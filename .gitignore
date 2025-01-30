@@ -1,3 +1,4 @@
 *.pbxproj
 *.xcworkspacedata
 *.resolved
+*.xcconfig
