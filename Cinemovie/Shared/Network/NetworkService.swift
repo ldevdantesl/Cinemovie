@@ -1,0 +1,15 @@
+//
+//  NetworkService.swift
+//  Cinemovie
+//
+//  Created by Buzurg Rakhimzoda on 30.01.2025.
+//
+
+import Foundation
+
+protocol NetworkService {
+    func request<T: Codable>(
+        _ endpoint: Endpoint,
+        completion: @escaping (Result<T, NetworkError>) -> Void
+    )
+}

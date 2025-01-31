@@ -7,8 +7,7 @@
 
 import UIKit
 
-protocol HomeScreenViewProtocol: AnyObject {
-}
+protocol HomeScreenViewProtocol: AnyObject { }
 
 final class HomeScreenVC: UIViewController {
 
@@ -16,8 +15,8 @@ final class HomeScreenVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .systemBrown
     }
 }
 
-extension HomeScreenVC: HomeScreenViewProtocol {
-}
+extension HomeScreenVC: HomeScreenViewProtocol { }

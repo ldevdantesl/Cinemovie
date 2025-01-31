@@ -1,0 +1,12 @@
+//
+//  Constants.swift
+//  Cinemovie
+//
+//  Created by Buzurg Rakhimzoda on 30.01.2025.
+//
+
+import Foundation
+
+struct Constants {
+    static let baseURLString: String = "https://" + ((try? Configuration.value(for: ConstantKeys.BASE_URL.rawValue)) ?? "")
+}
