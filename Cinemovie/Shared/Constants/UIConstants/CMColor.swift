@@ -24,4 +24,6 @@ public struct CMColor {
     static let cmDivider: UIColor = .cmDivider
     static let cmError: UIColor = .cmError
     static let cmSuccess: UIColor = .cmSuccess
+    
+    static let cmButton: UIColor = .cmButton
 }
