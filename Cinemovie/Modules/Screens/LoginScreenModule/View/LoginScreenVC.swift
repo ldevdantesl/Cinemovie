@@ -7,8 +7,7 @@
 
 import UIKit
 
-protocol LoginScreenViewProtocol: AnyObject {
-}
+protocol LoginScreenViewProtocol: AnyObject { }
 
 final class LoginScreenVC: UIViewController {
 
@@ -17,14 +16,18 @@ final class LoginScreenVC: UIViewController {
     private let welcomeText: UILabel = {
         let label = UILabel()
         label.text = "Welcome to the Cinemovie"
-        label.textColor = UIColor.systemCyan
+        label.textColor = CMColor.cmLabel
+        label.font = CMFont.bodyFont
+        label.numberOfLines = 1
+        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
     }
 }
 
-extension LoginScreenVC: LoginScreenViewProtocol {
-}
+extension LoginScreenVC: LoginScreenViewProtocol { }
