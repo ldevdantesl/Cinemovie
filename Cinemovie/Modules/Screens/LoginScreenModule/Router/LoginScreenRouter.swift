@@ -6,8 +6,18 @@
 //
 
 protocol LoginScreenRouterProtocol {
+    func routeToMainView()
 }
 
 final class LoginScreenRouter: LoginScreenRouterProtocol {
     weak var viewController: LoginScreenVC?
+    weak var appCoordinator: AppCoordinator?
+    
+    init(appCoordinator: AppCoordinator?) {
+        self.appCoordinator = appCoordinator
+    }
+    
+    func routeToMainView() {
+        appCoordinator?.showMainApp()
+    }
 }

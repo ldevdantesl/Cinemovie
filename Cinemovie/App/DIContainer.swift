@@ -8,5 +8,6 @@
 import Foundation
 
 final class DIContainer {
-    
+    let networkService: NetworkService = NetworkServiceImpl()
+    let authService: AuthService = AuthServiceImpl()
 }

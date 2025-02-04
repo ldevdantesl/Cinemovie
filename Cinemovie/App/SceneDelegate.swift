@@ -10,7 +10,9 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-    var appCoordinator: AppCoordinator?
+    private var appCoordinator: AppCoordinator?
+    
+    private let diContainer: DIContainer = DIContainer()
 
     func scene(
         _ scene: UIScene,
@@ -21,7 +23,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         window?.windowScene = windowScene
         
-        self.appCoordinator = AppCoordinator(window: window)
+        self.appCoordinator = AppCoordinator(window: window, authService: diContainer.authService)
         appCoordinator?.start()
     }
 }

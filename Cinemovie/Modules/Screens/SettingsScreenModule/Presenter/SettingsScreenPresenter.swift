@@ -6,6 +6,7 @@
 //
 
 protocol SettingsScreenPresenterProtocol: AnyObject {
+    func didPressLogoutButton()
 }
 
 final class SettingsScreenPresenter {
@@ -20,4 +21,8 @@ final class SettingsScreenPresenter {
 }
 
 extension SettingsScreenPresenter: SettingsScreenPresenterProtocol {
+    func didPressLogoutButton() {
+        interactor.logout()
+        router.navigateBackToLogin()
+    }
 }

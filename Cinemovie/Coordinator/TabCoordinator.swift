@@ -11,6 +11,9 @@ import UIKit
 final class TabCoordinator: Coordinator {
     var tabBarController: UITabBarController
     
+    weak var authService: AuthService?
+    weak var appCoordinator: AppCoordinator?
+    
     init() {
         self.tabBarController = UITabBarController()
     }
@@ -18,7 +21,7 @@ final class TabCoordinator: Coordinator {
     func start() {
         let homeCoordinator = HomeCoordinator()
         let searchCoordinator = SearchCoordinator()
-        let settingsCoordinator = SettingsCoordinator()
+        let settingsCoordinator = SettingsCoordinator(authService: authService, appCoordinator: appCoordinator)
         
         homeCoordinator.start()
         searchCoordinator.start()

@@ -6,8 +6,18 @@
 //
 
 protocol LoginScreenInteractorProtocol: AnyObject {
+    func loginAsGuest()
 }
 
 final class LoginScreenInteractor: LoginScreenInteractorProtocol {
     weak var presenter: LoginScreenPresenterProtocol?
+    private let authService: AuthService
+    
+    init(authService: AuthService) {
+        self.authService = authService
+    }
+    
+    func loginAsGuest() {
+        authService.loginAsGuest()
+    }
 }

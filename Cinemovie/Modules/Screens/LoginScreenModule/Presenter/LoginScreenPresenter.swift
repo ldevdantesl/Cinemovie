@@ -6,6 +6,7 @@
 //
 
 protocol LoginScreenPresenterProtocol: AnyObject {
+    func didPressLoginAsGuest()
 }
 
 final class LoginScreenPresenter {
@@ -20,4 +21,8 @@ final class LoginScreenPresenter {
 }
 
 extension LoginScreenPresenter: LoginScreenPresenterProtocol {
+    func didPressLoginAsGuest() {
+        interactor.loginAsGuest()
+        router.routeToMainView()
+    }
 }

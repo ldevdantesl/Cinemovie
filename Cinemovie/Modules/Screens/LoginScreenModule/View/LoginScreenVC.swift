@@ -71,8 +71,15 @@ final class LoginScreenVC: UIViewController {
         setupUI()
     }
     
+    @objc private func loginAsGuest() {
+        print("Tapped login as a guest")
+        presenter?.didPressLoginAsGuest()
+    }
+    
     private func setupUI() {
         view.backgroundColor = CMColor.cmBackground
+        
+        asGuestButton.addTarget(self, action: #selector(loginAsGuest), for: .touchUpInside)
         
         logoImg.snp.makeConstraints {
             $0.width.height.equalTo(150)

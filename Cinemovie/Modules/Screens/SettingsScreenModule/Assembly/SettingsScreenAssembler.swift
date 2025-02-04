@@ -8,9 +8,9 @@
 import UIKit
 
 final class SettingsScreenAssembler {
-    static func assemble() -> SettingsScreenVC {
-        let interactor = SettingsScreenInteractor()
-        let router = SettingsScreenRouter()
+    static func assemble(authService: AuthService?, appCoordinator: AppCoordinator?) -> SettingsScreenVC {
+        let interactor = SettingsScreenInteractor(authService: authService)
+        let router = SettingsScreenRouter(appCoordinator: appCoordinator)
         let presenter = SettingsScreenPresenter(interactor: interactor, router: router)
         let viewController = SettingsScreenVC()
         presenter.view  = viewController
