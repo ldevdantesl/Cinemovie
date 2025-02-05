@@ -10,11 +10,12 @@ import Foundation
 protocol AuthService: AnyObject {
     // MARK: - PROPERTIES
     var isLoggedIn: Bool { get }
-    var oAuthToken: String? { get }
+    var sessionID: String? { get }
+    var guestSessionID: String? { get }
     
     // MARK: - FUNCTIONS
     func createRequestToken(completion: @escaping (Result<String, AuthError>) -> Void)
-    func loginWithOAuth(token: String)
+    func loginWithOAuth(token: String, completion: @escaping (Result<String, AuthError>) -> Void) 
     func loginAsGuest(completion: @escaping (Result<Void, AuthError>) -> Void)
     func logout()
     func validateToken() -> Bool

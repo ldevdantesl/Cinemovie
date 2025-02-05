@@ -9,6 +9,12 @@ import Foundation
 
 struct GuestSessionResponse: APIResponse {
     let success: Bool
-    let guest_session_id: String
-    let expires_at: String
+    let guestSessionId: String
+    let expiresAt: String
+    
+    enum CodingKeys: String, CodingKey {
+        case success
+        case guestSessionId = "guest_session_id"
+        case expiresAt = "expires_at"
+    }
 }

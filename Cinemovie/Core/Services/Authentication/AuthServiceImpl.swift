@@ -8,8 +8,8 @@
 import Foundation
 
 final class AuthServiceImpl: AuthService {
-    private let oAuthTokenKey = "oAuthTokenKey"
-    private let guestSessionIdKey = "guestSessionIdKey"
+    private let sessionIDKey = "sessionIDKey"
+    private let guestSessionIDKey = "guestSessionIDKey"
     
     weak var networkService: NetworkService?
     
@@ -18,24 +18,37 @@ final class AuthServiceImpl: AuthService {
     }
     
     var isLoggedIn: Bool {
-        return oAuthToken != nil || guestSessionId != nil
+        return sessionID != nil || guestSessionID != nil
     }
     
-    var oAuthToken: String? {
-        return UserDefaults.standard.string(forKey: oAuthTokenKey)
+    var sessionID: String? {
+        return UserDefaults.standard.string(forKey: sessionIDKey)
     }
     
-    var guestSessionId: String? {
-        return UserDefaults.standard.string(forKey: guestSessionIdKey)
+    var guestSessionID: String? {
+        return UserDefaults.standard.string(forKey: guestSessionIDKey)
     }
     
-    func loginWithOAuth(token: String) { }
+    func loginWithOAuth(token: String, completion: @escaping (Result<String, AuthError>) -> Void) {
+        let endpoint = NewSessionEndpoint(body: ["request_token" : token])
+        networkService?.request(endpoint) { [weak self] (result: Result<NewSessionResponse, NetworkError>) in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let response):
+                UserDefaults.standard.set(response.sessionId, forKey: self.sessionIDKey)
+                completion(.success(response.sessionId))
+            case .failure(let error):
+                completion(.failure(.networkError(error)))
+            }
+        }
+    }
     
     func createRequestToken(completion: @escaping (Result<String, AuthError>) -> Void) {
         let endpoint = CreateRequestTokenEndpoint()
         networkService?.request(endpoint) { (result: Result<RequestTokenResponse, NetworkError>) in
             switch result {
-            case .success(let response): completion(.success((response.request_token)))
+            case .success(let response): completion(.success((response.requestToken)))
             case .failure(let error): completion(.failure(.networkError(error)))
             }
         }
@@ -47,8 +60,8 @@ final class AuthServiceImpl: AuthService {
             guard let self = self else { return }
             switch result {
             case .success(let response):
-                UserDefaults.standard.removeObject(forKey: self.guestSessionIdKey)
-                UserDefaults.standard.set(response.guest_session_id, forKey: self.guestSessionIdKey)
+                UserDefaults.standard.removeObject(forKey: self.guestSessionIDKey)
+                UserDefaults.standard.set(response.guestSessionId, forKey: self.guestSessionIDKey)
                 completion(.success(()))
                 
             case .failure(let error):
@@ -58,11 +71,15 @@ final class AuthServiceImpl: AuthService {
     }
     
     func logout() {
-        UserDefaults.standard.removeObject(forKey: oAuthTokenKey)
+        UserDefaults.standard.removeObject(forKey: self.sessionIDKey)
+        UserDefaults.standard.removeObject(forKey: self.guestSessionIDKey)
+        guard let sessionID = sessionID else { return }
+        let endpoint = DeleteSessionEndpoint(sessionId: sessionID)
+        networkService?.request(endpoint) { (result: Result<DeleteSessionResponse, NetworkError>) in }
     }
     
     func validateToken() -> Bool {
-        guard let token = oAuthToken else { return false }
-        return !token.isEmpty
+        guard let session = sessionID else { return false }
+        return !session.isEmpty
     }
 }

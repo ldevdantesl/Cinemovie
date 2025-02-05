@@ -12,12 +12,14 @@ enum AuthError: Error {
     case invalidCredentials
     case networkError(NetworkError)
     case userCancelled
+    case custom(String)
     
     var localizedDescription: String {
         switch self {
         case .invalidCredentials: "Error: Error with credentials"
         case .networkError(let error): "Error: Something is wrong with network \(error)"
         case .userCancelled: "Error: User cancelled"
+        case .custom(let error) : "Error: \(error)"
         }
     }
 }

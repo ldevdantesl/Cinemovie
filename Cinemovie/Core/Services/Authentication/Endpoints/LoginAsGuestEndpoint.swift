@@ -10,12 +10,12 @@ import Foundation
 struct LoginAsGuestEndpoint: Endpoint {
     let path: String = "/authentication/guest_session/new"
     
-    var method: HTTPMethod = .GET
+    let method: HTTPMethod = .GET
     
-    var headers: [String : String]? = [
+    let headers: [String : String]? = [
         "accept": "application/json",
         "Authorization" : "Bearer \(Constants.bearerToken)"
     ]
     
-    var body: Data?
+    let body: Data? = nil
 }

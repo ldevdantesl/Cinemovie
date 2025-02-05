@@ -8,14 +8,14 @@
 import Foundation
 
 struct CreateRequestTokenEndpoint: Endpoint {
-    var path: String = "/authentication/token/new"
+    let path: String = "/authentication/token/new"
     
-    var method: HTTPMethod = .GET
-    
-    var headers: [String : String]? = [
+    let method: HTTPMethod = .GET
+   
+    let headers: [String : String]? = [
         "Authorization" : "Bearer \(Constants.bearerToken)",
         "accept" : "application/json"
     ]
     
-    var body: Data?
+    let body: Data? = nil
 }

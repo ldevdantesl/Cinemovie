@@ -26,5 +26,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.appCoordinator = AppCoordinator(window: window, authService: diContainer.authService)
         appCoordinator?.start()
     }
+    
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let url = URLContexts.first?.url else { return }
+
+        if url.scheme == "cinemovie" {
+            NotificationCenter.default.post(name: Notification.Name(ConstantKeys.OAUTH_CALLBACK.rawValue), object: url)
+        }
+    }
 }
 

@@ -8,7 +8,9 @@
 import UIKit
 import SnapKit
 
-protocol SettingsScreenViewProtocol: AnyObject { }
+protocol SettingsScreenViewProtocol: AnyObject {
+    func didReceiveError(_ errorStr: String)
+}
 
 final class SettingsScreenVC: UIViewController {
 
@@ -48,8 +50,19 @@ final class SettingsScreenVC: UIViewController {
     
     @objc private func logoutPressed() {
         presenter?.didPressLogoutButton()
-        print("Pressed log out")
     }
 }
 
-extension SettingsScreenVC: SettingsScreenViewProtocol { }
+extension SettingsScreenVC: SettingsScreenViewProtocol {
+    func didReceiveError(_ errorStr: String) {
+        let alert = UIAlertController(
+            title: "Oops...",
+            message: errorStr,
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        
+        self.present(alert, animated: true)
+    }
+}

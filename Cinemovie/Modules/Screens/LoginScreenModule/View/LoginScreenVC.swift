@@ -9,12 +9,13 @@ import UIKit
 import SnapKit
 
 protocol LoginScreenViewProtocol: AnyObject {
+    func didReceiveError(errorString error: String)
     func didReceiveError(error: AuthError)
-    func openURLInSheet(_ urlString: String)
+    func openURL(_ url: URL)
 }
 
 final class LoginScreenVC: UIViewController {
-
+    
     var presenter: LoginScreenPresenterProtocol?
     
     private let logoImg: UIImageView = {
@@ -72,14 +73,13 @@ final class LoginScreenVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-    }
-    
-    @objc private func loginAsGuest() {
-        presenter?.didPressLoginAsGuest()
-    }
-    
-    @objc private func loginWithTMDB() {
-        presenter?.didPressLoginWithTMDB()
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleOAuthCallback),
+            name: Notification.Name(ConstantKeys.OAUTH_CALLBACK.rawValue),
+            object: nil
+        )
     }
     
     private func setupUI() {
@@ -142,18 +142,53 @@ final class LoginScreenVC: UIViewController {
             $0.leading.trailing.equalToSuperview()
         }
     }
+    
+    // MARK: - OBJC FUNCTIONS
+    @objc private func loginAsGuest() {
+        presenter?.didPressLoginAsGuest()
+    }
+    
+    @objc private func loginWithTMDB() {
+        presenter?.didPressLoginWithTMDB()
+    }
+    
+    @objc private func handleOAuthCallback(_ notification: Notification) {
+        guard let url = notification.object as? URL else { return }
+        presenter?.handleOAuthCallback(url: url)
+    }
 }
 
 extension LoginScreenVC: LoginScreenViewProtocol {
-    func openURLInSheet(_ urlString: String) {
-        let webVC = WebViewController(urlString: urlString)
-        self.present(webVC, animated: true)
+//    func openURLInSheet(_ urlString: String) {
+//        let webVC = WebViewController(urlString: urlString)
+//        print(urlString)
+//        self.present(webVC, animated: true)
+//    }
+    
+    func openURL(_ url: URL) {
+        if UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        }
     }
     
     func didReceiveError(error: AuthError) {
         let alert = UIAlertController(
             title: "Oops...",
             message: error.localizedDescription,
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
+    
+    func didReceiveError(errorString error: String) {
+        let alert = UIAlertController(
+            title: "Oops...",
+            message: "Error: \(error)",
             preferredStyle: .alert
         )
         
