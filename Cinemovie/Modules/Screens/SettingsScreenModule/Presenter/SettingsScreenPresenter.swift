@@ -10,6 +10,7 @@ import UIKit
 protocol SettingsScreenPresenterProtocol: AnyObject {
     // MARK: - START
     func didPressLogoutButton()
+    func viewDidLoaded()
 }
 
 final class SettingsScreenPresenter {
@@ -30,5 +31,9 @@ extension SettingsScreenPresenter: SettingsScreenPresenterProtocol {
         DispatchQueue.main.async { [weak self] in
             self?.router.navigateBackToLogin()
         }
+    }
+    
+    func viewDidLoaded() {
+        interactor.showSessionID()
     }
 }

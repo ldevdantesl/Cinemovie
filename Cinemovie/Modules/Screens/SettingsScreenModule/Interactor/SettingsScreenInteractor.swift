@@ -7,6 +7,7 @@
 
 protocol SettingsScreenInteractorProtocol: AnyObject {
     func logout()
+    func showSessionID()
 }
 
 final class SettingsScreenInteractor: SettingsScreenInteractorProtocol {
@@ -15,6 +16,16 @@ final class SettingsScreenInteractor: SettingsScreenInteractorProtocol {
     
     init(authService: AuthService?) {
         self.authService = authService
+    }
+    
+    func showSessionID() {
+        if let session = authService?.sessionID {
+            print("Logged in with \(session)")
+        } else if let guest = authService?.guestSessionID {
+            print("Logged in as a guest \(guest)")
+        } else {
+            print("Not logged in")
+        }
     }
     
     func logout() {

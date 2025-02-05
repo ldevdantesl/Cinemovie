@@ -30,6 +30,7 @@ final class SettingsScreenVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        presenter?.viewDidLoaded()
         setupUI()
     }
     

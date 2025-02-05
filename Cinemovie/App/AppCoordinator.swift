@@ -36,9 +36,7 @@ final class AppCoordinator: Coordinator {
             return
         }
         
-        let tabCoordinator = TabCoordinator()
-        tabCoordinator.authService = authService
-        tabCoordinator.appCoordinator = self
+        let tabCoordinator = TabCoordinator(authService: authService, appCoordinator: self)
         tabCoordinator.start()
     
         UIView.transition(

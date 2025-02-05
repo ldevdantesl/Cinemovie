@@ -14,8 +14,10 @@ final class TabCoordinator: Coordinator {
     weak var authService: AuthService?
     weak var appCoordinator: AppCoordinator?
     
-    init() {
+    init(authService: AuthService? = nil, appCoordinator: AppCoordinator? = nil) {
         self.tabBarController = UITabBarController()
+        self.authService = authService
+        self.appCoordinator = appCoordinator
     }
     
     func start() {
