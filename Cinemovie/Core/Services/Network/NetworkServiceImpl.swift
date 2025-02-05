@@ -15,7 +15,7 @@ final class NetworkServiceImpl: NetworkService {
         self.session = session
     }
 
-    func request<T>(
+    func request<T: APIResponse>(
         _ endpoint: any Endpoint,
         completion: @escaping (Result<T, NetworkError>) -> Void
     ) where T: Decodable, T: Encodable {
@@ -28,6 +28,12 @@ final class NetworkServiceImpl: NetworkService {
         session.dataTask(with: urlRequest) { data, response, error in
             if let error = error {
                 completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse,
+                  200...299 ~= httpResponse.statusCode else {
+                completion(.failure(.invalidResponse))
                 return
             }
             

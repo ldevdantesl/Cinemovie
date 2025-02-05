@@ -7,8 +7,8 @@
 
 import Foundation
 
-protocol NetworkService {
-    func request<T: Codable>(
+protocol NetworkService: AnyObject {
+    func request<T: APIResponse>(
         _ endpoint: Endpoint,
         completion: @escaping (Result<T, NetworkError>) -> Void
     )

@@ -19,14 +19,16 @@ protocol Endpoint {
 }
 
 extension Endpoint {
-    var baseURL: String { return "https://api.example.com" }
+    var baseURL: String { return Constants.baseURLString }
     
     var urlRequest: URLRequest? {
         guard let url = URL(string: baseURL + path) else { return nil }
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         request.httpBody = body
-        headers?.forEach { request.setValue($1, forHTTPHeaderField: $0) }
+        headers?.forEach { key, value in
+            request.setValue(value, forHTTPHeaderField: key)
+        }
         return request
     }
 }

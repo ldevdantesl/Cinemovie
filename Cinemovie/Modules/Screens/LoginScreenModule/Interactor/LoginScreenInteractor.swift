@@ -18,6 +18,15 @@ final class LoginScreenInteractor: LoginScreenInteractorProtocol {
     }
     
     func loginAsGuest() {
-        authService.loginAsGuest()
+        authService.loginAsGuest { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success:
+                self.presenter?.didFinishLogingAsGuest()
+            case .failure(let error):
+                self.presenter?.didFinishLogingAsGuest(withError: error)
+            }
+        }
     }
 }

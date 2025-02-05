@@ -8,7 +8,9 @@
 import UIKit
 import SnapKit
 
-protocol LoginScreenViewProtocol: AnyObject { }
+protocol LoginScreenViewProtocol: AnyObject {
+    func didReceiveError(error: AuthError)
+}
 
 final class LoginScreenVC: UIViewController {
 
@@ -137,4 +139,18 @@ final class LoginScreenVC: UIViewController {
     }
 }
 
-extension LoginScreenVC: LoginScreenViewProtocol { }
+extension LoginScreenVC: LoginScreenViewProtocol {
+    func didReceiveError(error: AuthError) {
+        let alert = UIAlertController(
+            title: "Oops...",
+            message: error.localizedDescription,
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
+}

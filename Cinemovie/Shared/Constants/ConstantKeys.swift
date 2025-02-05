@@ -9,4 +9,5 @@ import Foundation
 
 enum ConstantKeys: String {
     case BASE_URL = "BASE_URL"
+    case BEARER_TOKEN = "BEARER_TOKEN"
 }

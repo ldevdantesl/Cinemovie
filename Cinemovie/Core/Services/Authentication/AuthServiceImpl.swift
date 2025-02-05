@@ -9,14 +9,15 @@ import Foundation
 
 final class AuthServiceImpl: AuthService {
     private let oAuthTokenKey = "oAuthTokenKey"
-    private let isGuestUserKey = "isGuestUserKey"
     
-    var isLoggedIn: Bool {
-        return oAuthToken != nil || isGuestUser
+    weak var networkService: NetworkService?
+    
+    init(networkService: NetworkService? = nil) {
+        self.networkService = networkService
     }
     
-    var isGuestUser: Bool {
-        return UserDefaults.standard.bool(forKey: isGuestUserKey)
+    var isLoggedIn: Bool {
+        return oAuthToken != nil
     }
     
     var oAuthToken: String? {
@@ -25,17 +26,26 @@ final class AuthServiceImpl: AuthService {
     
     func loginWithOAuth(token: String) {
         UserDefaults.standard.set(token, forKey: oAuthTokenKey)
-        UserDefaults.standard.set(false, forKey: isGuestUserKey)
     }
     
-    func loginAsGuest() {
-        UserDefaults.standard.removeObject(forKey: oAuthTokenKey)
-        UserDefaults.standard.set(true, forKey: isGuestUserKey)
+    func loginAsGuest(completion: @escaping (Result<Void, AuthError>) -> Void) {
+        let endpoint = LoginAsGuestEndpoint()
+        networkService?.request(endpoint) { (result: Result<GuestSessionResponse, NetworkError>) in
+            switch result {
+            case .success(let response):
+                UserDefaults.standard.removeObject(forKey: self.oAuthTokenKey)
+                UserDefaults.standard.set(response.guest_session_id, forKey: self.oAuthTokenKey)
+                print("Got the response: \(response.guest_session_id)")
+                completion(.success(()))
+                
+            case .failure(let error):
+                completion(.failure(.networkError(error)))
+            }
+        }
     }
     
     func logout() {
         UserDefaults.standard.removeObject(forKey: oAuthTokenKey)
-        UserDefaults.standard.set(false, forKey: isGuestUserKey)
     }
     
     func validateToken() -> Bool {

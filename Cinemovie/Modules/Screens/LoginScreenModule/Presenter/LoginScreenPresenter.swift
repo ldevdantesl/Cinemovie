@@ -5,8 +5,12 @@
 //  Created by Buzurg Rakhimzoda on 31.01.2025
 //
 
+import Foundation
+
 protocol LoginScreenPresenterProtocol: AnyObject {
     func didPressLoginAsGuest()
+    func didFinishLogingAsGuest()
+    func didFinishLogingAsGuest(withError error: AuthError)
 }
 
 final class LoginScreenPresenter {
@@ -23,6 +27,15 @@ final class LoginScreenPresenter {
 extension LoginScreenPresenter: LoginScreenPresenterProtocol {
     func didPressLoginAsGuest() {
         interactor.loginAsGuest()
-        router.routeToMainView()
+    }
+    
+    func didFinishLogingAsGuest() {
+        DispatchQueue.main.async { [weak self] in
+            self?.router.routeToMainView()
+        }
+    }
+    
+    func didFinishLogingAsGuest(withError error: AuthError) {
+        view?.didReceiveError(error: error)
     }
 }
