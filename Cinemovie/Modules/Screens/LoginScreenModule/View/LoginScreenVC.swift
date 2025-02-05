@@ -10,6 +10,7 @@ import SnapKit
 
 protocol LoginScreenViewProtocol: AnyObject {
     func didReceiveError(error: AuthError)
+    func openURLInSheet(_ urlString: String)
 }
 
 final class LoginScreenVC: UIViewController {
@@ -74,14 +75,18 @@ final class LoginScreenVC: UIViewController {
     }
     
     @objc private func loginAsGuest() {
-        print("Tapped login as a guest")
         presenter?.didPressLoginAsGuest()
+    }
+    
+    @objc private func loginWithTMDB() {
+        presenter?.didPressLoginWithTMDB()
     }
     
     private func setupUI() {
         view.backgroundColor = CMColor.cmBackground
         
         asGuestButton.addTarget(self, action: #selector(loginAsGuest), for: .touchUpInside)
+        loginButton.addTarget(self, action: #selector(loginWithTMDB), for: .touchUpInside)
         
         logoImg.snp.makeConstraints {
             $0.width.height.equalTo(150)
@@ -140,6 +145,11 @@ final class LoginScreenVC: UIViewController {
 }
 
 extension LoginScreenVC: LoginScreenViewProtocol {
+    func openURLInSheet(_ urlString: String) {
+        let webVC = WebViewController(urlString: urlString)
+        self.present(webVC, animated: true)
+    }
+    
     func didReceiveError(error: AuthError) {
         let alert = UIAlertController(
             title: "Oops...",

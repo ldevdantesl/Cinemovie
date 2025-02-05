@@ -7,6 +7,7 @@
 
 protocol LoginScreenInteractorProtocol: AnyObject {
     func loginAsGuest()
+    func loginWithTMDB()
 }
 
 final class LoginScreenInteractor: LoginScreenInteractorProtocol {
@@ -26,6 +27,17 @@ final class LoginScreenInteractor: LoginScreenInteractorProtocol {
                 self.presenter?.didFinishLogingAsGuest()
             case .failure(let error):
                 self.presenter?.didFinishLogingAsGuest(withError: error)
+            }
+        }
+    }
+    
+    func loginWithTMDB() {
+        authService.createRequestToken { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let token): self.presenter?.openOAuthURLWithToken(token: token); print("Token: \(token)")
+            case .failure(let error): self.presenter?.cantOpenURLForToken(withError: error)
             }
         }
     }
