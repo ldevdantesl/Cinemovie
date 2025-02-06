@@ -9,7 +9,7 @@ import UIKit
 
 final class LoginScreenAssembler {
     static func assemble(
-        authService: AuthService,
+        authService: AuthService? = nil,
         appCoordinator: AppCoordinator
     ) -> LoginScreenVC {
         let interactor = LoginScreenInteractor(authService: authService)

@@ -12,6 +12,7 @@ struct NewSessionEndpoint: Endpoint {
     let method: HTTPMethod
     let headers: [String : String]?
     let body: Data?
+    let queryParams: [String : String]?
     
     init(body: [String : Any]) {
         self.path = "/authentication/session/new"
@@ -22,5 +23,6 @@ struct NewSessionEndpoint: Endpoint {
             "content-type" : "application/json"
         ]
         self.body = try? JSONSerialization.data(withJSONObject: body)
+        self.queryParams = nil
     }
 }

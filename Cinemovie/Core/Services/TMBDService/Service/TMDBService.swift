@@ -1,0 +1,17 @@
+//
+//  TMDBService.swift
+//  Cinemovie
+//
+//  Created by Buzurg Rakhimzoda on 5.02.2025.
+//
+
+import Foundation
+
+protocol TMDBService: AnyObject {
+    
+    // MARK: - LIST OF PRESET MOVIES
+    func getUpcomingMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
+    func getPopularMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
+    func getTopRatedMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
+    func getNowPlayingMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
+}

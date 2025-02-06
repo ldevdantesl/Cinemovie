@@ -11,6 +11,7 @@ enum ConstantKeys: String {
     // MARK: - CONFIGURATION
     case BASE_URL = "BASE_URL"
     case BASE_UNIVERSAL_URL = "BASE_UNIVERSAL_URL"
+    case IMAGE_BASE_URL = "IMAGE_BASE_URL"
     case BEARER_TOKEN = "BEARER_TOKEN"
     
     // MARK: - OTHER

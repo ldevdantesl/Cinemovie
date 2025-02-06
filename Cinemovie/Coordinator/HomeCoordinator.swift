@@ -11,12 +11,15 @@ import UIKit
 final class HomeCoordinator: Coordinator {
     var navigationController: UINavigationController
     
-    init() {
+    weak var tmdbService: TMDBService?
+    
+    init(tmdbService: TMDBService?) {
         self.navigationController = UINavigationController()
+        self.tmdbService = tmdbService
     }
     
     func start() {
-        let homeModule = HomeScreenAssembler.assemble()
+        let homeModule = HomeScreenAssembler.assemble(tmdbService: tmdbService)
         homeModule.tabBarItem = UITabBarItem(
             title: "Home",
             image: UIImage(systemName: "mail.stack"),

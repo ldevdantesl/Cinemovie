@@ -15,6 +15,7 @@ protocol Endpoint {
     var path: String { get }
     var method: HTTPMethod { get }
     var headers: [String: String]? { get }
+    var queryParams: [String : String]? { get }
     var body: Data? { get }
 }
 
@@ -22,13 +23,22 @@ extension Endpoint {
     var baseURL: String { return Constants.baseURLString }
     
     var urlRequest: URLRequest? {
-        guard let url = URL(string: baseURL + path) else { return nil }
+        var components = URLComponents(string: baseURL + path)
+        
+        if let queryParameters = queryParams {
+            components?.queryItems = queryParameters.map { URLQueryItem(name: $0.key, value: $0.value) }
+        }
+        
+        guard let url = components?.url else { return nil }
+        
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         request.httpBody = body
+        
         headers?.forEach { key, value in
             request.setValue(value, forHTTPHeaderField: key)
         }
+        
         return request
     }
 }

@@ -13,14 +13,14 @@ protocol LoginScreenInteractorProtocol: AnyObject {
 
 final class LoginScreenInteractor: LoginScreenInteractorProtocol {
     weak var presenter: LoginScreenPresenterProtocol?
-    private let authService: AuthService
+    weak var authService: AuthService?
     
-    init(authService: AuthService) {
+    init(authService: AuthService? = nil) {
         self.authService = authService
     }
     
     func loginAsGuest() {
-        authService.loginAsGuest { [weak self] result in
+        authService?.loginAsGuest { [weak self] result in
             guard let self = self else { return }
             
             switch result {
@@ -33,7 +33,7 @@ final class LoginScreenInteractor: LoginScreenInteractorProtocol {
     }
     
     func loginWithTMDB() {
-        authService.createRequestToken { [weak self] result in
+        authService?.createRequestToken { [weak self] result in
             guard let self = self else { return }
             
             switch result {
@@ -44,7 +44,7 @@ final class LoginScreenInteractor: LoginScreenInteractorProtocol {
     }
     
     func exchangeRequestTokenForSession(_ token: String) {
-        authService.loginWithOAuth(token: token) { [weak self] result in
+        authService?.loginWithOAuth(token: token) { [weak self] result in
             guard let self = self else { return }
             
             switch result {

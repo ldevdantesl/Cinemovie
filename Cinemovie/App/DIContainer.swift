@@ -8,6 +8,13 @@
 import Foundation
 
 final class DIContainer {
-    let networkService: NetworkService = NetworkServiceImpl()
-    lazy var authService: AuthService = AuthServiceImpl(networkService: networkService)
+    let networkService: NetworkService
+    let authService: AuthService
+    let tmdbService: TMDBService
+    
+    init() {
+        self.networkService = NetworkServiceImpl()
+        self.authService = AuthServiceImpl(networkService: networkService)
+        self.tmdbService = TMBDServiceImpl(networkService: networkService)
+    }
 }

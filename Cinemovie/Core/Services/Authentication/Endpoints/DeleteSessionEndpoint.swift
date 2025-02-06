@@ -14,6 +14,8 @@ struct DeleteSessionEndpoint: Endpoint {
     
     var headers: [String : String]?
     
+    var queryParams: [String : String]?
+    
     var body: Data?
     
     init(sessionId: String) {
@@ -24,6 +26,7 @@ struct DeleteSessionEndpoint: Endpoint {
             "accept" : "application/json",
             "content-type" : "application/json"
         ]
+        self.queryParams = nil
         self.body = try? JSONSerialization.data(withJSONObject:["session_id": sessionId])
     }
 }

@@ -18,4 +18,6 @@ struct LoginAsGuestEndpoint: Endpoint {
     ]
     
     let body: Data? = nil
+    
+    let queryParams: [String : String]? = nil
 }

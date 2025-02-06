@@ -17,6 +17,8 @@
 			</array>
 		</dict>
 	</array>
+	<key>IMAGE_BASE_URL</key>
+	<string>${IMAGE_BASE_URL}</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>https</string>

@@ -10,11 +10,14 @@ import UIKit
 
 final class AppCoordinator: Coordinator {
     private let window: UIWindow?
-    private let authService: AuthService
+
+    weak var authService: AuthService?
+    weak var tmdbService: TMDBService?
     
-    init(window: UIWindow?, authService: AuthService) {
+    init(window: UIWindow?, authService: AuthService?, tmdbService: TMDBService?) {
         self.window = window
         self.authService = authService
+        self.tmdbService = tmdbService
     }
     
     func start() {
@@ -28,6 +31,7 @@ final class AppCoordinator: Coordinator {
     }
     
     private func checkAuthentication() {
+        guard let authService = authService else { return }
         authService.isLoggedIn ? showMainApp() : showLoginPage()
     }
     
@@ -36,7 +40,11 @@ final class AppCoordinator: Coordinator {
             return
         }
         
-        let tabCoordinator = TabCoordinator(authService: authService, appCoordinator: self)
+        let tabCoordinator = TabCoordinator(
+            authService: authService,
+            tmdbService: tmdbService,
+            appCoordinator: self
+        )
         tabCoordinator.start()
     
         UIView.transition(

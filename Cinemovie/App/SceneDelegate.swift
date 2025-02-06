@@ -23,7 +23,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         window?.windowScene = windowScene
         
-        self.appCoordinator = AppCoordinator(window: window, authService: diContainer.authService)
+        self.appCoordinator = AppCoordinator(
+            window: window,
+            authService: diContainer.authService,
+            tmdbService: diContainer.tmdbService
+        )
         appCoordinator?.start()
     }
     

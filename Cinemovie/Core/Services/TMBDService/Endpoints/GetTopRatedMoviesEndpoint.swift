@@ -1,5 +1,5 @@
 //
-//  CreateRequestTokenEndpoint.swift
+//  GetTopRatedMoviesEndpoint.swift
 //  Cinemovie
 //
 //  Created by Buzurg Rakhimzoda on 5.02.2025.
@@ -7,17 +7,21 @@
 
 import Foundation
 
-struct CreateRequestTokenEndpoint: Endpoint {
-    let path: String = "/authentication/token/new"
+struct GetTopRatedMoviesEndpoint: Endpoint {
+    let path: String = "/movie/top_rated"
     
     let method: HTTPMethod = .GET
-   
+    
     let headers: [String : String]? = [
         "Authorization" : "Bearer \(Constants.bearerToken)",
         "accept" : "application/json"
     ]
     
+    let queryParams: [String : String]?
+    
     let body: Data? = nil
     
-    let queryParams: [String : String]? = nil
+    init(queryParams: [String : String]?) {
+        self.queryParams = queryParams
+    }
 }
