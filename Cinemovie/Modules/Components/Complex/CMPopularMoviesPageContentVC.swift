@@ -18,7 +18,6 @@ final class CMPopularMoviesPageContentVC: UIViewController {
         image.translatesAutoresizingMaskIntoConstraints = false
         image.contentMode = .scaleAspectFill
         image.clipsToBounds = true
-        
         return image
     }()
     
@@ -44,7 +43,7 @@ final class CMPopularMoviesPageContentVC: UIViewController {
         super.init(nibName: nil, bundle: nil)
         setupUI()
         
-        if let url = ImagePathURLHelper.getImageURL(with: movie.backdropPath, size: ImagePathURLHelper.Backdrop.original) {
+        if let url = ImagePathURLHelper.getImageURL(with: movie.backdropPath, size: .original) {
             activityIndicatorImage.startAnimating()
             backgroundImage.sd_setImage(with: url) { [weak self] image, error, _, _ in
                 self?.activityIndicatorImage.stopAnimating()

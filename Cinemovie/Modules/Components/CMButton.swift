@@ -44,13 +44,12 @@ final class CMButton: UIButton {
                 .foregroundColor : titleLabelForeColor
             ]
         )
-        
-        self.layer.cornerRadius = cornerRadius
         self.setTitleColor(.white, for: .normal)
         self.backgroundColor = backColor
         self.configuration = .borderedTinted()
         self.translatesAutoresizingMaskIntoConstraints = false
-        
+        self.layer.cornerRadius = cornerRadius
         self.setAttributedTitle(attrTitle, for: .normal)
+        self.clipsToBounds = true
     }
 }

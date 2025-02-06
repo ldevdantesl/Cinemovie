@@ -59,14 +59,14 @@ final class CMPopularMoviesPVC: UIPageViewController {
 
         view.addSubview(pageControl)
         pageControl.snp.makeConstraints {
-            $0.top.equalTo(view.snp.top).offset(25)
+            $0.top.equalTo(view.snp.top).offset(30)
             $0.centerX.equalToSuperview()
         }
     }
 
     private func startAutoScroll() {
         autoScrollTimer = Timer.scheduledTimer(
-            timeInterval: 3.0,
+            timeInterval: 5.0,
             target: self,
             selector: #selector(scrollToNextPage),
             userInfo: nil,
@@ -88,11 +88,6 @@ final class CMPopularMoviesPVC: UIPageViewController {
     // MARK: - UIPAGEVC CYCLE
     func presentationCount(for pageViewController: UIPageViewController) -> Int {
         return pages.count
-    }
-
-    func presentationIndex(for pageViewController: UIPageViewController) -> Int {
-        guard let currentVC = viewControllers?.first, let index = pages.firstIndex(of: currentVC) else { return 0 }
-        return index
     }
 }
 
