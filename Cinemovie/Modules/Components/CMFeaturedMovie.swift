@@ -90,9 +90,11 @@ final class CMFeaturedMovie: UIView {
             activityIndicatorImage.startAnimating()
             UIView.transition(with: movieImage, duration: 0.5, options: .transitionCrossDissolve) { [weak self] in
                 self?.movieImage.sd_setImage(with: url)
+            } completion: { [weak self] _ in
+                self?.animateScaling()
             }
         }
-        UIView.transition(with: movieImage, duration: 0.5, options: .transitionCrossDissolve) { [weak self] in
+        UIView.transition(with: ratingView, duration: 0.5, options: .transitionCrossDissolve) { [weak self] in
             self?.ratingView.rating = movie.voteAverage ?? 0
         }
     }
@@ -101,7 +103,6 @@ final class CMFeaturedMovie: UIView {
         self.movies = movies
         updateMovie()
         startMovieChangeTimer()
-        animateScaling()
     }
     
     func updateStretchEffect(scrollView: UIScrollView) {
