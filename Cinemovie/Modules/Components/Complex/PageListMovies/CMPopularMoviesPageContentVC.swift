@@ -11,7 +11,13 @@ import SnapKit
 
 final class CMPopularMoviesPageContentVC: UIViewController {
 
-    private let activityIndicatorImage = UIActivityIndicatorView(style: .large)
+    private let activityIndicatorImage: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.hidesWhenStopped = true
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.color = .white
+        return indicator
+    }()
     
     private let backgroundImage: UIImageView = {
         let image = UIImageView()
@@ -47,7 +53,6 @@ final class CMPopularMoviesPageContentVC: UIViewController {
             activityIndicatorImage.startAnimating()
             backgroundImage.sd_setImage(with: url) { [weak self] image, error, _, _ in
                 self?.activityIndicatorImage.stopAnimating()
-                self?.activityIndicatorImage.removeFromSuperview()
             }
         }
         
@@ -69,9 +74,7 @@ final class CMPopularMoviesPageContentVC: UIViewController {
         backgroundImage.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-    
-        activityIndicatorImage.translatesAutoresizingMaskIntoConstraints = false
-        activityIndicatorImage.color = .white
+        
         backgroundImage.addSubview(activityIndicatorImage)
         activityIndicatorImage.snp.makeConstraints {
             $0.centerX.centerY.equalToSuperview()
