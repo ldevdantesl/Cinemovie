@@ -19,41 +19,34 @@ final class CMFeaturedMovie: UIView {
     
     private let movieImage: UIImageView = {
         let image = UIImageView()
-        image.contentMode = .scaleAspectFill
+        image.contentMode = .scaleToFill
         image.clipsToBounds = true
         return image
     }()
     
-    private let infoButton: CMCircularButton = {
-        let button = CMCircularButton(
-            systemName: "info",
-            backColor: CMColor.cmSecondaryBackground,
-            foreColor: CMColor.cmLabel
-        )
-        return button
-    }()
-    
-    private let seeButton: CMButton = {
+    private let myListButton: CMButton = {
         let button = CMButton(
-            text: "Watch",
+            text: "+ My List",
             foreColor: CMColor.cmLabel,
             textFont: CMFont.subtitleFont,
-            backColor: CMColor.cmAccent,
-            cornerRadius: 15
+            backColor: CMColor.cmSecondary,
+            cornerRadius: 10
         )
+        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
-    private let saveButton: CMCircularButton = {
-        let button = CMCircularButton(
-            systemName: "bookmark",
-            backColor: CMColor.cmSecondaryBackground,
-            foreColor: CMColor.cmLabel
+    private let watchListButton: CMButton = {
+        let button = CMButton(
+            text: "+ Watchlist",
+            foreColor: .cmDivider,
+            textFont: CMFont.subtitleFont,
+            backColor: CMColor.cmLabel,
+            cornerRadius: 10
         )
+        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-    
-    private let ratingView = CMStarRatingView(rating: 0)
 
     init(movies: [QueryMovie]) {
         super.init(frame: .zero)
@@ -71,16 +64,6 @@ final class CMFeaturedMovie: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         gradientLayer.frame = bounds
-        
-        let maskPath = UIBezierPath(
-            roundedRect: self.bounds,
-            byRoundingCorners: [.bottomLeft, .bottomRight],
-            cornerRadii: CGSize(width: 8, height: 8)
-        )
-    
-        let maskLayer = CAShapeLayer()
-        maskLayer.path = maskPath.cgPath
-        layer.mask = maskLayer
     }
     
     // MARK: - PUBLIC FUNCTION
@@ -91,11 +74,8 @@ final class CMFeaturedMovie: UIView {
             UIView.transition(with: movieImage, duration: 0.5, options: .transitionCrossDissolve) { [weak self] in
                 self?.movieImage.sd_setImage(with: url)
             } completion: { [weak self] _ in
-                self?.animateScaling()
+//                self?.animateScaling()
             }
-        }
-        UIView.transition(with: ratingView, duration: 0.5, options: .transitionCrossDissolve) { [weak self] in
-            self?.ratingView.rating = movie.voteAverage ?? 0
         }
     }
     
@@ -133,6 +113,10 @@ final class CMFeaturedMovie: UIView {
     }
     
     private func setupUI() {
+        clipsToBounds = true
+        layer.cornerRadius = 10
+        layer.borderColor = CMColor.cmSecondary.cgColor
+        layer.borderWidth = 0.3
         addSubview(activityIndicatorImage)
         activityIndicatorImage.snp.makeConstraints {
             $0.center.equalToSuperview()
@@ -143,44 +127,23 @@ final class CMFeaturedMovie: UIView {
             $0.edges.equalToSuperview()
         }
         
-        let hstack = UIStackView(arrangedSubviews: [infoButton, seeButton, saveButton])
+        let hstack = UIStackView(arrangedSubviews: [watchListButton, myListButton])
         hstack.axis = .horizontal
         hstack.spacing = 10
         hstack.alignment = .center
-        
+        hstack.distribution = .fill
+
         addSubview(hstack)
         hstack.snp.makeConstraints {
             $0.bottom.equalToSuperview().inset(10)
-            $0.leading.equalToSuperview().offset(10)
-            $0.trailing.equalToSuperview().inset(10)
-        }
-        
-        infoButton.snp.makeConstraints {
-            $0.width.height.equalTo(40)
-        }
-
-        saveButton.snp.makeConstraints {
-            $0.width.height.equalTo(40)
-        }
-        
-        seeButton.snp.makeConstraints {
-            $0.height.equalTo(50)
-        }
-        
-        seeButton.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        seeButton.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
-        
-        addSubview(ratingView)
-        ratingView.snp.makeConstraints {
-            $0.bottom.equalTo(hstack.snp.top).offset(-10)
-            $0.centerX.equalToSuperview()
+            $0.leading.trailing.equalToSuperview().inset(15)
         }
     }
     
     private func setupGradient() {
         gradientLayer.colors = [
             UIColor.black.cgColor,
-            UIColor.black.cgColor,
+            UIColor.black.withAlphaComponent(0.5).cgColor,
             UIColor.clear.cgColor
         ]
         gradientLayer.locations = [0.0, 0.15, 1.0]

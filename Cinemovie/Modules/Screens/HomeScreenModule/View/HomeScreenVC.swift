@@ -19,23 +19,43 @@ protocol HomeScreenViewProtocol: AnyObject {
 final class HomeScreenVC: UIViewController {
 
     var presenter: HomeScreenPresenterProtocol?
+    private var isShadowVisible = false
+    
     private var popularMovies: [QueryMovie] = []
     private var upcomingMovies: [QueryMovie] = []
     private var nowPlayingMovies: [QueryMovie] = []
     private var topRatedMovies: [QueryMovie] = []
 
-    private let scrollView: UIScrollView = {
+    private lazy var scrollView: UIScrollView = {
         let scroll = UIScrollView()
         scroll.showsVerticalScrollIndicator = true
         scroll.alwaysBounceVertical = true
         scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.delegate = self
         return scroll
     }()
 
-    private let contentView: UIView = {
+    private lazy var contentView: UIView = {
         let contentView = UIView()
         contentView.translatesAutoresizingMaskIntoConstraints = false
         return contentView
+    }()
+    
+    private lazy var headerView: CMHeaderView = {
+        let firstButton = CMCircularButton(
+            systemName: "magnifyingglass",
+            size: 30,
+            backColor: .clear,
+            foreColor: .cmLabel
+        )
+        
+        let header = CMHeaderView(
+            headerTitle: "For Dantes",
+            firstButton: firstButton,
+            secondButton: nil
+        )
+        header.translatesAutoresizingMaskIntoConstraints = false
+        return header
     }()
 
     private lazy var featuredMovieView: CMFeaturedMovie = {
@@ -86,45 +106,55 @@ final class HomeScreenVC: UIViewController {
         featuredMovieView.updateStretchEffect(scrollView: self.scrollView)
     }
 
+    @objc
+    private func tapFirstButton() {
+        print("Tapped First Button")
+    }
+    
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
         view.backgroundColor = CMColor.cmBackground
-        scrollView.delegate = self
-        view.addSubview(scrollView)
+    
+        view.addSubview(headerView)
+        headerView.snp.makeConstraints {
+            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            $0.leading.equalToSuperview()
+            $0.trailing.equalToSuperview()
+            $0.height.equalTo(35)
+        }
+        view.bringSubviewToFront(headerView)
         
+        view.addSubview(scrollView)
         scrollView.snp.makeConstraints {
-            $0.top.equalToSuperview()
+            $0.top.equalTo(headerView.snp.bottom)
             $0.leading.equalToSuperview()
             $0.trailing.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
         
         scrollView.addSubview(contentView)
-        
         contentView.snp.makeConstraints {
-            $0.top.equalTo(scrollView.snp.top).offset(-50)
+            $0.top.equalTo(scrollView.snp.top)
             $0.leading.trailing.equalTo(scrollView)
             $0.bottom.equalTo(scrollView.snp.bottom)
             $0.width.equalToSuperview()
         }
         
         contentView.addSubview(featuredMovieView)
-        
         featuredMovieView.snp.makeConstraints {
             $0.top.equalTo(contentView.snp.top)
-            $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(UIConstants.screenHeight*0.7)
+            $0.leading.equalTo(contentView.snp.leading).offset(30)
+            $0.trailing.equalTo(contentView.snp.trailing).offset(-30)
+            $0.height.equalTo(UIConstants.screenHeight * 0.55)
         }
         
         contentView.addSubview(popularMoviesList)
-        
         popularMoviesList.snp.makeConstraints {
             $0.top.equalTo(featuredMovieView.snp.bottom).offset(10)
             $0.leading.trailing.equalToSuperview()
         }
         
         contentView.addSubview(upcomingMoviesList)
-        
         upcomingMoviesList.snp.makeConstraints {
             $0.top.equalTo(popularMoviesList.snp.bottom).offset(10)
             $0.leading.trailing.equalToSuperview()
@@ -150,20 +180,17 @@ final class HomeScreenVC: UIViewController {
 
 extension HomeScreenVC: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if scrollView.contentOffset.y < -view.safeAreaInsets.top {
-            scrollView.setContentOffset(CGPoint(x: 0, y: -view.safeAreaInsets.top), animated: false)
-            scrollView.isScrollEnabled = false
-            UIView.animate(
-                withDuration: 0.5, delay: 0.4,
-                usingSpringWithDamping: 0.7, initialSpringVelocity: 0.7, options: .curveEaseOut
-            ){
-                scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: false)
-            } completion: { _ in
-                FeedbackGenerator.shared.generate()
-                scrollView.isScrollEnabled = true
+        let shouldShowShadow = scrollView.contentOffset.y >= 10
+
+        if shouldShowShadow != isShadowVisible {
+            isShadowVisible = shouldShowShadow
+
+            if shouldShowShadow {
+                headerView.addShadowToHeader()
+            } else {
+                headerView.removeShadowFromHeader()
             }
         }
-        featuredMovieView.updateStretchEffect(scrollView: scrollView)
     }
 }
 
