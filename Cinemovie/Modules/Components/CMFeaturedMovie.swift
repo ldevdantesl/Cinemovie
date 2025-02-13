@@ -10,16 +10,22 @@ import SnapKit
 import SDWebImage
 
 final class CMFeaturedMovie: UIView {
-    private let gradientLayer = CAGradientLayer()
     private let activityIndicatorImage = UIActivityIndicatorView(style: .large)
     
     private var changeMovieTimer: Timer?
     
     private var movies: [QueryMovie] = []
     
+    private let buttonsContainer: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .black
+        return view
+    }()
+    
     private let movieImage: UIImageView = {
         let image = UIImageView()
-        image.contentMode = .scaleToFill
+        image.contentMode = .scaleAspectFill
         image.clipsToBounds = true
         return image
     }()
@@ -52,7 +58,6 @@ final class CMFeaturedMovie: UIView {
         super.init(frame: .zero)
         self.movies = movies
         setupUI()
-        setupGradient()
         updateMovie()
     }
     
@@ -63,7 +68,7 @@ final class CMFeaturedMovie: UIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        gradientLayer.frame = bounds
+        applyGradientToImageView()
     }
     
     // MARK: - PUBLIC FUNCTION
@@ -73,8 +78,6 @@ final class CMFeaturedMovie: UIView {
             activityIndicatorImage.startAnimating()
             UIView.transition(with: movieImage, duration: 0.5, options: .transitionCrossDissolve) { [weak self] in
                 self?.movieImage.sd_setImage(with: url)
-            } completion: { [weak self] _ in
-//                self?.animateScaling()
             }
         }
     }
@@ -124,31 +127,51 @@ final class CMFeaturedMovie: UIView {
         
         addSubview(movieImage)
         movieImage.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.top.leading.trailing.equalToSuperview()
         }
         
-        let hstack = UIStackView(arrangedSubviews: [watchListButton, myListButton])
-        hstack.axis = .horizontal
-        hstack.spacing = 10
-        hstack.alignment = .center
-        hstack.distribution = .fill
-
-        addSubview(hstack)
-        hstack.snp.makeConstraints {
-            $0.bottom.equalToSuperview().inset(10)
-            $0.leading.trailing.equalToSuperview().inset(15)
+        
+        addSubview(buttonsContainer)
+        buttonsContainer.snp.makeConstraints {
+            $0.top.equalTo(movieImage.snp.bottom)
+            $0.leading.trailing.bottom.equalToSuperview()
+            $0.height.equalTo(50)
+        }
+        
+        buttonsContainer.addSubview(watchListButton)
+        
+        watchListButton.snp.makeConstraints {
+            $0.top.equalToSuperview()
+            $0.leading.equalToSuperview().offset(10)
+            $0.trailing.equalToSuperview().multipliedBy(0.48)
+            $0.bottom.equalToSuperview().offset(-10)
+        }
+        
+        buttonsContainer.addSubview(myListButton)
+        
+        myListButton.snp.makeConstraints {
+            $0.top.equalToSuperview()
+            $0.leading.equalTo(watchListButton.snp.trailing).offset(10)
+            $0.trailing.equalToSuperview().offset(-10)
+            $0.bottom.equalToSuperview().offset(-10)
         }
     }
     
-    private func setupGradient() {
+    private func applyGradientToImageView() {
+        let gradientLayer = CAGradientLayer()
         gradientLayer.colors = [
             UIColor.black.cgColor,
-            UIColor.black.withAlphaComponent(0.5).cgColor,
             UIColor.clear.cgColor
         ]
-        gradientLayer.locations = [0.0, 0.15, 1.0]
-        gradientLayer.startPoint = CGPoint(x: 0.5, y: 1.0)
-        gradientLayer.endPoint = CGPoint(x: 0.5, y: 0.0)
-        layer.insertSublayer(gradientLayer, above: movieImage.layer)
+        
+        let gradientHeight = movieImage.bounds.height * 0.2
+        
+        gradientLayer.frame = CGRect(x: 0, y: movieImage.bounds.height - gradientHeight, width: movieImage.bounds.width, height: gradientHeight)
+        
+        gradientLayer.startPoint = CGPoint(x: 0.5, y: 1)
+        gradientLayer.endPoint = CGPoint(x: 0.5, y: 0)
+
+        movieImage.layer.sublayers?.removeAll { $0 is CAGradientLayer }
+        movieImage.layer.insertSublayer(gradientLayer, at: 0)
     }
 }

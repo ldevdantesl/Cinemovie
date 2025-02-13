@@ -145,7 +145,7 @@ final class HomeScreenVC: UIViewController {
             $0.top.equalTo(contentView.snp.top)
             $0.leading.equalTo(contentView.snp.leading).offset(30)
             $0.trailing.equalTo(contentView.snp.trailing).offset(-30)
-            $0.height.equalTo(UIConstants.screenHeight * 0.55)
+            $0.height.equalTo(UIConstants.screenHeight * 0.65)
         }
         
         contentView.addSubview(popularMoviesList)
