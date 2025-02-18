@@ -10,11 +10,13 @@ import SnapKit
 import SDWebImage
 
 final class CMFeaturedMovie: UIView {
+    private var gradientLayer: CAGradientLayer?
     private let activityIndicatorImage = UIActivityIndicatorView(style: .large)
     
     private var changeMovieTimer: Timer?
     
     private var movies: [QueryMovie] = []
+    private var currentMovie: QueryMovie?
     
     private let buttonsContainer: UIView = {
         let view = UIView()
@@ -23,10 +25,13 @@ final class CMFeaturedMovie: UIView {
         return view
     }()
     
-    private let movieImage: UIImageView = {
+    private lazy var movieImage: UIImageView = {
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapedOnMovieImage))
         let image = UIImageView()
         image.contentMode = .scaleAspectFill
         image.clipsToBounds = true
+        image.isUserInteractionEnabled = true
+        image.addGestureRecognizer(gesture)
         return image
     }()
     
@@ -66,6 +71,10 @@ final class CMFeaturedMovie: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    deinit {
+        changeMovieTimer?.invalidate()
+    }
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         applyGradientToImageView()
@@ -74,6 +83,7 @@ final class CMFeaturedMovie: UIView {
     // MARK: - PUBLIC FUNCTION
     func updateMovie() {
         guard let movie = movies.randomElement() else { return }
+        self.currentMovie = movie
         if let url = ImagePathURLHelper.getImageURL(with: movie.posterPath, size: .w1280) {
             activityIndicatorImage.startAnimating()
             UIView.transition(with: movieImage, duration: 0.5, options: .transitionCrossDissolve) { [weak self] in
@@ -88,33 +98,7 @@ final class CMFeaturedMovie: UIView {
         startMovieChangeTimer()
     }
     
-    func updateStretchEffect(scrollView: UIScrollView) {
-        let offsetY = scrollView.contentOffset.y
-        
-        if offsetY < 0 {
-            let scaleFactor = 1 + abs(offsetY) / 200
-            movieImage.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-        } else {
-            movieImage.transform = .identity
-        }
-    }
-    
     // MARK: - PRIVATE FUNCTIONS
-    private func startMovieChangeTimer() {
-        changeMovieTimer?.invalidate()
-        
-        changeMovieTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
-            self?.updateMovie()
-        }
-    }
-    
-    private func animateScaling() {
-        UIView.animate(withDuration: 5.0, delay: 0, options: [.curveLinear, .autoreverse, .repeat]) { [weak self] in
-            guard let self = self else { return }
-            self.movieImage.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
-        }
-    }
-    
     private func setupUI() {
         clipsToBounds = true
         layer.cornerRadius = 10
@@ -157,21 +141,39 @@ final class CMFeaturedMovie: UIView {
         }
     }
     
+    private func startMovieChangeTimer() {
+        changeMovieTimer?.invalidate()
+        changeMovieTimer = nil
+        
+        changeMovieTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
+            self?.updateMovie()
+        }
+    }
+    
     private func applyGradientToImageView() {
-        let gradientLayer = CAGradientLayer()
-        gradientLayer.colors = [
-            UIColor.black.cgColor,
-            UIColor.clear.cgColor
-        ]
+        if gradientLayer == nil {
+            let newGradientLayer = CAGradientLayer()
+            newGradientLayer.colors = [
+                UIColor.black.cgColor,
+                UIColor.clear.cgColor
+            ]
+            newGradientLayer.startPoint = CGPoint(x: 0.5, y: 1)
+            newGradientLayer.endPoint = CGPoint(x: 0.5, y: 0)
+            movieImage.layer.insertSublayer(newGradientLayer, at: 0)
+            gradientLayer = newGradientLayer
+        }
         
-        let gradientHeight = movieImage.bounds.height * 0.2
-        
-        gradientLayer.frame = CGRect(x: 0, y: movieImage.bounds.height - gradientHeight, width: movieImage.bounds.width, height: gradientHeight)
-        
-        gradientLayer.startPoint = CGPoint(x: 0.5, y: 1)
-        gradientLayer.endPoint = CGPoint(x: 0.5, y: 0)
-
-        movieImage.layer.sublayers?.removeAll { $0 is CAGradientLayer }
-        movieImage.layer.insertSublayer(gradientLayer, at: 0)
+        gradientLayer?.frame = CGRect(
+            x: 0,
+            y: movieImage.bounds.height * 0.8,
+            width: movieImage.bounds.width,
+            height: movieImage.bounds.height * 0.2
+        )
+    }
+    
+    // MARK: - OBJC FUNCTIONS
+    @objc
+    private func didTapedOnMovieImage() {
+        print("DEBUG: tapped on a movie: \(currentMovie?.title ?? "")")
     }
 }

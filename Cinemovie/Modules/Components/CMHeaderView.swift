@@ -42,13 +42,12 @@ final class CMHeaderView: UIView {
     // MARK: - Private Methods
     private func setupUI(headerTitle: String) {
         headerLabel.text = headerTitle
-        
         self.backgroundColor = CMColor.cmBackground
+        
         let spacer = UIView()
         let hStack = UIStackView(arrangedSubviews: [headerLabel, spacer, firstButton])
         hStack.axis = .horizontal
         hStack.spacing = 10
-        hStack.alignment = .top
         hStack.distribution = .fill
         hStack.translatesAutoresizingMaskIntoConstraints = false
 
@@ -59,10 +58,9 @@ final class CMHeaderView: UIView {
         addSubview(hStack)
         
         hStack.snp.makeConstraints {
-            $0.top.equalToSuperview()
             $0.leading.equalToSuperview().offset(10)
             $0.trailing.equalToSuperview().offset(-10)
-            $0.bottom.lessThanOrEqualToSuperview()
+            $0.bottom.equalToSuperview().offset(-10)
         }
         
         spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)

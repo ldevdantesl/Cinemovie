@@ -10,6 +10,7 @@ import UIKit
 protocol HomeScreenPresenterProtocol: AnyObject {
     // MARK: - STARTING
     func viewDidLoaded()
+    func didTapMovie(_ movie: QueryMovie)
     
     // MARK: - FINISHING
     func didDownloadPopularMovies(queryMovies: [QueryMovie])
@@ -43,6 +44,10 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
         interactor.downloadUpcomingMovies()
         interactor.downloadTopRatedMovies()
         interactor.downloadNowPlayingMovies()
+    }
+    
+    func didTapMovie(_ movie: QueryMovie) {
+        router.navigateToMovieDetails(movieID: movie.id)
     }
 
     // MARK: - FINISHING

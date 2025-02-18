@@ -39,7 +39,7 @@ final class CMMovieListCell: UICollectionViewCell {
     
     // MARK: - PUBLIC FUNC
     func configure(movie: QueryMovie) {
-        if let url = ImagePathURLHelper.getImageURL(with: movie.posterPath, size: .original) {
+        if let url = ImagePathURLHelper.getImageURL(with: movie.posterPath, size: .w780) {
             loadingIndicator.startAnimating()
             movieImage.sd_setImage(with: url) { [weak self] _, _, _, _ in
                 self?.loadingIndicator.stopAnimating()

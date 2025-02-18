@@ -13,6 +13,7 @@ protocol HomeScreenViewProtocol: AnyObject {
     func didRecieveTopRatedMovies(_ movies: [QueryMovie])
     func didRecieveUpcomingMovies(_ movies: [QueryMovie])
     func didRecieveNowPlayingMovies(_ movies: [QueryMovie])
+    func didTapMovie(_ movie: QueryMovie)
     func didRecieveError(_ errorStr: String)
 }
 
@@ -46,7 +47,9 @@ final class HomeScreenVC: UIViewController {
             systemName: "magnifyingglass",
             size: 30,
             backColor: .clear,
-            foreColor: .cmLabel
+            foreColor: .cmLabel,
+            target: self,
+            action: #selector(didTapSearchButton)
         )
         
         let header = CMHeaderView(
@@ -65,7 +68,12 @@ final class HomeScreenVC: UIViewController {
     }()
 
     private lazy var popularMoviesList: CMMovieList = {
-        let list = CMMovieList(movies: popularMovies, listTitle: "Popular Movies", listSubtitle: nil)
+        let list = CMMovieList(
+            movies: popularMovies,
+            listTitle: "Popular Movies",
+            listSubtitle: nil,
+            didTapMovie: didTapMovie
+        )
         list.translatesAutoresizingMaskIntoConstraints = false
         list.isUserInteractionEnabled = true
         return list
@@ -103,12 +111,6 @@ final class HomeScreenVC: UIViewController {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: true)
         featuredMovieView.updateMovie()
-        featuredMovieView.updateStretchEffect(scrollView: self.scrollView)
-    }
-
-    @objc
-    private func tapFirstButton() {
-        print("Tapped First Button")
     }
     
     // MARK: - PRIVATE FUNCTIONS
@@ -117,10 +119,10 @@ final class HomeScreenVC: UIViewController {
     
         view.addSubview(headerView)
         headerView.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            $0.top.equalTo(view.snp.top)
             $0.leading.equalToSuperview()
             $0.trailing.equalToSuperview()
-            $0.height.equalTo(35)
+            $0.height.equalTo(80)
         }
         view.bringSubviewToFront(headerView)
         
@@ -143,9 +145,9 @@ final class HomeScreenVC: UIViewController {
         contentView.addSubview(featuredMovieView)
         featuredMovieView.snp.makeConstraints {
             $0.top.equalTo(contentView.snp.top)
-            $0.leading.equalTo(contentView.snp.leading).offset(30)
-            $0.trailing.equalTo(contentView.snp.trailing).offset(-30)
-            $0.height.equalTo(UIConstants.screenHeight * 0.65)
+            $0.leading.equalTo(contentView.snp.leading).offset(20)
+            $0.trailing.equalTo(contentView.snp.trailing).offset(-20)
+            $0.height.equalTo(UIConstants.screenHeight * 0.6)
         }
         
         contentView.addSubview(popularMoviesList)
@@ -175,6 +177,12 @@ final class HomeScreenVC: UIViewController {
         contentView.snp.makeConstraints {
             $0.bottom.equalTo(nowPlayingMoviesList.snp.bottom).offset(10)
         }
+    }
+    
+    // MARK: - OBJC FUNCTIONS
+    @objc
+    private func didTapSearchButton() {
+        print("Tapped Search Button")
     }
 }
 
@@ -227,5 +235,10 @@ extension HomeScreenVC: HomeScreenViewProtocol {
             UIAlertAction(title: "OK", style: .cancel, handler: nil))
 
         self.present(alert, animated: true, completion: nil)
+    }
+    
+    func didTapMovie(_ movie: QueryMovie) {
+        print("Tapped movie: \(movie.title)")
+        presenter?.didTapMovie(movie)
     }
 }

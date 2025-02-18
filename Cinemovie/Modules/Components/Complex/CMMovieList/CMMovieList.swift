@@ -9,11 +9,17 @@ import SnapKit
 import UIKit
 
 final class CMMovieList: UIView {
+    // MARK: - Public properties
+    public var didTapMovie: ((QueryMovie) -> Void)?
+    
+    // MARK: - Private properties
     private let cellWidth = (UIConstants.screenWidth / 3) - 15
-    public let cellHeight = (UIConstants.screenWidth / 3) * 1.3
+    private let cellHeight = (UIConstants.screenWidth / 3) * 1.3
     
     private var movies: [QueryMovie]
-
+    private var listTitleLabel: UILabel?
+    private var listSubtitleLabel: UILabel?
+    
     private lazy var collectionView: UICollectionView = {
         let flow = UICollectionViewFlowLayout()
         flow.scrollDirection = .horizontal
@@ -35,11 +41,14 @@ final class CMMovieList: UIView {
         return cv
     }()
     
-    private var listTitleLabel: UILabel?
-    private var listSubtitleLabel: UILabel?
-
-    init(movies: [QueryMovie], listTitle: String?, listSubtitle: String?) {
+    init(
+        movies: [QueryMovie],
+        listTitle: String?,
+        listSubtitle: String?,
+        didTapMovie: ((QueryMovie) -> Void)? = nil
+    ) {
         self.movies = movies
+        self.didTapMovie = didTapMovie
         
         if let listTitle = listTitle {
             let listTitleLabel = UILabel()
@@ -68,6 +77,13 @@ final class CMMovieList: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - PUBLIC FUNCTIONS
+    func updateMovies(_ movies: [QueryMovie]) {
+        self.movies = movies
+        collectionView.reloadData()
+    }
+    
+    // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
         if let listTitleLabel = listTitleLabel {
             addSubview(listTitleLabel)
@@ -107,21 +123,12 @@ final class CMMovieList: UIView {
             }
         }
     }
-    
-    func updateMovies(_ movies: [QueryMovie]) {
-        self.movies = movies
-        collectionView.reloadData()
-    }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesBegan(touches, with: event)
-        print("Touches Began in CMMovieList")
-    }
 }
 
 extension CMMovieList: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print(movies[indexPath.row].title)
+        let selectedMovie = movies[indexPath.row]
+        self.didTapMovie?(selectedMovie)
     }
     
     func collectionView(
