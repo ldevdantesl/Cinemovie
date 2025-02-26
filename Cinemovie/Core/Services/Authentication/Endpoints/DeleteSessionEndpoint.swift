@@ -22,7 +22,7 @@ struct DeleteSessionEndpoint: Endpoint {
         self.path = "/authentication/session"
         self.method = .DELETE
         self.headers = [
-            "Authorization" : "Bearer \(Constants.bearerToken)",
+            "Authorization" : "Bearer \(CONSTANTS.bearerToken)",
             "accept" : "application/json",
             "content-type" : "application/json"
         ]

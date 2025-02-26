@@ -14,6 +14,17 @@ final class TMBDServiceImpl: TMDBService {
         self.networkService = networkService
     }
     
+    func getMovieDetails(movieID: Int, completion: @escaping (Result<MovieDetails, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        let endpoint = GetMovieDetailsEndpoint(movieID: movieID, queryParams: queryParams)
+        networkService?.request(endpoint) { (result: Result<MovieDetails, NetworkError>) in
+            switch result {
+            case .success(let details): completion(.success(details))
+            case .failure(let failure): completion(.failure(failure))
+            }
+        }
+    }
+    
     func getPopularMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru", "page" : "1"]
         let endpoint = GetPopularMoviesEndpoint(queryParams: queryParams)

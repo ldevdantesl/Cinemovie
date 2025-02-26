@@ -18,7 +18,7 @@ struct NewSessionEndpoint: Endpoint {
         self.path = "/authentication/session/new"
         self.method = .POST
         self.headers = [
-            "Authorization" : "Bearer \(Constants.bearerToken)",
+            "Authorization" : "Bearer \(CONSTANTS.bearerToken)",
             "accept" : "application/json",
             "content-type" : "application/json"
         ]

@@ -31,7 +31,7 @@ final class CMPopularMoviesPageContentVC: UIViewController {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textColor = CMColor.cmButton
-        label.font = CMFont.bodyFont
+        label.font = CMFont.font(size: .body)
         label.numberOfLines = 1
         return label
     }()
@@ -40,7 +40,7 @@ final class CMPopularMoviesPageContentVC: UIViewController {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textColor = CMColor.cmSecondary
-        label.font = CMFont.captionFont
+        label.font = CMFont.font(size: .caption)
         label.numberOfLines = 1
         return label
     }()
@@ -49,7 +49,7 @@ final class CMPopularMoviesPageContentVC: UIViewController {
         super.init(nibName: nil, bundle: nil)
         setupUI()
         
-        if let url = ImagePathURLHelper.getImageURL(with: movie.backdropPath, size: .original) {
+        if let url = URLHelper.getImageURL(with: movie.backdropPath, size: .original) {
             activityIndicatorImage.startAnimating()
             backgroundImage.sd_setImage(with: url) { [weak self] image, error, _, _ in
                 self?.activityIndicatorImage.stopAnimating()

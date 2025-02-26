@@ -13,7 +13,7 @@ struct CreateRequestTokenEndpoint: Endpoint {
     let method: HTTPMethod = .GET
    
     let headers: [String : String]? = [
-        "Authorization" : "Bearer \(Constants.bearerToken)",
+        "Authorization" : "Bearer \(CONSTANTS.bearerToken)",
         "accept" : "application/json"
     ]
     

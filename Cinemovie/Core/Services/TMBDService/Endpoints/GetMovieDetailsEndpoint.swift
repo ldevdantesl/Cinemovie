@@ -1,27 +1,24 @@
 //
-//  GetNowPlayingMoviesEndpoint.swift
+//  GetMovieDetailsEndpoint.swift
 //  Cinemovie
 //
-//  Created by Buzurg Rakhimzoda on 5.02.2025.
+//  Created by Buzurg Rakhimzoda on 18.02.2025.
 //
 
 import Foundation
 
-struct GetNowPlayingMoviesEndpoint: Endpoint {
-    let path: String = "/movie/now_playing"
-    
+struct GetMovieDetailsEndpoint: Endpoint {
+    let path: String
     let method: HTTPMethod = .GET
-    
     let headers: [String : String]? = [
         "Authorization" : "Bearer \(CONSTANTS.bearerToken)",
         "accept" : "application/json"
     ]
-    
     let queryParams: [String : String]?
-
     let body: Data? = nil
     
-    init(queryParams: [String : String]?) {
+    init(movieID: Int, queryParams: [String: String]? = nil) {
+        self.path = "/movie/\(movieID)"
         self.queryParams = queryParams
     }
 }

@@ -10,6 +10,8 @@ import SnapKit
 import SDWebImage
 
 final class CMFeaturedMovie: UIView {
+    private var didTapMovie: ((QueryMovie) -> Void)?
+    
     private var gradientLayer: CAGradientLayer?
     private let activityIndicatorImage = UIActivityIndicatorView(style: .large)
     
@@ -39,7 +41,7 @@ final class CMFeaturedMovie: UIView {
         let button = CMButton(
             text: "+ My List",
             foreColor: CMColor.cmLabel,
-            textFont: CMFont.subtitleFont,
+            textFont: CMFont.font(size: .subtitle),
             backColor: CMColor.cmSecondary,
             cornerRadius: 10
         )
@@ -51,7 +53,7 @@ final class CMFeaturedMovie: UIView {
         let button = CMButton(
             text: "+ Watchlist",
             foreColor: .cmDivider,
-            textFont: CMFont.subtitleFont,
+            textFont: CMFont.font(size: .subtitle),
             backColor: CMColor.cmLabel,
             cornerRadius: 10
         )
@@ -59,9 +61,10 @@ final class CMFeaturedMovie: UIView {
         return button
     }()
 
-    init(movies: [QueryMovie]) {
+    init(movies: [QueryMovie], didTapMovie: @escaping (QueryMovie) -> Void) {
         super.init(frame: .zero)
         self.movies = movies
+        self.didTapMovie = didTapMovie
         setupUI()
         updateMovie()
     }
@@ -84,7 +87,7 @@ final class CMFeaturedMovie: UIView {
     func updateMovie() {
         guard let movie = movies.randomElement() else { return }
         self.currentMovie = movie
-        if let url = ImagePathURLHelper.getImageURL(with: movie.posterPath, size: .w1280) {
+        if let url = URLHelper.getImageURL(with: movie.posterPath, size: .w1280) {
             activityIndicatorImage.startAnimating()
             UIView.transition(with: movieImage, duration: 0.5, options: .transitionCrossDissolve) { [weak self] in
                 self?.movieImage.sd_setImage(with: url)
@@ -174,6 +177,7 @@ final class CMFeaturedMovie: UIView {
     // MARK: - OBJC FUNCTIONS
     @objc
     private func didTapedOnMovieImage() {
-        print("DEBUG: tapped on a movie: \(currentMovie?.title ?? "")")
+        guard let currentMovie = currentMovie else { return }
+        didTapMovie?(currentMovie)
     }
 }

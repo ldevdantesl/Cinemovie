@@ -6,6 +6,10 @@
 //
 
 protocol MovieDetailsScreenPresenterProtocol: AnyObject {
+    func viewDidLoad()
+    
+    func didGetMovieDetails(_ details: MovieDetails)
+    func didRecieveError(_ error: String)
 }
 
 final class MovieDetailsScreenPresenter {
@@ -20,4 +24,15 @@ final class MovieDetailsScreenPresenter {
 }
 
 extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
+    func viewDidLoad() {
+        interactor.getMovieDetails()
+    }
+    
+    func didRecieveError(_ error: String) {
+        view?.didRecieveError(error)
+    }
+    
+    func didGetMovieDetails(_ details: MovieDetails) {
+        view?.didGetMovieDetails(details)
+    }
 }

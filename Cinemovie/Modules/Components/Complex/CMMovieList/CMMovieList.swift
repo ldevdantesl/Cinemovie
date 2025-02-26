@@ -52,7 +52,7 @@ final class CMMovieList: UIView {
         
         if let listTitle = listTitle {
             let listTitleLabel = UILabel()
-            listTitleLabel.font = CMFont.subtitleFont
+            listTitleLabel.font = CMFont.font(size: .subtitle, weight: .medium)
             listTitleLabel.textColor = CMColor.cmLabel
             listTitleLabel.textAlignment = .left
             listTitleLabel.text = listTitle
@@ -61,7 +61,7 @@ final class CMMovieList: UIView {
         
         if let listSubtitle = listSubtitle {
             let listSubtitleLabel = UILabel()
-            listSubtitleLabel.font = CMFont.bodyFont
+            listSubtitleLabel.font = CMFont.font(size: .body, weight: .light)
             listSubtitleLabel.textColor = CMColor.cmSecondary
             listSubtitleLabel.textAlignment = .left
             listSubtitleLabel.text = listSubtitle

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ImagePathURLHelper {
+public struct URLHelper {
     enum ImageSizes: String {
         case w92 = "w92"
         case w154 = "w154"
@@ -21,7 +21,11 @@ struct ImagePathURLHelper {
     
     static func getImageURL(with path: String?, size: ImageSizes) -> URL? {
         guard let path = path else { return nil }
-        let finalPath = "\(Constants.imageBaseURLString)/\(size.rawValue)/\(path)"
+        let finalPath = "\(CONSTANTS.imageBaseURLString)/\(size.rawValue)/\(path)"
         return URL(string: finalPath)
+    }
+    
+    static func getImdbURL(withID id: String) -> URL? {
+        return URL(string: "https://www.imdb.com/title/\(id)/")
     }
 }

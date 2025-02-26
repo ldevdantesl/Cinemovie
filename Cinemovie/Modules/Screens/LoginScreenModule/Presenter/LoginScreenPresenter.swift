@@ -53,7 +53,7 @@ extension LoginScreenPresenter: LoginScreenPresenterProtocol {
     
     func openOAuthURLWithToken(token: String) {
         DispatchQueue.main.async { [weak self] in
-            let urlString = Constants.baseUniversalURLString + "/authenticate/\(token)?redirect_to=cinemovie://callback"
+            let urlString = CONSTANTS.baseUniversalURLString + "/authenticate/\(token)?redirect_to=cinemovie://callback"
             guard let url = URL(string: urlString) else { return }
             self?.view?.openURL(url)
         }

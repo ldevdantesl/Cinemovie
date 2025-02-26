@@ -12,9 +12,15 @@ protocol HomeScreenRouterProtocol {
 final class HomeScreenRouter: HomeScreenRouterProtocol {
     weak var viewController: HomeScreenVC?
     
+    private let tmdbService: TMDBService?
+    
+    init(tmdbService: TMDBService?) {
+        self.tmdbService = tmdbService
+    }
+    
     func navigateToMovieDetails(movieID: Int) {
-        let movieDetails = MovieDetailsScreenAssembler.assemble(movieID: movieID)
-        movieDetails.modalPresentationStyle = .fullScreen
+        let movieDetails = MovieDetailsScreenAssembler.assemble(movieID: movieID, tmdbService: tmdbService)
+        movieDetails.modalPresentationStyle = .pageSheet
         viewController?.present(movieDetails, animated: true)
     }
 }

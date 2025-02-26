@@ -14,7 +14,7 @@ struct LoginAsGuestEndpoint: Endpoint {
     
     let headers: [String : String]? = [
         "accept": "application/json",
-        "Authorization" : "Bearer \(Constants.bearerToken)"
+        "Authorization" : "Bearer \(CONSTANTS.bearerToken)"
     ]
     
     let body: Data? = nil

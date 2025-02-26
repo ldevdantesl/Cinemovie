@@ -8,6 +8,7 @@
 import Foundation
 
 protocol TMDBService: AnyObject {
+    func getMovieDetails(movieID: Int, completion: @escaping (Result<MovieDetails, NetworkError>) -> Void)
     
     // MARK: - LIST OF PRESET MOVIES
     func getUpcomingMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)

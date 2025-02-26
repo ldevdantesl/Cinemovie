@@ -20,7 +20,7 @@ protocol Endpoint {
 }
 
 extension Endpoint {
-    var baseURL: String { return Constants.baseURLString }
+    var baseURL: String { return CONSTANTS.baseURLString }
     
     var urlRequest: URLRequest? {
         var components = URLComponents(string: baseURL + path)

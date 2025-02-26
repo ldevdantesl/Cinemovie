@@ -12,7 +12,7 @@ final class CMHeaderView: UIView {
     
     private let headerLabel: UILabel = {
         let label = UILabel()
-        label.font = CMFont.titleFont
+        label.font = CMFont.font(size: .title, weight: .bold)
         label.textColor = CMColor.cmLabel
         label.numberOfLines = 1
         label.textAlignment = .center

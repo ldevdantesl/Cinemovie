@@ -30,7 +30,7 @@ final class LoginScreenVC: UIViewController {
         let label = UILabel()
         label.text = "Welcome to the Cinemovie"
         label.textColor = CMColor.cmLabel
-        label.font = CMFont.bodyFont
+        label.font = CMFont.font(size: .body)
         label.numberOfLines = 1
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -40,7 +40,7 @@ final class LoginScreenVC: UIViewController {
         let label = UILabel()
         label.text = "Select your preferred authentication method"
         label.textColor = CMColor.cmSublabel
-        label.font = CMFont.bodyFont
+        label.font = CMFont.font(size: .body)
         label.numberOfLines = 1
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -50,7 +50,7 @@ final class LoginScreenVC: UIViewController {
         let button = CMButton(
             text: "Login with TMDB",
             foreColor: CMColor.cmButton,
-            textFont: CMFont.buttonFont,
+            textFont: CMFont.font(size: .body, fontName: .avenir),
             backColor: CMColor.cmPrimary,
             cornerRadius: 10
         )
@@ -62,7 +62,7 @@ final class LoginScreenVC: UIViewController {
         let button = CMButton(
             text: "Continue as Guest",
             foreColor: CMColor.cmButton,
-            textFont: CMFont.buttonFont,
+            textFont: CMFont.font(size: .body, fontName: .avenir),
             backColor: CMColor.cmAccent,
             cornerRadius: 10
         )
@@ -158,17 +158,9 @@ final class LoginScreenVC: UIViewController {
     }
 }
 
-extension LoginScreenVC: LoginScreenViewProtocol {
-//    func openURLInSheet(_ urlString: String) {
-//        let webVC = WebViewController(urlString: urlString)
-//        print(urlString)
-//        self.present(webVC, animated: true)
-//    }
-    
+extension LoginScreenVC: LoginScreenViewProtocol {    
     func openURL(_ url: URL) {
-        if UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-        }
+        AppOpener.openURL(url)
     }
     
     func didReceiveError(error: AuthError) {

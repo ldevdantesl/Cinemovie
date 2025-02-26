@@ -8,10 +8,23 @@
 import Foundation
 import UIKit
 
+public enum CMFontSizes: CGFloat {
+    case title = 24
+    case subtitle = 18
+    case body = 16
+    case caption = 14
+}
+
+public enum CMFontNames: String {
+    case avenir = "AvenirNext-DemiBold"
+}
+
 public struct CMFont {
-    static let titleFont = UIFont.systemFont(ofSize: 24, weight: .bold)
-    static let subtitleFont = UIFont.systemFont(ofSize: 18, weight: .medium)
-    static let bodyFont = UIFont.systemFont(ofSize: 16, weight: .regular)
-    static let captionFont = UIFont.systemFont(ofSize: 14, weight: .medium)
-    static let buttonFont = UIFont(name: "AvenirNext-DemiBold", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium)
+    static func font(size: CMFontSizes, weight: UIFont.Weight = .regular) -> UIFont {
+        return UIFont.systemFont(ofSize: size.rawValue, weight: weight)
+    }
+    
+    static func font(size: CMFontSizes, fontName: CMFontNames) -> UIFont {
+        return UIFont(name: fontName.rawValue, size: size.rawValue) ?? UIFont().withSize(size.rawValue)
+    }
 }

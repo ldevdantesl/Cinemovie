@@ -62,7 +62,7 @@ final class HomeScreenVC: UIViewController {
     }()
 
     private lazy var featuredMovieView: CMFeaturedMovie = {
-        let movie = CMFeaturedMovie(movies: popularMovies)
+        let movie = CMFeaturedMovie(movies: popularMovies, didTapMovie: didTapMovie)
         movie.translatesAutoresizingMaskIntoConstraints = false
         return movie
     }()
@@ -80,21 +80,36 @@ final class HomeScreenVC: UIViewController {
     }()
     
     private lazy var upcomingMoviesList: CMMovieList = {
-        let list = CMMovieList(movies: upcomingMovies, listTitle: "Upcoming Movies", listSubtitle: nil)
+        let list = CMMovieList(
+            movies: upcomingMovies,
+            listTitle: "Upcoming Movies",
+            listSubtitle: nil,
+            didTapMovie: didTapMovie
+        )
         list.translatesAutoresizingMaskIntoConstraints = false
         list.isUserInteractionEnabled = true
         return list
     }()
     
     private lazy var nowPlayingMoviesList: CMMovieList = {
-        let list = CMMovieList(movies: nowPlayingMovies, listTitle: "Now Playing Movies", listSubtitle: nil)
+        let list = CMMovieList(
+            movies: nowPlayingMovies,
+            listTitle: "Now Playing Movies",
+            listSubtitle: nil,
+            didTapMovie: didTapMovie
+        )
         list.translatesAutoresizingMaskIntoConstraints = false
         list.isUserInteractionEnabled = true
         return list
     }()
     
     private lazy var topRatedMoviesList: CMMovieList = {
-        let list = CMMovieList(movies: topRatedMovies, listTitle: "Top Rated Movies", listSubtitle: nil)
+        let list = CMMovieList(
+            movies: topRatedMovies,
+            listTitle: "Top Rated Movies",
+            listSubtitle: nil,
+            didTapMovie: didTapMovie
+        )
         list.translatesAutoresizingMaskIntoConstraints = false
         list.isUserInteractionEnabled = true
         return list
@@ -238,7 +253,7 @@ extension HomeScreenVC: HomeScreenViewProtocol {
     }
     
     func didTapMovie(_ movie: QueryMovie) {
-        print("Tapped movie: \(movie.title)")
+        print("Tapped movie: \(movie.id)")
         presenter?.didTapMovie(movie)
     }
 }

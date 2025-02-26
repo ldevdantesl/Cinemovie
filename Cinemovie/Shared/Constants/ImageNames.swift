@@ -9,4 +9,9 @@ import Foundation
 
 enum ImageNames: String {
     case logoTransparent = "LogoXTransparent"
+    case logoAlt = "LogoXAlt"
+    case released = "Released"
+    case notReleased = "NotReleased"
+    case HD = "HD"
+    case imdb = "IMDB"
 }
