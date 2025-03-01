@@ -25,4 +25,3 @@ struct MovieListsAPIResponse: APIResponse {
 struct Dates: Codable {
     let maximum, minimum: String?
 }
-

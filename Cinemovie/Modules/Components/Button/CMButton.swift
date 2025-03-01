@@ -12,6 +12,7 @@ final class CMButton: UIButton {
     public var titleLabelText: String = ""
     public var titleLabelForeColor: UIColor = UIColor.white
     public var titleLabelFont: UIFont = UIFont.boldSystemFont(ofSize: 24)
+    public var buttonImage: UIImage? = nil
     public var backColor: UIColor = .systemCyan
     public var cornerRadius: CGFloat = 8
     
@@ -19,6 +20,7 @@ final class CMButton: UIButton {
         text: String = "",
         foreColor: UIColor = UIColor.white,
         textFont: UIFont = UIFont.boldSystemFont(ofSize: 24),
+        image: UIImage? = nil,
         backColor: UIColor = .systemCyan,
         cornerRadius: CGFloat = 8
     ) {
@@ -28,6 +30,7 @@ final class CMButton: UIButton {
         self.titleLabelForeColor = foreColor
         self.backColor = backColor
         self.cornerRadius = cornerRadius
+        self.buttonImage = image
         setup()
     }
     
@@ -51,5 +54,12 @@ final class CMButton: UIButton {
         self.layer.cornerRadius = cornerRadius
         self.setAttributedTitle(attrTitle, for: .normal)
         self.clipsToBounds = true
+        
+        if let buttonImage = buttonImage?.withRenderingMode(.alwaysTemplate) {
+            self.setImage(buttonImage, for: .normal)
+            self.configuration?.imagePlacement = .leading
+            self.configuration?.imagePadding = 5
+            self.tintColor = titleLabelForeColor
+        }
     }
 }

@@ -7,6 +7,7 @@
 
 protocol MovieDetailsScreenInteractorProtocol: AnyObject {
     func getMovieDetails()
+    func getMovieCast()
 }
 
 final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
@@ -24,6 +25,16 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetMovieDetails(success)
+            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription)
+            }
+        }
+    }
+    
+    func getMovieCast() {
+        tmdbService?.getMovieCast(movieID: movieID) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didGetMovieCast(cast: success.cast, crew: success.crew)
             case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription)
             }
         }

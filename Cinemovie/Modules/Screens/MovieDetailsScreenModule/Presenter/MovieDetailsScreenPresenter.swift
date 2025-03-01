@@ -10,6 +10,7 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     
     func didGetMovieDetails(_ details: MovieDetails)
     func didRecieveError(_ error: String)
+    func didGetMovieCast(cast: [Cast], crew: [Cast])
 }
 
 final class MovieDetailsScreenPresenter {
@@ -26,6 +27,7 @@ final class MovieDetailsScreenPresenter {
 extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     func viewDidLoad() {
         interactor.getMovieDetails()
+        interactor.getMovieCast()
     }
     
     func didRecieveError(_ error: String) {
@@ -34,5 +36,9 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     
     func didGetMovieDetails(_ details: MovieDetails) {
         view?.didGetMovieDetails(details)
+    }
+    
+    func didGetMovieCast(cast: [Cast], crew: [Cast]) {
+        view?.didGetMovieCast(cast: cast, crew: crew)
     }
 }

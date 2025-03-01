@@ -13,6 +13,8 @@ public enum CMFontSizes: CGFloat {
     case subtitle = 18
     case body = 16
     case caption = 14
+    case footnote = 12
+    case tiny = 10
 }
 
 public enum CMFontNames: String {

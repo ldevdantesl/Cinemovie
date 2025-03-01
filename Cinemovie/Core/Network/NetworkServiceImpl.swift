@@ -8,7 +8,6 @@
 import Foundation
 
 final class NetworkServiceImpl: NetworkService {
-
     private let session: URLSession
 
     init(session: URLSession = .shared) {
@@ -18,7 +17,7 @@ final class NetworkServiceImpl: NetworkService {
     func request<T: APIResponse>(
         _ endpoint: any Endpoint,
         completion: @escaping (Result<T, NetworkError>) -> Void
-    ) where T: Decodable, T: Encodable {
+    ) where T: APIResponse {
         
         guard let urlRequest = endpoint.urlRequest else {
             completion(.failure(.invalidURL))
