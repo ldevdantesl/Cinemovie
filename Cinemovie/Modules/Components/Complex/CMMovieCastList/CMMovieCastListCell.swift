@@ -10,7 +10,29 @@ import SnapKit
 import SDWebImage
 
 final class CMMovieCastListCell: UICollectionViewCell {
-    static let identifier = "CMMovieCastListCell"
+    
+    fileprivate enum Paddings {
+        static let imageViewTopPadding: CGFloat = 50
+        static let spacer: CGFloat = 5
+    }
+    
+    fileprivate enum Constants {
+        static let identifier = "CMMovieCastListCell"
+        
+        static let loadingIndicatorSize: CGFloat = 20
+        
+        static let imageViewCornerRadius: CGFloat = 20
+        static let imageViewBorderWidth: CGFloat = 1
+        static let imageSize: CGFloat = 80
+        static let imageViewImageName = "person"
+        static let imageViewImagePointSize: CGFloat = 2
+        
+        static let labelWidth: CGFloat = 100
+        
+        static let unknownText: String = "Unknown"
+    }
+    
+    static let identifier = Constants.identifier
     
     private lazy var loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
@@ -23,12 +45,12 @@ final class CMMovieCastListCell: UICollectionViewCell {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = 20
+        imageView.layer.cornerRadius = Constants.imageViewCornerRadius
         imageView.layer.borderColor = CMColor.cmAccent.cgColor
-        imageView.layer.borderWidth = 1
+        imageView.layer.borderWidth = Constants.imageViewBorderWidth
         imageView.image = UIImage(
-            systemName: "person",
-            withConfiguration: UIImage.SymbolConfiguration(pointSize: 2, weight: .bold)
+            systemName: Constants.imageViewImageName,
+            withConfiguration: UIImage.SymbolConfiguration(pointSize: Constants.imageViewImagePointSize, weight: .bold)
         )
         imageView.backgroundColor = CMColor.cmSecondaryBackground
         return imageView
@@ -39,6 +61,14 @@ final class CMMovieCastListCell: UICollectionViewCell {
         label.font = CMFont.font(size: .tiny, fontName: .avenir)
         label.textColor = CMColor.cmLabel
         label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var characterName: UILabel = {
+        let label = UILabel()
+        label.textColor = CMColor.cmSecondary
+        label.font = CMFont.font(size: .tiny, fontName: .avenir)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -67,6 +97,7 @@ final class CMMovieCastListCell: UICollectionViewCell {
                 }
             }
             self.nameLabel.text = item.name
+            self.characterName.text = item.character ?? item.job ?? Constants.unknownText
         }
     }
     
@@ -75,22 +106,28 @@ final class CMMovieCastListCell: UICollectionViewCell {
         avatarImageView.addSubview(loadingIndicator)
         loadingIndicator.snp.makeConstraints {
             $0.center.equalToSuperview()
-            $0.width.height.equalTo(20)
+            $0.width.height.equalTo(Constants.loadingIndicatorSize)
         }
         
         contentView.addSubview(avatarImageView)
         avatarImageView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(60)
+            $0.top.equalToSuperview().offset(Paddings.imageViewTopPadding)
             $0.centerX.equalToSuperview()
-            $0.width.equalTo(80)
-            $0.height.equalTo(80)
+            $0.width.height.equalTo(Constants.imageSize)
         }
         
         contentView.addSubview(nameLabel)
         nameLabel.snp.makeConstraints {
-            $0.top.equalTo(avatarImageView.snp.bottom).offset(5)
+            $0.top.equalTo(avatarImageView.snp.bottom).offset(Paddings.spacer)
             $0.centerX.equalToSuperview()
-            $0.width.equalTo(100)
+            $0.width.equalTo(Constants.labelWidth)
+        }
+        
+        contentView.addSubview(characterName)
+        characterName.snp.makeConstraints {
+            $0.top.equalTo(nameLabel.snp.bottom)
+            $0.centerX.equalToSuperview()
+            $0.width.lessThanOrEqualTo(Constants.labelWidth)
             $0.bottom.lessThanOrEqualToSuperview()
         }
     }

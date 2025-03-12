@@ -11,6 +11,20 @@ import SDWebImage
 
 final class CMProductionCompaniesView: UIView {
     
+    fileprivate enum Paddings {
+        static let hStackTopPadding: CGFloat = 10
+        static let containerSpacing: CGFloat = 10
+    }
+    
+    fileprivate enum Constants {
+        static let hstackSpacing: CGFloat = 8
+        static let productionCompaniesPrefix: Int = 2
+        
+        static let imageViewImageName: String = "building.columns"
+        static let imageViewImageWidth: CGFloat = 100
+        static let imageViewImageHeight: CGFloat = 40
+    }
+    
     private var productionCompanies: [ProductionCompany] = []
     
     private let productionTitleLabel: UILabel = {
@@ -25,7 +39,7 @@ final class CMProductionCompaniesView: UIView {
     private let hStack: UIStackView = {
         let hStack = UIStackView()
         hStack.axis = .horizontal
-        hStack.spacing = 8
+        hStack.spacing = Constants.hstackSpacing
         hStack.alignment = .leading
         hStack.distribution = .fill
         hStack.translatesAutoresizingMaskIntoConstraints = false
@@ -59,11 +73,11 @@ final class CMProductionCompaniesView: UIView {
         
         addSubview(hStack)
         hStack.snp.makeConstraints {
-            $0.top.equalTo(productionTitleLabel.snp.bottom).offset(10)
+            $0.top.equalTo(productionTitleLabel.snp.bottom).offset(Paddings.hStackTopPadding)
             $0.leading.trailing.bottom.equalToSuperview()
         }
         
-        productionCompanies.prefix(2).forEach { company in
+        productionCompanies.prefix(Constants.productionCompaniesPrefix).forEach { company in
             let companyView = createCompanyView(for: company)
             hStack.addArrangedSubview(companyView)
             hStack.addArrangedSubview(UIView())
@@ -75,7 +89,7 @@ final class CMProductionCompaniesView: UIView {
     private func createCompanyView(for company: ProductionCompany) -> UIView {
         let container = UIStackView()
         container.axis = .vertical
-        container.spacing = 10
+        container.spacing = Paddings.containerSpacing
         container.alignment = .center
         
         let activityIndicator = UIActivityIndicatorView(style: .medium)
@@ -83,9 +97,9 @@ final class CMProductionCompaniesView: UIView {
         
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
-        imageView.image = UIImage(systemName: "building.columns")
+        imageView.image = UIImage(systemName: Constants.imageViewImageName)
         imageView.clipsToBounds = true
-        imageView.snp.makeConstraints { $0.width.equalTo(100); $0.height.equalTo(40) }
+        imageView.snp.makeConstraints { $0.width.equalTo(Constants.imageViewImageWidth); $0.height.equalTo(Constants.imageViewImageHeight) }
         
         imageView.addSubview(activityIndicator)
         activityIndicator.snp.makeConstraints { $0.center.equalToSuperview() }

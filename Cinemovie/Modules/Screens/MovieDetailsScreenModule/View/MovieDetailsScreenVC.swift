@@ -17,16 +17,18 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
 
 final class MovieDetailsScreenVC: UIViewController {
     
-    private enum Paddings {
+    fileprivate enum Paddings {
         static let vertical: CGFloat = 10
         static let horizontal: CGFloat = 15
         static let spacing: CGFloat = 5
         static let biggerSpacing: CGFloat = 8
     }
     
-    private enum Constants {
+    fileprivate enum Constants {
         static let appName = CONSTANTS.appName
+        static let releasedText: String = "Released"
         static let backdropImageHeight = UIConstants.screenHeight/4
+        static let addToWatchlistButtonHeight: CGFloat = 40
         static let altImageSize: CGFloat = 20
         static let releasedImageSize: CGFloat = 25
         static let imdbImageSize: CGFloat = 30
@@ -34,7 +36,7 @@ final class MovieDetailsScreenVC: UIViewController {
         static let closeButtonImageSize: CGFloat = 10
         static let closeButtonViewSize: CGFloat = 30
         static let closeButtonImageName: String = "xmark"
-        static let movieCastListHeight: CGFloat = 140
+        static let movieCastListHeight: CGFloat = 150
     }
     
     var presenter: MovieDetailsScreenPresenterProtocol?
@@ -175,10 +177,30 @@ final class MovieDetailsScreenVC: UIViewController {
     }()
     
     private lazy var imdbImageView: UIImageView = {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapIMDBButton))
+        
         let view = UIImageView()
+        view.image = UIImage(named: ImageNames.imdb.rawValue)
+        view.isUserInteractionEnabled = true
+        view.addGestureRecognizer(tapGesture)
         view.contentMode = .scaleAspectFit
+        view.isHidden = true
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
+    }()
+    
+    private lazy var movieSubDetailsStackView: UIStackView = {
+        let movieSubDetailsStack = UIStackView(arrangedSubviews: [
+            movieYearLabel, movieStatusImageView, movieRuntimeLabel,
+            hdImageView, UIView(), imdbImageView
+        ])
+        movieSubDetailsStack.axis = .horizontal
+        movieSubDetailsStack.spacing = Paddings.biggerSpacing
+        movieSubDetailsStack.alignment = .center
+        movieSubDetailsStack.isUserInteractionEnabled = true
+        movieSubDetailsStack.translatesAutoresizingMaskIntoConstraints = false
+        
+        return movieSubDetailsStack
     }()
     
     private lazy var addToWatchListButton: CMButton = {
@@ -216,11 +238,22 @@ final class MovieDetailsScreenVC: UIViewController {
         return view
     }()
     
+    private lazy var rateAndShareView: CMRateAndShareView = {
+        let view = CMRateAndShareView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     // MARK: - LIFECYCLE
     override func viewDidLoad() {
         super.viewDidLoad()
         presenter?.viewDidLoad()
         setupUI()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.isHidden = true
     }
     
     // MARK: - PRIVATE FUNCTIONS
@@ -235,7 +268,6 @@ final class MovieDetailsScreenVC: UIViewController {
         contentView.snp.makeConstraints {
             $0.edges.equalToSuperview()
             $0.width.equalToSuperview()
-            $0.height.greaterThanOrEqualTo(scrollView.snp.height)
         }
         
         contentView.addSubview(closeButton)
@@ -277,18 +309,8 @@ final class MovieDetailsScreenVC: UIViewController {
             $0.trailing.equalToSuperview().offset(-Paddings.horizontal)
         }
         
-        let movieSubDetailsStack = UIStackView(arrangedSubviews: [
-            movieYearLabel, movieStatusImageView, movieRuntimeLabel,
-            hdImageView, UIView(), imdbImageView
-        ])
-        movieSubDetailsStack.axis = .horizontal
-        movieSubDetailsStack.spacing = Paddings.biggerSpacing
-        movieSubDetailsStack.alignment = .center
-        movieSubDetailsStack.isUserInteractionEnabled = true
-        movieSubDetailsStack.translatesAutoresizingMaskIntoConstraints = false
-        
-        contentView.addSubview(movieSubDetailsStack)
-        movieSubDetailsStack.snp.makeConstraints {
+        contentView.addSubview(movieSubDetailsStackView)
+        movieSubDetailsStackView.snp.makeConstraints {
             $0.top.equalTo(movieTaglineLabel.snp.bottom).offset(Paddings.biggerSpacing)
             $0.leading.equalToSuperview().offset(Paddings.horizontal)
             $0.trailing.equalToSuperview().offset(-Paddings.horizontal)
@@ -308,10 +330,10 @@ final class MovieDetailsScreenVC: UIViewController {
         
         contentView.addSubview(addToWatchListButton)
         addToWatchListButton.snp.makeConstraints {
-            $0.top.equalTo(movieSubDetailsStack.snp.bottom).offset(Paddings.biggerSpacing)
+            $0.top.equalTo(movieSubDetailsStackView.snp.bottom).offset(Paddings.biggerSpacing)
             $0.leading.equalToSuperview().offset(Paddings.horizontal)
             $0.trailing.equalToSuperview().offset(-Paddings.horizontal)
-            $0.height.equalTo(40)
+            $0.height.equalTo(Constants.addToWatchlistButtonHeight)
         }
         
         contentView.addSubview(movieOverviewLabel)
@@ -334,6 +356,17 @@ final class MovieDetailsScreenVC: UIViewController {
             $0.top.equalTo(movieCastListView.snp.bottom).offset(Paddings.vertical)
             $0.leading.equalToSuperview().offset(Paddings.horizontal)
             $0.trailing.equalToSuperview().offset(-Paddings.horizontal)
+        }
+        
+        contentView.addSubview(rateAndShareView)
+        rateAndShareView.snp.makeConstraints {
+            $0.top.equalTo(movieProductionCompaniesView.snp.bottom).offset(Paddings.horizontal + Paddings.spacing)
+            $0.leading.equalToSuperview().offset(Paddings.horizontal + Paddings.spacing)
+            $0.trailing.equalToSuperview().offset(-Paddings.horizontal)
+        }
+        
+        contentView.snp.makeConstraints {
+            $0.bottom.greaterThanOrEqualTo(rateAndShareView.snp.bottom)
         }
         
         contentView.bringSubviewToFront(closeButton)
@@ -405,33 +438,31 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             self.movieTitleLabel.text = details.title
             self.movieYearLabel.text = String(details.releaseDate.prefix(4))
             self.movieRuntimeLabel.text = RuntimeHelper.runtime(details.runtime)
-            self.movieTaglineLabel.text = TextFormatter.formatToCleanString(details.tagline)
+            
+            self.movieTaglineLabel.text = details.tagline.isEmpty ? nil : TextFormatter.formatToCleanString(details.tagline)
+            self.movieTaglineLabel.isHidden = details.tagline.isEmpty ? true : false
+
             self.movieOverviewLabel.text = details.overview
             self.movieProductionCompaniesView.configure(companies: details.productionCompanies)
-            self.movieStatusImageView.image = details.status == "Released" ?
+            self.movieStatusImageView.image = details.status == Constants.releasedText ?
             UIImage(named: ImageNames.released.rawValue) : UIImage(named: ImageNames.notReleased.rawValue)
-            self.movieStatusImageView.accessibilityIdentifier = details.status == "Released" ? "Re" : "Nr"
+            self.movieStatusImageView.accessibilityIdentifier = details.status == Constants.releasedText ? "Re" : "Nr"
             
-            if let imdbID = details.imdbID {
-                self.imdbImageView.image = UIImage(named: ImageNames.imdb.rawValue)
-                self.imdbImageView.accessibilityIdentifier = imdbID
-                self.imdbImageView.isUserInteractionEnabled = true
-                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapIMDBButton))
-                self.imdbImageView.addGestureRecognizer(tapGesture)
-            }
+            self.imdbImageView.accessibilityIdentifier = details.imdbID
+            self.imdbImageView.isHidden = details.imdbID == nil ? true : false
             
             let imageURL = URLHelper.getImageURL(with: details.backdropPath, size: .original)
             self.backdropImageView.sd_setImage(with: imageURL) { _, _, _, _ in
                 self.loadingIndicator.stopAnimating()
             }
+            self.view.layoutIfNeeded()
         }
     }
     
     func didGetMovieCast(cast: [Cast], crew: [Cast]) {
         DispatchQueue.main.async { [weak self] in
-            print(cast.count, crew.count)
             guard let self = self else { return }
-            self.movieCastListView.reloadData(cast: cast)
+            self.movieCastListView.reloadData(cast: cast.isEmpty ? crew : cast)
         }
     }
 }

@@ -19,6 +19,17 @@ protocol HomeScreenViewProtocol: AnyObject {
 
 final class HomeScreenVC: UIViewController {
 
+    fileprivate enum Paddings {
+        static let headerViewHeight: CGFloat = 80
+        static let featuredMovieViewHorPadding = 20
+        static let featuredMovieHeight = UIConstants.screenHeight * 0.55
+        static let spacing: CGFloat = 10
+    }
+    
+    fileprivate enum Constants {
+        static let headerViewFirstButtonSize: CGFloat = 30
+    }
+    
     var presenter: HomeScreenPresenterProtocol?
     private var isShadowVisible = false
     
@@ -45,7 +56,7 @@ final class HomeScreenVC: UIViewController {
     private lazy var headerView: CMHeaderView = {
         let firstButton = CMCircularButton(
             systemName: "magnifyingglass",
-            size: 30,
+            size: Constants.headerViewFirstButtonSize,
             backColor: .clear,
             foreColor: .cmLabel,
             target: self,
@@ -137,7 +148,7 @@ final class HomeScreenVC: UIViewController {
             $0.top.equalTo(view.snp.top)
             $0.leading.equalToSuperview()
             $0.trailing.equalToSuperview()
-            $0.height.equalTo(80)
+            $0.height.equalTo(Paddings.headerViewHeight)
         }
         view.bringSubviewToFront(headerView)
         
@@ -160,37 +171,37 @@ final class HomeScreenVC: UIViewController {
         contentView.addSubview(featuredMovieView)
         featuredMovieView.snp.makeConstraints {
             $0.top.equalTo(contentView.snp.top)
-            $0.leading.equalTo(contentView.snp.leading).offset(20)
-            $0.trailing.equalTo(contentView.snp.trailing).offset(-20)
-            $0.height.equalTo(UIConstants.screenHeight * 0.55)
+            $0.leading.equalTo(contentView.snp.leading).offset(Paddings.featuredMovieViewHorPadding)
+            $0.trailing.equalTo(contentView.snp.trailing).offset(-Paddings.featuredMovieViewHorPadding)
+            $0.height.equalTo(Paddings.featuredMovieHeight)
         }
         
         contentView.addSubview(popularMoviesList)
         popularMoviesList.snp.makeConstraints {
-            $0.top.equalTo(featuredMovieView.snp.bottom).offset(10)
+            $0.top.equalTo(featuredMovieView.snp.bottom).offset(Paddings.spacing)
             $0.leading.trailing.equalToSuperview()
         }
         
         contentView.addSubview(upcomingMoviesList)
         upcomingMoviesList.snp.makeConstraints {
-            $0.top.equalTo(popularMoviesList.snp.bottom).offset(10)
+            $0.top.equalTo(popularMoviesList.snp.bottom).offset(Paddings.spacing)
             $0.leading.trailing.equalToSuperview()
         }
         
         contentView.addSubview(topRatedMoviesList)
         topRatedMoviesList.snp.makeConstraints {
-            $0.top.equalTo(upcomingMoviesList.snp.bottom).offset(10)
+            $0.top.equalTo(upcomingMoviesList.snp.bottom).offset(Paddings.spacing)
             $0.leading.trailing.equalToSuperview()
         }
         
         contentView.addSubview(nowPlayingMoviesList)
         nowPlayingMoviesList.snp.makeConstraints {
-            $0.top.equalTo(topRatedMoviesList.snp.bottom).offset(10)
+            $0.top.equalTo(topRatedMoviesList.snp.bottom).offset(Paddings.spacing)
             $0.leading.trailing.equalToSuperview()
         }
         
         contentView.snp.makeConstraints {
-            $0.bottom.equalTo(nowPlayingMoviesList.snp.bottom).offset(10)
+            $0.bottom.equalTo(nowPlayingMoviesList.snp.bottom).offset(Paddings.spacing)
         }
     }
     

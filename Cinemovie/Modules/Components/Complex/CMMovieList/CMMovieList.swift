@@ -9,13 +9,23 @@ import SnapKit
 import UIKit
 
 final class CMMovieList: UIView {
+    
+    fileprivate enum Paddings {
+        static let spacing: CGFloat = 5
+        static let biggerSpacing: CGFloat = 10
+        
+        static let horizontalPadding: CGFloat = 10
+    }
+    
+    fileprivate enum Constants {
+        static let cellWidth = (UIConstants.screenWidth / 3) - 15
+        static let cellHeight = (UIConstants.screenWidth / 3) * 1.3
+    }
+    
     // MARK: - Public properties
     public var didTapMovie: ((QueryMovie) -> Void)?
     
     // MARK: - Private properties
-    private let cellWidth = (UIConstants.screenWidth / 3) - 15
-    private let cellHeight = (UIConstants.screenWidth / 3) * 1.3
-    
     private var movies: [QueryMovie]
     private var listTitleLabel: UILabel?
     private var listSubtitleLabel: UILabel?
@@ -88,38 +98,38 @@ final class CMMovieList: UIView {
         if let listTitleLabel = listTitleLabel {
             addSubview(listTitleLabel)
             listTitleLabel.snp.makeConstraints {
-                $0.top.equalToSuperview().offset(5)
-                $0.leading.equalToSuperview().offset(10)
-                $0.trailing.equalToSuperview().offset(-10)
+                $0.top.equalToSuperview().offset(Paddings.spacing)
+                $0.leading.equalToSuperview().offset(Paddings.horizontalPadding)
+                $0.trailing.equalToSuperview().offset(-Paddings.horizontalPadding)
             }
             
             if let listSubtitleLabel = listSubtitleLabel {
                 addSubview(listSubtitleLabel)
                 listSubtitleLabel.snp.makeConstraints {
-                    $0.top.equalTo(listTitleLabel.snp.bottom).offset(5)
+                    $0.top.equalTo(listTitleLabel.snp.bottom).offset(Paddings.spacing)
                     $0.leading.trailing.equalToSuperview()
                 }
                 
                 addSubview(collectionView)
                 collectionView.snp.makeConstraints {
-                    $0.top.equalTo(listSubtitleLabel.snp.bottom).offset(10)
+                    $0.top.equalTo(listSubtitleLabel.snp.bottom).offset(Paddings.biggerSpacing)
                     $0.leading.trailing.bottom.equalToSuperview()
-                    $0.height.equalTo(cellHeight)
+                    $0.height.equalTo(Constants.cellHeight)
                 }
             } else {
                 addSubview(collectionView)
                 collectionView.snp.makeConstraints {
-                    $0.top.equalTo(listTitleLabel.snp.bottom).offset(10)
+                    $0.top.equalTo(listTitleLabel.snp.bottom).offset(Paddings.biggerSpacing)
                     $0.leading.trailing.bottom.equalToSuperview()
-                    $0.height.equalTo(cellHeight)
+                    $0.height.equalTo(Constants.cellHeight)
                 }
             }
         } else {
             addSubview(collectionView)
             collectionView.snp.makeConstraints {
-                $0.top.equalToSuperview().offset(5)
+                $0.top.equalToSuperview().offset(Paddings.spacing)
                 $0.leading.trailing.bottom.equalToSuperview()
-                $0.height.equalTo(cellHeight)
+                $0.height.equalTo(Constants.cellHeight)
             }
         }
     }
@@ -157,7 +167,7 @@ extension CMMovieList: UICollectionViewDelegate, UICollectionViewDelegateFlowLay
         layout collectionViewLayout: UICollectionViewLayout,
         sizeForItemAt indexPath: IndexPath
     ) -> CGSize {
-        return CGSize(width: cellWidth, height: cellHeight)
+        return CGSize(width: Constants.cellWidth, height: Constants.cellHeight)
     }
     
     func collectionView(
@@ -165,6 +175,6 @@ extension CMMovieList: UICollectionViewDelegate, UICollectionViewDelegateFlowLay
         layout collectionViewLayout: UICollectionViewLayout,
         insetForSectionAt section: Int
     ) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        return UIEdgeInsets(top: 0, left: Paddings.horizontalPadding, bottom: 0, right: Paddings.horizontalPadding)
     }
 }

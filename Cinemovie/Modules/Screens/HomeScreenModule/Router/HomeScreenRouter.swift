@@ -5,6 +5,8 @@
 //  Created by Buzurg Rakhimzoda on 30.01.2025
 //
 
+import UIKit
+
 protocol HomeScreenRouterProtocol {
     func navigateToMovieDetails(movieID: Int)
 }
@@ -21,6 +23,6 @@ final class HomeScreenRouter: HomeScreenRouterProtocol {
     func navigateToMovieDetails(movieID: Int) {
         let movieDetails = MovieDetailsScreenAssembler.assemble(movieID: movieID, tmdbService: tmdbService)
         movieDetails.modalPresentationStyle = .pageSheet
-        viewController?.present(movieDetails, animated: true)
+        viewController?.present(UINavigationController(rootViewController: movieDetails), animated: true)
     }
 }

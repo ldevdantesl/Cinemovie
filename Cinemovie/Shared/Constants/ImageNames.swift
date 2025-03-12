@@ -14,4 +14,6 @@ enum ImageNames: String {
     case notReleased = "NotReleased"
     case HD = "HD"
     case imdb = "IMDB"
+    case like = "Like"
+    case share = "Share"
 }
