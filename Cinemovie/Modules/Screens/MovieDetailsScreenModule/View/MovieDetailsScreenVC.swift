@@ -10,9 +10,11 @@ import SnapKit
 import SDWebImage
 
 protocol MovieDetailsScreenViewProtocol: AnyObject {
+    func didOpenMoreLikeThis()
     func didRecieveError(_ errorStr: String)
     func didGetMovieDetails(_ details: MovieDetails)
     func didGetMovieCast(cast: [Cast], crew: [Cast])
+    func didGetMovieRecommendations(movies: [QueryMovie])
 }
 
 final class MovieDetailsScreenVC: UIViewController {
@@ -22,6 +24,7 @@ final class MovieDetailsScreenVC: UIViewController {
         static let horizontal: CGFloat = 15
         static let spacing: CGFloat = 5
         static let biggerSpacing: CGFloat = 8
+        static let superSpacing: CGFloat = 15
     }
     
     fileprivate enum Constants {
@@ -54,6 +57,7 @@ final class MovieDetailsScreenVC: UIViewController {
     
     private lazy var scrollView: UIScrollView = {
         let scroll = UIScrollView()
+        scroll.delegate = self
         scroll.translatesAutoresizingMaskIntoConstraints = false
         scroll.alwaysBounceVertical = true
         return scroll
@@ -244,6 +248,12 @@ final class MovieDetailsScreenVC: UIViewController {
         return view
     }()
     
+    private lazy var movieSubDetailsView: CMMovieSubDetailsView = {
+        let view = CMMovieSubDetailsView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     // MARK: - LIFECYCLE
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -360,15 +370,21 @@ final class MovieDetailsScreenVC: UIViewController {
         
         contentView.addSubview(rateAndShareView)
         rateAndShareView.snp.makeConstraints {
-            $0.top.equalTo(movieProductionCompaniesView.snp.bottom).offset(Paddings.horizontal + Paddings.spacing)
-            $0.leading.equalToSuperview().offset(Paddings.horizontal + Paddings.spacing)
+            $0.top.equalTo(movieProductionCompaniesView.snp.bottom).offset(Paddings.superSpacing)
+            $0.leading.equalToSuperview().offset(Paddings.horizontal)
             $0.trailing.equalToSuperview().offset(-Paddings.horizontal)
         }
-        
-        contentView.snp.makeConstraints {
-            $0.bottom.greaterThanOrEqualTo(rateAndShareView.snp.bottom)
+    
+        contentView.addSubview(movieSubDetailsView)
+        movieSubDetailsView.snp.makeConstraints {
+            $0.top.equalTo(rateAndShareView.snp.bottom).offset(Paddings.superSpacing)
+            $0.leading.equalToSuperview().offset(Paddings.horizontal)
+            $0.trailing.equalToSuperview().offset(-Paddings.horizontal)
         }
-        
+    
+        contentView.snp.makeConstraints {
+            $0.bottom.greaterThanOrEqualTo(movieSubDetailsView.snp.bottom).offset(Paddings.superSpacing)
+        }
         contentView.bringSubviewToFront(closeButton)
     }
     
@@ -417,7 +433,20 @@ final class MovieDetailsScreenVC: UIViewController {
     }
 }
 
+extension MovieDetailsScreenVC: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView.contentOffset.y < 0 {
+            scrollView.contentOffset.y = 0
+        }
+    }
+}
+
 extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
+    
+    func didOpenMoreLikeThis() {
+        presenter?.didOpenMoreLikeThis()
+    }
+    
     func didRecieveError(_ errorStr: String) {
         let alert = UIAlertController(
             title: "Oops..",
@@ -455,6 +484,8 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             self.backdropImageView.sd_setImage(with: imageURL) { _, _, _, _ in
                 self.loadingIndicator.stopAnimating()
             }
+            
+            self.movieSubDetailsView.configure(details: details)
             self.view.layoutIfNeeded()
         }
     }
@@ -463,6 +494,13 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.movieCastListView.reloadData(cast: cast.isEmpty ? crew : cast)
+        }
+    }
+    
+    func didGetMovieRecommendations(movies: [QueryMovie]) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+         
         }
     }
 }

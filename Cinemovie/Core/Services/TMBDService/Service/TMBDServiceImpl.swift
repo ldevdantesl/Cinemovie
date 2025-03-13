@@ -36,6 +36,18 @@ final class TMBDServiceImpl: TMDBService {
         }
     }
     
+    func getMovieRecommendations(movieID: Int, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        let endpoint = GetMovieRecommendationsEndpoint(movieID: movieID, queryParams: queryParams)
+        networkService?.request(endpoint) { (result: Result<MovieListsAPIResponse, NetworkError>) in
+            switch result {
+            case .success(let response): completion(.success(response))
+            case .failure(let failure): completion(.failure(failure))
+            }
+        }
+    }
+    
+    // MARK: - PRESET LIST IMPLEMENTATIONS
     func getPopularMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru", "page" : "1"]
         let endpoint = GetPopularMoviesEndpoint(queryParams: queryParams)

@@ -12,7 +12,7 @@ struct Cast: Codable {
     let adult: Bool
     let gender: Int
     let id: Int
-    let knownForDepartment: Department
+    let knownForDepartment: String
     let name: String
     let originalName: String
     let popularity: Double
@@ -21,7 +21,7 @@ struct Cast: Codable {
     let character: String?
     let creditID: String
     let order: Int?
-    let department: Department?
+    let department: String?
     let job: String?
 
     enum CodingKeys: String, CodingKey {
@@ -36,19 +36,4 @@ struct Cast: Codable {
         case creditID = "credit_id"
         case order, department, job
     }
-}
-
-enum Department: String, Codable {
-    case acting = "Acting"
-    case art = "Art"
-    case camera = "Camera"
-    case costumeMakeUp = "Costume & Make-Up"
-    case crew = "Crew"
-    case directing = "Directing"
-    case editing = "Editing"
-    case lighting = "Lighting"
-    case production = "Production"
-    case sound = "Sound"
-    case visualEffects = "Visual Effects"
-    case writing = "Writing"
 }

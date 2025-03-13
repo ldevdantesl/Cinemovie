@@ -8,9 +8,12 @@
 protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
     
+    func didOpenMoreLikeThis()
+    
     func didGetMovieDetails(_ details: MovieDetails)
     func didRecieveError(_ error: String)
     func didGetMovieCast(cast: [Cast], crew: [Cast])
+    func didGetMovieRecommendations(queryMovies: [QueryMovie])
 }
 
 final class MovieDetailsScreenPresenter {
@@ -30,6 +33,10 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         interactor.getMovieCast()
     }
     
+    func didOpenMoreLikeThis() {
+        interactor.getMovieRecommendations()
+    }
+    
     func didRecieveError(_ error: String) {
         view?.didRecieveError(error)
     }
@@ -40,5 +47,9 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     
     func didGetMovieCast(cast: [Cast], crew: [Cast]) {
         view?.didGetMovieCast(cast: cast, crew: crew)
+    }
+    
+    func didGetMovieRecommendations(queryMovies: [QueryMovie]) {
+        view?.didGetMovieRecommendations(movies: queryMovies)
     }
 }

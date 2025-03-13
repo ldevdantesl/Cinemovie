@@ -81,16 +81,17 @@ final class CMRateAndShareView: UIView {
             $0.width.height.equalTo(Constants.shareImageViewSize)
         }
         
-        let hStack = UIStackView(arrangedSubviews: [rateStack, shareStack])
+        let hStack = UIStackView(arrangedSubviews: [rateStack, UIView(), shareStack])
         hStack.axis = .horizontal
         hStack.spacing = Constants.biggerSpacing
         hStack.alignment = .bottom
-        hStack.distribution = .fillEqually
+        hStack.distribution = .equalSpacing
         
         addSubview(hStack)
         hStack.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.leading.equalToSuperview()
+            $0.trailing.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
     }
