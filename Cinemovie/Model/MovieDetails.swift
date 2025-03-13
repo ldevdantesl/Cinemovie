@@ -9,7 +9,7 @@ import Foundation
 
 struct MovieDetails: APIResponse {
     let adult: Bool
-    let backdropPath: String
+    let backdropPath: String?
     let belongsToCollection: BelongsToCollection?
     let budget: Int
     let genres: [Genre]

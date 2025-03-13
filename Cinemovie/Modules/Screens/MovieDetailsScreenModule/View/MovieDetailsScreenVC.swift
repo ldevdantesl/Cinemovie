@@ -454,9 +454,11 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             preferredStyle: .alert
         )
 
-        alert.addAction(
-            UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        let action = UIAlertAction(title: "OK", style: .cancel) {_ in
+            self.dismiss(animated: true)
+        }
 
+        alert.addAction(action)
         self.present(alert, animated: true, completion: nil)
     }
     
@@ -480,8 +482,14 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             self.imdbImageView.accessibilityIdentifier = details.imdbID
             self.imdbImageView.isHidden = details.imdbID == nil ? true : false
             
-            let imageURL = URLHelper.getImageURL(with: details.backdropPath, size: .original)
-            self.backdropImageView.sd_setImage(with: imageURL) { _, _, _, _ in
+            if let imageURL = URLHelper.getImageURL(with: details.backdropPath, size: .original){
+                self.backdropImageView.sd_setImage(with: imageURL) { _, _, _, _ in
+                    self.loadingIndicator.stopAnimating()
+                }
+            } else {
+                self.backdropImageView.image = UIImage(systemName: "questionmark.circle.fill")
+                self.backdropImageView.preferredSymbolConfiguration = .init(pointSize: 40, weight: .bold)
+                self.backdropImageView.contentMode = .center
                 self.loadingIndicator.stopAnimating()
             }
             
