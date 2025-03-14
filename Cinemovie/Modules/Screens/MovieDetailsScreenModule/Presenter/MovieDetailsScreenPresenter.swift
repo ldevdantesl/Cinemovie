@@ -31,6 +31,7 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     func viewDidLoad() {
         interactor.getMovieDetails()
         interactor.getMovieCast()
+        interactor.getMovieRecommendations()
     }
     
     func didOpenMoreLikeThis() {

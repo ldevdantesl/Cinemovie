@@ -11,11 +11,13 @@ import SnapKit
 final class CMMovieSubDetailsView: UIView {
     
     fileprivate enum Paddings {
-        
+        static let hStackSpacing: CGFloat = 10
+        static let topSpacing: CGFloat = 10
     }
     
     fileprivate enum Constants {
-        
+        static let dividerHeight: CGFloat = 2
+        static let aniDurations: CGFloat = 0.3
     }
     
     fileprivate enum Tabs: Int {
@@ -28,10 +30,16 @@ final class CMMovieSubDetailsView: UIView {
     private var selectedTab: Tabs = .recommendations
     private var contentView: UIView!
     
+    private lazy var containerView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     private lazy var hStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
-        stack.spacing = 10
+        stack.spacing = Paddings.hStackSpacing
         stack.alignment = .leading
         stack.distribution = .equalSpacing
         return stack
@@ -39,21 +47,18 @@ final class CMMovieSubDetailsView: UIView {
     
     private lazy var belongsToCollectionView: CMMovieBelongsToCollectionView = {
         let view = CMMovieBelongsToCollectionView()
-        view.backgroundColor = .cmAccent
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
     private lazy var movieRecommendationsView: CMMovieRecommendationsView = {
         let view = CMMovieRecommendationsView()
-        view.backgroundColor = .cmError
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
     private lazy var trailersView: CMMovieTrailersView = {
         let view = CMMovieTrailersView()
-        view.backgroundColor = .cmSuccess
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -66,6 +71,7 @@ final class CMMovieSubDetailsView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+        setupUI()
     }
     
     @available(*, unavailable)
@@ -74,29 +80,30 @@ final class CMMovieSubDetailsView: UIView {
     }
     
     // MARK: - Public func
-    public func configure(details: MovieDetails) {
-        if let belongsToCollection = details.belongsToCollection {
-            selectedTab = .collection
-            let label = createLabel(withText: "Collection", tag: 0)
-            hStack.addArrangedSubview(label)
-            belongsToCollectionView.configure(belongsToCollection: belongsToCollection)
-            contentView = belongsToCollectionView
-            
-            let recommendationsLabel = createLabel(withText: "Recommends", tag: 1)
-            hStack.addArrangedSubview(recommendationsLabel)
-        } else {
-            let recommendationsLabel = createLabel(withText: "Recommends", tag: 1)
-            hStack.addArrangedSubview(recommendationsLabel)
-            contentView = movieRecommendationsView
-        }
+    public func configureRecommendations(recommendationMovies: [QueryMovie]) {
+        let recommendationsLabel = createLabel(withText: "Recommends", tag: 1)
+        hStack.addArrangedSubview(recommendationsLabel)
+        movieRecommendationsView.configure(movies: recommendationMovies)
         
         let trailersLabel = createLabel(withText: "Trailers", tag: 2)
         hStack.addArrangedSubview(trailersLabel)
         
         let reviews = createLabel(withText: "Reviews", tag: 3)
         hStack.addArrangedSubview(reviews)
-
-        setupUI()
+    }
+    
+    public func configureCollections(with details: MovieDetails) {
+        if let belongsToCollection = details.belongsToCollection{
+            selectedTab = .collection
+            hStack.insertArrangedSubview(createLabel(withText: "Collection", tag: 0), at: 0)
+            belongsToCollectionView.configure(belongsToCollection: belongsToCollection)
+            switchToView(belongsToCollectionView)
+        } else {
+            selectedTab = .recommendations
+            switchToView(movieRecommendationsView)
+        }
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
     }
     
     // MARK: - Private func
@@ -107,18 +114,18 @@ final class CMMovieSubDetailsView: UIView {
         divider.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(2)
+            $0.height.equalTo(Constants.dividerHeight)
         }
         
         self.addSubview(hStack)
         hStack.snp.makeConstraints {
-            $0.top.equalTo(divider.snp.bottom).offset(10)
+            $0.top.equalTo(divider.snp.bottom).offset(Paddings.topSpacing)
             $0.leading.trailing.equalToSuperview()
         }
-
-        self.addSubview(contentView)
-        contentView.snp.makeConstraints {
-            $0.top.equalTo(hStack.snp.bottom).offset(10)
+        
+        self.addSubview(containerView)
+        containerView.snp.makeConstraints {
+            $0.top.equalTo(hStack.snp.bottom).offset(Paddings.topSpacing)
             $0.leading.trailing.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
@@ -131,49 +138,57 @@ final class CMMovieSubDetailsView: UIView {
         label.textColor = selectedTab.rawValue == tag ? CMColor.cmLabel : CMColor.cmSecondary
         label.tag = tag
         label.isUserInteractionEnabled = true
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped(_:)))
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapTab))
         label.addGestureRecognizer(tapGesture)
         return label
     }
     
-    // MARK: - OBJC func
-    @objc private func labelTapped(_ sender: UITapGestureRecognizer) {
-        if let label = sender.view as? UILabel, label.tag != selectedTab.rawValue {
-            for case let lbl as UILabel in hStack.arrangedSubviews {
-                UIView.transition(with: lbl, duration: 0.3, options: .transitionCrossDissolve) {
-                    lbl.textColor = CMColor.cmSecondary
-                }
-            }
+    private func switchToView(_ view: UIView) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            print(type(of: view))
+            if self.contentView == view { return }
             
-            selectedTab = Tabs(rawValue: label.tag) ?? .recommendations
-            UIView.transition(with: label, duration: 0.3, options: .transitionCrossDissolve) {
-                label.textColor = CMColor.cmLabel
-            }
-            
-            // Update the contentView reference
-            let newContentView: UIView
-            switch selectedTab {
-            case .collection: newContentView = belongsToCollectionView
-            case .recommendations: newContentView = movieRecommendationsView
-            case .trailers: newContentView = trailersView
-            case .reviews: newContentView = reviewsView
-            }
-            
-            // Only update constraints if contentView is actually changing
-            if newContentView != contentView {
-                contentView.removeFromSuperview()
-                contentView = newContentView
-                self.addSubview(contentView)
+            self.contentView?.removeFromSuperview()
 
-                contentView.snp.makeConstraints {
-                    $0.top.equalTo(hStack.snp.bottom).offset(10)
-                    $0.leading.trailing.equalToSuperview()
-                    $0.bottom.equalToSuperview()
-                }
+            self.contentView = view
+            self.contentView.translatesAutoresizingMaskIntoConstraints = false
+            
+            UIView.transition(with: containerView, duration: Constants.aniDurations, options: .transitionFlipFromTop) {
+                self.containerView.addSubview(self.contentView)
             }
 
-            self.bringSubviewToFront(contentView)
-            self.layoutIfNeeded()
+            self.contentView.snp.makeConstraints {
+                $0.edges.equalToSuperview()
+            }
+
+            UIView.animate(withDuration: Constants.aniDurations) {
+                self.setNeedsLayout()
+                self.layoutIfNeeded()
+            }
         }
+    }
+    
+    // MARK: - OBJC func
+    @objc private func didTapTab(_ sender: UITapGestureRecognizer) {
+        guard let label = sender.view as? UILabel, label.tag != selectedTab.rawValue else { return }
+
+        for case let lbl as UILabel in hStack.arrangedSubviews {
+            UIView.transition(with: lbl, duration: Constants.aniDurations, options: .transitionCrossDissolve) {
+                lbl.textColor = CMColor.cmSecondary
+            }
+        }
+        selectedTab = Tabs(rawValue: label.tag) ?? .recommendations
+        UIView.transition(with: label, duration: Constants.aniDurations, options: .transitionCrossDissolve) {
+            label.textColor = CMColor.cmLabel
+        }
+
+        switch selectedTab {
+        case .collection: switchToView(belongsToCollectionView)
+        case .recommendations: switchToView(movieRecommendationsView)
+        case .trailers: switchToView(trailersView)
+        case .reviews: switchToView(reviewsView)
+        }
+
     }
 }

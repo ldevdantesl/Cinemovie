@@ -380,11 +380,9 @@ final class MovieDetailsScreenVC: UIViewController {
             $0.top.equalTo(rateAndShareView.snp.bottom).offset(Paddings.superSpacing)
             $0.leading.equalToSuperview().offset(Paddings.horizontal)
             $0.trailing.equalToSuperview().offset(-Paddings.horizontal)
+            $0.bottom.equalToSuperview()
         }
     
-        contentView.snp.makeConstraints {
-            $0.bottom.greaterThanOrEqualTo(movieSubDetailsView.snp.bottom).offset(Paddings.superSpacing)
-        }
         contentView.bringSubviewToFront(closeButton)
     }
     
@@ -433,13 +431,7 @@ final class MovieDetailsScreenVC: UIViewController {
     }
 }
 
-extension MovieDetailsScreenVC: UIScrollViewDelegate {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if scrollView.contentOffset.y < 0 {
-            scrollView.contentOffset.y = 0
-        }
-    }
-}
+extension MovieDetailsScreenVC: UIScrollViewDelegate {}
 
 extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
     
@@ -493,7 +485,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
                 self.loadingIndicator.stopAnimating()
             }
             
-            self.movieSubDetailsView.configure(details: details)
+            self.movieSubDetailsView.configureCollections(with: details)
             self.view.layoutIfNeeded()
         }
     }
@@ -508,7 +500,8 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
     func didGetMovieRecommendations(movies: [QueryMovie]) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-         
+            print("Recommends: \(movies.count)")
+            self.movieSubDetailsView.configureRecommendations(recommendationMovies: movies)
         }
     }
 }
