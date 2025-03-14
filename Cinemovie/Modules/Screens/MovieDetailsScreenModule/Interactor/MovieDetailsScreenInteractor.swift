@@ -9,6 +9,7 @@ protocol MovieDetailsScreenInteractorProtocol: AnyObject {
     func getMovieDetails()
     func getMovieCast()
     func getMovieRecommendations()
+    func getMovieVideos()
 }
 
 final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
@@ -46,6 +47,16 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetMovieRecommendations(queryMovies: success.movies)
+            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription)
+            }
+        }
+    }
+    
+    func getMovieVideos() {
+        tmdbService?.getMovieVideos(movieID: movieID) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didRecieveMovieVideos(videos: success.results)
             case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription)
             }
         }

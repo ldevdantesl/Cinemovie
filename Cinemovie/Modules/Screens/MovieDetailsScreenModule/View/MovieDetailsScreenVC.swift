@@ -10,8 +10,8 @@ import SnapKit
 import SDWebImage
 
 protocol MovieDetailsScreenViewProtocol: AnyObject {
-    func didOpenMoreLikeThis()
     func didRecieveError(_ errorStr: String)
+    func didGetMovieVideos(videos: [DomainVideo])
     func didGetMovieDetails(_ details: MovieDetails)
     func didGetMovieCast(cast: [Cast], crew: [Cast])
     func didGetMovieRecommendations(movies: [QueryMovie])
@@ -35,10 +35,11 @@ final class MovieDetailsScreenVC: UIViewController {
         static let altImageSize: CGFloat = 20
         static let releasedImageSize: CGFloat = 25
         static let imdbImageSize: CGFloat = 30
-        static let closeButtonCornerRadius: CGFloat = 15
-        static let closeButtonImageSize: CGFloat = 10
-        static let closeButtonViewSize: CGFloat = 30
+        static let smallButtonsCornerRadius: CGFloat = 15
+        static let smallButtonsImageSize: CGFloat = 10
+        static let smallButtonsViewSize: CGFloat = 30
         static let closeButtonImageName: String = "xmark"
+        static let backButtonImageName: String = "chevron.left"
         static let movieCastListHeight: CGFloat = 150
     }
     
@@ -75,10 +76,23 @@ final class MovieDetailsScreenVC: UIViewController {
         button.tintColor = CMColor.cmButton
         button.setImage(UIImage(systemName: Constants.closeButtonImageName), for: .normal)
         button.backgroundColor = CMColor.cmSecondary
-        button.layer.cornerRadius = Constants.closeButtonCornerRadius
+        button.layer.cornerRadius = Constants.smallButtonsCornerRadius
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(didTapCloseButton), for: .touchUpInside)
-        button.configuration?.preferredSymbolConfigurationForImage = .init(pointSize: Constants.closeButtonImageSize, weight: .bold)
+        button.configuration?.preferredSymbolConfigurationForImage = .init(pointSize: Constants.smallButtonsImageSize, weight: .bold)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private lazy var backButton: UIButton = {
+        let button = UIButton(configuration: .borderless())
+        button.tintColor = CMColor.cmButton
+        button.setImage(UIImage(systemName: Constants.backButtonImageName), for: .normal)
+        button.backgroundColor = CMColor.cmSecondary
+        button.layer.cornerRadius = Constants.smallButtonsCornerRadius
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(didTapCloseButton), for: .touchUpInside)
+        button.configuration?.preferredSymbolConfigurationForImage = .init(pointSize: Constants.smallButtonsImageSize, weight: .bold)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -250,6 +264,7 @@ final class MovieDetailsScreenVC: UIViewController {
     
     private lazy var movieSubDetailsView: CMMovieSubDetailsView = {
         let view = CMMovieSubDetailsView()
+        view.didTapRecommendedMovie = presenter?.didTapAnotherMovie
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -278,13 +293,6 @@ final class MovieDetailsScreenVC: UIViewController {
         contentView.snp.makeConstraints {
             $0.edges.equalToSuperview()
             $0.width.equalToSuperview()
-        }
-        
-        contentView.addSubview(closeButton)
-        closeButton.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(Paddings.vertical)
-            $0.trailing.equalToSuperview().offset(-Paddings.horizontal)
-            $0.width.height.equalTo(Constants.closeButtonViewSize)
         }
         
         contentView.addSubview(backdropImageView)
@@ -374,7 +382,7 @@ final class MovieDetailsScreenVC: UIViewController {
             $0.leading.equalToSuperview().offset(Paddings.horizontal)
             $0.trailing.equalToSuperview().offset(-Paddings.horizontal)
         }
-    
+        
         contentView.addSubview(movieSubDetailsView)
         movieSubDetailsView.snp.makeConstraints {
             $0.top.equalTo(rateAndShareView.snp.bottom).offset(Paddings.superSpacing)
@@ -382,8 +390,22 @@ final class MovieDetailsScreenVC: UIViewController {
             $0.trailing.equalToSuperview().offset(-Paddings.horizontal)
             $0.bottom.equalToSuperview()
         }
-    
-        contentView.bringSubviewToFront(closeButton)
+        
+        contentView.addSubview(closeButton)
+        closeButton.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(Paddings.vertical)
+            $0.trailing.equalToSuperview().offset(-Paddings.horizontal)
+            $0.width.height.equalTo(Constants.smallButtonsViewSize)
+        }
+        
+        if let count = navigationController?.viewControllers.count, count > 1 {
+            contentView.addSubview(backButton)
+            backButton.snp.makeConstraints {
+                $0.top.equalToSuperview().offset(Paddings.vertical)
+                $0.leading.equalToSuperview().offset(Paddings.horizontal)
+                $0.width.height.equalTo(Constants.smallButtonsViewSize)
+            }
+        }
     }
     
     private func showTooltip(from sourceView: UIView, text: String) {
@@ -393,7 +415,7 @@ final class MovieDetailsScreenVC: UIViewController {
         let tooltip = CMTooltipView(text: text)
         activeTooltip = tooltip
         tooltip.show(from: sourceView, in: self.view)
-
+        
         let workItem = DispatchWorkItem { [weak self] in
             self?.activeTooltip?.dismiss()
             self?.activeTooltip = nil
@@ -407,6 +429,10 @@ final class MovieDetailsScreenVC: UIViewController {
     // MARK: - OBJC FUNCTIONS
     @objc private func didTapCloseButton() {
         dismiss(animated: true)
+    }
+    
+    @objc private func didTapBackButton() {
+        self.navigationController?.popViewController(animated: true)
     }
     
     @objc private func didTapIMDBButton() {
@@ -431,14 +457,7 @@ final class MovieDetailsScreenVC: UIViewController {
     }
 }
 
-extension MovieDetailsScreenVC: UIScrollViewDelegate {}
-
 extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
-    
-    func didOpenMoreLikeThis() {
-        presenter?.didOpenMoreLikeThis()
-    }
-    
     func didRecieveError(_ errorStr: String) {
         let alert = UIAlertController(
             title: "Oops..",
@@ -504,4 +523,13 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             self.movieSubDetailsView.configureRecommendations(recommendationMovies: movies)
         }
     }
+    
+    func didGetMovieVideos(videos: [DomainVideo]) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            movieSubDetailsView.configureVideos(with: videos)
+        }
+    }
 }
+
+extension MovieDetailsScreenVC: UIScrollViewDelegate {}

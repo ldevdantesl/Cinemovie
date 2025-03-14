@@ -7,13 +7,13 @@
 
 protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
-    
-    func didOpenMoreLikeThis()
-    
+
     func didGetMovieDetails(_ details: MovieDetails)
     func didRecieveError(_ error: String)
     func didGetMovieCast(cast: [Cast], crew: [Cast])
     func didGetMovieRecommendations(queryMovies: [QueryMovie])
+    func didRecieveMovieVideos(videos: [DomainVideo])
+    func didTapAnotherMovie(movie: QueryMovie)
 }
 
 final class MovieDetailsScreenPresenter {
@@ -32,10 +32,15 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         interactor.getMovieDetails()
         interactor.getMovieCast()
         interactor.getMovieRecommendations()
+        interactor.getMovieVideos()
     }
     
-    func didOpenMoreLikeThis() {
-        interactor.getMovieRecommendations()
+    func didTapAnotherMovie(movie: QueryMovie) {
+        router.navigateToAnotherMovie(movie: movie)
+    }
+    
+    func didRecieveMovieVideos(videos: [DomainVideo]) {
+        view?.didGetMovieVideos(videos: videos)
     }
     
     func didRecieveError(_ error: String) {

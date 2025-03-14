@@ -21,6 +21,9 @@ final class CMMovieRecommendationsView: UIView {
         static let totalMoviesToShow = 9
     }
     
+    // MARK: - PUBLIC PROPERTIES
+    public var didTapMovie: ((QueryMovie) -> Void)?
+    
     // MARK: - PROPERTIES
     private var movies: [QueryMovie] = []
     
@@ -64,12 +67,6 @@ final class CMMovieRecommendationsView: UIView {
         }
     }
     
-    public func reloadData() {
-        collectionView.reloadData()
-        setNeedsLayout()
-        layoutIfNeeded()
-    }
-    
     // MARK: - Private methods
     private func setupUI() {
         self.addSubview(collectionView)
@@ -85,6 +82,10 @@ extension CMMovieRecommendationsView: UICollectionViewDelegateFlowLayout, UIColl
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int
     ) -> Int { return movies.isEmpty ? 0 : Constants.totalMoviesToShow }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        didTapMovie?(movies[indexPath.row])
+    }
     
     func collectionView(
         _ collectionView: UICollectionView,

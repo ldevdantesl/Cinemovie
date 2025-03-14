@@ -10,6 +10,7 @@ import SnapKit
 
 final class CMMovieSubDetailsView: UIView {
     
+    // MARK: - CONSTANTS
     fileprivate enum Paddings {
         static let hStackSpacing: CGFloat = 10
         static let topSpacing: CGFloat = 10
@@ -27,6 +28,10 @@ final class CMMovieSubDetailsView: UIView {
         case reviews = 3
     }
     
+    // MARK: - PUBLIC PROPERTIES
+    public var didTapRecommendedMovie: ((QueryMovie) -> Void)?
+    
+    // MARK: - PROPERTIES
     private var selectedTab: Tabs = .recommendations
     private var contentView: UIView!
     
@@ -53,6 +58,7 @@ final class CMMovieSubDetailsView: UIView {
     
     private lazy var movieRecommendationsView: CMMovieRecommendationsView = {
         let view = CMMovieRecommendationsView()
+        view.didTapMovie = didTapRecommendedMovie
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -80,18 +86,6 @@ final class CMMovieSubDetailsView: UIView {
     }
     
     // MARK: - Public func
-    public func configureRecommendations(recommendationMovies: [QueryMovie]) {
-        let recommendationsLabel = createLabel(withText: "Recommends", tag: 1)
-        hStack.addArrangedSubview(recommendationsLabel)
-        movieRecommendationsView.configure(movies: recommendationMovies)
-        
-        let trailersLabel = createLabel(withText: "Trailers", tag: 2)
-        hStack.addArrangedSubview(trailersLabel)
-        
-        let reviews = createLabel(withText: "Reviews", tag: 3)
-        hStack.addArrangedSubview(reviews)
-    }
-    
     public func configureCollections(with details: MovieDetails) {
         if let belongsToCollection = details.belongsToCollection{
             selectedTab = .collection
@@ -102,8 +96,21 @@ final class CMMovieSubDetailsView: UIView {
             selectedTab = .recommendations
             switchToView(movieRecommendationsView)
         }
-        self.setNeedsLayout()
-        self.layoutIfNeeded()
+    }
+    
+    public func configureRecommendations(recommendationMovies: [QueryMovie]) {
+        hStack.addArrangedSubview(createLabel(withText: "Recommends", tag: 1))
+        let filteredMovies = recommendationMovies.filter { $0.posterPath != nil }.shuffled()
+        movieRecommendationsView.configure(movies: filteredMovies)
+    }
+    
+    public func configureVideos(with videos: [DomainVideo]) {
+        guard !videos.isEmpty else { return }
+        hStack.addArrangedSubview(createLabel(withText: "Trailers", tag: 2))
+        trailersView.configure(videos: videos)
+        
+        let reviews = createLabel(withText: "Reviews", tag: 3)
+        hStack.addArrangedSubview(reviews)
     }
     
     // MARK: - Private func
@@ -154,7 +161,7 @@ final class CMMovieSubDetailsView: UIView {
             self.contentView = view
             self.contentView.translatesAutoresizingMaskIntoConstraints = false
             
-            UIView.transition(with: containerView, duration: Constants.aniDurations, options: .transitionFlipFromTop) {
+            UIView.transition(with: containerView, duration: Constants.aniDurations, options: .showHideTransitionViews) {
                 self.containerView.addSubview(self.contentView)
             }
 

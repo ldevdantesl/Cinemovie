@@ -28,4 +28,8 @@ public struct URLHelper {
     static func getImdbURL(withID id: String) -> URL? {
         return URL(string: "https://www.imdb.com/title/\(id)/")
     }
+    
+    static func getYouTubeVideoURL(video: DomainVideo, playsInline: Bool = true) -> URL? {
+        return URL(string:"https://www.youtube.com/embed/\(video.key)?playsinline=\(playsInline ? "1" : "0")")
+    }
 }
