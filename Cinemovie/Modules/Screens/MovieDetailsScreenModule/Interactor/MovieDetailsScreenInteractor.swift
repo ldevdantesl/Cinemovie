@@ -10,6 +10,7 @@ protocol MovieDetailsScreenInteractorProtocol: AnyObject {
     func getMovieCast()
     func getMovieRecommendations()
     func getMovieVideos()
+    func getMovieReviews()
 }
 
 final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
@@ -56,8 +57,18 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
         tmdbService?.getMovieVideos(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): self.presenter?.didRecieveMovieVideos(videos: success.results)
+            case .success(let success): self.presenter?.didGetMovieVideos(videos: success.results)
             case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription)
+            }
+        }
+    }
+    
+    func getMovieReviews() {
+        tmdbService?.getMovieReviews(movieID: movieID) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): presenter?.didGetMovieReviews(success.results, reviewCount: success.totalResults)
+            case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription)
             }
         }
     }

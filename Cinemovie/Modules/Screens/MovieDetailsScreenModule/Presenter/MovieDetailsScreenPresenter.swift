@@ -12,7 +12,8 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didRecieveError(_ error: String)
     func didGetMovieCast(cast: [Cast], crew: [Cast])
     func didGetMovieRecommendations(queryMovies: [QueryMovie])
-    func didRecieveMovieVideos(videos: [DomainVideo])
+    func didGetMovieVideos(videos: [DomainVideo])
+    func didGetMovieReviews(_ reviews: [DomainReview], reviewCount: Int)
     func didTapAnotherMovie(movie: QueryMovie)
 }
 
@@ -33,13 +34,18 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         interactor.getMovieCast()
         interactor.getMovieRecommendations()
         interactor.getMovieVideos()
+        interactor.getMovieReviews()
     }
     
     func didTapAnotherMovie(movie: QueryMovie) {
         router.navigateToAnotherMovie(movie: movie)
     }
     
-    func didRecieveMovieVideos(videos: [DomainVideo]) {
+    func didGetMovieReviews(_ reviews: [DomainReview], reviewCount: Int) {
+        view?.didGetMovieReviews(reviews: reviews, reviewCount: reviewCount)
+    }
+    
+    func didGetMovieVideos(videos: [DomainVideo]) {
         view?.didGetMovieVideos(videos: videos)
     }
     

@@ -12,12 +12,17 @@ import WebKit
 final class CMMovieTrailersView: UIView {
     
     // MARK: - CONSTANTS
-    fileprivate enum Constants { }
+    fileprivate enum Constants {
+        static let vStackSpacing: CGFloat = 10
+        static let innerStackSpacing: CGFloat = 5
+        static let webViewCornerRadius: CGFloat = 10
+        static let webViewHeight: CGFloat = 200
+    }
     
     private lazy var vStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
-        stack.spacing = 10
+        stack.spacing = Constants.vStackSpacing
         stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
@@ -55,7 +60,7 @@ final class CMMovieTrailersView: UIView {
         
         let innerStack = UIStackView()
         innerStack.axis = .vertical
-        innerStack.spacing = 5
+        innerStack.spacing = Constants.innerStackSpacing
         innerStack.alignment = .leading
         innerStack.translatesAutoresizingMaskIntoConstraints = false
 
@@ -65,13 +70,13 @@ final class CMMovieTrailersView: UIView {
         let wkView = WKWebView(frame: .zero, configuration: config)
         wkView.translatesAutoresizingMaskIntoConstraints = false
         wkView.clipsToBounds = true
-        wkView.layer.cornerRadius = 10
+        wkView.layer.cornerRadius = Constants.webViewCornerRadius
         wkView.load(URLRequest(url: videoURL))
         
         innerStack.addArrangedSubview(wkView)
         wkView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(200)
+            $0.height.equalTo(Constants.webViewHeight)
         }
         
         let videoLabel = UILabel()

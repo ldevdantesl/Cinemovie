@@ -99,6 +99,7 @@ final class CMMovieSubDetailsView: UIView {
     }
     
     public func configureRecommendations(recommendationMovies: [QueryMovie]) {
+        guard !recommendationMovies.isEmpty else { return }
         hStack.addArrangedSubview(createLabel(withText: "Recommends", tag: 1))
         let filteredMovies = recommendationMovies.filter { $0.posterPath != nil }.shuffled()
         movieRecommendationsView.configure(movies: filteredMovies)
@@ -108,9 +109,12 @@ final class CMMovieSubDetailsView: UIView {
         guard !videos.isEmpty else { return }
         hStack.addArrangedSubview(createLabel(withText: "Trailers", tag: 2))
         trailersView.configure(videos: videos)
-        
-        let reviews = createLabel(withText: "Reviews", tag: 3)
-        hStack.addArrangedSubview(reviews)
+    }
+    
+    public func configureReviews(with reviews: [DomainReview], reviewCount: Int) {
+        let reviewsLabel = createLabel(withText: "Reviews", tag: 3)
+        hStack.addArrangedSubview(reviewsLabel)
+        reviewsView.configureReviews(with: reviews, reviewCount: reviewCount)
     }
     
     // MARK: - Private func

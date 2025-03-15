@@ -15,10 +15,12 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
     func didGetMovieDetails(_ details: MovieDetails)
     func didGetMovieCast(cast: [Cast], crew: [Cast])
     func didGetMovieRecommendations(movies: [QueryMovie])
+    func didGetMovieReviews(reviews: [DomainReview], reviewCount: Int)
 }
 
 final class MovieDetailsScreenVC: UIViewController {
-    
+
+    // MARK: - PADDINGS
     fileprivate enum Paddings {
         static let vertical: CGFloat = 10
         static let horizontal: CGFloat = 15
@@ -27,6 +29,7 @@ final class MovieDetailsScreenVC: UIViewController {
         static let superSpacing: CGFloat = 15
     }
     
+    // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let appName = CONSTANTS.appName
         static let releasedText: String = "Released"
@@ -43,8 +46,10 @@ final class MovieDetailsScreenVC: UIViewController {
         static let movieCastListHeight: CGFloat = 150
     }
     
+    // MARK: - VIPER
     var presenter: MovieDetailsScreenPresenterProtocol?
     
+    // MARK: - PROPERTIES
     private var activeTooltip: CMTooltipView?
     
     private var tooltipDismissWorkItem: DispatchWorkItem?
@@ -481,7 +486,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             self.movieYearLabel.text = String(details.releaseDate.prefix(4))
             self.movieRuntimeLabel.text = RuntimeHelper.runtime(details.runtime)
             
-            self.movieTaglineLabel.text = details.tagline.isEmpty ? nil : TextFormatter.formatToCleanString(details.tagline)
+            self.movieTaglineLabel.text = details.tagline.isEmpty ? nil : CMTextFormatter.formatToCleanString(details.tagline)
             self.movieTaglineLabel.isHidden = details.tagline.isEmpty ? true : false
 
             self.movieOverviewLabel.text = details.overview
@@ -519,7 +524,6 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
     func didGetMovieRecommendations(movies: [QueryMovie]) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            print("Recommends: \(movies.count)")
             self.movieSubDetailsView.configureRecommendations(recommendationMovies: movies)
         }
     }
@@ -528,6 +532,13 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             movieSubDetailsView.configureVideos(with: videos)
+        }
+    }
+    
+    func didGetMovieReviews(reviews: [DomainReview], reviewCount: Int) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.movieSubDetailsView.configureReviews(with: reviews, reviewCount: reviewCount)
         }
     }
 }

@@ -6,88 +6,73 @@
 //
 
 import UIKit
+import SnapKit
 
 final class CMStarRatingView: UIView {
-    private let starCount: Int = 5
-    private let filledStarImage = UIImage(systemName: "star.fill")
-    private let emptyStarImage = UIImage(systemName: "star")
-    private var starImageViews: [UIImageView] = []
-    
-    private let starStackView: UIStackView = {
-        let stack = UIStackView()
-        stack.axis = .horizontal
-        stack.alignment = .center
-        stack.spacing = 5
-        stack.distribution = .fillEqually
-        return stack
-    }()
-    
-    private let ratingLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.textColor = .white
-        label.textAlignment = .center
-        return label
-    }()
-    
-    private let mainStackView: UIStackView = {
-        let stack = UIStackView()
-        stack.axis = .vertical
-        stack.alignment = .center
-        stack.spacing = 4
-        return stack
-    }()
-    
-    var rating: CGFloat = 0 {
-        didSet {
-            updateStars()
-        }
+    // MARK: - CONSTANTS
+    fileprivate enum Constants {
+        static let totalStars = 5
     }
     
-    init(rating: CGFloat = 0) {
-        self.rating = rating
-        super.init(frame: .zero)
-        setupView()
-        updateStars()
+    // MARK: - PROPERTIES
+    private var starImageViews: [UIImageView] = []
+    
+    // MARK: - LIFECYCLE
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func setupView() {
-        addSubview(mainStackView)
-        mainStackView.addArrangedSubview(starStackView)
-        mainStackView.addArrangedSubview(ratingLabel)
-        
-        mainStackView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            mainStackView.topAnchor.constraint(equalTo: topAnchor),
-            mainStackView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            mainStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            mainStackView.trailingAnchor.constraint(equalTo: trailingAnchor)
-        ])
-        
-        for _ in 0..<starCount {
-            let imageView = UIImageView()
-            imageView.contentMode = .scaleAspectFit
-            imageView.tintColor = .systemYellow
-            starStackView.addArrangedSubview(imageView)
-            starImageViews.append(imageView)
-        }
+    // MARK: - PUBLIC FUNC
+    public func configure(rating: Int) {
+        let normalizedRating = Double(rating) / 2.0
+        updateStars(for: normalizedRating)
     }
     
-    private func updateStars() {
-        let normalizedRating = (rating / 10.0) * CGFloat(starCount)
+    // MARK: - PRIVATE FUNC
+    private func setupUI() {
+        for _ in 0..<Constants.totalStars {
+            let imageView = UIImageView()
+            imageView.contentMode = .scaleAspectFit
+            starImageViews.append(imageView)
+            addSubview(imageView)
+        }
         
-        for (index, imageView) in starImageViews.enumerated() {
-            if CGFloat(index) < normalizedRating {
-                imageView.image = filledStarImage
-            } else {
-                imageView.image = emptyStarImage
+        starImageViews.forEach { star in
+            star.snp.makeConstraints {
+                $0.top.bottom.equalToSuperview()
+                $0.width.height.equalTo(20)
             }
         }
         
-        ratingLabel.text = String(format: "%.1f/10 TMDB", rating)
+        for (index, star) in starImageViews.enumerated() {
+            if index == 0 {
+                star.snp.makeConstraints {
+                    $0.leading.equalToSuperview()
+                }
+            } else {
+                star.snp.makeConstraints {
+                    $0.leading.equalTo(starImageViews[index - 1].snp.trailing).offset(5)
+                }
+            }
+        }
+    }
+    
+    private func updateStars(for rating: Double) {
+        for (index, imageView) in starImageViews.enumerated() {
+            let starValue = Double(index) + 1
+            
+            if rating >= starValue {
+                imageView.image = UIImage(named: ImageNames.star.rawValue)
+            } else if rating >= starValue - 0.5 {
+                imageView.image = UIImage(named: ImageNames.halfStar.rawValue)
+            } else {
+                break
+            }
+        }
     }
 }
