@@ -5,6 +5,8 @@
 //  Created by Buzurg Rakhimzoda on 18.02.2025
 //
 
+import UIKit
+
 protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
 
@@ -21,6 +23,16 @@ final class MovieDetailsScreenPresenter {
     weak var view: MovieDetailsScreenViewProtocol?
     var router: MovieDetailsScreenRouterProtocol
     var interactor: MovieDetailsScreenInteractorProtocol
+    
+    private let dispatchGroup = DispatchGroup()
+    
+    private var movieDetails: MovieDetails?
+    private var movieVideos: [DomainVideo]?
+    private var movieCast: [Cast]?
+    private var movieCrew: [Cast]?
+    private var movieRecommends: [QueryMovie]?
+    private var movieReviews: [DomainReview]?
+    private var movieReviewCount: Int?
 
     init(interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
         self.interactor = interactor
@@ -30,11 +42,35 @@ final class MovieDetailsScreenPresenter {
 
 extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     func viewDidLoad() {
+        dispatchGroup.enter()
         interactor.getMovieDetails()
+        
+        dispatchGroup.enter()
         interactor.getMovieCast()
+        
+        dispatchGroup.enter()
         interactor.getMovieRecommendations()
+        
+        dispatchGroup.enter()
         interactor.getMovieVideos()
+        
+        dispatchGroup.enter()
         interactor.getMovieReviews()
+        
+        dispatchGroup.notify(queue: .main) { [weak self] in
+            guard let self = self else { return }
+            guard let details = self.movieDetails else { return }
+            self.view?.didDownloadAllData(
+                details: details, videos: movieVideos,
+                cast: movieCast, crew: movieCrew,
+                recommends: movieRecommends, reviews: movieReviews,
+                reviewCount: movieReviewCount
+            )
+        }
+    }
+    
+    func didRecieveError(_ error: String) {
+        view?.didRecieveError(error)
     }
     
     func didTapAnotherMovie(movie: QueryMovie) {
@@ -42,26 +78,29 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     }
     
     func didGetMovieReviews(_ reviews: [DomainReview], reviewCount: Int) {
-        view?.didGetMovieReviews(reviews: reviews, reviewCount: reviewCount)
+        movieReviews = reviews
+        movieReviewCount = reviewCount
+        dispatchGroup.leave()
     }
     
     func didGetMovieVideos(videos: [DomainVideo]) {
-        view?.didGetMovieVideos(videos: videos)
-    }
-    
-    func didRecieveError(_ error: String) {
-        view?.didRecieveError(error)
+        movieVideos = videos
+        dispatchGroup.leave()
     }
     
     func didGetMovieDetails(_ details: MovieDetails) {
-        view?.didGetMovieDetails(details)
+        movieDetails = details
+        dispatchGroup.leave()
     }
     
     func didGetMovieCast(cast: [Cast], crew: [Cast]) {
-        view?.didGetMovieCast(cast: cast, crew: crew)
+        movieCast = cast
+        movieCrew = crew
+        dispatchGroup.leave()
     }
     
     func didGetMovieRecommendations(queryMovies: [QueryMovie]) {
-        view?.didGetMovieRecommendations(movies: queryMovies)
+        movieRecommends = queryMovies
+        dispatchGroup.leave()
     }
 }

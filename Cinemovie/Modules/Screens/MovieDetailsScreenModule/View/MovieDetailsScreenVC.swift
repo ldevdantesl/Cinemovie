@@ -11,11 +11,13 @@ import SDWebImage
 
 protocol MovieDetailsScreenViewProtocol: AnyObject {
     func didRecieveError(_ errorStr: String)
-    func didGetMovieVideos(videos: [DomainVideo])
-    func didGetMovieDetails(_ details: MovieDetails)
-    func didGetMovieCast(cast: [Cast], crew: [Cast])
-    func didGetMovieRecommendations(movies: [QueryMovie])
-    func didGetMovieReviews(reviews: [DomainReview], reviewCount: Int)
+    
+    func didDownloadAllData(
+        details: MovieDetails, videos: [DomainVideo]?,
+        cast: [Cast]?, crew: [Cast]?,
+        recommends: [QueryMovie]?, reviews: [DomainReview]?,
+        reviewCount: Int?
+    )
 }
 
 final class MovieDetailsScreenVC: UIViewController {
@@ -51,6 +53,12 @@ final class MovieDetailsScreenVC: UIViewController {
     
     // MARK: - PROPERTIES
     private var activeTooltip: CMTooltipView?
+    
+    private lazy var downloadingScreen: CMSplashView = {
+        let view = CMSplashView(frame: .zero, showsLoadingLabel: true)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
     private var tooltipDismissWorkItem: DispatchWorkItem?
     
@@ -96,7 +104,7 @@ final class MovieDetailsScreenVC: UIViewController {
         button.backgroundColor = CMColor.cmSecondary
         button.layer.cornerRadius = Constants.smallButtonsCornerRadius
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(didTapCloseButton), for: .touchUpInside)
+        button.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
         button.configuration?.preferredSymbolConfigurationForImage = .init(pointSize: Constants.smallButtonsImageSize, weight: .bold)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -255,8 +263,8 @@ final class MovieDetailsScreenVC: UIViewController {
         return view
     }()
     
-    private lazy var movieProductionCompaniesView: CMProductionCompaniesView = {
-        let view = CMProductionCompaniesView()
+    private lazy var movieProductionInfoView: CMProductionInfoView = {
+        let view = CMProductionInfoView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -289,7 +297,15 @@ final class MovieDetailsScreenVC: UIViewController {
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
         view.backgroundColor = .systemBackground
+        
+        view.addSubview(downloadingScreen)
+        downloadingScreen.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
         view.addSubview(scrollView)
+        
+        view.bringSubviewToFront(downloadingScreen)
         scrollView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
@@ -374,8 +390,8 @@ final class MovieDetailsScreenVC: UIViewController {
             $0.height.equalTo(Constants.movieCastListHeight)
         }
         
-        contentView.addSubview(movieProductionCompaniesView)
-        movieProductionCompaniesView.snp.makeConstraints {
+        contentView.addSubview(movieProductionInfoView)
+        movieProductionInfoView.snp.makeConstraints {
             $0.top.equalTo(movieCastListView.snp.bottom).offset(Paddings.vertical)
             $0.leading.equalToSuperview().offset(Paddings.horizontal)
             $0.trailing.equalToSuperview().offset(-Paddings.horizontal)
@@ -383,7 +399,7 @@ final class MovieDetailsScreenVC: UIViewController {
         
         contentView.addSubview(rateAndShareView)
         rateAndShareView.snp.makeConstraints {
-            $0.top.equalTo(movieProductionCompaniesView.snp.bottom).offset(Paddings.superSpacing)
+            $0.top.equalTo(movieProductionInfoView.snp.bottom).offset(Paddings.superSpacing)
             $0.leading.equalToSuperview().offset(Paddings.horizontal)
             $0.trailing.equalToSuperview().offset(-Paddings.horizontal)
         }
@@ -429,6 +445,71 @@ final class MovieDetailsScreenVC: UIViewController {
         
         tooltipDismissWorkItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: workItem)
+    }
+    
+    // MARK: - Configuring Data
+    private func configureMovieDetails(_ details: MovieDetails) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.loadingIndicator.startAnimating()
+            self.movieTitleLabel.text = details.title
+            self.movieYearLabel.text = String(details.releaseDate.prefix(4))
+            self.movieRuntimeLabel.text = RuntimeHelper.runtime(details.runtime)
+            
+            self.movieTaglineLabel.text = details.tagline.isEmpty ? nil : CMTextFormatter.formatToCleanString(details.tagline)
+            self.movieTaglineLabel.isHidden = details.tagline.isEmpty ? true : false
+
+            self.movieOverviewLabel.text = details.overview
+            self.movieProductionInfoView.configure(companies: details.productionCompanies, countries: details.productionCountries)
+            self.movieStatusImageView.image = details.status == Constants.releasedText ?
+            UIImage(named: ImageNames.released.rawValue) : UIImage(named: ImageNames.notReleased.rawValue)
+            self.movieStatusImageView.accessibilityIdentifier = details.status == Constants.releasedText ? "Re" : "Nr"
+            
+            self.imdbImageView.accessibilityIdentifier = details.imdbID
+            self.imdbImageView.isHidden = details.imdbID == nil ? true : false
+            
+            if let imageURL = URLHelper.getImageURL(with: details.backdropPath, size: .original){
+                self.backdropImageView.sd_setImage(with: imageURL) { _, _, _, _ in
+                    self.loadingIndicator.stopAnimating()
+                }
+            } else {
+                self.backdropImageView.image = UIImage(systemName: "questionmark.circle.fill")
+                self.backdropImageView.preferredSymbolConfiguration = .init(pointSize: 40, weight: .bold)
+                self.backdropImageView.contentMode = .center
+                self.loadingIndicator.stopAnimating()
+            }
+            
+            self.movieSubDetailsView.configureCollections(with: details)
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    private func configureMovieCast(cast: [Cast], crew: [Cast]) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.movieCastListView.reloadData(cast: cast.isEmpty ? crew : cast)
+        }
+    }
+    
+    private func configureMovieRecommendations(movies: [QueryMovie]) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.movieSubDetailsView.configureRecommendations(recommendationMovies: movies)
+        }
+    }
+    
+    private func configureMovieVideos(videos: [DomainVideo]) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            movieSubDetailsView.configureVideos(with: videos)
+        }
+    }
+    
+    private func configureMovieReviews(reviews: [DomainReview], reviewCount: Int) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.movieSubDetailsView.configureReviews(with: reviews, reviewCount: reviewCount)
+        }
     }
     
     // MARK: - OBJC FUNCTIONS
@@ -478,67 +559,25 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         self.present(alert, animated: true, completion: nil)
     }
     
-    func didGetMovieDetails(_ details: MovieDetails) {
+    func didDownloadAllData(
+        details: MovieDetails, videos: [DomainVideo]?,
+        cast: [Cast]?, crew: [Cast]?,
+        recommends: [QueryMovie]?, reviews: [DomainReview]?,
+        reviewCount: Int?
+    ) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.loadingIndicator.startAnimating()
-            self.movieTitleLabel.text = details.title
-            self.movieYearLabel.text = String(details.releaseDate.prefix(4))
-            self.movieRuntimeLabel.text = RuntimeHelper.runtime(details.runtime)
-            
-            self.movieTaglineLabel.text = details.tagline.isEmpty ? nil : CMTextFormatter.formatToCleanString(details.tagline)
-            self.movieTaglineLabel.isHidden = details.tagline.isEmpty ? true : false
-
-            self.movieOverviewLabel.text = details.overview
-            self.movieProductionCompaniesView.configure(companies: details.productionCompanies)
-            self.movieStatusImageView.image = details.status == Constants.releasedText ?
-            UIImage(named: ImageNames.released.rawValue) : UIImage(named: ImageNames.notReleased.rawValue)
-            self.movieStatusImageView.accessibilityIdentifier = details.status == Constants.releasedText ? "Re" : "Nr"
-            
-            self.imdbImageView.accessibilityIdentifier = details.imdbID
-            self.imdbImageView.isHidden = details.imdbID == nil ? true : false
-            
-            if let imageURL = URLHelper.getImageURL(with: details.backdropPath, size: .original){
-                self.backdropImageView.sd_setImage(with: imageURL) { _, _, _, _ in
-                    self.loadingIndicator.stopAnimating()
-                }
-            } else {
-                self.backdropImageView.image = UIImage(systemName: "questionmark.circle.fill")
-                self.backdropImageView.preferredSymbolConfiguration = .init(pointSize: 40, weight: .bold)
-                self.backdropImageView.contentMode = .center
-                self.loadingIndicator.stopAnimating()
+            UIView.animate(withDuration: 1, delay: 1, options: .showHideTransitionViews) {
+                self.configureMovieDetails(details)
+                self.configureMovieCast(cast: cast ?? [], crew: crew ?? [])
+                self.configureMovieRecommendations(movies: recommends ?? [])
+                self.configureMovieVideos(videos: videos ?? [])
+                self.configureMovieReviews(reviews: reviews ?? [], reviewCount: reviewCount ?? 0)
+                self.downloadingScreen.alpha = 0
+            } completion: { _ in
+                self.downloadingScreen.isHidden = true
+                self.movieSubDetailsView.switchToFirstAvailableTab()
             }
-            
-            self.movieSubDetailsView.configureCollections(with: details)
-            self.view.layoutIfNeeded()
-        }
-    }
-    
-    func didGetMovieCast(cast: [Cast], crew: [Cast]) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.movieCastListView.reloadData(cast: cast.isEmpty ? crew : cast)
-        }
-    }
-    
-    func didGetMovieRecommendations(movies: [QueryMovie]) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.movieSubDetailsView.configureRecommendations(recommendationMovies: movies)
-        }
-    }
-    
-    func didGetMovieVideos(videos: [DomainVideo]) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            movieSubDetailsView.configureVideos(with: videos)
-        }
-    }
-    
-    func didGetMovieReviews(reviews: [DomainReview], reviewCount: Int) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.movieSubDetailsView.configureReviews(with: reviews, reviewCount: reviewCount)
         }
     }
 }

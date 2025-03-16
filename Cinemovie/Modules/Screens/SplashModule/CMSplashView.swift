@@ -1,0 +1,92 @@
+//
+//  CMSplashView.swift
+//  Cinemovie
+//
+//  Created by Buzurg Rakhimzoda on 16.03.2025.
+//
+
+import UIKit
+import SnapKit
+
+final class CMSplashView: UIView {
+
+    // MARK: - CONSTANTS
+    fileprivate enum Constants {
+        static let appLogoSize: CGFloat = 150
+        static let appLogoTranslationY: CGFloat = 20
+        static let aniDuration: TimeInterval = 1.2
+    }
+    
+    private let appLogo: UIImageView = {
+        let image = UIImageView()
+        image.image = UIImage(named: ImageNames.logoTransparent.rawValue)
+        image.translatesAutoresizingMaskIntoConstraints = false
+        return image
+    }()
+    
+    // MARK: - LIFECYCLE
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setup()
+        animateLogo()
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    convenience init(frame: CGRect, showsLoadingLabel: Bool) {
+        self.init(frame: frame)
+        setup()
+        animateLogo()
+        showsLoadingLabel ? setupLoadingLabel() : ()
+    }
+    
+    // MARK: - PRIVATE FUNC
+    private func setup() {
+        backgroundColor = .clear
+
+        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
+        let blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(blurView)
+
+        blurView.snp.makeConstraints { $0.edges.equalToSuperview() }
+
+        addSubview(appLogo)
+        appLogo.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.equalTo(Constants.appLogoSize)
+            $0.height.equalTo(Constants.appLogoSize)
+        }
+    }
+    
+    private func setupLoadingLabel() {
+        let loadingLabel = UILabel()
+        loadingLabel.text = "Loading..."
+        loadingLabel.textColor = CMColor.cmLabel
+        loadingLabel.textAlignment = .center
+        loadingLabel.font = CMFont.font(size: .body, fontName: .avenirBold)
+        loadingLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        addSubview(loadingLabel)
+        loadingLabel.snp.makeConstraints {
+            $0.top.equalTo(appLogo.snp.bottom).offset(10)
+            $0.leading.equalToSuperview().offset(20)
+            $0.trailing.equalToSuperview().offset(-20)
+        }
+    }
+    
+    private func animateLogo() {
+        UIView.animate(
+            withDuration: Constants.aniDuration,
+            delay: 0,
+            options: [.autoreverse, .repeat, .curveEaseInOut],
+            animations: {
+                self.appLogo.transform = CGAffineTransform(translationX: 0, y: Constants.appLogoTranslationY)
+            },
+            completion: nil
+        )
+    }
+}

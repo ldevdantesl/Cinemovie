@@ -19,6 +19,7 @@ public enum CMFontSizes: CGFloat {
 
 public enum CMFontNames: String {
     case avenir = "AvenirNext-DemiBold"
+    case avenirBold = "AvenirNext-Bold"
 }
 
 public struct CMFont {
