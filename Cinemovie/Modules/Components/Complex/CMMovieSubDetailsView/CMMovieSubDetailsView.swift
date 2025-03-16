@@ -107,6 +107,7 @@ final class CMMovieSubDetailsView: UIView {
     }
     
     public func configureReviews(with reviews: [DomainReview], reviewCount: Int) {
+        guard !reviews.isEmpty else { return }
         let reviewsLabel = createLabel(withText: "Reviews", tag: 3)
         hStack.addArrangedSubview(reviewsLabel)
         reviewsView.configureReviews(with: reviews, reviewCount: reviewCount)

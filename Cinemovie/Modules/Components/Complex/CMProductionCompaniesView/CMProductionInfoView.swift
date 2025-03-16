@@ -15,6 +15,7 @@ final class CMProductionInfoView: UIView {
     fileprivate enum Paddings {
         static let vSpacing: CGFloat = 10
         static let hSpacing: CGFloat = 10
+        static let spacing: CGFloat = 5
     }
     
     fileprivate enum Constants {
@@ -24,6 +25,8 @@ final class CMProductionInfoView: UIView {
         static let imageViewImageName: String = "building.columns"
         static let imageViewImageWidth: CGFloat = 100
         static let imageViewImageHeight: CGFloat = 40
+        
+        static let stackPrefix: Int = 2
     }
     
     private let companiesStack: UIStackView = {
@@ -78,7 +81,7 @@ final class CMProductionInfoView: UIView {
     public func configure(companies: [ProductionCompany], countries: [ProductionCountry]) {
         guard !companies.isEmpty else { return }
         
-        companies.map { $0.name }.prefix(2).forEach {
+        companies.map { $0.name }.prefix(Constants.stackPrefix).forEach {
             guard let name = $0 else { return }
             let label = UILabel()
             label.text = "\(name), "
@@ -87,7 +90,7 @@ final class CMProductionInfoView: UIView {
             companiesStack.addArrangedSubview(label)
         }
         
-        countries.map { $0.name }.prefix(2).forEach {
+        countries.map { $0.name }.prefix(Constants.stackPrefix).forEach {
             let label = UILabel()
             label.text = "\($0), "
             label.textColor = CMColor.cmSecondary
@@ -109,7 +112,7 @@ final class CMProductionInfoView: UIView {
         addSubview(countriesStack)
         countriesStack.snp.makeConstraints {
             $0.top.equalToSuperview()
-            $0.leading.equalTo(productionCountriesLabel.snp.trailing).offset(5)
+            $0.leading.equalTo(productionCountriesLabel.snp.trailing).offset(Paddings.spacing)
             $0.trailing.equalToSuperview()
         }
         
@@ -123,7 +126,7 @@ final class CMProductionInfoView: UIView {
         addSubview(companiesStack)
         companiesStack.snp.makeConstraints {
             $0.top.equalTo(productionCompaniesLabel.snp.top)
-            $0.leading.equalTo(productionCompaniesLabel.snp.trailing).offset(5)
+            $0.leading.equalTo(productionCompaniesLabel.snp.trailing).offset(Paddings.spacing)
             $0.trailing.equalToSuperview()
             $0.bottom.equalToSuperview()
         }

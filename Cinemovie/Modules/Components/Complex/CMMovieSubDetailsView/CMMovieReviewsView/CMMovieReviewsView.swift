@@ -11,7 +11,12 @@ import SnapKit
 final class CMMovieReviewsView: UIView {
     
     // MARK: - CONSTANTS
-    fileprivate enum Constants { }
+    fileprivate enum Constants {
+        static let padding: CGFloat = 5
+        static let biggerPadding: CGFloat = 10
+        static let stackSpacing: CGFloat = 10
+        static let imageName: String = "hand.thumbsup.fill"
+    }
     
     private enum ReviewSection {
         case main
@@ -21,27 +26,21 @@ final class CMMovieReviewsView: UIView {
     private lazy var reviewsStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
-        stackView.spacing = 10
+        stackView.spacing = Constants.stackSpacing
         stackView.alignment = .fill
         stackView.distribution = .fill
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
     
-    private lazy var userInputTextView: UITextView = {
-        let container = NSTextContainer()
-        container.lineBreakMode = .byTruncatingTail
-        container.lineFragmentPadding = 10
-        
-        let view = UITextView(frame: .zero, textContainer: container)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.isEditable = true
-        view.font = CMFont.font(size: .body, fontName: .avenir)
-        view.clipsToBounds = true
-        view.layer.cornerRadius = 10
-        view.textColor = CMColor.cmLabel
-        view.backgroundColor = CMColor.cmSecondaryBackground
-        return view
+    private lazy var addRatingButton: CMButton = {
+        let button = CMButton(
+            text: "Rate", foreColor: CMColor.cmDivider,
+            textFont: CMFont.font(size: .body, fontName: .avenirBold), image: UIImage(systemName: Constants.imageName),
+            backColor: CMColor.cmLabel, cornerRadius: 15
+        )
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
     }()
     
     private lazy var reviewsLabel: UILabel = {
@@ -90,13 +89,20 @@ final class CMMovieReviewsView: UIView {
         addSubview(totalReviewsLabel)
         totalReviewsLabel.snp.makeConstraints {
             $0.bottom.equalTo(reviewsLabel.snp.bottom)
-            $0.leading.equalTo(reviewsLabel.snp.trailing).offset(5)
+            $0.leading.equalTo(reviewsLabel.snp.trailing).offset(Constants.padding)
         }
         
         addSubview(reviewsStackView)
         reviewsStackView.snp.makeConstraints {
-            $0.top.equalTo(reviewsLabel.snp.bottom).offset(10)
+            $0.top.equalTo(reviewsLabel.snp.bottom).offset(Constants.biggerPadding)
             $0.leading.trailing.equalToSuperview()
+        }
+        
+        addSubview(addRatingButton)
+        addRatingButton.snp.makeConstraints {
+            $0.top.equalTo(reviewsStackView.snp.bottom).offset(Constants.biggerPadding)
+            $0.leading.trailing.equalToSuperview()
+            $0.height.equalTo(60)
             $0.bottom.equalToSuperview()
         }
     }
