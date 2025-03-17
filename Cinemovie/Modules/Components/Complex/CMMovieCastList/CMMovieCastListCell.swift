@@ -12,7 +12,7 @@ import SDWebImage
 final class CMMovieCastListCell: UICollectionViewCell {
     
     fileprivate enum Paddings {
-        static let imageViewTopPadding: CGFloat = 50
+        static let imageViewTopPadding: CGFloat = 10
         static let spacer: CGFloat = 5
     }
     

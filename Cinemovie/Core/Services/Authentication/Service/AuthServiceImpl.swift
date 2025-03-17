@@ -30,7 +30,7 @@ final class AuthServiceImpl: AuthService {
     }
     
     func loginWithOAuth(token: String, completion: @escaping (Result<String, AuthError>) -> Void) {
-        let endpoint = NewSessionEndpoint(body: ["request_token" : token])
+        let endpoint = AuthenticationEndpoints.newSessionEndpoint(requestToken: token)
         networkService?.request(endpoint) { [weak self] (result: Result<NewSessionResponse, NetworkError>) in
             guard let self = self else { return }
             
@@ -45,7 +45,7 @@ final class AuthServiceImpl: AuthService {
     }
     
     func createRequestToken(completion: @escaping (Result<String, AuthError>) -> Void) {
-        let endpoint = CreateRequestTokenEndpoint()
+        let endpoint = AuthenticationEndpoints.createRequestTokenEndpoint()
         networkService?.request(endpoint) { (result: Result<RequestTokenResponse, NetworkError>) in
             switch result {
             case .success(let response): completion(.success((response.requestToken)))
@@ -55,7 +55,7 @@ final class AuthServiceImpl: AuthService {
     }
     
     func loginAsGuest(completion: @escaping (Result<Void, AuthError>) -> Void) {
-        let endpoint = LoginAsGuestEndpoint()
+        let endpoint = AuthenticationEndpoints.loginAsGuestEndpoint()
         networkService?.request(endpoint) { [weak self] (result: Result<GuestSessionResponse, NetworkError>) in
             guard let self = self else { return }
             switch result {
@@ -74,7 +74,7 @@ final class AuthServiceImpl: AuthService {
         UserDefaults.standard.removeObject(forKey: self.sessionIDKey)
         UserDefaults.standard.removeObject(forKey: self.guestSessionIDKey)
         guard let sessionID = sessionID else { return }
-        let endpoint = DeleteSessionEndpoint(sessionId: sessionID)
+        let endpoint = AuthenticationEndpoints.deleteSessionEndpoint(sessionID: sessionID)
         networkService?.request(endpoint) { (result: Result<DeleteSessionResponse, NetworkError>) in }
     }
     

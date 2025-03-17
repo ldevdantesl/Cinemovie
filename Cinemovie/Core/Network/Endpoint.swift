@@ -7,22 +7,40 @@
 
 import Foundation
 
-enum HTTPMethod: String {
-    case GET, POST, PUT, DELETE
-}
-
-protocol Endpoint {
-    var path: String { get }
-    var method: HTTPMethod { get }
-    var headers: [String: String]? { get }
-    var queryParams: [String : String]? { get }
-    var body: Data? { get }
-}
-
-extension Endpoint {
-    var baseURL: String { return CONSTANTS.baseURLString }
+struct Endpoint {
+   
+    // MARK: - PRIVATE PROPERTIES
+    private let baseURL: String
+    private let bearerToken: String
+    private let path: String
+    private let method: HTTPMethod
+    private let headers: [String: String]?
+    private let queryParams: [String : String]?
+    private let body: Data?
     
-    var urlRequest: URLRequest? {
+    // MARK: - INIT
+    init(
+        baseURL: String, bearerToken: String,
+        path: String, method: HTTPMethod = .GET,
+        headers: [String : String]? = nil,
+        queryParams: [String : String]? = nil,
+        body: Data? = nil
+    ) {
+        self.baseURL = baseURL
+        self.bearerToken = bearerToken
+        self.path = path
+        self.method = method
+        self.headers = headers ?? [
+            "Authorization" : "Bearer \(bearerToken)",
+            "accept" : "application/json",
+            "content-type" : "application/json"
+        ]
+        self.queryParams = queryParams
+        self.body = body
+    }
+    
+    // MARK: - PUBLIC PROPERTIES
+    public var urlRequest: URLRequest? {
         var components = URLComponents(string: baseURL + path)
         
         if let queryParameters = queryParams {
@@ -40,5 +58,9 @@ extension Endpoint {
         }
         
         return request
+    }
+    
+    enum HTTPMethod: String {
+        case GET, POST, PUT, DELETE
     }
 }

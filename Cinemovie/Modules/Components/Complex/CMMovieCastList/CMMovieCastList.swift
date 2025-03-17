@@ -11,7 +11,7 @@ import SnapKit
 final class CMMovieCastList: UIView {
     private var cast: [Cast] = []
 
-    private let cellHeight = (UIConstants.screenHeight / 4)
+    private let cellHeight = (UIConstants.screenHeight / 6)
     private let cellWidth = (UIConstants.screenWidth / 4)
     
     private let castLabel: UILabel = {
@@ -26,7 +26,9 @@ final class CMMovieCastList: UIView {
     private lazy var castCollectionView: UICollectionView = {
         let flowLayout = UICollectionViewFlowLayout()
         flowLayout.scrollDirection = .horizontal
-
+        flowLayout.itemSize = CGSize(width: cellWidth, height: cellHeight)
+        flowLayout.sectionInset = UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
+        
         let view = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         view.register(
             CMMovieCastListCell.self,
@@ -72,7 +74,7 @@ final class CMMovieCastList: UIView {
     }
 }
 
-extension CMMovieCastList: UICollectionViewDelegate, UICollectionViewDataSource , UICollectionViewDelegateFlowLayout {
+extension CMMovieCastList: UICollectionViewDelegate, UICollectionViewDataSource{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return cast.count
     }
@@ -88,21 +90,5 @@ extension CMMovieCastList: UICollectionViewDelegate, UICollectionViewDataSource 
         let item = cast[indexPath.row]
         cell.configure(item: item)
         return cell
-    }
-    
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        sizeForItemAt indexPath: IndexPath
-    ) -> CGSize {
-        return CGSize(width: cellWidth, height: cellHeight)
-    }
-    
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        insetForSectionAt section: Int
-    ) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
     }
 }

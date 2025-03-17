@@ -15,7 +15,7 @@ final class NetworkServiceImpl: NetworkService {
     }
 
     func request<T: APIResponse>(
-        _ endpoint: any Endpoint,
+        _ endpoint: Endpoint,
         completion: @escaping (Result<T, NetworkError>) -> Void
     ) where T: APIResponse {
         

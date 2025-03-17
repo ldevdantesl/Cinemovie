@@ -16,56 +16,56 @@ final class TMBDServiceImpl: TMDBService {
     
     func getMovieDetails(movieID: Int, completion: @escaping (Result<MovieDetails, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
-        let endpoint = GetMovieDetailsEndpoint(movieID: movieID, queryParams: queryParams)
+        let endpoint = TMDBEndpoints.getMovieDetailsEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
     func getMovieCast(movieID: Int, completion: @escaping (Result<MovieCastAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
-        let endpoint = GetMovieCastEndpoint(movieID: movieID, queryParams: queryParams)
+        let endpoint = TMDBEndpoints.getMovieCastEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
     func getMovieRecommendations(movieID: Int, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
-        let endpoint = GetMovieRecommendationsEndpoint(movieID: movieID, queryParams: queryParams)
+        let endpoint = TMDBEndpoints.getMovieRecommendationsEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
     func getMovieVideos(movieID: Int, completion: @escaping (Result<MovieVideosAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "en-US"]
-        let endpoint = GetMovieVideosEndpoint(movieID: movieID, queryParams: queryParams)
+        let endpoint = TMDBEndpoints.getMovieVideosEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
     func getMovieReviews(movieID: Int, completion: @escaping (Result<MovieReviewsAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["page" : "1"]
-        let endpoint = GetMovieReviewsEndpoint(movieID: movieID, queryParams: queryParams)
+        let endpoint = TMDBEndpoints.getMovieReviewsEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
     // MARK: - PRESET LIST IMPLEMENTATIONS
     func getPopularMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru", "page" : "1"]
-        let endpoint = GetPopularMoviesEndpoint(queryParams: queryParams)
+        let endpoint = TMDBEndpoints.getPopularMoviesEndpoint(queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
     func getUpcomingMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru", "page" : "1"]
-        let endpoint = GetUpcomingMoviesEndpoint(queryParams: queryParams)
+        let endpoint = TMDBEndpoints.getUpcomingMoviesEndpoint(queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
     func getTopRatedMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru", "page" : "1"]
-        let endpoint = GetTopRatedMoviesEndpoint(queryParams: queryParams)
+        let endpoint = TMDBEndpoints.getTopRatedMoviesEndpoint(queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
     func getNowPlayingMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru", "page" : "1"]
-        let endpoint = GetNowPlayingMoviesEndpoint(queryParams: queryParams)
+        let endpoint = TMDBEndpoints.getNowPlayingMoviesEndpoint(queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
