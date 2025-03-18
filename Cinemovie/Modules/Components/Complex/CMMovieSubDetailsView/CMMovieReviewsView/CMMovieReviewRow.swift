@@ -115,7 +115,7 @@ final class CMMovieReviewRow: UIView {
         }
         
         authorNameLabel.text = review.author
-        reviewDateLabel.text = CMDateFormatter.formatToNormalDate(dateString: review.createdAt)
+        reviewDateLabel.text = CMDateFormatter.formatToNormalDateUsingISO8601(dateString: review.createdAt)
         
         if let attributedText = CMTextFormatter.setHTMLText(review.content) {
             let mutableAttributedText = NSMutableAttributedString(attributedString: attributedText)

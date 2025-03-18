@@ -20,12 +20,13 @@ public struct URLHelper {
     }
     
     static func getImageURL(with path: String?, size: ImageSizes) -> URL? {
-        guard let path = path else { return nil }
+        guard let path = path, !path.isEmpty else { return nil }
         let finalPath = "\(CONSTANTS.imageBaseURLString)/\(size.rawValue)/\(path)"
         return URL(string: finalPath)
     }
     
-    static func getImdbURL(withID id: String) -> URL? {
+    static func getImdbURL(withID id: String?) -> URL? {
+        guard let id = id else { return nil }
         return URL(string: "https://www.imdb.com/title/\(id)/")
     }
     

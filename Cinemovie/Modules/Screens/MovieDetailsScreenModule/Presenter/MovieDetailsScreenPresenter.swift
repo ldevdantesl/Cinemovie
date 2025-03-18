@@ -10,13 +10,15 @@ import UIKit
 protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
 
+    func didTapAnotherMovie(movie: QueryMovie)
+    func didTapIMDBImage()
+    
     func didGetMovieDetails(_ details: MovieDetails)
     func didRecieveError(_ error: String)
     func didGetMovieCast(cast: [Cast], crew: [Cast])
     func didGetMovieRecommendations(queryMovies: [QueryMovie])
     func didGetMovieVideos(videos: [DomainVideo])
     func didGetMovieReviews(_ reviews: [DomainReview], reviewCount: Int)
-    func didTapAnotherMovie(movie: QueryMovie)
 }
 
 final class MovieDetailsScreenPresenter {
@@ -68,13 +70,18 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
             )
         }
     }
-    
+
     func didRecieveError(_ error: String) {
         view?.didRecieveError(error)
     }
     
     func didTapAnotherMovie(movie: QueryMovie) {
         router.navigateToAnotherMovie(movie: movie)
+    }
+    
+    func didTapIMDBImage() {
+        guard let imdbURL = URLHelper.getImdbURL(withID: movieDetails?.imdbID) else { return }
+        AppOpener.openURL(imdbURL)
     }
     
     func didGetMovieReviews(_ reviews: [DomainReview], reviewCount: Int) {

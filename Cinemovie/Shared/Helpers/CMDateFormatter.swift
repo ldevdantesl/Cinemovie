@@ -8,7 +8,7 @@
 import Foundation
 
 public struct CMDateFormatter {
-    static func formatToNormalDate(dateString: String) -> String {
+    static func formatToNormalDateUsingISO8601(dateString: String) -> String {
         let inputFormatter = ISO8601DateFormatter()
         inputFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
@@ -21,5 +21,32 @@ public struct CMDateFormatter {
         outputFormatter.locale = Locale(identifier: "en_US")
 
         return outputFormatter.string(from: date)
+    }
+    
+    static func formatToYearOnly(dateString: String) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        guard let date = dateFormatter.date(from: dateString) else {
+            return dateString
+        }
+        
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "yyyy"
+        
+        return outputFormatter.string(from: date)
+    }
+    
+    static func isDatePassed(_ dateString: String) -> Bool {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        guard let date = dateFormatter.date(from: dateString) else {
+            return false
+        }
+        
+        return date < Date()
     }
 }
