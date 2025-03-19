@@ -28,6 +28,8 @@ final class MovieDetailsCastList: UICollectionViewCell {
     fileprivate enum Constants {
         static let spacing: CGFloat = 5
         static let hSpacing: CGFloat = 15
+        static let itemWidth = UIConstants.screenWidth / 4
+        static let itemHeight = 120.0
     }
     
     // MARK: - PROPERTIES
@@ -49,8 +51,8 @@ final class MovieDetailsCastList: UICollectionViewCell {
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.minimumLineSpacing = Constants.spacing
-        layout.itemSize = CGSize(width: UIConstants.screenWidth / 4, height: 120)
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10)
+        layout.itemSize = CGSize(width: Constants.itemWidth, height: Constants.itemHeight)
         
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.showsHorizontalScrollIndicator = false

@@ -8,15 +8,14 @@
 import UIKit
 import SnapKit
 
-struct MovieAddToWatchlistAndOverviewViewModel: MovieDetailsCellViewModel {
+class MovieAddToWatchlistAndOverviewViewModel: MovieDetailsCellViewModel {
     let identifier: String = "MovieAddToWatchlistAndOverviewView"
     let movieOverview: String
+    var cellHeight: CGFloat = 80.0
     
     init(movieOverview: String) {
         self.movieOverview = movieOverview
     }
-    
-    func didSelect() { }
 }
 
 final class MovieAddToWatchlistAndOverviewView: UICollectionViewCell {
@@ -34,7 +33,17 @@ final class MovieAddToWatchlistAndOverviewView: UICollectionViewCell {
     }
     
     // MARK: - PROPERTIES
-    private lazy var movieOverviewLabel: UILabel = {
+    private let addToWatchlistButton: CMButton = {
+        let button = CMButton(
+            text: Constants.buttonName, foreColor: .cmDivider,
+            textFont: CMFont.font(size: .body, fontName: .avenirBold), image: UIImage(systemName: Constants.imageName),
+            backColor: .cmLabel, cornerRadius: Constants.buttonCornerRadius
+        )
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private let movieOverviewLabel: UILabel = {
         let label = UILabel()
         label.textColor = CMColor.cmLabel
         label.textAlignment = .left
@@ -44,14 +53,15 @@ final class MovieAddToWatchlistAndOverviewView: UICollectionViewCell {
         return label
     }()
     
-    private lazy var addToWatchlistButton: CMButton = {
-        let button = CMButton(
-            text: Constants.buttonName, foreColor: .cmDivider,
-            textFont: CMFont.font(size: .body, fontName: .avenirBold), image: UIImage(systemName: Constants.imageName),
-            backColor: .cmLabel, cornerRadius: Constants.buttonCornerRadius
-        )
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
+    private lazy var vStack: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [addToWatchlistButton, movieOverviewLabel])
+        stack.axis = .vertical
+        stack.spacing = Constants.spacing
+        stack.alignment = .fill
+        stack.distribution = .fill
+        stack.isLayoutMarginsRelativeArrangement = true
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
     }()
     
     // MARK: - LIFECYCLE
@@ -68,23 +78,31 @@ final class MovieAddToWatchlistAndOverviewView: UICollectionViewCell {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: MovieAddToWatchlistAndOverviewViewModel) {
         movieOverviewLabel.text = viewModel.movieOverview
+        
         layoutIfNeeded()
+        
+        let targetWidth = contentView.frame.width
+        
+        let fittingSize = CGSize(width: targetWidth, height: UIView.layoutFittingCompressedSize.height)
+        let calculatedHeight = vStack.systemLayoutSizeFitting(
+            fittingSize,
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        ).height
+        
+        viewModel.cellHeight = calculatedHeight
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        addSubview(addToWatchlistButton)
-        addToWatchlistButton.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(Constants.buttonHeight)
+        addSubview(vStack)
+        vStack.snp.makeConstraints {
+            $0.edges.equalToSuperview()
         }
         
-        addSubview(movieOverviewLabel)
-        movieOverviewLabel.snp.makeConstraints {
-            $0.top.equalTo(addToWatchlistButton.snp.bottom).offset(Constants.spacing)
-            $0.leading.trailing.equalToSuperview()
-            $0.bottom.lessThanOrEqualToSuperview().offset(-Constants.spacing)
+        addToWatchlistButton.snp.makeConstraints {
+            $0.width.equalToSuperview()
+            $0.height.equalTo(Constants.buttonHeight)
         }
     }
 }

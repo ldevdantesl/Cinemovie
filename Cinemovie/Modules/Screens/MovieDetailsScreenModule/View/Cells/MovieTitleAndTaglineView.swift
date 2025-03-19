@@ -18,6 +18,10 @@ struct MovieTitleAndTaglineViewModel: MovieDetailsCellViewModel {
         self.movieName = movieName
         self.movieTagline = CMTextFormatter.formatToCleanString(movieTagline)
     }
+    
+    var isTaglineAvailable: Bool {
+        !movieTagline.isEmpty
+    }
 }
 
 final class MovieTitleAndTaglineView: UICollectionViewCell {

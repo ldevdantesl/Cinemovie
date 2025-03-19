@@ -44,6 +44,7 @@ final class MovieDetailsScreenVC: UIViewController {
         
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.backgroundColor = CMColor.cmBackground
+        cv.register(MovieDetailsRateAndShareView.self, forCellWithReuseIdentifier: MovieDetailsRateAndShareView.identifier)
         cv.register(MovieDetailsProductionView.self, forCellWithReuseIdentifier: MovieDetailsProductionView.identifier)
         cv.register(MovieSubDetailsView.self, forCellWithReuseIdentifier: MovieSubDetailsView.identifier)
         cv.register(MovieBackdropImageView.self, forCellWithReuseIdentifier: MovieBackdropImageView.identifier)
@@ -84,6 +85,14 @@ final class MovieDetailsScreenVC: UIViewController {
         
         view.bringSubviewToFront(downloadingScreen)
     }
+    
+    private func dynamicHeightForCell(viewModel: MovieDetailsCellViewModel, width: CGFloat) -> CGSize {
+        if let overviewVM = viewModel as? MovieAddToWatchlistAndOverviewViewModel {
+            return CGSize(width: width - 20, height: overviewVM.cellHeight)
+        }
+        
+        return CGSize(width: width - 20, height: 120)
+    }
 }
 
 extension MovieDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -94,25 +103,19 @@ extension MovieDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSo
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let viewModel = viewModels[indexPath.row]
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.identifier, for: indexPath)
-        
-        if let backdropCell = cell as? MovieBackdropImageView,
-           let backdropVM = viewModel as? MovieBackdropImageViewModel {
-            backdropCell.configure(viewModel: backdropVM)
-        } else if let titleCell = cell as? MovieTitleAndTaglineView,
-                  let titleVM = viewModel as? MovieTitleAndTaglineViewModel {
-            titleCell.configure(viewModel: titleVM)
-        } else if let addToWatchlistCell = cell as? MovieAddToWatchlistAndOverviewView,
-                  let addToWatchlistVM = viewModel as? MovieAddToWatchlistAndOverviewViewModel {
-            addToWatchlistCell.configure(viewModel: addToWatchlistVM)
-        } else if let castListCell = cell as? MovieDetailsCastList,
-                  let castListVM = viewModel as? MovieDetailsCastListViewModel {
-            castListCell.configure(viewModel: castListVM)
-        } else if let subDetailsCell = cell as? MovieSubDetailsView,
-                  let subDetailsVM = viewModel as? MovieSubDetailsViewModel {
-            subDetailsCell.configure(viewModel: subDetailsVM)
-        } else if let productionCell = cell as? MovieDetailsProductionView,
-                  let productionVM = viewModel as? MovieDetailsProductionViewModel {
-            productionCell.configure(viewModel: productionVM)
+
+        switch viewModel {
+        case let vm as MovieBackdropImageViewModel: (cell as? MovieBackdropImageView)?.configure(viewModel: vm)
+        case let vm as MovieTitleAndTaglineViewModel: (cell as? MovieTitleAndTaglineView)?.configure(viewModel: vm)
+        case let vm as MovieAddToWatchlistAndOverviewViewModel:
+            (cell as? MovieAddToWatchlistAndOverviewView)?.configure(viewModel: vm)
+            DispatchQueue.main.async { collectionView.performBatchUpdates(nil) }
+            
+        case let vm as MovieDetailsCastListViewModel: (cell as? MovieDetailsCastList)?.configure(viewModel: vm)
+        case let vm as MovieSubDetailsViewModel: (cell as? MovieSubDetailsView)?.configure(viewModel: vm)
+        case let vm as MovieDetailsProductionViewModel: (cell as? MovieDetailsProductionView)?.configure(viewModel: vm)
+        case let vm as MovieDetailsRateAndShareViewModel: (cell as? MovieDetailsRateAndShareView)?.configure(viewModel: vm)
+        default: break
         }
         
         return cell
@@ -123,12 +126,13 @@ extension MovieDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSo
         let width = collectionView.frame.width
         
         switch viewModel {
-        case is MovieSubDetailsViewModel: return CGSize(width: width - 20, height: 30)
+        case is MovieSubDetailsViewModel: return CGSize(width: width - 20, height: 25)
         case is MovieBackdropImageViewModel: return CGSize(width: width, height: width * 0.55)
-        case is MovieTitleAndTaglineViewModel: return CGSize(width: width - 20, height: 70)
-        case is MovieAddToWatchlistAndOverviewViewModel: return CGSize(width: width - 20, height: 120)
+        case let vm as MovieTitleAndTaglineViewModel: print(vm.isTaglineAvailable); return CGSize(width: width - 20, height: vm.isTaglineAvailable ? 70 : 55)
+        case is MovieAddToWatchlistAndOverviewViewModel: return dynamicHeightForCell(viewModel: viewModel, width: width)
         case is MovieDetailsCastListViewModel: return CGSize(width: width - 20, height: 150)
         case is MovieDetailsProductionViewModel: return CGSize(width: width - 20, height: 50)
+        case is MovieDetailsRateAndShareViewModel: return CGSize(width: width - 30, height: 40)
         default: return CGSize(width: width, height: 100)
         }
     }
@@ -182,6 +186,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         }
         
         self.viewModels.append(MovieDetailsProductionViewModel(companies: details.productionCompanies, countries: details.productionCountries))
+        self.viewModels.append(MovieDetailsRateAndShareViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton))
         
         self.collectionView.reloadData()
     }

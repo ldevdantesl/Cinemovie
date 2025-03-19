@@ -12,6 +12,8 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
 
     func didTapAnotherMovie(movie: QueryMovie)
     func didTapIMDBImage()
+    func didTapShareButton()
+    func didTapRateButton()
     
     func didGetMovieDetails(_ details: MovieDetails)
     func didRecieveError(_ error: String)
@@ -82,6 +84,15 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     func didTapIMDBImage() {
         guard let imdbURL = URLHelper.getImdbURL(withID: movieDetails?.imdbID) else { return }
         AppOpener.openURL(imdbURL)
+    }
+    
+    func didTapRateButton() {
+        print("DID tap rate button")
+    }
+    
+    func didTapShareButton() {
+        guard let details = self.movieDetails else { return }
+        router.presentShareView(movie: details)
     }
     
     func didGetMovieReviews(_ reviews: [DomainReview], reviewCount: Int) {
