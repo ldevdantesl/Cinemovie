@@ -109,8 +109,7 @@ extension MovieDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSo
         case let vm as MovieTitleAndTaglineViewModel: (cell as? MovieTitleAndTaglineView)?.configure(viewModel: vm)
         case let vm as MovieAddToWatchlistAndOverviewViewModel:
             (cell as? MovieAddToWatchlistAndOverviewView)?.configure(viewModel: vm)
-            DispatchQueue.main.async { collectionView.performBatchUpdates(nil) }
-            
+            DispatchQueue.main.async { self.collectionView.performBatchUpdates(nil) }
         case let vm as MovieDetailsCastListViewModel: (cell as? MovieDetailsCastList)?.configure(viewModel: vm)
         case let vm as MovieSubDetailsViewModel: (cell as? MovieSubDetailsView)?.configure(viewModel: vm)
         case let vm as MovieDetailsProductionViewModel: (cell as? MovieDetailsProductionView)?.configure(viewModel: vm)

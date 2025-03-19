@@ -44,6 +44,7 @@ final class MovieBackdropImageView: UICollectionViewCell {
         view.preferredSymbolConfiguration = .init(pointSize: 40, weight: .bold)
         view.image = UIImage(systemName: Constants.imageNotFoundName)
         view.clipsToBounds = true
+        view.backgroundColor = CMColor.cmSecondaryBackground
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
