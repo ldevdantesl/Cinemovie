@@ -9,6 +9,9 @@ import UIKit
 
 protocol PersonDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
+    
+    func didTapBackButton()
+    
     func didGetPersonDetails(_ details: PersonDetails)
     func didRecieveError(_ error: Error)
 }
@@ -35,5 +38,9 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
     
     func didGetPersonDetails(_ details: PersonDetails) {
         view?.didGetPersonDetails(details)
+    }
+    
+    func didTapBackButton() {
+        router.goBack()
     }
 }

@@ -7,7 +7,9 @@
 
 import UIKit
 
-protocol PersonDetailsScreenRouterProtocol { }
+protocol PersonDetailsScreenRouterProtocol {
+    func goBack()
+}
 
 final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
     weak var viewController: PersonDetailsScreenVC?
@@ -15,5 +17,9 @@ final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
     
     init(tmdbService: TMDBService?) {
         self.tmdbService = tmdbService
+    }
+    
+    func goBack() {
+        viewController?.navigationController?.popViewController(animated: true)
     }
 }

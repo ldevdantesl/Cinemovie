@@ -216,7 +216,7 @@ final class MovieDetailsActorPopupView: UIView {
     
     // MARK: - OBJC FUNC
     @objc private func didTapClose() {
-        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseOut) { [weak self] in
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseOut) { [weak self] in
             guard let self = self else { return }
             self.alpha = 0
             self.transform = CGAffineTransform(scaleX: 0.8, y: 0.8).concatenating(CGAffineTransform(translationX: 0, y: 30))

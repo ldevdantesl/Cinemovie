@@ -42,25 +42,24 @@ final class CMCircularButton: UIButton {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        self.layer.cornerRadius = buttonSize / 2
+    }
+    
     // MARK: - Private Methods
     private func setupUI(systemName: String, backColor: UIColor, foreColor: UIColor) {
-        var buttonConfig = UIButton.Configuration.plain()
-        buttonConfig.image = UIImage(systemName: systemName)
-        buttonConfig.baseForegroundColor = foreColor
-        buttonConfig.background.backgroundColor = backColor
-        buttonConfig.imagePadding = 10
-        buttonConfig.cornerStyle = .capsule
-        buttonConfig.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
+        self.setImage(UIImage(systemName: systemName), for: .normal)
+        self.imageView?.tintColor = foreColor
+        self.backgroundColor = backColor
+        self.imageView?.contentMode = .center
         
-        self.configuration = buttonConfig
-        self.imageView?.contentMode = .scaleAspectFit
-        self.imageView?.clipsToBounds = true
-        self.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: buttonSize * 0.5 , weight: .medium), forImageIn: .normal)
-        
-        clipsToBounds = true
-        translatesAutoresizingMaskIntoConstraints = false
-        
-        snp.makeConstraints { $0.size.equalTo(buttonSize) }
+        self.clipsToBounds = true
+        self.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: buttonSize * 0.6 , weight: .medium), forImageIn: .normal)
+        self.translatesAutoresizingMaskIntoConstraints = false
+        self.snp.makeConstraints {
+            $0.size.equalTo(buttonSize)
+        }
     }
     
     // MARK: - Public Methods

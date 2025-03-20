@@ -25,6 +25,9 @@ final class PersonDetailsScreenVC: UIViewController {
     var presenter: PersonDetailsScreenPresenterProtocol?
     
     // MARK: - PROPERTIES
+    private var viewModels: [PersonDetailsCellViewModel] = []
+    
+    // MARK: - VIEW PROPERTIES
     private let downloadingView: CMSplashView = {
         let splash = CMSplashView(frame: .zero, showsLoadingLabel: true)
         splash.translatesAutoresizingMaskIntoConstraints = false
@@ -38,6 +41,7 @@ final class PersonDetailsScreenVC: UIViewController {
         
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.backgroundColor = CMColor.cmBackground
+        cv.register(PersonDetailsHeaderView.self, forCellWithReuseIdentifier: PersonDetailsHeaderView.identifier)
         cv.dataSource = self
         cv.delegate = self
         cv.translatesAutoresizingMaskIntoConstraints = false
@@ -55,8 +59,6 @@ final class PersonDetailsScreenVC: UIViewController {
         super.viewWillAppear(animated)
         self.navigationController?.navigationBar.isHidden = true
     }
-    
-    // MARK: - PUBLIC FUNC
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
@@ -76,11 +78,28 @@ final class PersonDetailsScreenVC: UIViewController {
 
 extension PersonDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 0
+        return viewModels.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        return UICollectionViewCell()
+        let viewModel = viewModels[indexPath.row]
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.identifier, for: indexPath)
+        
+        switch viewModel {
+        case let vm as PersonDetailsHeaderViewModel: (cell as? PersonDetailsHeaderView)?.configure(viewModel: vm)
+        default: return UICollectionViewCell()
+        }
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let viewModel = viewModels[indexPath.row]
+        let width = collectionView.frame.width
+        
+        switch viewModel {
+        case is PersonDetailsHeaderViewModel: return CGSize(width: width - 20, height: 200)
+        default: return CGSize(width: width - 20, height: 100)
+        }
     }
 }
 
@@ -113,6 +132,7 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
                 self.downloadingView.isHidden = true
             }
         }
-        print(details.name)
+        
+        viewModels.append(PersonDetailsHeaderViewModel(imagePath: details.profilePath, didTapAvaImage: nil, didTapBackButton: presenter?.didTapBackButton))
     }
 }

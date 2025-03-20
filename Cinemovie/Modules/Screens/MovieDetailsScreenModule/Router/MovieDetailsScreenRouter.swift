@@ -44,7 +44,7 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
         popupView.alpha = 0
         popupView.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
 
-        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseOut) {
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseOut) {
             popupView.alpha = 1
             popupView.transform = .identity
         }

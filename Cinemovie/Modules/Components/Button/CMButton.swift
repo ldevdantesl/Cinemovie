@@ -55,6 +55,11 @@ final class CMButton: UIButton {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        self.layer.cornerRadius = cornerRadius
+    }
+    
     // MARK: - PUBLIC FUNC
     public func setAction(target: Any?, action: Selector){
         self.addTarget(target, action: action, for: .touchUpInside)
@@ -73,7 +78,6 @@ final class CMButton: UIButton {
         self.backgroundColor = backColor
         self.configuration = .borderedTinted()
         self.translatesAutoresizingMaskIntoConstraints = false
-        self.layer.cornerRadius = cornerRadius
         self.setAttributedTitle(attrTitle, for: .normal)
         self.clipsToBounds = true
         
