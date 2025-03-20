@@ -181,7 +181,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         ]
         
         if let cast = cast, !cast.isEmpty {
-            self.viewModels.append(MovieDetailsCastListViewModel(cast: cast, crew: crew))
+            self.viewModels.append(MovieDetailsCastListViewModel(cast: cast, didSelectCast: presenter?.didSelectActor))
         }
         
         self.viewModels.append(MovieDetailsProductionViewModel(companies: details.productionCompanies, countries: details.productionCountries))

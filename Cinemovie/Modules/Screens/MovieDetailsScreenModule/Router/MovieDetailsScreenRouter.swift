@@ -10,6 +10,7 @@ import UIKit
 protocol MovieDetailsScreenRouterProtocol {
     func navigateToAnotherMovie(movie: QueryMovie)
     func presentShareView(movie: MovieDetails)
+    func presentActor(actor: Cast)
 }
 
 final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
@@ -24,6 +25,8 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
         let newMovieDetails = MovieDetailsScreenAssembler.assemble(movieID: movie.id, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(newMovieDetails, animated: true)
     }
+    
+    func presentActor(actor: Cast) {}
     
     func presentShareView(movie: MovieDetails) {
         let title = movie.title

@@ -12,11 +12,11 @@ struct MovieDetailsCastListViewModel: MovieDetailsCellViewModel {
     let identifier: String = "MovieDetailsCastList"
     
     let cast: [Cast]?
-    let crew: [Cast]?
+    let didSelectCast: ((Cast) -> Void)?
     
-    init(cast: [Cast]?, crew: [Cast]?) {
+    init(cast: [Cast]?, didSelectCast: ((Cast) -> Void)?) {
         self.cast = cast
-        self.crew = crew
+        self.didSelectCast = didSelectCast
     }
 }
 
@@ -33,10 +33,7 @@ final class MovieDetailsCastList: UICollectionViewCell {
     }
     
     // MARK: - PROPERTIES
-    private var cast: [Cast]?
-    private var crew: [Cast]?
-    
-    private var useCrew: Bool = false
+    private var viewModel: MovieDetailsCastListViewModel?
     
     // MARK: - VIEW PROPERTIES
     private lazy var castLabel: UILabel = {
@@ -57,7 +54,7 @@ final class MovieDetailsCastList: UICollectionViewCell {
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.showsHorizontalScrollIndicator = false
         cv.backgroundColor = CMColor.cmBackground
-        cv.register(CMMovieDetailsCastListCell.self, forCellWithReuseIdentifier: CMMovieDetailsCastListCell.identifier)
+        cv.register(MovieDetailsCastListCell.self, forCellWithReuseIdentifier: MovieDetailsCastListCell.identifier)
         cv.delegate = self
         cv.dataSource = self
         cv.translatesAutoresizingMaskIntoConstraints = false
@@ -77,10 +74,7 @@ final class MovieDetailsCastList: UICollectionViewCell {
     
     // MARK: - PUBLIC FUNCTIONS
     public func configure(viewModel: MovieDetailsCastListViewModel) {
-        self.cast = viewModel.cast
-        self.crew = viewModel.crew
-        self.useCrew = cast == nil
-        self.layoutIfNeeded()
+        self.viewModel = viewModel
     }
     
     // MARK: - PRIVATE FUNCTIONS
@@ -103,16 +97,22 @@ final class MovieDetailsCastList: UICollectionViewCell {
 
 extension MovieDetailsCastList: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return cast?.count ?? crew?.count ?? 0
+        return viewModel?.cast?.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: CMMovieDetailsCastListCell.identifier, for: indexPath
-        ) as? CMMovieDetailsCastListCell else {
+            withReuseIdentifier: MovieDetailsCastListCell.identifier, for: indexPath
+        ) as? MovieDetailsCastListCell else {
             return UICollectionViewCell()
         }
-        cell.configure(cast: useCrew ? crew?[indexPath.row] : cast?[indexPath.row])
+        let vm = MovieDetailsCastListCellViewModel(cast: viewModel?.cast?[indexPath.row])
+        cell.configure(viewModel: vm)
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let cast = viewModel?.cast?[indexPath.row] else { return }
+        viewModel?.didSelectCast?(cast)
     }
 }

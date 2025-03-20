@@ -14,6 +14,7 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didTapIMDBImage()
     func didTapShareButton()
     func didTapRateButton()
+    func didSelectActor(_ actor: Cast)
     
     func didGetMovieDetails(_ details: MovieDetails)
     func didRecieveError(_ error: String)
@@ -93,6 +94,10 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     func didTapShareButton() {
         guard let details = self.movieDetails else { return }
         router.presentShareView(movie: details)
+    }
+    
+    func didSelectActor(_ actor: Cast) {
+        router.presentActor(actor: actor)
     }
     
     func didGetMovieReviews(_ reviews: [DomainReview], reviewCount: Int) {

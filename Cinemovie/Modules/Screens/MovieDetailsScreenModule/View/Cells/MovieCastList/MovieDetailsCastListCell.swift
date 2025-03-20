@@ -9,10 +9,14 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-final class CMMovieDetailsCastListCell: UICollectionViewCell {
+struct MovieDetailsCastListCellViewModel {
+    let cast: Cast?
+}
+
+final class MovieDetailsCastListCell: UICollectionViewCell {
     
     // MARK: - STATIC
-    static let identifier = Constants.identifier
+    static let identifier = "MovieDetailsCastListCell"
     
     // MARK: - CONSTANTS
     fileprivate enum Paddings {
@@ -21,8 +25,6 @@ final class CMMovieDetailsCastListCell: UICollectionViewCell {
     }
     
     fileprivate enum Constants {
-        static let identifier = "CMMovieDetailsCastListCell"
-        
         static let loadingIndicatorSize: CGFloat = 20
         
         static let imageViewCornerRadius: CGFloat = 20
@@ -88,21 +90,18 @@ final class CMMovieDetailsCastListCell: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC METHOD
-    public func configure(cast: Cast?) {
-        guard let cast = cast else { return }
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
+    public func configure(viewModel: MovieDetailsCastListCellViewModel) {
+        guard let cast = viewModel.cast else { return }
+        DispatchQueue.main.async {
             if let imageURL = URLHelper.getImageURL(with: cast.profilePath, size: .original){
                 self.loadingIndicator.startAnimating()
                 self.avatarImageView.contentMode = .scaleAspectFill
-                avatarImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
+                self.avatarImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
                     guard let self = self else { return }
                     self.loadingIndicator.stopAnimating()
                     self.avatarImageView.setNeedsLayout()
                     self.avatarImageView.layoutIfNeeded()
                 }
-            } else {
-                
             }
             self.nameLabel.text = cast.name
             self.characterName.text = cast.character ?? cast.job ?? Constants.unknownText
