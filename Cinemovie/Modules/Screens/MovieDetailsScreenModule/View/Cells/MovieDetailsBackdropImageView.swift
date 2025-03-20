@@ -9,8 +9,8 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-struct MovieBackdropImageViewModel: MovieDetailsCellViewModel {
-    let identifier = "MovieBackdropImageView"
+struct MovieDetailsBackdropImageViewModel: MovieDetailsCellViewModel {
+    let identifier = "MovieDetailsBackdropImageView"
     
     let imageURL: URL?
     
@@ -19,10 +19,10 @@ struct MovieBackdropImageViewModel: MovieDetailsCellViewModel {
     }
 }
 
-final class MovieBackdropImageView: UICollectionViewCell {
+final class MovieDetailsBackdropImageView: UICollectionViewCell {
     
     // MARK: - STATIC
-    static let identifier = "MovieBackdropImageView"
+    static let identifier = "MovieDetailsBackdropImageView"
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -61,7 +61,7 @@ final class MovieBackdropImageView: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MovieBackdropImageViewModel) {
+    public func configure(viewModel: MovieDetailsBackdropImageViewModel) {
         self.loadingIndicator.startAnimating()
         guard let url = viewModel.imageURL else { self.loadingIndicator.stopAnimating(); return }
         backdropImageView.contentMode = .scaleAspectFill

@@ -9,6 +9,7 @@ import UIKit
 
 final class CMButton: UIButton {
 
+    // MARK: - PROPERTIES
     public var titleLabelText: String = ""
     public var titleLabelForeColor: UIColor = UIColor.white
     public var titleLabelFont: UIFont = UIFont.boldSystemFont(ofSize: 24)
@@ -16,6 +17,7 @@ final class CMButton: UIButton {
     public var backColor: UIColor = .systemCyan
     public var cornerRadius: CGFloat = 8
     
+    // MARK: - LIFECYCLE
     init(
         text: String = "",
         foreColor: UIColor = UIColor.white,
@@ -34,11 +36,31 @@ final class CMButton: UIButton {
         setup()
     }
     
+    convenience init(
+        text: String = "",
+        foreColor: UIColor = UIColor.white,
+        textFont: UIFont = UIFont.boldSystemFont(ofSize: 24),
+        image: UIImage? = nil,
+        backColor: UIColor = .systemCyan,
+        cornerRadius: CGFloat = 8,
+        target: Any?,
+        action: Selector
+    ) {
+        self.init(text: text, foreColor: foreColor, textFont: textFont, image: image, backColor: backColor, cornerRadius: cornerRadius)
+        addTarget(target, action: action, for: .touchUpInside)
+    }
+    
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - PUBLIC FUNC
+    public func setAction(target: Any?, action: Selector){
+        self.addTarget(target, action: action, for: .touchUpInside)
+    }
+    
+    // MARK: - PRIVATE FUNC
     private func setup() {
         let attrTitle = NSAttributedString(
             string: titleLabelText,

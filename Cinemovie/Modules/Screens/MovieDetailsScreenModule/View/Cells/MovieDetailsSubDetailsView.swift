@@ -8,8 +8,8 @@
 import UIKit
 import SnapKit
 
-struct MovieSubDetailsViewModel: MovieDetailsCellViewModel {
-    let identifier: String = "MovieSubDetailsView"
+struct MovieDetailsSubDetailsViewModel: MovieDetailsCellViewModel {
+    let identifier: String = "MovieDetailsSubDetailsView"
     
     let year: String
     let released: Bool
@@ -26,7 +26,7 @@ struct MovieSubDetailsViewModel: MovieDetailsCellViewModel {
     }
 }
 
-final class MovieSubDetailsView: UICollectionViewCell {
+final class MovieDetailsSubDetailsView: UICollectionViewCell {
 
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -35,10 +35,10 @@ final class MovieSubDetailsView: UICollectionViewCell {
     }
     
     // MARK: - STATIC
-    static let identifier = "MovieSubDetailsView"
+    static let identifier = "MovieDetailsSubDetailsView"
     
     // MARK: - PROPERTIES
-    private var viewModel: MovieSubDetailsViewModel?
+    private var viewModel: MovieDetailsSubDetailsViewModel?
     
     // MARK: - VIEW PROPERTIES
     private lazy var hStackView: UIStackView = {
@@ -111,7 +111,7 @@ final class MovieSubDetailsView: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MovieSubDetailsViewModel) {
+    public func configure(viewModel: MovieDetailsSubDetailsViewModel) {
         self.viewModel = viewModel
         movieYearLabel.text = CMDateFormatter.formatToYearOnly(dateString: viewModel.year)
         movieReleasedImageView.image = viewModel.released ?

@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-struct MovieTitleAndTaglineViewModel: MovieDetailsCellViewModel {
+struct MovieDetailsTitleViewModel: MovieDetailsCellViewModel {
     let identifier: String = "MovieTitleAndTaglineView"
     
     let movieName: String
@@ -24,7 +24,7 @@ struct MovieTitleAndTaglineViewModel: MovieDetailsCellViewModel {
     }
 }
 
-final class MovieTitleAndTaglineView: UICollectionViewCell {
+final class MovieDetailsTitleView: UICollectionViewCell {
     
     // MARK: - STATIC
     static let identifier = "MovieTitleAndTaglineView"
@@ -82,7 +82,7 @@ final class MovieTitleAndTaglineView: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MovieTitleAndTaglineViewModel) {
+    public func configure(viewModel: MovieDetailsTitleViewModel) {
         movieNameLabel.text = viewModel.movieName
         movieTaglineLabel.text = viewModel.movieTagline
     }

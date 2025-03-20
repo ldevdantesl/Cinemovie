@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SnapKit
 
 protocol MovieDetailsScreenRouterProtocol {
     func navigateToAnotherMovie(movie: QueryMovie)
@@ -26,7 +27,29 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
         viewController?.navigationController?.pushViewController(newMovieDetails, animated: true)
     }
     
-    func presentActor(actor: Cast) {}
+    func presentActor(actor: Cast) {
+        if let existingPopup = viewController?.view.subviews.first(where: { $0 is MovieDetailsActorPopupView }) as? MovieDetailsActorPopupView {
+            existingPopup.removeFromSuperview()
+        }
+
+        let vm = MovieDetailsActorPopupViewModel(actor: actor, didTapActorDetails: nil)
+        let popupView = MovieDetailsActorPopupView()
+        popupView.translatesAutoresizingMaskIntoConstraints = false
+        popupView.configure(viewModel: vm)
+
+        viewController?.view.addSubview(popupView)
+        popupView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+
+        popupView.alpha = 0
+        popupView.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+
+        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseOut) {
+            popupView.alpha = 1
+            popupView.transform = .identity
+        }
+    }
     
     func presentShareView(movie: MovieDetails) {
         let title = movie.title

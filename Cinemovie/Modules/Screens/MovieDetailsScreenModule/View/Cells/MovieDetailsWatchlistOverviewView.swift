@@ -8,8 +8,8 @@
 import UIKit
 import SnapKit
 
-class MovieAddToWatchlistAndOverviewViewModel: MovieDetailsCellViewModel {
-    let identifier: String = "MovieAddToWatchlistAndOverviewView"
+class MovieDetailsWatchlistOverviewViewModel: MovieDetailsCellViewModel {
+    let identifier: String = "MovieDetailsWatchlistOverviewView"
     let movieOverview: String
     var cellHeight: CGFloat = 80.0
     
@@ -18,10 +18,10 @@ class MovieAddToWatchlistAndOverviewViewModel: MovieDetailsCellViewModel {
     }
 }
 
-final class MovieAddToWatchlistAndOverviewView: UICollectionViewCell {
+final class MovieDetailsWatchlistOverviewView: UICollectionViewCell {
     
     // MARK: - STATIC
-    static let identifier = "MovieAddToWatchlistAndOverviewView"
+    static let identifier = "MovieDetailsWatchlistOverviewView"
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -76,7 +76,7 @@ final class MovieAddToWatchlistAndOverviewView: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MovieAddToWatchlistAndOverviewViewModel) {
+    public func configure(viewModel: MovieDetailsWatchlistOverviewViewModel) {
         movieOverviewLabel.text = viewModel.movieOverview
         
         layoutIfNeeded()

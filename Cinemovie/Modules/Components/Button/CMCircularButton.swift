@@ -10,8 +10,10 @@ import SnapKit
 
 final class CMCircularButton: UIButton {
     
+    // MARK: - PROPERTIES
     private var buttonSize: CGFloat
     
+    // MARK: - LIFECYCLE
     init(
         systemName: String,
         size: CGFloat = 44,
