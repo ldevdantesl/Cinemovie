@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct QueryMovie: Codable {
+struct QueryMovie: APIResponse {
     let id: Int
     let title: String
     let voteAverage: Double?

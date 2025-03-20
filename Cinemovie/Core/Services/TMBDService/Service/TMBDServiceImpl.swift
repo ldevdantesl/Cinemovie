@@ -13,7 +13,20 @@ final class TMBDServiceImpl: TMDBService {
     init(networkService: NetworkService? = nil) {
         self.networkService = networkService
     }
+
+    // MARK: - PERSON DETAILS
+    func getPersonID(creditID: String, completion: @escaping (Result<CreditDetailsAPIResponse, NetworkError>) -> Void) {
+        let endpoint = TMDBEndpoints.getPersonIDEndpoint(creditID: creditID)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
     
+    func getPersonDetails(personID: Int, completion: @escaping (Result<PersonDetails, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getPersonDetailsEndpoint(personID: personID, queryParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    // MARK: - MOVIE DETAILS
     func getMovieDetails(movieID: Int, completion: @escaping (Result<MovieDetails, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
         let endpoint = TMDBEndpoints.getMovieDetailsEndpoint(movieID: movieID, queryParams: queryParams)

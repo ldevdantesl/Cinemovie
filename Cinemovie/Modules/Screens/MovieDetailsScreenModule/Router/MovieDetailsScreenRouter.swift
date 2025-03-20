@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 
 protocol MovieDetailsScreenRouterProtocol {
-    func navigateToPerson(personID: Int)
+    func navigateToPersonDetails(creditID: String)
     func navigateToAnotherMovie(movie: QueryMovie)
     func presentShareView(movie: MovieDetails)
     func presentActor(actor: Cast)
@@ -31,11 +31,7 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
     }
     
     func presentActor(actor: Cast) {
-        if let existingPopup = viewController?.view.subviews.first(where: { $0 is MovieDetailsActorPopupView }) as? MovieDetailsActorPopupView {
-            existingPopup.removeFromSuperview()
-        }
-
-        let vm = MovieDetailsActorPopupViewModel(actor: actor, didTapActorDetails: nil)
+        let vm = MovieDetailsActorPopupViewModel(actor: actor, didTapActorDetails: navigateToPersonDetails)
         let popupView = MovieDetailsActorPopupView()
         popupView.translatesAutoresizingMaskIntoConstraints = false
         popupView.configure(viewModel: vm)
@@ -52,6 +48,11 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
             popupView.alpha = 1
             popupView.transform = .identity
         }
+    }
+    
+    func navigateToPersonDetails(creditID: String) {
+        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, tmdbService: tmdbService)
+        viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
     func presentShareView(movie: MovieDetails) {

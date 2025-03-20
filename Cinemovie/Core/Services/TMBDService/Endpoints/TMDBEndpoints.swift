@@ -11,6 +11,16 @@ struct TMDBEndpoints {
     static let baseURL = CONSTANTS.baseURLString
     static let bearerToken = CONSTANTS.bearerToken
     
+    // MARK: - PERSON
+    static func getPersonIDEndpoint(creditID: String) -> Endpoint {
+        return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/credit/\(creditID)")
+    }
+    
+    static func getPersonDetailsEndpoint(personID: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)", queryParams: queryParams)
+    }
+    
+    // MARK: - MOVIE DETAILS
     static func getMovieCastEndpoint(movieID: Int, queryParams: [String : String]? = nil) -> Endpoint {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/\(movieID)/credits", queryParams: queryParams)
     }

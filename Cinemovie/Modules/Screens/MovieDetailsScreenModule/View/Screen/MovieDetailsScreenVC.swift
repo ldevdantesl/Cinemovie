@@ -27,6 +27,7 @@ final class MovieDetailsScreenVC: UIViewController {
         static let aniDuration = 1.0
         static let hSpacing = 20.0
         static let biggerHSpacing = 30.0
+        static let cellDefaultHeight = 120.0
     }
     
     // MARK: - VIPER
@@ -36,7 +37,7 @@ final class MovieDetailsScreenVC: UIViewController {
     private var viewModels: [MovieDetailsCellViewModel] = []
     
     // MARK: - VIEW PROPERTIES
-    private lazy var downloadingScreen: CMSplashView = {
+    private lazy var downloadingView: CMSplashView = {
         let view = CMSplashView(frame: .zero, showsLoadingLabel: true)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -76,10 +77,8 @@ final class MovieDetailsScreenVC: UIViewController {
     
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
-        view.backgroundColor = .systemBackground
-        
-        view.addSubview(downloadingScreen)
-        downloadingScreen.snp.makeConstraints {
+        view.addSubview(downloadingView)
+        downloadingView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         
@@ -88,7 +87,7 @@ final class MovieDetailsScreenVC: UIViewController {
             $0.edges.equalToSuperview()
         }
         
-        view.bringSubviewToFront(downloadingScreen)
+        view.bringSubviewToFront(downloadingView)
     }
     
     private func dynamicHeightForCell(viewModel: MovieDetailsCellViewModel, width: CGFloat) -> CGSize {
@@ -96,7 +95,7 @@ final class MovieDetailsScreenVC: UIViewController {
             return CGSize(width: width - Constants.hSpacing, height: overviewVM.cellHeight)
         }
         
-        return CGSize(width: width - Constants.hSpacing, height: 120)
+        return CGSize(width: width - Constants.hSpacing, height: Constants.cellDefaultHeight)
     }
 }
 
@@ -137,7 +136,7 @@ extension MovieDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSo
         case is MovieDetailsCastListViewModel: return CGSize(width: width - Constants.hSpacing, height: 150)
         case is MovieDetailsProductionViewModel: return CGSize(width: width - Constants.hSpacing, height: 50)
         case is MovieDetailsRateAndShareViewModel: return CGSize(width: width - Constants.biggerHSpacing, height: 40)
-        default: return CGSize(width: width, height: 100)
+        default: return CGSize(width: width, height: Constants.cellDefaultHeight)
         }
     }
 }
@@ -150,7 +149,8 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             preferredStyle: .alert
         )
 
-        let action = UIAlertAction(title: "OK", style: .cancel) {_ in
+        let action = UIAlertAction(title: "OK", style: .cancel) { [weak self] _ in
+            guard let self = self else { return }
             self.dismiss(animated: true)
         }
 
@@ -166,10 +166,10 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
     ) {
         UIView.animate(withDuration: Constants.aniDuration, delay: Constants.aniDuration, options: .showHideTransitionViews) { [weak self] in
             guard let self = self else { return }
-            self.downloadingScreen.alpha = 0
+            self.downloadingView.alpha = 0
         } completion: { [weak self] _ in
             guard let self = self else { return }
-            self.downloadingScreen.isHidden = true
+            self.downloadingView.isHidden = true
         }
         
         self.viewModels = [

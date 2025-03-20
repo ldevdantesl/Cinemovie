@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct DomainVideo: Decodable {
+struct DomainVideo: APIResponse {
     let iso639_1: String
     let iso3166_1: String
     let name, key: String

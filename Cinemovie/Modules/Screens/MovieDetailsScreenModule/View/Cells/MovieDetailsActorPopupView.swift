@@ -11,7 +11,7 @@ import SDWebImage
 
 struct MovieDetailsActorPopupViewModel {
     let actor: Cast
-    let didTapActorDetails: ((Int) -> Void)?
+    let didTapActorDetails: ((String) -> Void)?
 }
 
 final class MovieDetailsActorPopupView: UIView {
@@ -22,7 +22,7 @@ final class MovieDetailsActorPopupView: UIView {
         static let buttonHeight = 40.0
         
         static let spacing = 5
-        static let biggerSpacing = 10
+        static let biggerSpacing = 10.0
         static let superSpacing = 15
         
         static let containerHeight = 270.0
@@ -92,12 +92,13 @@ final class MovieDetailsActorPopupView: UIView {
         return view
     }()
     
-    private let actorDetailsButton: CMButton = {
+    private lazy var actorDetailsButton: CMButton = {
         let button = CMButton(
             text: "Additional Details", foreColor: .cmLabel,
             textFont: CMFont.font(size: .body, fontName: .avenir), image: nil,
             backColor: CMColor.cmSuccess, cornerRadius: Constants.buttonCornerRadius
         )
+        button.setAction(target: self, action: #selector(didTapDetails))
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -121,7 +122,7 @@ final class MovieDetailsActorPopupView: UIView {
     private lazy var vStack: UIStackView = {
         let stack = UIStackView(arrangedSubviews: [actorNameLabel, actorCharacterLabel, actorGenderLabel, UIView()])
         stack.axis = .vertical
-        stack.spacing = 10
+        stack.spacing = Constants.biggerSpacing
         stack.alignment = .fill
         return stack
     }()
@@ -214,7 +215,7 @@ final class MovieDetailsActorPopupView: UIView {
     }
     
     // MARK: - OBJC FUNC
-    @objc func didTapClose() {
+    @objc private func didTapClose() {
         UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseOut) { [weak self] in
             guard let self = self else { return }
             self.alpha = 0
@@ -223,5 +224,10 @@ final class MovieDetailsActorPopupView: UIView {
             guard let self = self else { return }
             self.removeFromSuperview()
         }
+    }
+    
+    @objc private func didTapDetails() {
+        guard let creditID = viewModel?.actor.creditID else { return }
+        viewModel?.didTapActorDetails?(creditID)
     }
 }
