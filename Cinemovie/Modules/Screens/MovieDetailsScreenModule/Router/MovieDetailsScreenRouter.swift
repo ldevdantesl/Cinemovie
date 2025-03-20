@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 
 protocol MovieDetailsScreenRouterProtocol {
+    func navigateToPerson(personID: Int)
     func navigateToAnotherMovie(movie: QueryMovie)
     func presentShareView(movie: MovieDetails)
     func presentActor(actor: Cast)
@@ -21,6 +22,8 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
     init(tmdbService: TMDBService?) {
         self.tmdbService = tmdbService
     }
+    
+    func navigateToPerson(personID: Int) { }
     
     func navigateToAnotherMovie(movie: QueryMovie) {
         let newMovieDetails = MovieDetailsScreenAssembler.assemble(movieID: movie.id, tmdbService: tmdbService)
