@@ -10,16 +10,18 @@ import Foundation
 struct PersonDetails: APIResponse {
     let id: Int
     let imdbID: String?
+    let name: String
+    let placeOfBirth: String?
     let adult: Bool
     let alsoKnownAs: [String]
     let biography: String
-    let birthday: String
+    let birthday: String?
     let deathday: String?
     let gender: Int
     let homepage: String?
-    let knownForDepartment, name, placeOfBirth: String
+    let knownForDepartment: String
     let popularity: Double
-    let profilePath: String
+    let profilePath: String?
     
     enum CodingKeys: String, CodingKey {
         case adult, biography, birthday, deathday, gender, homepage, id, name, popularity

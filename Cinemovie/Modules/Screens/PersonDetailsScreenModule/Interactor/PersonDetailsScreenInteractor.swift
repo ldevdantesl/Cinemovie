@@ -8,7 +8,9 @@
 import UIKit
 
 protocol PersonDetailsScreenInteractorProtocol: AnyObject {
-    func getPersonDetails()
+    func getPersonID()
+    func getPersonDetails(personID: Int)
+    func getPersonExternalSources(personID: Int)
 }
 
 final class PersonDetailsScreenInteractor: PersonDetailsScreenInteractorProtocol {
@@ -21,22 +23,31 @@ final class PersonDetailsScreenInteractor: PersonDetailsScreenInteractorProtocol
         self.tmdbService = tmdbService
     }
     
-    func getPersonDetails() {
+    func getPersonID() {
         tmdbService?.getPersonID(creditID: creditID) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let response): getPersonDetails(personID: response.person.id)
+            case .success(let response): presenter?.didGetPersonID(response.person.id)
             case .failure(let failure): presenter?.didRecieveError(failure)
             }
         }
     }
     
-    // MARK: - PRIVATE FUNC
-    private func getPersonDetails(personID: Int) {
+    func getPersonDetails(personID: Int) {
         tmdbService?.getPersonDetails(personID: personID) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let details): presenter?.didGetPersonDetails(details)
+            case .success(let success): presenter?.didGetPersonDetails(success)
+            case .failure(let failure): presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func getPersonExternalSources(personID: Int) {
+        tmdbService?.getPersonExternalSources(personID: personID) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): presenter?.didGetPersonExternalSources(success)
             case .failure(let failure): presenter?.didRecieveError(failure)
             }
         }

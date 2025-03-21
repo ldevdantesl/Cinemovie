@@ -10,7 +10,7 @@ import SnapKit
 
 protocol PersonDetailsScreenViewProtocol: AnyObject {
     func didRecieveError(_ errorStr: String)
-    func didGetPersonDetails(_ details: PersonDetails)
+    func didGetAllPersonData(_ details: PersonDetails, sources: ExternalSource)
 }
 
 final class PersonDetailsScreenVC: UIViewController {
@@ -19,6 +19,7 @@ final class PersonDetailsScreenVC: UIViewController {
     fileprivate enum Constants {
         static let collectionViewSpacing = 10.0
         static let aniDuration = 1.0
+        static let defaultCellHeight = 100.0
     }
     
     // MARK: - VIPER
@@ -41,6 +42,9 @@ final class PersonDetailsScreenVC: UIViewController {
         
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.backgroundColor = CMColor.cmBackground
+        cv.register(PersonDetailsBiographyView.self, forCellWithReuseIdentifier: PersonDetailsBiographyView.identifier)
+        cv.register(PersonDetailsSourcesView.self, forCellWithReuseIdentifier: PersonDetailsSourcesView.identifier)
+        cv.register(PersonDetailsInfoView.self, forCellWithReuseIdentifier: PersonDetailsInfoView.identifier)
         cv.register(PersonDetailsHeaderView.self, forCellWithReuseIdentifier: PersonDetailsHeaderView.identifier)
         cv.dataSource = self
         cv.delegate = self
@@ -74,6 +78,13 @@ final class PersonDetailsScreenVC: UIViewController {
         
         view.bringSubviewToFront(downloadingView)
     }
+    
+    private func dynamicHeightForCell(viewModel: PersonDetailsCellViewModel, width: CGFloat) -> CGSize {
+        switch viewModel {
+        case let vm as PersonDetailsBiographyViewModel: return CGSize(width: width - 20, height: vm.cellHeight)
+        default: return CGSize(width: width - 20, height: Constants.defaultCellHeight)
+        }
+    }
 }
 
 extension PersonDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -86,7 +97,12 @@ extension PersonDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataS
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.identifier, for: indexPath)
         
         switch viewModel {
+        case let vm as PersonDetailsBiographyViewModel:
+            (cell as? PersonDetailsBiographyView)?.configure(viewModel: vm)
+            collectionView.collectionViewLayout.invalidateLayout()
+        case let vm as PersonDetailsSourcesViewModel: (cell as? PersonDetailsSourcesView)?.configure(viewModel: vm)
         case let vm as PersonDetailsHeaderViewModel: (cell as? PersonDetailsHeaderView)?.configure(viewModel: vm)
+        case let vm as PersonDetailsInfoViewModel: (cell as? PersonDetailsInfoView)?.configure(viewModel: vm)
         default: return UICollectionViewCell()
         }
         return cell
@@ -97,8 +113,11 @@ extension PersonDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataS
         let width = collectionView.frame.width
         
         switch viewModel {
+        case let vm as PersonDetailsBiographyViewModel: return dynamicHeightForCell(viewModel: vm, width: width)
         case is PersonDetailsHeaderViewModel: return CGSize(width: width - 20, height: 200)
-        default: return CGSize(width: width - 20, height: 100)
+        case let vm as PersonDetailsInfoViewModel: print(vm.totalAvailableInfo); return CGSize(width: width - 20, height: CGFloat(26 * vm.totalAvailableInfo))
+        case is PersonDetailsSourcesViewModel: return CGSize(width: width - 30, height: 30)
+        default: return CGSize(width: width - 20, height: Constants.defaultCellHeight)
         }
     }
 }
@@ -113,7 +132,7 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
 
         let action = UIAlertAction(title: "OK", style: .cancel) { [weak self] _ in
             guard let self = self else { return }
-            self.dismiss(animated: true)
+            presenter?.didTapBackButton()
         }
 
         alert.addAction(action)
@@ -122,7 +141,7 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
         }
     }
     
-    func didGetPersonDetails(_ details: PersonDetails) {
+    func didGetAllPersonData(_ details: PersonDetails, sources: ExternalSource) {
         DispatchQueue.main.async {
             UIView.animate(withDuration: Constants.aniDuration, delay: Constants.aniDuration, options: .showHideTransitionViews) { [weak self] in
                 guard let self = self else { return }
@@ -133,6 +152,22 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
             }
         }
         
-        viewModels.append(PersonDetailsHeaderViewModel(imagePath: details.profilePath, didTapAvaImage: nil, didTapBackButton: presenter?.didTapBackButton))
+        viewModels.append(PersonDetailsHeaderViewModel(
+            imagePath: details.profilePath, didTapAvaImage: nil,
+            didTapBackButton: presenter?.didTapBackButton
+        ))
+     
+        viewModels.append(PersonDetailsInfoViewModel(
+            name: details.name, job: details.knownForDepartment,
+            birthday: details.birthday, hometown: details.placeOfBirth,
+            gender: details.gender
+        ))
+    
+        viewModels.append(PersonDetailsBiographyViewModel(biography: details.biography))
+        viewModels.append(PersonDetailsSourcesViewModel(externalSource: sources, didTapLogo: presenter?.didTapLogoImage))
+        
+        DispatchQueue.main.async {
+            self.collectionView.reloadData()
+        }
     }
 }

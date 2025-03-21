@@ -14,7 +14,7 @@ struct MovieDetailsBackdropImageViewModel: MovieDetailsCellViewModel {
     
     let imageURL: URL?
     
-    init(imagePath: String?, size: URLHelper.ImageSizes) {
+    init(imagePath: String?, size: ImageSizes) {
         self.imageURL = URLHelper.getImageURL(with: imagePath, size: size)
     }
 }

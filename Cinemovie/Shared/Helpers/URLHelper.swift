@@ -7,16 +7,47 @@
 
 import Foundation
 
+enum ImageSizes: String {
+    case w92 = "w92"
+    case w154 = "w154"
+    case w185 = "w185"
+    case w342 = "w342"
+    case w500 = "w500"
+    case w780 = "w780"
+    case w1280 = "w1280"
+    case original = "original"
+}
+
 public struct URLHelper {
-    enum ImageSizes: String {
-        case w92 = "w92"
-        case w154 = "w154"
-        case w185 = "w185"
-        case w342 = "w342"
-        case w500 = "w500"
-        case w780 = "w780"
-        case w1280 = "w1280"
-        case original = "original"
+    static func getPersonInstagramURL(withID id: String?) -> URL? {
+        guard let id = id, !id.isEmpty else { return nil }
+        return URL(string: "https://www.instagram.com/\(id)/")
+    }
+    
+    static func getPersonFacebookURL(withID id: String?) -> URL? {
+        guard let id = id, !id.isEmpty else { return nil }
+        return URL(string: "https://www.facebook.com/\(id)/")
+    }
+    
+    static func getPersonTwitterURL(withID id: String?) -> URL? {
+        guard let id = id, !id.isEmpty else { return nil }
+        return URL(string: "https://twitter.com/\(id)/")
+    }
+    
+    static func getPersonWikiURL(withID id: String?) -> URL? {
+        guard let id = id, !id.isEmpty else { return nil }
+        return URL(string: "https://www.wikidata.org/wiki/\(id)")
+    }
+    
+    static func getPersonIMDBURL(withID id: String?) -> URL? {
+        guard let id = id, !id.isEmpty else { return nil }
+        return URL(string: "https://www.imdb.com/name/\(id)/")
+    }
+    
+    static func getPersonYouTubeURL(withID id: String?) -> URL? {
+        guard let id = id, !id.isEmpty else { return nil }
+        print("https://www.youtube.com/channel/\(id)")
+        return URL(string: "https://www.youtube.com/\(id)")
     }
     
     static func getImageURL(with path: String?, size: ImageSizes) -> URL? {

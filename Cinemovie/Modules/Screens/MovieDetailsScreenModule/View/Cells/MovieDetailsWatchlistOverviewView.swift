@@ -78,9 +78,7 @@ final class MovieDetailsWatchlistOverviewView: UICollectionViewCell {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: MovieDetailsWatchlistOverviewViewModel) {
         movieOverviewLabel.text = viewModel.movieOverview
-        
-        layoutIfNeeded()
-        
+
         let targetWidth = contentView.frame.width
         
         let fittingSize = CGSize(width: targetWidth, height: UIView.layoutFittingCompressedSize.height)
@@ -91,6 +89,7 @@ final class MovieDetailsWatchlistOverviewView: UICollectionViewCell {
         ).height
         
         viewModel.cellHeight = calculatedHeight
+        self.layoutIfNeeded()
     }
     
     // MARK: - PRIVATE FUNC

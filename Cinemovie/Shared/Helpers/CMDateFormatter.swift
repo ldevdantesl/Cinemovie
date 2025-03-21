@@ -38,6 +38,19 @@ public struct CMDateFormatter {
         return outputFormatter.string(from: date)
     }
     
+    static func formatToNormalDate(dateString: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        
+        guard let date = formatter.date(from: dateString) else { return dateString }
+        
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "d MMMM yyyy"
+        outputFormatter.locale = Locale(identifier: "en_US")
+        
+        return outputFormatter.string(from: date)
+    }
+    
     static func isDatePassed(_ dateString: String) -> Bool {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"

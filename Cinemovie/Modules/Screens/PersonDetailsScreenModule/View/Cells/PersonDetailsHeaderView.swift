@@ -11,7 +11,7 @@ import SDWebImage
 
 struct PersonDetailsHeaderViewModel: PersonDetailsCellViewModel {
     let identifier: String = "PersonDetailsHeaderView"
-    let imagePath: String
+    let imagePath: String?
     let didTapAvaImage: (() -> Void)?
     let didTapBackButton: (() -> Void)?
 }
@@ -22,6 +22,7 @@ final class PersonDetailsHeaderView: UICollectionViewCell {
         static let backButtonImage = "chevron.left"
         static let backButtonSize = 35.0
         
+        static let avaDefaultImageName = "person"
         static let avaImageSize = 100.0
         static let loadingIndicatorSize = 20.0
         
@@ -90,6 +91,12 @@ final class PersonDetailsHeaderView: UICollectionViewCell {
                 guard let self = self else { return }
                 self.loadingIndicator.stopAnimating()
             }
+        } else {
+            loadingIndicator.stopAnimating()
+            avatarImageView.preferredSymbolConfiguration = .init(pointSize: Constants.avaImageSize * 0.6, weight: .bold)
+            avatarImageView.contentMode = .center
+            avatarImageView.image = UIImage(systemName: Constants.avaDefaultImageName)
+            avatarImageView.backgroundColor = CMColor.cmSecondaryBackground
         }
     }
     

@@ -26,6 +26,11 @@ final class TMBDServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
+    func getPersonExternalSources(personID: Int, completion: @escaping (Result<ExternalSource, NetworkError>) -> Void) {
+        let endpoint = TMDBEndpoints.getPersonExternalSourcesEndpoint(personID: personID)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
     // MARK: - MOVIE DETAILS
     func getMovieDetails(movieID: Int, completion: @escaping (Result<MovieDetails, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]

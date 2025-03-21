@@ -13,7 +13,8 @@ struct QueryPerson: Decodable {
     let adult: Bool
     let popularity: Double
     let gender: Int
-    let knownForDepartment, profilePath: String
+    let knownForDepartment: String
+    let profilePath: String?
     
     enum CodingKeys: String, CodingKey {
         case id, name

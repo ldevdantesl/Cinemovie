@@ -91,7 +91,7 @@ final class MovieDetailsSubDetailsView: UICollectionViewCell {
     
     private lazy var imdbImageView: UIImageView = {
         let image = UIImageView()
-        image.image = UIImage(named: ImageNames.imdb.rawValue)
+        image.image = UIImage(named: ImageNames.imdbLogo.rawValue)
         image.contentMode = .scaleAspectFit
         image.translatesAutoresizingMaskIntoConstraints = false
         image.isUserInteractionEnabled = true
@@ -117,7 +117,7 @@ final class MovieDetailsSubDetailsView: UICollectionViewCell {
         movieReleasedImageView.image = viewModel.released ?
         UIImage(named: ImageNames.released.rawValue) : UIImage(named: ImageNames.notReleased.rawValue)
         movieDurationLabel.text = viewModel.duration
-        imdbImageView.image = viewModel.imdbPath != nil ? UIImage(named: ImageNames.imdb.rawValue) : nil
+        imdbImageView.image = viewModel.imdbPath != nil ? UIImage(named: ImageNames.imdbLogo.rawValue) : nil
     }
     
     // MARK: - PRIVATE FUNC
