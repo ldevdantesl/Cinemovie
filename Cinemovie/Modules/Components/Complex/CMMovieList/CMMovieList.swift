@@ -8,12 +8,26 @@
 import SnapKit
 import UIKit
 
+struct CMMovieListViewModel {
+    let movies: [QueryMovie]
+    let listTitle: String?
+    let listSubtitle: String?
+    let didTapMovie: ((QueryMovie) -> Void)?
+    
+    init(movies: [QueryMovie], listTitle: String?, listSubtitle: String? = nil, didTapMovie: ((QueryMovie) -> Void)? = nil) {
+        self.movies = movies
+        self.listTitle = listTitle
+        self.listSubtitle = listSubtitle
+        self.didTapMovie = didTapMovie
+    }
+}
+
 final class CMMovieList: UIView {
     
+    // MARK: - CONSTANTS
     fileprivate enum Paddings {
         static let spacing: CGFloat = 5
         static let biggerSpacing: CGFloat = 10
-        
         static let horizontalPadding: CGFloat = 10
     }
     
@@ -22,13 +36,36 @@ final class CMMovieList: UIView {
         static let cellHeight = (UIConstants.screenWidth / 3) * 1.3
     }
     
-    // MARK: - Public properties
-    public var didTapMovie: ((QueryMovie) -> Void)?
+    // MARK: - PROPERTIES
+    private var viewModel: CMMovieListViewModel?
     
-    // MARK: - Private properties
-    private var movies: [QueryMovie]
-    private var listTitleLabel: UILabel?
-    private var listSubtitleLabel: UILabel?
+    // MARK: - VIEW PROPERTIES
+    private let listTitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = CMFont.font(size: .subtitle, weight: .medium)
+        label.textColor = CMColor.cmLabel
+        label.textAlignment = .left
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let listSubtitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = CMFont.font(size: .body, weight: .light)
+        label.textColor = CMColor.cmSecondary
+        label.textAlignment = .left
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var vStack: UIStackView = {
+        let vStack = UIStackView(arrangedSubviews: [listTitleLabel])
+        vStack.axis = .vertical
+        vStack.spacing = Paddings.spacing
+        vStack.alignment = .leading
+        vStack.translatesAutoresizingMaskIntoConstraints = false
+        return vStack
+    }()
     
     private lazy var collectionView: UICollectionView = {
         let flow = UICollectionViewFlowLayout()
@@ -51,34 +88,9 @@ final class CMMovieList: UIView {
         return cv
     }()
     
-    init(
-        movies: [QueryMovie],
-        listTitle: String?,
-        listSubtitle: String?,
-        didTapMovie: ((QueryMovie) -> Void)? = nil
-    ) {
-        self.movies = movies
-        self.didTapMovie = didTapMovie
-        
-        if let listTitle = listTitle {
-            let listTitleLabel = UILabel()
-            listTitleLabel.font = CMFont.font(size: .subtitle, weight: .medium)
-            listTitleLabel.textColor = CMColor.cmLabel
-            listTitleLabel.textAlignment = .left
-            listTitleLabel.text = listTitle
-            self.listTitleLabel = listTitleLabel
-        }
-        
-        if let listSubtitle = listSubtitle {
-            let listSubtitleLabel = UILabel()
-            listSubtitleLabel.font = CMFont.font(size: .body, weight: .light)
-            listSubtitleLabel.textColor = CMColor.cmSecondary
-            listSubtitleLabel.textAlignment = .left
-            listSubtitleLabel.text = listSubtitle
-            self.listSubtitleLabel = listSubtitleLabel
-        }
-        
-        super.init(frame: .zero)
+    // MARK: - LIFECYCLE
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         setupUI()
     }
     
@@ -88,64 +100,47 @@ final class CMMovieList: UIView {
     }
     
     // MARK: - PUBLIC FUNCTIONS
-    func updateMovies(_ movies: [QueryMovie]) {
-        self.movies = movies
+    public func configure(viewModel: CMMovieListViewModel) {
+        self.vStack.removeArrangedSubview(self.listSubtitleLabel)
+        self.viewModel = viewModel
+        self.listTitleLabel.text = viewModel.listTitle
+        if let listSubtitle = viewModel.listSubtitle {
+            self.listSubtitleLabel.text = listSubtitle
+            self.vStack.addArrangedSubview(self.listSubtitleLabel)
+        }
         collectionView.reloadData()
     }
     
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
-        if let listTitleLabel = listTitleLabel {
-            addSubview(listTitleLabel)
-            listTitleLabel.snp.makeConstraints {
-                $0.top.equalToSuperview().offset(Paddings.spacing)
-                $0.leading.equalToSuperview().offset(Paddings.horizontalPadding)
-                $0.trailing.equalToSuperview().offset(-Paddings.horizontalPadding)
-            }
-            
-            if let listSubtitleLabel = listSubtitleLabel {
-                addSubview(listSubtitleLabel)
-                listSubtitleLabel.snp.makeConstraints {
-                    $0.top.equalTo(listTitleLabel.snp.bottom).offset(Paddings.spacing)
-                    $0.leading.trailing.equalToSuperview()
-                }
-                
-                addSubview(collectionView)
-                collectionView.snp.makeConstraints {
-                    $0.top.equalTo(listSubtitleLabel.snp.bottom).offset(Paddings.biggerSpacing)
-                    $0.leading.trailing.bottom.equalToSuperview()
-                    $0.height.equalTo(Constants.cellHeight)
-                }
-            } else {
-                addSubview(collectionView)
-                collectionView.snp.makeConstraints {
-                    $0.top.equalTo(listTitleLabel.snp.bottom).offset(Paddings.biggerSpacing)
-                    $0.leading.trailing.bottom.equalToSuperview()
-                    $0.height.equalTo(Constants.cellHeight)
-                }
-            }
-        } else {
-            addSubview(collectionView)
-            collectionView.snp.makeConstraints {
-                $0.top.equalToSuperview().offset(Paddings.spacing)
-                $0.leading.trailing.bottom.equalToSuperview()
-                $0.height.equalTo(Constants.cellHeight)
-            }
+        addSubview(vStack)
+        vStack.snp.makeConstraints {
+            $0.top.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(Paddings.horizontalPadding)
+        }
+        
+        addSubview(collectionView)
+        collectionView.snp.makeConstraints {
+            $0.top.equalTo(vStack.snp.bottom).offset(Paddings.spacing)
+            $0.leading.trailing.bottom.equalToSuperview()
+            $0.height.equalTo(Constants.cellHeight)
         }
     }
 }
 
 extension CMMovieList: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let selectedMovie = movies[indexPath.row]
-        self.didTapMovie?(selectedMovie)
+        guard let viewModel = viewModel else { return }
+        let selectedMovie = viewModel.movies[indexPath.row]
+        viewModel.didTapMovie?(selectedMovie)
     }
     
     func collectionView(
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int
     ) -> Int {
-        movies.count
+        guard let viewModel = viewModel else { return 0 }
+        return viewModel.movies.count
     }
 
     func collectionView(
@@ -157,8 +152,10 @@ extension CMMovieList: UICollectionViewDelegate, UICollectionViewDelegateFlowLay
         ) as? CMMovieListCell else {
             fatalError("CMMovieListCell is not registered")
         }
+        
+        guard let viewModel = viewModel else { return cell }
 
-        cell.configure(movie: movies[indexPath.row])
+        cell.configure(movie: viewModel.movies[indexPath.row])
         return cell
     }
 

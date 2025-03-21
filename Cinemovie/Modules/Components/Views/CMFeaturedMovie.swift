@@ -9,31 +9,54 @@ import UIKit
 import SnapKit
 import SDWebImage
 
+final class CMFeaturedMovieViewModel {
+    let movies: [QueryMovie]
+    let changeInSeconds: TimeInterval
+    let didTapMovie: ((QueryMovie) -> Void)?
+    var currentMovie: QueryMovie?
+    
+    init(movies: [QueryMovie], changeInSeconds: TimeInterval = 5.0,didTapMovie: ((QueryMovie) -> Void)? = nil) {
+        self.movies = movies
+        self.changeInSeconds = changeInSeconds
+        self.didTapMovie = didTapMovie
+    }
+}
+
 final class CMFeaturedMovie: UIView {
-    private var didTapMovie: ((QueryMovie) -> Void)?
+
+    // MARK: - CONSTANTS
+    fileprivate enum Constants {
+        static let selfCornerRadius = 10.0
+        static let selfBorderWidth = 0.3
+        
+        static let buttonCornerRadius = 10.0
+        static let buttonSize = 40.0
+        
+        static let bigSpacing = 10.0
+        
+        static let stackHeight = 50.0
+    }
     
+    // MARK: - PROPERTIES
+    private var viewModel: CMFeaturedMovieViewModel?
+    private var movieWorkItem: DispatchWorkItem?
     private var gradientLayer: CAGradientLayer?
-    private let activityIndicatorImage = UIActivityIndicatorView(style: .large)
     
-    private var changeMovieTimer: Timer?
-    
-    private var movies: [QueryMovie] = []
-    private var currentMovie: QueryMovie?
-    
-    private let buttonsContainer: UIView = {
-        let view = UIView()
+    // MARK: - VIEW PROPERTIES
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView(style: .large)
+        view.hidesWhenStopped = true
+        view.color = CMColor.cmLabel
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .black
         return view
     }()
     
     private lazy var movieImage: UIImageView = {
-        let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapedOnMovieImage))
         let image = UIImageView()
         image.contentMode = .scaleAspectFill
         image.clipsToBounds = true
         image.isUserInteractionEnabled = true
-        image.addGestureRecognizer(gesture)
+        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapOnMovieImage)))
         return image
     }()
     
@@ -43,7 +66,7 @@ final class CMFeaturedMovie: UIView {
             foreColor: CMColor.cmLabel,
             textFont: CMFont.font(size: .subtitle),
             backColor: CMColor.cmSecondary,
-            cornerRadius: 10
+            cornerRadius: Constants.buttonCornerRadius
         )
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -55,18 +78,26 @@ final class CMFeaturedMovie: UIView {
             foreColor: .cmDivider,
             textFont: CMFont.font(size: .subtitle),
             backColor: CMColor.cmLabel,
-            cornerRadius: 10
+            cornerRadius: Constants.buttonCornerRadius
         )
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
+    
+    private lazy var hStack: UIStackView = {
+        let view = UIStackView(arrangedSubviews: [myListButton, watchListButton])
+        view.axis = .horizontal
+        view.spacing = Constants.bigSpacing
+        view.alignment = .center
+        view.distribution = .fill
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
 
-    init(movies: [QueryMovie], didTapMovie: @escaping (QueryMovie) -> Void) {
-        super.init(frame: .zero)
-        self.movies = movies
-        self.didTapMovie = didTapMovie
+    // MARK: - LIFECYCLE
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         setupUI()
-        updateMovie()
     }
     
     @available(*, unavailable)
@@ -74,41 +105,29 @@ final class CMFeaturedMovie: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    deinit {
-        changeMovieTimer?.invalidate()
-    }
-    
     override func layoutSubviews() {
         super.layoutSubviews()
+        clipsToBounds = true
+        layer.cornerRadius = Constants.selfCornerRadius
+        layer.borderColor = CMColor.cmSecondary.cgColor
+        layer.borderWidth = Constants.selfBorderWidth
         applyGradientToImageView()
     }
     
-    // MARK: - PUBLIC FUNCTION
-    func updateMovie() {
-        guard let movie = movies.randomElement() else { return }
-        self.currentMovie = movie
-        if let url = URLHelper.getImageURL(with: movie.posterPath, size: .w1280) {
-            activityIndicatorImage.startAnimating()
-            UIView.transition(with: movieImage, duration: 0.5, options: .transitionCrossDissolve) { [weak self] in
-                self?.movieImage.sd_setImage(with: url)
-            }
-        }
+    deinit {
+        movieWorkItem?.cancel()
     }
     
-    func updateMovies(_ movies: [QueryMovie]) {
-        self.movies = movies
-        updateMovie()
-        startMovieChangeTimer()
+    // MARK: - PUBLIC FUNCTION
+    public func configure(viewModel: CMFeaturedMovieViewModel) {
+        self.viewModel = viewModel
+        startMovieLoop(movies: viewModel.movies)
     }
     
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
-        clipsToBounds = true
-        layer.cornerRadius = 10
-        layer.borderColor = CMColor.cmSecondary.cgColor
-        layer.borderWidth = 0.3
-        addSubview(activityIndicatorImage)
-        activityIndicatorImage.snp.makeConstraints {
+        movieImage.addSubview(loadingIndicator)
+        loadingIndicator.snp.makeConstraints {
             $0.center.equalToSuperview()
         }
         
@@ -117,39 +136,44 @@ final class CMFeaturedMovie: UIView {
             $0.top.leading.trailing.equalToSuperview()
         }
         
-        
-        addSubview(buttonsContainer)
-        buttonsContainer.snp.makeConstraints {
+        addSubview(hStack)
+        hStack.snp.makeConstraints {
             $0.top.equalTo(movieImage.snp.bottom)
-            $0.leading.trailing.bottom.equalToSuperview()
-            $0.height.equalTo(50)
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(Constants.stackHeight)
         }
-        
-        buttonsContainer.addSubview(watchListButton)
-        
-        watchListButton.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.leading.equalToSuperview().offset(10)
-            $0.trailing.equalToSuperview().multipliedBy(0.48)
-            $0.bottom.equalToSuperview().offset(-10)
-        }
-        
-        buttonsContainer.addSubview(myListButton)
         
         myListButton.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.leading.equalTo(watchListButton.snp.trailing).offset(10)
-            $0.trailing.equalToSuperview().offset(-10)
-            $0.bottom.equalToSuperview().offset(-10)
+            $0.size.equalTo(Constants.buttonSize)
+        }
+        
+        watchListButton.snp.makeConstraints {
+            $0.size.equalTo(Constants.buttonSize)
         }
     }
     
-    private func startMovieChangeTimer() {
-        changeMovieTimer?.invalidate()
-        changeMovieTimer = nil
-        
-        changeMovieTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
-            self?.updateMovie()
+    private func startMovieLoop(movies: [QueryMovie]) {
+        guard let viewModel = viewModel else { return }
+        movieWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            guard let movie = movies.randomElement() else { return }
+            self.viewModel?.currentMovie = movie
+            self.updateMovie(with: movie)
+            
+            self.startMovieLoop(movies: movies)
+        }
+        movieWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + viewModel.changeInSeconds, execute: workItem)
+    }
+    
+    private func updateMovie(with movie: QueryMovie) {
+        if let url = URLHelper.getImageURL(with: movie.posterPath, size: .original) {
+            loadingIndicator.startAnimating()
+            movieImage.sd_setImage(with: url) { [weak self] _, _, _, _ in
+                guard let self = self else { return }
+                self.loadingIndicator.stopAnimating()
+            }
         }
     }
     
@@ -175,9 +199,9 @@ final class CMFeaturedMovie: UIView {
     }
     
     // MARK: - OBJC FUNCTIONS
-    @objc
-    private func didTapedOnMovieImage() {
-        guard let currentMovie = currentMovie else { return }
-        didTapMovie?(currentMovie)
+    @objc private func didTapOnMovieImage() {
+        guard let viewModel = viewModel else { return }
+        guard let currentMovie = viewModel.currentMovie else { return }
+        viewModel.didTapMovie?(currentMovie)
     }
 }

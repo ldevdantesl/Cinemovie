@@ -13,12 +13,13 @@ protocol HomeScreenViewProtocol: AnyObject {
     func didRecieveTopRatedMovies(_ movies: [QueryMovie])
     func didRecieveUpcomingMovies(_ movies: [QueryMovie])
     func didRecieveNowPlayingMovies(_ movies: [QueryMovie])
-    func didTapMovie(_ movie: QueryMovie)
+
     func didRecieveError(_ errorStr: String)
 }
 
 final class HomeScreenVC: UIViewController {
 
+    // MARK: - CONSTANTS
     fileprivate enum Paddings {
         static let headerViewHeight: CGFloat = 80
         static let featuredMovieViewHorPadding = 20
@@ -30,14 +31,13 @@ final class HomeScreenVC: UIViewController {
         static let headerViewFirstButtonSize: CGFloat = 30
     }
     
+    // MARK: - VIPER
     var presenter: HomeScreenPresenterProtocol?
+    
+    // MARK: - PROPERTIES
     private var isShadowVisible = false
     
-    private var popularMovies: [QueryMovie] = []
-    private var upcomingMovies: [QueryMovie] = []
-    private var nowPlayingMovies: [QueryMovie] = []
-    private var topRatedMovies: [QueryMovie] = []
-
+    // MARK: - VIEW PROPERTIES
     private lazy var scrollView: UIScrollView = {
         let scroll = UIScrollView()
         scroll.showsVerticalScrollIndicator = true
@@ -72,61 +72,41 @@ final class HomeScreenVC: UIViewController {
         return header
     }()
 
-    private lazy var featuredMovieView: CMFeaturedMovie = {
-        let movie = CMFeaturedMovie(movies: popularMovies, didTapMovie: didTapMovie)
+    private let featuredMovieView: CMFeaturedMovie = {
+        let movie = CMFeaturedMovie()
         movie.translatesAutoresizingMaskIntoConstraints = false
         return movie
     }()
 
-    private lazy var popularMoviesList: CMMovieList = {
-        let list = CMMovieList(
-            movies: popularMovies,
-            listTitle: "Popular Movies",
-            listSubtitle: nil,
-            didTapMovie: didTapMovie
-        )
+    private let popularMoviesList: CMMovieList = {
+        let list = CMMovieList()
         list.translatesAutoresizingMaskIntoConstraints = false
         list.isUserInteractionEnabled = true
         return list
     }()
     
-    private lazy var upcomingMoviesList: CMMovieList = {
-        let list = CMMovieList(
-            movies: upcomingMovies,
-            listTitle: "Upcoming Movies",
-            listSubtitle: nil,
-            didTapMovie: didTapMovie
-        )
+    private let upcomingMoviesList: CMMovieList = {
+        let list = CMMovieList()
         list.translatesAutoresizingMaskIntoConstraints = false
         list.isUserInteractionEnabled = true
         return list
     }()
     
-    private lazy var nowPlayingMoviesList: CMMovieList = {
-        let list = CMMovieList(
-            movies: nowPlayingMovies,
-            listTitle: "Now Playing Movies",
-            listSubtitle: nil,
-            didTapMovie: didTapMovie
-        )
+    private let nowPlayingMoviesList: CMMovieList = {
+        let list = CMMovieList()
         list.translatesAutoresizingMaskIntoConstraints = false
         list.isUserInteractionEnabled = true
         return list
     }()
     
-    private lazy var topRatedMoviesList: CMMovieList = {
-        let list = CMMovieList(
-            movies: topRatedMovies,
-            listTitle: "Top Rated Movies",
-            listSubtitle: nil,
-            didTapMovie: didTapMovie
-        )
+    private let topRatedMoviesList: CMMovieList = {
+        let list = CMMovieList()
         list.translatesAutoresizingMaskIntoConstraints = false
         list.isUserInteractionEnabled = true
         return list
     }()
 
-    // MARK: - VC Cycle
+    // MARK: - LIFECYCLE
     override func viewDidLoad() {
         super.viewDidLoad()
         presenter?.viewDidLoaded()
@@ -136,7 +116,6 @@ final class HomeScreenVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: true)
-        featuredMovieView.updateMovie()
     }
     
     // MARK: - PRIVATE FUNCTIONS
@@ -179,25 +158,25 @@ final class HomeScreenVC: UIViewController {
         contentView.addSubview(popularMoviesList)
         popularMoviesList.snp.makeConstraints {
             $0.top.equalTo(featuredMovieView.snp.bottom).offset(Paddings.spacing)
-            $0.leading.trailing.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
         }
         
         contentView.addSubview(upcomingMoviesList)
         upcomingMoviesList.snp.makeConstraints {
             $0.top.equalTo(popularMoviesList.snp.bottom).offset(Paddings.spacing)
-            $0.leading.trailing.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
         }
         
         contentView.addSubview(topRatedMoviesList)
         topRatedMoviesList.snp.makeConstraints {
             $0.top.equalTo(upcomingMoviesList.snp.bottom).offset(Paddings.spacing)
-            $0.leading.trailing.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
         }
         
         contentView.addSubview(nowPlayingMoviesList)
         nowPlayingMoviesList.snp.makeConstraints {
             $0.top.equalTo(topRatedMoviesList.snp.bottom).offset(Paddings.spacing)
-            $0.leading.trailing.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
         }
         
         contentView.snp.makeConstraints {
@@ -206,8 +185,7 @@ final class HomeScreenVC: UIViewController {
     }
     
     // MARK: - OBJC FUNCTIONS
-    @objc
-    private func didTapSearchButton() {
+    @objc private func didTapSearchButton() {
         print("Tapped Search Button")
     }
 }
@@ -230,24 +208,33 @@ extension HomeScreenVC: UIScrollViewDelegate {
 
 extension HomeScreenVC: HomeScreenViewProtocol {
     func didRecievePopularMovies(_ movies: [QueryMovie]) {
-        self.popularMovies = movies
-        self.popularMoviesList.updateMovies(movies)
-        self.featuredMovieView.updateMovies(movies)
+        DispatchQueue.main.async {
+            let vm = CMMovieListViewModel(movies: movies, listTitle: "Popular Movies", didTapMovie: self.presenter?.didTapMovie)
+            self.popularMoviesList.configure(viewModel: vm)
+            let featuredVM = CMFeaturedMovieViewModel(movies: movies, didTapMovie: self.presenter?.didTapMovie)
+            self.featuredMovieView.configure(viewModel: featuredVM)
+        }
     }
     
     func didRecieveTopRatedMovies(_ movies: [QueryMovie]) {
-        self.topRatedMovies = movies
-        self.topRatedMoviesList.updateMovies(movies)
+        DispatchQueue.main.async {
+            let vm = CMMovieListViewModel(movies: movies, listTitle: "Upcoming Movies", didTapMovie: self.presenter?.didTapMovie)
+            self.topRatedMoviesList.configure(viewModel: vm)
+        }
     }
     
     func didRecieveUpcomingMovies(_ movies: [QueryMovie]) {
-        self.upcomingMovies = movies
-        self.upcomingMoviesList.updateMovies(movies)
+        DispatchQueue.main.async {
+            let vm = CMMovieListViewModel(movies: movies, listTitle: "Top Rated Movies", didTapMovie: self.presenter?.didTapMovie)
+            self.upcomingMoviesList.configure(viewModel: vm)
+        }
     }
     
     func didRecieveNowPlayingMovies(_ movies: [QueryMovie]) {
-        self.nowPlayingMovies = movies
-        self.nowPlayingMoviesList.updateMovies(movies)
+        DispatchQueue.main.async {
+            let vm = CMMovieListViewModel(movies: movies, listTitle: "Now Playing Movies", didTapMovie: self.presenter?.didTapMovie)
+            self.nowPlayingMoviesList.configure(viewModel: vm)
+        }
     }
 
     func didRecieveError(_ errorStr: String) {
@@ -261,10 +248,5 @@ extension HomeScreenVC: HomeScreenViewProtocol {
             UIAlertAction(title: "OK", style: .cancel, handler: nil))
 
         self.present(alert, animated: true, completion: nil)
-    }
-    
-    func didTapMovie(_ movie: QueryMovie) {
-        print("Tapped movie: \(movie.id)")
-        presenter?.didTapMovie(movie)
     }
 }

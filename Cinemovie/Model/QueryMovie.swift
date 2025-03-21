@@ -23,9 +23,13 @@ struct QueryMovie: APIResponse {
     let popularity: Double?
     let releaseDate: String
     let video: Bool?
+    let character: String?
+    let creditID: String?
+    let order: Int?
 
     enum CodingKeys: String, CodingKey {
-        case adult, title, video, id, overview, popularity
+        case adult, title, video, id, overview, popularity, character, order
+        case creditID = "credit_id"
         case backdropPath = "backdrop_path"
         case genreIDS = "genre_ids"
         case mediaType = "media_type"

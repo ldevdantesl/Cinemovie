@@ -9,8 +9,10 @@ import SnapKit
 import UIKit
 
 final class CMMovieListCell: UICollectionViewCell {
+    // MARK: - STATIC
     static let identifier = "CMMovieListCell"
     
+    // MARK: - PROPERTIES
     private let loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
         indicator.hidesWhenStopped = true
@@ -27,6 +29,7 @@ final class CMMovieListCell: UICollectionViewCell {
         return image
     }()
     
+    // MARK: - LIFECYCLE
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()

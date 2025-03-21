@@ -9,7 +9,9 @@ import UIKit
 
 struct PersonDetailsMediaViewModel: PersonDetailsCellViewModel {
     let identifier: String = "PersonDetailsMediaView"
-    
+    let headerTitle: String
+    let headerSubtitle: String?
+    let movies: [QueryMovie]
 }
 
 final class PersonDetailsMediaView: UICollectionViewCell {
@@ -20,6 +22,13 @@ final class PersonDetailsMediaView: UICollectionViewCell {
     static let identifier = "PersonDetailsMediaView"
     
     // MARK: - PROPERTIES
+    private var viewModel: PersonDetailsMediaViewModel?
+    
+    private lazy var movieListView: CMMovieList = {
+        let view = CMMovieList()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
     // MARK: - LIFECYCLE
     override init(frame: CGRect) {
@@ -33,10 +42,10 @@ final class PersonDetailsMediaView: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure() { }
+    public func configure(viewModel: PersonDetailsMediaViewModel) {
+        self.viewModel = viewModel
+    }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() { }
-    
-    // MARK: - OBJC FUNC
 }
