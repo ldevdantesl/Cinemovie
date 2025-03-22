@@ -146,6 +146,10 @@ final class MovieDetailsActorPopupView: UIView {
         self.containerView.layer.cornerRadius = Constants.containerCornerRadius
     }
     
+    deinit {
+        print("Actor popup removed")
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: MovieDetailsActorPopupViewModel) {
         self.viewModel = viewModel
