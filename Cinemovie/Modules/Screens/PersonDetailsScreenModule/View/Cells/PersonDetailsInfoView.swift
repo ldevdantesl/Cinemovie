@@ -76,7 +76,7 @@ final class PersonDetailsInfoView: UICollectionViewCell {
         let label = UILabel()
         label.numberOfLines = 1
         label.textColor = CMColor.cmLabel
-        label.font = CMFont.font(size: .caption, fontName: .avenir)
+        label.font = CMFont.font(size: .caption, fontName: .avenirDemiBold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

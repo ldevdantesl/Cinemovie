@@ -46,7 +46,7 @@ final class CMMovieReviewsView: UIView {
     private lazy var reviewsLabel: UILabel = {
         let label = UILabel()
         label.text = "Reviews"
-        label.font = CMFont.font(size: .subtitle, fontName: .avenir)
+        label.font = CMFont.font(size: .subtitle, fontName: .avenirDemiBold)
         label.textColor = CMColor.cmLabel
         label.numberOfLines = 1
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -55,7 +55,7 @@ final class CMMovieReviewsView: UIView {
     
     private lazy var totalReviewsLabel: UILabel = {
         let label = UILabel()
-        label.font = CMFont.font(size: .subtitle, fontName: .avenir)
+        label.font = CMFont.font(size: .subtitle, fontName: .avenirDemiBold)
         label.numberOfLines = 1
         label.textColor = CMColor.cmSecondary
         return label

@@ -50,7 +50,7 @@ final class LoginScreenVC: UIViewController {
         let button = CMButton(
             text: "Login with TMDB",
             foreColor: CMColor.cmButton,
-            textFont: CMFont.font(size: .body, fontName: .avenir),
+            textFont: CMFont.font(size: .body, fontName: .avenirDemiBold),
             backColor: CMColor.cmPrimary,
             cornerRadius: 10
         )
@@ -62,7 +62,7 @@ final class LoginScreenVC: UIViewController {
         let button = CMButton(
             text: "Continue as Guest",
             foreColor: CMColor.cmButton,
-            textFont: CMFont.font(size: .body, fontName: .avenir),
+            textFont: CMFont.font(size: .body, fontName: .avenirDemiBold),
             backColor: CMColor.cmAccent,
             cornerRadius: 10
         )

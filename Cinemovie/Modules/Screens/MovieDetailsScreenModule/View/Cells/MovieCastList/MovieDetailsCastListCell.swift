@@ -63,7 +63,7 @@ final class MovieDetailsCastListCell: UICollectionViewCell {
     
     private lazy var nameLabel: UILabel = {
         let label = UILabel()
-        label.font = CMFont.font(size: .tiny, fontName: .avenir)
+        label.font = CMFont.font(size: .tiny, fontName: .avenirDemiBold)
         label.textColor = CMColor.cmLabel
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -73,7 +73,7 @@ final class MovieDetailsCastListCell: UICollectionViewCell {
     private lazy var characterName: UILabel = {
         let label = UILabel()
         label.textColor = CMColor.cmSecondary
-        label.font = CMFont.font(size: .tiny, fontName: .avenir)
+        label.font = CMFont.font(size: .tiny, fontName: .avenirDemiBold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

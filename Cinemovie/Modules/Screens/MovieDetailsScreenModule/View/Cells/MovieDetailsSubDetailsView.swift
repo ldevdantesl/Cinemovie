@@ -58,7 +58,7 @@ final class MovieDetailsSubDetailsView: UICollectionViewCell {
         let label = UILabel()
         label.textColor = CMColor.cmLabel
         label.numberOfLines = 1
-        label.font = CMFont.font(size: .caption, fontName: .avenir)
+        label.font = CMFont.font(size: .caption, fontName: .avenirDemiBold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -84,7 +84,7 @@ final class MovieDetailsSubDetailsView: UICollectionViewCell {
         let label = UILabel()
         label.textColor = CMColor.cmLabel
         label.numberOfLines = 1
-        label.font = CMFont.font(size: .caption, fontName: .avenir)
+        label.font = CMFont.font(size: .caption, fontName: .avenirDemiBold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

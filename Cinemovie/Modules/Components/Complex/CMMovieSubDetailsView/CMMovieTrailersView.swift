@@ -30,7 +30,7 @@ final class CMMovieTrailersView: UIView {
         let label = UILabel()
         label.text = "Trailers"
         label.textColor = CMColor.cmLabel
-        label.font = CMFont.font(size: .body, fontName: .avenir)
+        label.font = CMFont.font(size: .body, fontName: .avenirDemiBold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -39,7 +39,7 @@ final class CMMovieTrailersView: UIView {
         let label = UILabel()
         label.textColor = CMColor.cmSecondary
         label.textAlignment = .left
-        label.font = CMFont.font(size: .caption, fontName: .avenir)
+        label.font = CMFont.font(size: .caption, fontName: .avenirDemiBold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -153,7 +153,7 @@ final class CMMovieTrailersView: UIView {
         let videoLabel = UILabel()
         videoLabel.text = video.name
         videoLabel.textColor = CMColor.cmSecondary
-        videoLabel.font = CMFont.font(size: .tiny, fontName: .avenir)
+        videoLabel.font = CMFont.font(size: .tiny, fontName: .avenirDemiBold)
         videoLabel.translatesAutoresizingMaskIntoConstraints = false
         innerStack.addArrangedSubview(videoLabel)
         

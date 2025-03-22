@@ -20,7 +20,7 @@ final class SettingsScreenVC: UIViewController {
         let button = CMButton(
             text: "Log Out",
             foreColor: CMColor.cmButton,
-            textFont: CMFont.font(size: .body, fontName: .avenir),
+            textFont: CMFont.font(size: .body, fontName: .avenirDemiBold),
             backColor: CMColor.cmError,
             cornerRadius: 15
         )

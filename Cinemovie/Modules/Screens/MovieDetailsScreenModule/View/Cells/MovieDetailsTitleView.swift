@@ -56,7 +56,7 @@ final class MovieDetailsTitleView: UICollectionViewCell {
     private lazy var movieNameLabel: UILabel = {
         let label = UILabel()
         label.textColor = CMColor.cmLabel
-        label.font = CMFont.font(size: .body, fontName: .avenir)
+        label.font = CMFont.font(size: .body, fontName: .avenirDemiBold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -64,7 +64,7 @@ final class MovieDetailsTitleView: UICollectionViewCell {
     private lazy var movieTaglineLabel: UILabel = {
         let label = UILabel()
         label.textColor = CMColor.cmSecondary
-        label.font = CMFont.font(size: .footnote, fontName: .avenir)
+        label.font = CMFont.font(size: .footnote, fontName: .avenirDemiBold)
         label.translatesAutoresizingMaskIntoConstraints = false
         label.adjustsFontForContentSizeCategory = true
         return label

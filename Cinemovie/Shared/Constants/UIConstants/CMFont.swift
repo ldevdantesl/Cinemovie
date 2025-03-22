@@ -18,8 +18,18 @@ public enum CMFontSizes: CGFloat {
 }
 
 public enum CMFontNames: String {
-    case avenir = "AvenirNext-DemiBold"
+    case avenirUltraLight = "AvenirNext-UltraLight"
+    case avenirRegular = "AvenirNext-Regular"
+    case avenirMedium = "AvenirNext-Medium"
+    case avenirDemiBold = "AvenirNext-DemiBold"
     case avenirBold = "AvenirNext-Bold"
+    case avenirHeavy = "AvenirNext-Heavy"
+    case avenirItalic = "AvenirNext-Italic"
+    case avenirBoldItalic = "AvenirNext-BoldItalic"
+    case avenirDemiBoldItalic = "AvenirNext-DemiBoldItalic"
+    case avenirMediumItalic = "AvenirNext-MediumItalic"
+    case avenirHeavyItalic = "AvenirNext-HeavyItalic"
+    case avenirUltraLightItalic = "AvenirNext-UltraLightItalic"
 }
 
 public struct CMFont {

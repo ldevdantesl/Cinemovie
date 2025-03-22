@@ -38,7 +38,7 @@ final class MovieDetailsProductionView: UICollectionViewCell {
     private let companiesListLabel: UILabel = {
         let label = UILabel()
         label.textColor = CMColor.cmSecondary
-        label.font = CMFont.font(size: .footnote, fontName: .avenir)
+        label.font = CMFont.font(size: .footnote, fontName: .avenirDemiBold)
         label.textAlignment = .right
         label.text = "Unknown"
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -57,7 +57,7 @@ final class MovieDetailsProductionView: UICollectionViewCell {
     private let countriesListLabel: UILabel = {
         let label = UILabel()
         label.textColor = CMColor.cmSecondary
-        label.font = CMFont.font(size: .footnote, fontName: .avenir)
+        label.font = CMFont.font(size: .footnote, fontName: .avenirDemiBold)
         label.textAlignment = .right
         label.text = "Unknown"
         label.translatesAutoresizingMaskIntoConstraints = false

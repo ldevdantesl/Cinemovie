@@ -154,7 +154,7 @@ final class CMMovieSubDetailsView: UIView {
     private func createLabel(withText text: String, tag: Int) -> UILabel {
         let label = UILabel()
         label.text = text
-        label.font = CMFont.font(size: .caption, fontName: .avenir)
+        label.font = CMFont.font(size: .caption, fontName: .avenirDemiBold)
         label.textColor = selectedTab.rawValue == tag ? CMColor.cmLabel : CMColor.cmSecondary
         label.tag = tag
         label.isUserInteractionEnabled = true

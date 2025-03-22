@@ -22,8 +22,7 @@ final class CMFeaturedMovieViewModel {
     }
 }
 
-final class CMFeaturedMovie: UIView {
-
+final class CMFeaturedMovieView: UIView {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let selfCornerRadius = 10.0
@@ -34,7 +33,7 @@ final class CMFeaturedMovie: UIView {
         
         static let bigSpacing = 10.0
         
-        static let stackHeight = 50.0
+        static let stackHeight = 70.0
     }
     
     // MARK: - PROPERTIES
@@ -64,8 +63,8 @@ final class CMFeaturedMovie: UIView {
         let button = CMButton(
             text: "+ My List",
             foreColor: CMColor.cmLabel,
-            textFont: CMFont.font(size: .subtitle),
-            backColor: CMColor.cmSecondary,
+            textFont: CMFont.font(size: .subtitle, fontName: .avenirBold),
+            backColor: CMColor.cmAccent,
             cornerRadius: Constants.buttonCornerRadius
         )
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -75,9 +74,9 @@ final class CMFeaturedMovie: UIView {
     private let watchListButton: CMButton = {
         let button = CMButton(
             text: "+ Watchlist",
-            foreColor: .cmDivider,
-            textFont: CMFont.font(size: .subtitle),
-            backColor: CMColor.cmLabel,
+            foreColor: CMColor.cmLabel,
+            textFont: CMFont.font(size: .subtitle, fontName: .avenirBold),
+            backColor: CMColor.cmSuccess,
             cornerRadius: Constants.buttonCornerRadius
         )
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -90,6 +89,8 @@ final class CMFeaturedMovie: UIView {
         view.spacing = Constants.bigSpacing
         view.alignment = .center
         view.distribution = .fill
+        view.isLayoutMarginsRelativeArrangement = true
+        view.layoutMargins = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -133,22 +134,22 @@ final class CMFeaturedMovie: UIView {
         
         addSubview(movieImage)
         movieImage.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview()
+            $0.top.leading.trailing.bottom.equalToSuperview()
         }
         
         addSubview(hStack)
         hStack.snp.makeConstraints {
-            $0.top.equalTo(movieImage.snp.bottom)
+            $0.bottom.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(Constants.stackHeight)
         }
         
         myListButton.snp.makeConstraints {
-            $0.size.equalTo(Constants.buttonSize)
+            $0.height.equalTo(Constants.buttonSize)
         }
         
         watchListButton.snp.makeConstraints {
-            $0.size.equalTo(Constants.buttonSize)
+            $0.height.equalTo(Constants.buttonSize)
         }
     }
     
@@ -168,11 +169,21 @@ final class CMFeaturedMovie: UIView {
     }
     
     private func updateMovie(with movie: QueryMovie) {
-        if let url = URLHelper.getImageURL(with: movie.posterPath, size: .original) {
-            loadingIndicator.startAnimating()
+        guard let url = URLHelper.getImageURL(with: movie.posterPath, size: .original) else { return }
+        loadingIndicator.startAnimating()
+        
+        UIView.animate(withDuration: 0.3) { [weak self] in
+            guard let self = self else { return }
+            self.movieImage.alpha = 0
+        } completion: { [weak self] _ in
+            guard let self = self else { return }
             movieImage.sd_setImage(with: url) { [weak self] _, _, _, _ in
                 guard let self = self else { return }
                 self.loadingIndicator.stopAnimating()
+            }
+    
+            UIView.animate(withDuration: 0.3) {
+                self.movieImage.alpha = 1.0
             }
         }
     }

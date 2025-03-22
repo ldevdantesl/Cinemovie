@@ -29,7 +29,7 @@ final class PersonDetailsBiographyView: UICollectionViewCell {
     private let biographyLabel: UILabel = {
         let label = UILabel()
         label.textColor = CMColor.cmSecondary
-        label.font = CMFont.font(size: .caption, fontName: .avenir)
+        label.font = CMFont.font(size: .caption, fontName: .avenirDemiBold)
         label.textAlignment = .left
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false

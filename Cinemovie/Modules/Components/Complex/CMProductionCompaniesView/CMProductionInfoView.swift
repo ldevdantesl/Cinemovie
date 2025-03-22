@@ -86,7 +86,7 @@ final class CMProductionInfoView: UIView {
             let label = UILabel()
             label.text = "\(name), "
             label.textColor = CMColor.cmSecondary
-            label.font = CMFont.font(size: .tiny, fontName: .avenir)
+            label.font = CMFont.font(size: .tiny, fontName: .avenirDemiBold)
             companiesStack.addArrangedSubview(label)
         }
         
@@ -94,7 +94,7 @@ final class CMProductionInfoView: UIView {
             let label = UILabel()
             label.text = "\($0), "
             label.textColor = CMColor.cmSecondary
-            label.font = CMFont.font(size: .tiny, fontName: .avenir)
+            label.font = CMFont.font(size: .tiny, fontName: .avenirDemiBold)
             countriesStack.addArrangedSubview(label)
         }
         

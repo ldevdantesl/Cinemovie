@@ -31,7 +31,7 @@ final class CMMovieBelongsToCollectionView: UIView {
     private lazy var collectionLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = CMFont.font(size: .body, fontName: .avenir)
+        label.font = CMFont.font(size: .body, fontName: .avenirDemiBold)
         label.textColor = CMColor.cmLabel
         return label
     }()
@@ -39,7 +39,7 @@ final class CMMovieBelongsToCollectionView: UIView {
     private let collectionSubtitle: UILabel = {
         let label = UILabel()
         label.text = "Collection"
-        label.font = CMFont.font(size: .caption, fontName: .avenir)
+        label.font = CMFont.font(size: .caption, fontName: .avenirDemiBold)
         label.textColor = CMColor.cmSecondary
         return label
     }()

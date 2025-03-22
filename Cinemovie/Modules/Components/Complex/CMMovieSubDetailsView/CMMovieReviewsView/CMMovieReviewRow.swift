@@ -49,7 +49,7 @@ final class CMMovieReviewRow: UIView {
     
     private lazy var authorNameLabel: UILabel = {
         let label = UILabel()
-        label.font = CMFont.font(size: .body, fontName: .avenir)
+        label.font = CMFont.font(size: .body, fontName: .avenirDemiBold)
         label.textColor = CMColor.cmLabel
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -57,7 +57,7 @@ final class CMMovieReviewRow: UIView {
     
     private lazy var reviewContentLabel: UILabel = {
         let label = UILabel()
-        label.font = CMFont.font(size: .caption, fontName: .avenir)
+        label.font = CMFont.font(size: .caption, fontName: .avenirDemiBold)
         label.textColor = CMColor.cmLabel
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
@@ -67,7 +67,7 @@ final class CMMovieReviewRow: UIView {
     
     private lazy var reviewDateLabel: UILabel = {
         let label = UILabel()
-        label.font = CMFont.font(size: .caption, fontName: .avenir)
+        label.font = CMFont.font(size: .caption, fontName: .avenirDemiBold)
         label.textColor = CMColor.cmSecondary
         label.translatesAutoresizingMaskIntoConstraints = false
         return label

@@ -66,7 +66,7 @@ final class MovieDetailsActorPopupView: UIView {
     
     private let departmentLabel: UILabel = {
         let view = UILabel()
-        view.font = CMFont.font(size: .footnote, fontName: .avenir)
+        view.font = CMFont.font(size: .footnote, fontName: .avenirDemiBold)
         view.textColor = CMColor.cmSecondary
         view.numberOfLines = 1
         view.textAlignment = .center
@@ -95,7 +95,7 @@ final class MovieDetailsActorPopupView: UIView {
     private lazy var actorDetailsButton: CMButton = {
         let button = CMButton(
             text: "Additional Details", foreColor: .cmLabel,
-            textFont: CMFont.font(size: .body, fontName: .avenir), image: nil,
+            textFont: CMFont.font(size: .body, fontName: .avenirDemiBold), image: nil,
             backColor: CMColor.cmSuccess, cornerRadius: Constants.buttonCornerRadius
         )
         button.setAction(target: self, action: #selector(didTapDetails))

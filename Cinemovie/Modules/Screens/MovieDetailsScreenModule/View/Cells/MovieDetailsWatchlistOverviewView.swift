@@ -48,7 +48,7 @@ final class MovieDetailsWatchlistOverviewView: UICollectionViewCell {
         label.textColor = CMColor.cmLabel
         label.textAlignment = .left
         label.numberOfLines = 0
-        label.font = CMFont.font(size: .footnote, fontName: .avenir)
+        label.font = CMFont.font(size: .footnote, fontName: .avenirDemiBold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

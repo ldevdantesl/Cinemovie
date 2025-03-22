@@ -28,7 +28,7 @@ final class CMRateAndShareView: UIView {
     
     private let rateLabel: UILabel = {
         let label = UILabel()
-        label.font = CMFont.font(size: .footnote, fontName: .avenir)
+        label.font = CMFont.font(size: .footnote, fontName: .avenirDemiBold)
         label.textColor = CMColor.cmLabel
         label.text = "Rate"
         return label
@@ -44,7 +44,7 @@ final class CMRateAndShareView: UIView {
     
     private let shareLabel: UILabel = {
         let label = UILabel()
-        label.font = CMFont.font(size: .footnote, fontName: .avenir)
+        label.font = CMFont.font(size: .footnote, fontName: .avenirDemiBold)
         label.textColor = CMColor.cmLabel
         label.text = "Share"
         return label

@@ -72,8 +72,8 @@ final class HomeScreenVC: UIViewController {
         return header
     }()
 
-    private let featuredMovieView: CMFeaturedMovie = {
-        let movie = CMFeaturedMovie()
+    private let featuredMovieView: CMFeaturedMovieView = {
+        let movie = CMFeaturedMovieView()
         movie.translatesAutoresizingMaskIntoConstraints = false
         return movie
     }()
