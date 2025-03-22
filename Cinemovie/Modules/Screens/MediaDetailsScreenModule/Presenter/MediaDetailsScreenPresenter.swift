@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol MovieDetailsScreenPresenterProtocol: AnyObject {
+protocol MediaDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
 
     func didTapAnotherMovie(movie: QueryMovie)
@@ -24,10 +24,10 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didGetMovieReviews(_ reviews: [DomainReview], reviewCount: Int)
 }
 
-final class MovieDetailsScreenPresenter {
-    weak var view: MovieDetailsScreenViewProtocol?
-    var router: MovieDetailsScreenRouterProtocol
-    var interactor: MovieDetailsScreenInteractorProtocol
+final class MediaDetailsScreenPresenter {
+    weak var view: MediaDetailsScreenViewProtocol?
+    var router: MediaDetailsScreenRouterProtocol
+    var interactor: MediaDetailsScreenInteractorProtocol
     
     private let dispatchGroup = DispatchGroup()
     
@@ -39,13 +39,13 @@ final class MovieDetailsScreenPresenter {
     private var movieReviews: [DomainReview]?
     private var movieReviewCount: Int?
 
-    init(interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
+    init(interactor: MediaDetailsScreenInteractorProtocol, router: MediaDetailsScreenRouterProtocol) {
         self.interactor = interactor
         self.router = router
     }
 }
 
-extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
+extension MediaDetailsScreenPresenter: MediaDetailsScreenPresenterProtocol {
     func viewDidLoad() {
         dispatchGroup.enter()
         interactor.getMovieDetails()

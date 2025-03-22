@@ -5,7 +5,7 @@
 //  Created by Buzurg Rakhimzoda on 18.02.2025
 //
 
-protocol MovieDetailsScreenInteractorProtocol: AnyObject {
+protocol MediaDetailsScreenInteractorProtocol: AnyObject {
     func getMovieDetails()
     func getMovieCast()
     func getMovieRecommendations()
@@ -13,8 +13,8 @@ protocol MovieDetailsScreenInteractorProtocol: AnyObject {
     func getMovieReviews()
 }
 
-final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
-    weak var presenter: MovieDetailsScreenPresenterProtocol?
+final class MediaDetailsScreenInteractor: MediaDetailsScreenInteractorProtocol {
+    weak var presenter: MediaDetailsScreenPresenterProtocol?
     weak var tmdbService: TMDBService?
     private let movieID: Int
     

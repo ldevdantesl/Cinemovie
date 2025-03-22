@@ -21,7 +21,7 @@ final class HomeScreenRouter: HomeScreenRouterProtocol {
     }
     
     func navigateToMovieDetails(movieID: Int) {
-        let movieDetails = MovieDetailsScreenAssembler.assemble(movieID: movieID, tmdbService: tmdbService)
+        let movieDetails = MediaDetailsScreenAssembler.assemble(movieID: movieID, tmdbService: tmdbService)
         movieDetails.modalPresentationStyle = .pageSheet
         viewController?.present(UINavigationController(rootViewController: movieDetails), animated: true)
     }
