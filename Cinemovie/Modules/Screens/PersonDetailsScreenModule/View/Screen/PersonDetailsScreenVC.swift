@@ -10,7 +10,10 @@ import SnapKit
 
 protocol PersonDetailsScreenViewProtocol: AnyObject {
     func didRecieveError(_ errorStr: String)
-    func didGetAllPersonData(_ details: PersonDetails, sources: ExternalSource)
+    func didGetAllPersonData(
+        _ details: PersonDetails, sources: ExternalSource,
+        movies: [QueryMovie], tvShows: [QueryTVShow]
+    )
 }
 
 final class PersonDetailsScreenVC: UIViewController {
@@ -42,6 +45,7 @@ final class PersonDetailsScreenVC: UIViewController {
         
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.backgroundColor = CMColor.cmBackground
+        cv.register(PersonDetailsMediaView.self, forCellWithReuseIdentifier: PersonDetailsMediaView.identifier)
         cv.register(PersonDetailsBiographyView.self, forCellWithReuseIdentifier: PersonDetailsBiographyView.identifier)
         cv.register(PersonDetailsSourcesView.self, forCellWithReuseIdentifier: PersonDetailsSourcesView.identifier)
         cv.register(PersonDetailsInfoView.self, forCellWithReuseIdentifier: PersonDetailsInfoView.identifier)
@@ -100,6 +104,7 @@ extension PersonDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataS
         case let vm as PersonDetailsBiographyViewModel:
             (cell as? PersonDetailsBiographyView)?.configure(viewModel: vm)
             collectionView.collectionViewLayout.invalidateLayout()
+        case let vm as PersonDetailsMediaViewModel: (cell as? PersonDetailsMediaView)?.configure(viewModel: vm)
         case let vm as PersonDetailsSourcesViewModel: (cell as? PersonDetailsSourcesView)?.configure(viewModel: vm)
         case let vm as PersonDetailsHeaderViewModel: (cell as? PersonDetailsHeaderView)?.configure(viewModel: vm)
         case let vm as PersonDetailsInfoViewModel: (cell as? PersonDetailsInfoView)?.configure(viewModel: vm)
@@ -115,6 +120,7 @@ extension PersonDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataS
         switch viewModel {
         case let vm as PersonDetailsBiographyViewModel: return dynamicHeightForCell(viewModel: vm, width: width)
         case is PersonDetailsHeaderViewModel: return CGSize(width: width - 20, height: 200)
+        case is PersonDetailsMediaViewModel: return CGSize(width: width - 20, height: 200)
         case let vm as PersonDetailsInfoViewModel: print(vm.totalAvailableInfo); return CGSize(width: width - 20, height: CGFloat(26 * vm.totalAvailableInfo))
         case is PersonDetailsSourcesViewModel: return CGSize(width: width - 30, height: 30)
         default: return CGSize(width: width - 20, height: Constants.defaultCellHeight)
@@ -141,7 +147,10 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
         }
     }
     
-    func didGetAllPersonData(_ details: PersonDetails, sources: ExternalSource) {
+    func didGetAllPersonData(
+        _ details: PersonDetails, sources: ExternalSource,
+        movies: [QueryMovie], tvShows: [QueryTVShow]
+    ) {
         DispatchQueue.main.async {
             UIView.animate(withDuration: Constants.aniDuration, delay: Constants.aniDuration, options: .showHideTransitionViews) { [weak self] in
                 guard let self = self else { return }
@@ -166,7 +175,12 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
         viewModels.append(PersonDetailsBiographyViewModel(biography: details.biography))
         viewModels.append(PersonDetailsSourcesViewModel(externalSource: sources, didTapLogo: presenter?.didTapLogoImage))
         
+        !movies.isEmpty ? viewModels.append(PersonDetailsMediaViewModel(headerTitle: "Movies", headerSubtitle: nil, movies: movies)) : ()
+        !tvShows.isEmpty ? viewModels.append(PersonDetailsMediaViewModel(headerTitle: "TV Shows", headerSubtitle: nil, tvShows: tvShows)) : ()
+        
         DispatchQueue.main.async {
+            self.collectionView.setNeedsLayout()
+            self.collectionView.layoutIfNeeded()
             self.collectionView.reloadData()
         }
     }

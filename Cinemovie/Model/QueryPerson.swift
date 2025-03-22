@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct QueryPerson: Decodable {
+struct QueryPerson: APIResponse {
     let id: Int
     let name, originalName, mediaType: String
     let adult: Bool

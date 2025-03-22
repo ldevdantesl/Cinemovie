@@ -16,7 +16,8 @@ protocol PersonDetailsScreenPresenterProtocol: AnyObject {
     func didGetPersonID(_ id: Int)
     func didGetPersonDetails(_ details: PersonDetails)
     func didGetPersonExternalSources(_ sources: ExternalSource)
-    
+    func didGetPersonMovies(_ movies: [QueryMovie])
+    func didGetPersonTVShows(_ tvShows: [QueryTVShow])
     func didRecieveError(_ error: Error)
 }
 
@@ -28,6 +29,8 @@ final class PersonDetailsScreenPresenter {
     private var personID: Int?
     private var personDetails: PersonDetails?
     private var personExternalSources: ExternalSource?
+    private var personMovies: [QueryMovie] = []
+    private var personTVShows: [QueryTVShow] = []
     private let downloadGroup = DispatchGroup()
 
     init(interactor: PersonDetailsScreenInteractorProtocol, router: PersonDetailsScreenRouterProtocol) {
@@ -45,7 +48,7 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
             guard let self = self else { return }
             guard let personDetails = personDetails else { self.view?.didRecieveError("Something went wrong with person details"); return }
             guard let personExternalSources = personExternalSources else { self.view?.didRecieveError("Something went wrong with external sources"); return }
-            self.view?.didGetAllPersonData(personDetails, sources: personExternalSources)
+            self.view?.didGetAllPersonData(personDetails, sources: personExternalSources, movies: personMovies, tvShows: personTVShows)
         }
     }
     
@@ -62,6 +65,12 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
         
         downloadGroup.enter()
         self.interactor.getPersonExternalSources(personID: id)
+        
+        downloadGroup.enter()
+        self.interactor.getPersonMovies(personID: id)
+        
+        downloadGroup.enter()
+        self.interactor.getPersonTVShows(personID: id)
         
         downloadGroup.leave()
     }
@@ -82,5 +91,15 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
     
     func didTapLogoImage(sourceID: String, sourceType: ExternalSource.SourceTypes) {
         router.openSource(sourceID: sourceID, sourceType: sourceType)
+    }
+    
+    func didGetPersonMovies(_ movies: [QueryMovie]) {
+        self.personMovies = movies
+        downloadGroup.leave()
+    }
+    
+    func didGetPersonTVShows(_ tvShows: [QueryTVShow]) {
+        self.personTVShows = tvShows
+        downloadGroup.leave()
     }
 }

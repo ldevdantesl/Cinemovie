@@ -6,12 +6,32 @@
 //
 
 import UIKit
+import SnapKit
 
 struct PersonDetailsMediaViewModel: PersonDetailsCellViewModel {
     let identifier: String = "PersonDetailsMediaView"
+    private(set) var isMovieType: Bool
+    
     let headerTitle: String
     let headerSubtitle: String?
     let movies: [QueryMovie]
+    let tvShows: [QueryTVShow]
+    
+    init(headerTitle: String, headerSubtitle: String?, movies: [QueryMovie]) {
+        self.isMovieType = true
+        self.headerTitle = headerTitle
+        self.headerSubtitle = headerSubtitle
+        self.movies = movies
+        self.tvShows = []
+    }
+    
+    init(headerTitle: String, headerSubtitle: String?, tvShows: [QueryTVShow]) {
+        self.isMovieType = false
+        self.headerTitle = headerTitle
+        self.headerSubtitle = headerSubtitle
+        self.movies = []
+        self.tvShows = tvShows
+    }
 }
 
 final class PersonDetailsMediaView: UICollectionViewCell {
@@ -24,8 +44,8 @@ final class PersonDetailsMediaView: UICollectionViewCell {
     // MARK: - PROPERTIES
     private var viewModel: PersonDetailsMediaViewModel?
     
-    private lazy var movieListView: CMMovieListView = {
-        let view = CMMovieListView()
+    private lazy var mediaListView: CMMediaListView = {
+        let view = CMMediaListView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -44,8 +64,17 @@ final class PersonDetailsMediaView: UICollectionViewCell {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: PersonDetailsMediaViewModel) {
         self.viewModel = viewModel
+        let vm = viewModel.isMovieType ?
+        CMMediaListViewModel(movies: viewModel.movies, listTitle: viewModel.headerTitle, listSubtitle: viewModel.headerSubtitle) :
+        CMMediaListViewModel(tvShows: viewModel.tvShows, listTitle: viewModel.headerTitle, listSubtitle: viewModel.headerSubtitle)
+        self.mediaListView.configure(viewModel: vm)
     }
     
     // MARK: - PRIVATE FUNC
-    private func setupUI() { }
+    private func setupUI() {
+        addSubview(mediaListView)
+        mediaListView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+    }
 }

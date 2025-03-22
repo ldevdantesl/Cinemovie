@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct QueryMovie: APIResponse {
+struct QueryMovie: APIResponse, Media {
     let id: Int
     let title: String
     let voteAverage: Double?
@@ -26,9 +26,10 @@ struct QueryMovie: APIResponse {
     let character: String?
     let creditID: String?
     let order: Int?
+    let department: String?
 
     enum CodingKeys: String, CodingKey {
-        case adult, title, video, id, overview, popularity, character, order
+        case adult, title, video, id, overview, popularity, character, order, department
         case creditID = "credit_id"
         case backdropPath = "backdrop_path"
         case genreIDS = "genre_ids"

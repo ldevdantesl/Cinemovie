@@ -11,6 +11,8 @@ protocol PersonDetailsScreenInteractorProtocol: AnyObject {
     func getPersonID()
     func getPersonDetails(personID: Int)
     func getPersonExternalSources(personID: Int)
+    func getPersonMovies(personID: Int)
+    func getPersonTVShows(personID: Int)
 }
 
 final class PersonDetailsScreenInteractor: PersonDetailsScreenInteractorProtocol {
@@ -49,6 +51,26 @@ final class PersonDetailsScreenInteractor: PersonDetailsScreenInteractorProtocol
             switch result {
             case .success(let success): presenter?.didGetPersonExternalSources(success)
             case .failure(let failure): presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func getPersonMovies(personID: Int) {
+        tmdbService?.getPersonMovieCredits(personID: personID) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didGetPersonMovies(success.cast)
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func getPersonTVShows(personID: Int) {
+        tmdbService?.getPersonTVShowCredits(personID: personID) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didGetPersonTVShows(success.cast)
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }
     }

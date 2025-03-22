@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ReviewAuthorDetails: Codable, Hashable {
+struct ReviewAuthorDetails: APIResponse, Hashable {
     let name, username: String
     let avatarPath: String?
     let rating: Int?

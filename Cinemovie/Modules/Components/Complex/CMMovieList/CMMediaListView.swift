@@ -8,21 +8,37 @@
 import SnapKit
 import UIKit
 
-struct CMMovieListViewModel {
+struct CMMediaListViewModel {
+    private(set) var isMovieMedia: Bool
     let movies: [QueryMovie]
+    let tvShows: [QueryTVShow]
     let listTitle: String?
     let listSubtitle: String?
     let didTapMovie: ((QueryMovie) -> Void)?
+    let didTapTVShow: ((QueryTVShow) -> Void)?
     
     init(movies: [QueryMovie], listTitle: String?, listSubtitle: String? = nil, didTapMovie: ((QueryMovie) -> Void)? = nil) {
+        self.isMovieMedia = true
         self.movies = movies
         self.listTitle = listTitle
         self.listSubtitle = listSubtitle
         self.didTapMovie = didTapMovie
+        self.tvShows = []
+        self.didTapTVShow = nil
+    }
+    
+    init(tvShows: [QueryTVShow], listTitle: String?, listSubtitle: String? = nil, didTapTVShow: ((QueryTVShow) -> Void)? = nil) {
+        self.isMovieMedia = false
+        self.movies = []
+        self.listTitle = listTitle
+        self.listSubtitle = listSubtitle
+        self.didTapMovie = nil
+        self.tvShows = tvShows
+        self.didTapTVShow = didTapTVShow
     }
 }
 
-final class CMMovieListView: UIView {
+final class CMMediaListView: UIView {
     
     // MARK: - CONSTANTS
     fileprivate enum Paddings {
@@ -37,7 +53,11 @@ final class CMMovieListView: UIView {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: CMMovieListViewModel?
+    public var isShowingMovieMedia: Bool {
+        viewModel?.isMovieMedia ?? true
+    }
+    
+    private var viewModel: CMMediaListViewModel?
     
     // MARK: - VIEW PROPERTIES
     private let listTitleLabel: UILabel = {
@@ -71,6 +91,7 @@ final class CMMovieListView: UIView {
         let flow = UICollectionViewFlowLayout()
         flow.scrollDirection = .horizontal
         flow.minimumLineSpacing = 10
+        flow.itemSize = CGSize(width: Constants.cellWidth, height: Constants.cellHeight)
 
         let cv = UICollectionView(frame: .zero, collectionViewLayout: flow)
         cv.backgroundColor = CMColor.cmBackground
@@ -82,8 +103,8 @@ final class CMMovieListView: UIView {
         cv.showsHorizontalScrollIndicator = false
         cv.translatesAutoresizingMaskIntoConstraints = false
         cv.register(
-            CMMovieListCell.self,
-            forCellWithReuseIdentifier: CMMovieListCell.identifier
+            CMMediaListViewCell.self,
+            forCellWithReuseIdentifier: CMMediaListViewCell.identifier
         )
         return cv
     }()
@@ -100,7 +121,7 @@ final class CMMovieListView: UIView {
     }
     
     // MARK: - PUBLIC FUNCTIONS
-    public func configure(viewModel: CMMovieListViewModel) {
+    public func configure(viewModel: CMMediaListViewModel) {
         self.vStack.removeArrangedSubview(self.listSubtitleLabel)
         self.viewModel = viewModel
         self.listTitleLabel.text = viewModel.listTitle
@@ -116,23 +137,27 @@ final class CMMovieListView: UIView {
         addSubview(vStack)
         vStack.snp.makeConstraints {
             $0.top.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview().inset(Paddings.horizontalPadding)
+            $0.horizontalEdges.equalToSuperview()
         }
         
         addSubview(collectionView)
         collectionView.snp.makeConstraints {
             $0.top.equalTo(vStack.snp.bottom).offset(Paddings.spacing)
-            $0.leading.trailing.bottom.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(Constants.cellHeight)
         }
     }
 }
 
-extension CMMovieListView: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
+extension CMMediaListView: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let viewModel = viewModel else { return }
-        let selectedMovie = viewModel.movies[indexPath.row]
-        viewModel.didTapMovie?(selectedMovie)
+        let selectedMedia: Media = viewModel.isMovieMedia ? viewModel.movies[indexPath.row] : viewModel.tvShows[indexPath.row]
+        switch selectedMedia {
+        case let movie as QueryMovie: viewModel.didTapMovie?(movie)
+        case let tvshow as QueryTVShow: viewModel.didTapTVShow?(tvshow)
+        default: ()
+        }
     }
     
     func collectionView(
@@ -140,7 +165,7 @@ extension CMMovieListView: UICollectionViewDelegate, UICollectionViewDelegateFlo
         numberOfItemsInSection section: Int
     ) -> Int {
         guard let viewModel = viewModel else { return 0 }
-        return viewModel.movies.count
+        return viewModel.isMovieMedia ? viewModel.movies.count : viewModel.tvShows.count
     }
 
     func collectionView(
@@ -148,30 +173,15 @@ extension CMMovieListView: UICollectionViewDelegate, UICollectionViewDelegateFlo
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: CMMovieListCell.identifier, for: indexPath
-        ) as? CMMovieListCell else {
+            withReuseIdentifier: CMMediaListViewCell.identifier, for: indexPath
+        ) as? CMMediaListViewCell else {
             fatalError("CMMovieListCell is not registered")
         }
         
         guard let viewModel = viewModel else { return cell }
-
-        cell.configure(movie: viewModel.movies[indexPath.row])
+        let vm = isShowingMovieMedia ? CMMediaListViewCellViewModel(movie: viewModel.movies[indexPath.row]) :
+        CMMediaListViewCellViewModel(tvShow: viewModel.tvShows[indexPath.row])
+        cell.configure(viewModel: vm)
         return cell
-    }
-
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        sizeForItemAt indexPath: IndexPath
-    ) -> CGSize {
-        return CGSize(width: Constants.cellWidth, height: Constants.cellHeight)
-    }
-    
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        insetForSectionAt section: Int
-    ) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 0, left: Paddings.horizontalPadding, bottom: 0, right: Paddings.horizontalPadding)
     }
 }
