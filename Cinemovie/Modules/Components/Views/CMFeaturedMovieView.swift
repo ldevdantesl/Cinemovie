@@ -60,25 +60,28 @@ final class CMFeaturedMovieView: UIView {
     }()
     
     private let myListButton: CMButton = {
-        let button = CMButton(
+        let vm = CMButtonViewModel(
             text: "+ My List",
             foreColor: CMColor.cmLabel,
-            textFont: CMFont.font(size: .subtitle, fontName: .avenirBold),
+            font: CMFont.font(size: .subtitle, fontName: .avenirBold),
             backColor: CMColor.cmAccent,
             cornerRadius: Constants.buttonCornerRadius
         )
+        
+        let button = CMButton(viewModel: vm)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
     private let watchListButton: CMButton = {
-        let button = CMButton(
+        let vm = CMButtonViewModel(
             text: "+ Watchlist",
             foreColor: CMColor.cmLabel,
-            textFont: CMFont.font(size: .subtitle, fontName: .avenirBold),
+            font: CMFont.font(size: .subtitle, fontName: .avenirBold),
             backColor: CMColor.cmSuccess,
             cornerRadius: Constants.buttonCornerRadius
         )
+        let button = CMButton(viewModel: vm)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()

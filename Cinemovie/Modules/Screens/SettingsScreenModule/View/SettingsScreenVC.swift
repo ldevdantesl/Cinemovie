@@ -14,16 +14,22 @@ protocol SettingsScreenViewProtocol: AnyObject {
 
 final class SettingsScreenVC: UIViewController {
 
+    // MARK: - CONSTANTS
+    fileprivate enum Constants {
+        static let buttonCornerRadius = 15.0
+    }
+    
+    // MARK: - VIPER
     var presenter: SettingsScreenPresenterProtocol?
     
-    private let logoutButton: UIButton = {
-        let button = CMButton(
-            text: "Log Out",
-            foreColor: CMColor.cmButton,
-            textFont: CMFont.font(size: .body, fontName: .avenirDemiBold),
-            backColor: CMColor.cmError,
-            cornerRadius: 15
+    private lazy var logoutButton: UIButton = {
+        let vm = CMButtonViewModel(
+            text: "Log Out", foreColor: CMColor.cmButton,
+            font: CMFont.font(size: .body, fontName: .avenirDemiBold),
+            backColor: CMColor.cmError, cornerRadius: Constants.buttonCornerRadius,
+            didTapAction: presenter?.didPressLogoutButton
         )
+        let button = CMButton(viewModel: vm)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -45,12 +51,6 @@ final class SettingsScreenVC: UIViewController {
             $0.height.equalTo(50)
             $0.bottom.equalTo(view.snp.bottomMargin).inset(50)
         }
-        
-        logoutButton.addTarget(self, action: #selector(logoutPressed), for: .touchUpInside)
-    }
-    
-    @objc private func logoutPressed() {
-        presenter?.didPressLogoutButton()
     }
 }
 

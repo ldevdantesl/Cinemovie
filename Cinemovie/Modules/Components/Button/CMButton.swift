@@ -7,47 +7,45 @@
 
 import UIKit
 
+public struct CMButtonViewModel {
+    public var text: String
+    public var foreColor: UIColor
+    public var font: UIFont
+    public var image: UIImage?
+    public var backColor: UIColor
+    public var cornerRadius: CGFloat
+    
+    public var didTapAction: (() -> Void)?
+    
+    init(
+        text: String,
+        foreColor: UIColor = CMColor.cmLabel,
+        font: UIFont,
+        image: UIImage? = nil,
+        backColor: UIColor = CMColor.cmSecondary,
+        cornerRadius: CGFloat = 8,
+        didTapAction: (() -> Void)? = nil
+    ) {
+        self.text = text
+        self.foreColor = foreColor
+        self.font = font
+        self.image = image
+        self.backColor = backColor
+        self.cornerRadius = cornerRadius
+        self.didTapAction = didTapAction
+    }
+}
+
 final class CMButton: UIButton {
 
     // MARK: - PROPERTIES
-    public var titleLabelText: String = ""
-    public var titleLabelForeColor: UIColor = UIColor.white
-    public var titleLabelFont: UIFont = UIFont.boldSystemFont(ofSize: 24)
-    public var buttonImage: UIImage? = nil
-    public var backColor: UIColor = .systemCyan
-    public var cornerRadius: CGFloat = 8
+    private(set) var viewModel: CMButtonViewModel
     
     // MARK: - LIFECYCLE
-    init(
-        text: String = "",
-        foreColor: UIColor = UIColor.white,
-        textFont: UIFont = UIFont.boldSystemFont(ofSize: 24),
-        image: UIImage? = nil,
-        backColor: UIColor = .systemCyan,
-        cornerRadius: CGFloat = 8
-    ) {
+    init(viewModel: CMButtonViewModel) {
+        self.viewModel = viewModel
         super.init(frame: .zero)
-        self.titleLabelText = text
-        self.titleLabelFont = textFont
-        self.titleLabelForeColor = foreColor
-        self.backColor = backColor
-        self.cornerRadius = cornerRadius
-        self.buttonImage = image
         setup()
-    }
-    
-    convenience init(
-        text: String = "",
-        foreColor: UIColor = UIColor.white,
-        textFont: UIFont = UIFont.boldSystemFont(ofSize: 24),
-        image: UIImage? = nil,
-        backColor: UIColor = .systemCyan,
-        cornerRadius: CGFloat = 8,
-        target: Any?,
-        action: Selector
-    ) {
-        self.init(text: text, foreColor: foreColor, textFont: textFont, image: image, backColor: backColor, cornerRadius: cornerRadius)
-        addTarget(target, action: action, for: .touchUpInside)
     }
     
     @available(*, unavailable)
@@ -57,35 +55,52 @@ final class CMButton: UIButton {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        self.layer.cornerRadius = cornerRadius
+        self.layer.cornerRadius = viewModel.cornerRadius
     }
     
     // MARK: - PUBLIC FUNC
-    public func setAction(target: Any?, action: Selector){
-        self.addTarget(target, action: action, for: .touchUpInside)
+    public func configure(viewModel: CMButtonViewModel) {
+        self.viewModel = viewModel
+        self.layoutIfNeeded()
+        setup()
     }
     
     // MARK: - PRIVATE FUNC
     private func setup() {
+        self.setTitle(nil, for: .normal)
+        self.setImage(nil, for: .normal)
+        self.configuration = nil
+        self.removeTarget(self, action: #selector(didTapButton), for: .touchUpInside)
+        
         let attrTitle = NSAttributedString(
-            string: titleLabelText,
+            string: viewModel.text,
             attributes: [
-                .font : titleLabelFont,
-                .foregroundColor : titleLabelForeColor
+                .font : viewModel.font,
+                .foregroundColor : viewModel.foreColor
             ]
         )
+        
         self.setTitleColor(.white, for: .normal)
-        self.backgroundColor = backColor
+        self.backgroundColor = viewModel.backColor
         self.configuration = .borderedTinted()
         self.translatesAutoresizingMaskIntoConstraints = false
         self.setAttributedTitle(attrTitle, for: .normal)
         self.clipsToBounds = true
         
-        if let buttonImage = buttonImage?.withRenderingMode(.alwaysTemplate) {
+        if let buttonImage = viewModel.image?.withRenderingMode(.alwaysTemplate) {
             self.setImage(buttonImage, for: .normal)
             self.configuration?.imagePlacement = .leading
             self.configuration?.imagePadding = 5
-            self.tintColor = titleLabelForeColor
+            self.tintColor = viewModel.foreColor
         }
+        
+        if let _ = viewModel.didTapAction {
+            self.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
+        }
+    }
+    
+    // MARK: - OBJC FUNC
+    @objc private func didTapButton() {
+        viewModel.didTapAction?()
     }
 }

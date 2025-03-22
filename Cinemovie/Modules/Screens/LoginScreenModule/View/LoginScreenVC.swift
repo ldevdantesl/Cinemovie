@@ -16,8 +16,15 @@ protocol LoginScreenViewProtocol: AnyObject {
 
 final class LoginScreenVC: UIViewController {
     
+    // MARK: - CONSTANTS
+    fileprivate enum Constants {
+        static let buttonCornerRadius = 10.0
+    }
+    
+    // MARK: - VIPER
     var presenter: LoginScreenPresenterProtocol?
     
+    // MARK: - VIEW PROPERTIES
     private let logoImg: UIImageView = {
         let img = UIImageView()
         img.image = UIImage(named: ImageNames.logoTransparent.rawValue)
@@ -46,47 +53,44 @@ final class LoginScreenVC: UIViewController {
         return label
     }()
     
-    private let loginButton: CMButton = {
-        let button = CMButton(
-            text: "Login with TMDB",
-            foreColor: CMColor.cmButton,
-            textFont: CMFont.font(size: .body, fontName: .avenirDemiBold),
-            backColor: CMColor.cmPrimary,
-            cornerRadius: 10
+    private lazy var loginButton: CMButton = {
+        let vm = CMButtonViewModel(
+            text: "Login with TMDB", foreColor: CMColor.cmButton,
+            font: CMFont.font(size: .body, fontName: .avenirDemiBold),
+            backColor: CMColor.cmPrimary, cornerRadius: Constants.buttonCornerRadius,
+            didTapAction: presenter?.didPressLoginWithTMDB
         )
+        let button = CMButton(viewModel: vm)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
-    private let asGuestButton: CMButton = {
-        let button = CMButton(
-            text: "Continue as Guest",
-            foreColor: CMColor.cmButton,
-            textFont: CMFont.font(size: .body, fontName: .avenirDemiBold),
-            backColor: CMColor.cmAccent,
-            cornerRadius: 10
+    private lazy var asGuestButton: CMButton = {
+        let vm = CMButtonViewModel(
+            text: "Continue as Guest", foreColor: CMColor.cmButton,
+            font: CMFont.font(size: .body, fontName: .avenirDemiBold),
+            backColor: CMColor.cmAccent, cornerRadius: Constants.buttonCornerRadius,
+            didTapAction: presenter?.didPressLoginAsGuest
         )
+        let button = CMButton(viewModel: vm)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
+    // MARK: - LIFECYCLE
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         
         NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleOAuthCallback),
-            name: Notification.Name(ConstantKeys.OAUTH_CALLBACK.rawValue),
-            object: nil
+            self, selector: #selector(handleOAuthCallback),
+            name: Notification.Name(ConstantKeys.OAUTH_CALLBACK.rawValue), object: nil
         )
     }
     
+    // MARK: - PRIVATE FUNC
     private func setupUI() {
         view.backgroundColor = CMColor.cmBackground
-        
-        asGuestButton.addTarget(self, action: #selector(loginAsGuest), for: .touchUpInside)
-        loginButton.addTarget(self, action: #selector(loginWithTMDB), for: .touchUpInside)
         
         logoImg.snp.makeConstraints {
             $0.width.height.equalTo(150)
@@ -144,14 +148,6 @@ final class LoginScreenVC: UIViewController {
     }
     
     // MARK: - OBJC FUNCTIONS
-    @objc private func loginAsGuest() {
-        presenter?.didPressLoginAsGuest()
-    }
-    
-    @objc private func loginWithTMDB() {
-        presenter?.didPressLoginWithTMDB()
-    }
-    
     @objc private func handleOAuthCallback(_ notification: Notification) {
         guard let url = notification.object as? URL else { return }
         presenter?.handleOAuthCallback(url: url)

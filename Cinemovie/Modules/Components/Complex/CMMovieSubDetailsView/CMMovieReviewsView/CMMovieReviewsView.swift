@@ -33,12 +33,13 @@ final class CMMovieReviewsView: UIView {
         return stackView
     }()
     
-    private lazy var addRatingButton: CMButton = {
-        let button = CMButton(
+    private let addRatingButton: CMButton = {
+        let vm = CMButtonViewModel(
             text: "Rate", foreColor: CMColor.cmDivider,
-            textFont: CMFont.font(size: .body, fontName: .avenirBold), image: UIImage(systemName: Constants.imageName),
+            font: CMFont.font(size: .body, fontName: .avenirBold), image: UIImage(systemName: Constants.imageName),
             backColor: CMColor.cmLabel, cornerRadius: 15
         )
+        let button = CMButton(viewModel: vm)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()

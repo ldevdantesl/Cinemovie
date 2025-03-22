@@ -34,11 +34,12 @@ final class MovieDetailsWatchlistOverviewView: UICollectionViewCell {
     
     // MARK: - PROPERTIES
     private let addToWatchlistButton: CMButton = {
-        let button = CMButton(
+        let vm = CMButtonViewModel(
             text: Constants.buttonName, foreColor: .cmDivider,
-            textFont: CMFont.font(size: .body, fontName: .avenirBold), image: UIImage(systemName: Constants.imageName),
+            font: CMFont.font(size: .body, fontName: .avenirBold), image: UIImage(systemName: Constants.imageName),
             backColor: .cmLabel, cornerRadius: Constants.buttonCornerRadius
         )
+        let button = CMButton(viewModel: vm)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()

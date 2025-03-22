@@ -24,8 +24,8 @@ final class PersonDetailsMediaView: UICollectionViewCell {
     // MARK: - PROPERTIES
     private var viewModel: PersonDetailsMediaViewModel?
     
-    private lazy var movieListView: CMMovieList = {
-        let view = CMMovieList()
+    private lazy var movieListView: CMMovieListView = {
+        let view = CMMovieListView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()

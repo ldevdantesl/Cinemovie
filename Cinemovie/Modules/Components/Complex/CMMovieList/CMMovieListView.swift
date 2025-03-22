@@ -22,7 +22,7 @@ struct CMMovieListViewModel {
     }
 }
 
-final class CMMovieList: UIView {
+final class CMMovieListView: UIView {
     
     // MARK: - CONSTANTS
     fileprivate enum Paddings {
@@ -128,7 +128,7 @@ final class CMMovieList: UIView {
     }
 }
 
-extension CMMovieList: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
+extension CMMovieListView: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let viewModel = viewModel else { return }
         let selectedMovie = viewModel.movies[indexPath.row]

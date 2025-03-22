@@ -78,29 +78,29 @@ final class HomeScreenVC: UIViewController {
         return movie
     }()
 
-    private let popularMoviesList: CMMovieList = {
-        let list = CMMovieList()
+    private let popularMoviesList: CMMovieListView = {
+        let list = CMMovieListView()
         list.translatesAutoresizingMaskIntoConstraints = false
         list.isUserInteractionEnabled = true
         return list
     }()
     
-    private let upcomingMoviesList: CMMovieList = {
-        let list = CMMovieList()
+    private let upcomingMoviesList: CMMovieListView = {
+        let list = CMMovieListView()
         list.translatesAutoresizingMaskIntoConstraints = false
         list.isUserInteractionEnabled = true
         return list
     }()
     
-    private let nowPlayingMoviesList: CMMovieList = {
-        let list = CMMovieList()
+    private let nowPlayingMoviesList: CMMovieListView = {
+        let list = CMMovieListView()
         list.translatesAutoresizingMaskIntoConstraints = false
         list.isUserInteractionEnabled = true
         return list
     }()
     
-    private let topRatedMoviesList: CMMovieList = {
-        let list = CMMovieList()
+    private let topRatedMoviesList: CMMovieListView = {
+        let list = CMMovieListView()
         list.translatesAutoresizingMaskIntoConstraints = false
         list.isUserInteractionEnabled = true
         return list

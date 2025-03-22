@@ -93,12 +93,14 @@ final class MovieDetailsActorPopupView: UIView {
     }()
     
     private lazy var actorDetailsButton: CMButton = {
-        let button = CMButton(
+        let vm = CMButtonViewModel(
             text: "Additional Details", foreColor: .cmLabel,
-            textFont: CMFont.font(size: .body, fontName: .avenirDemiBold), image: nil,
-            backColor: CMColor.cmSuccess, cornerRadius: Constants.buttonCornerRadius
+            font: CMFont.font(size: .body, fontName: .avenirDemiBold), image: nil,
+            backColor: CMColor.cmSuccess, cornerRadius: Constants.buttonCornerRadius,
+            didTapAction: didTapDetails
         )
-        button.setAction(target: self, action: #selector(didTapDetails))
+        
+        let button = CMButton(viewModel: vm)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
