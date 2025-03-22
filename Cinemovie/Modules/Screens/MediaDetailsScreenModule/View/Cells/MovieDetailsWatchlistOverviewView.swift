@@ -8,13 +8,26 @@
 import UIKit
 import SnapKit
 
-class MovieDetailsWatchlistOverviewViewModel: MovieDetailsCellViewModel {
+struct MovieDetailsWatchlistOverviewViewModel: MovieDetailsCellViewModel {
     let identifier: String = "MovieDetailsWatchlistOverviewView"
     let movieOverview: String
-    var cellHeight: CGFloat = 80.0
+    let cellHeight: CGFloat
     
     init(movieOverview: String) {
         self.movieOverview = movieOverview
+        self.cellHeight = Self.calculateCellHeight(for: movieOverview)
+    }
+    
+    private static func calculateCellHeight(for overview: String) -> CGFloat {
+        let width = UIConstants.screenWidth - 20
+        let font = CMFont.font(size: .footnote, fontName: .avenirDemiBold)
+        let bounding = NSString(string: overview).boundingRect(
+            with: CGSize(width: width, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            attributes: [.font: font],
+            context: nil
+        )
+        return ceil(bounding.height) + 60
     }
 }
 
@@ -79,18 +92,6 @@ final class MovieDetailsWatchlistOverviewView: UICollectionViewCell {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: MovieDetailsWatchlistOverviewViewModel) {
         movieOverviewLabel.text = viewModel.movieOverview
-
-        let targetWidth = contentView.frame.width
-        
-        let fittingSize = CGSize(width: targetWidth, height: UIView.layoutFittingCompressedSize.height)
-        let calculatedHeight = vStack.systemLayoutSizeFitting(
-            fittingSize,
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: .fittingSizeLevel
-        ).height
-        
-        viewModel.cellHeight = calculatedHeight
-        self.layoutIfNeeded()
     }
     
     // MARK: - PRIVATE FUNC

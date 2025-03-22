@@ -8,13 +8,26 @@
 import UIKit
 import SnapKit
 
-final class PersonDetailsBiographyViewModel: PersonDetailsCellViewModel {
+struct PersonDetailsBiographyViewModel: PersonDetailsCellViewModel {
     let identifier: String = "PersonDetailsBiographyView"
     let biography: String
-    var cellHeight: CGFloat = 10.0
+    let cellHeight: CGFloat
     
     init(biography: String) {
         self.biography = biography
+        self.cellHeight = Self.calculateHeight(for: biography)
+    }
+    
+    private static func calculateHeight(for text: String) -> CGFloat {
+        let width = UIScreen.main.bounds.width - 20
+        let font = CMFont.font(size: .caption, fontName: .avenirDemiBold)
+        let bounding = NSString(string: text).boundingRect(
+            with: CGSize(width: width, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            attributes: [.font: font],
+            context: nil
+        )
+        return ceil(bounding.height) + 20
     }
 }
 
@@ -51,13 +64,6 @@ final class PersonDetailsBiographyView: UICollectionViewCell {
     public func configure(viewModel: PersonDetailsBiographyViewModel) {
         self.viewModel = viewModel
         self.biographyLabel.text = viewModel.biography
-        
-        let targetSize = CGSize(width: contentView.frame.width, height: UIView.layoutFittingCompressedSize.height)
-        let height = biographyLabel.systemLayoutSizeFitting(
-            targetSize, withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel
-        ).height
-        
-        viewModel.cellHeight = height
     }
     
     // MARK: - PRIVATE FUNC

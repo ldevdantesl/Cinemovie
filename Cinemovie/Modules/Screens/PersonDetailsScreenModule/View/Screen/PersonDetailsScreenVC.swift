@@ -30,6 +30,7 @@ final class PersonDetailsScreenVC: UIViewController {
     
     // MARK: - PROPERTIES
     private var viewModels: [PersonDetailsCellViewModel] = []
+    private var cachedCollectionViewCellSize: [IndexPath : CGSize] = [:]
     
     // MARK: - VIEW PROPERTIES
     private let downloadingView: CMSplashView = {
@@ -82,13 +83,6 @@ final class PersonDetailsScreenVC: UIViewController {
         
         view.bringSubviewToFront(downloadingView)
     }
-    
-    private func dynamicHeightForCell(viewModel: PersonDetailsCellViewModel, width: CGFloat) -> CGSize {
-        switch viewModel {
-        case let vm as PersonDetailsBiographyViewModel: return CGSize(width: width - 20, height: vm.cellHeight)
-        default: return CGSize(width: width - 20, height: Constants.defaultCellHeight)
-        }
-    }
 }
 
 extension PersonDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -101,9 +95,7 @@ extension PersonDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataS
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.identifier, for: indexPath)
         
         switch viewModel {
-        case let vm as PersonDetailsBiographyViewModel:
-            (cell as? PersonDetailsBiographyView)?.configure(viewModel: vm)
-            collectionView.collectionViewLayout.invalidateLayout()
+        case let vm as PersonDetailsBiographyViewModel: (cell as? PersonDetailsBiographyView)?.configure(viewModel: vm)
         case let vm as PersonDetailsMediaViewModel: (cell as? PersonDetailsMediaView)?.configure(viewModel: vm)
         case let vm as PersonDetailsSourcesViewModel: (cell as? PersonDetailsSourcesView)?.configure(viewModel: vm)
         case let vm as PersonDetailsHeaderViewModel: (cell as? PersonDetailsHeaderView)?.configure(viewModel: vm)
@@ -114,17 +106,25 @@ extension PersonDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataS
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if let cachedSize = cachedCollectionViewCellSize[indexPath] {
+            return cachedSize
+        }
+        
         let viewModel = viewModels[indexPath.row]
         let width = collectionView.frame.width
         
+        let size: CGSize
         switch viewModel {
-        case let vm as PersonDetailsBiographyViewModel: return dynamicHeightForCell(viewModel: vm, width: width)
-        case is PersonDetailsHeaderViewModel: return CGSize(width: width - 20, height: 200)
-        case is PersonDetailsMediaViewModel: return CGSize(width: width - 20, height: 200)
-        case let vm as PersonDetailsInfoViewModel: print(vm.totalAvailableInfo); return CGSize(width: width - 20, height: CGFloat(26 * vm.totalAvailableInfo))
-        case is PersonDetailsSourcesViewModel: return CGSize(width: width - 30, height: 30)
-        default: return CGSize(width: width - 20, height: Constants.defaultCellHeight)
+        case let vm as PersonDetailsBiographyViewModel: size = CGSize(width: width - 20, height: vm.cellHeight)
+        case is PersonDetailsHeaderViewModel: size = CGSize(width: width - 20, height: 200)
+        case is PersonDetailsMediaViewModel: size = CGSize(width: width - 20, height: 200)
+        case let vm as PersonDetailsInfoViewModel: size = CGSize(width: width - 20, height: vm.cellHeight)
+        case is PersonDetailsSourcesViewModel: size = CGSize(width: width - 30, height: 30)
+        default: size = CGSize(width: width - 20, height: Constants.defaultCellHeight)
         }
+        
+        self.cachedCollectionViewCellSize[indexPath] = size
+        return size
     }
 }
 

@@ -15,6 +15,7 @@ struct PersonDetailsInfoViewModel: PersonDetailsCellViewModel {
     let birthday: String?
     let hometown: String?
     let gender: Int
+    let cellHeight: CGFloat
     
     init(name: String, job: String, birthday: String?, hometown: String?, gender: Int) {
         self.name = name
@@ -22,13 +23,14 @@ struct PersonDetailsInfoViewModel: PersonDetailsCellViewModel {
         self.birthday = birthday
         self.hometown = hometown
         self.gender = gender
+        self.cellHeight = Self.calculateHeight(hometown: hometown, birthday: birthday)
     }
     
-    var totalAvailableInfo: Int {
-        var counter: Int = 3
-        counter = hometown == nil ? counter : counter + 1
-        counter = birthday == nil ? counter : counter + 1
-        return counter
+    private static func calculateHeight(hometown: String?, birthday: String?) -> CGFloat {
+        var count = 5
+        count -= hometown == nil ? 1 : 0
+        count -= birthday == nil ? 1 : 0
+        return CGFloat(count) * 26.0
     }
 }
 

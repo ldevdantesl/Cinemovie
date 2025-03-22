@@ -35,6 +35,7 @@ final class MediaDetailsScreenVC: UIViewController {
     
     // MARK: - PROPERTIES
     private var viewModels: [MovieDetailsCellViewModel] = []
+    private var cachedCollectionViewCellHeights: [IndexPath : CGSize] = [:]
     
     // MARK: - VIEW PROPERTIES
     private lazy var downloadingView: CMSplashView = {
@@ -89,14 +90,6 @@ final class MediaDetailsScreenVC: UIViewController {
         
         view.bringSubviewToFront(downloadingView)
     }
-    
-    private func dynamicHeightForCell(viewModel: MovieDetailsCellViewModel, width: CGFloat) -> CGSize {
-        if let overviewVM = viewModel as? MovieDetailsWatchlistOverviewViewModel {
-            return CGSize(width: width - Constants.hSpacing, height: overviewVM.cellHeight)
-        }
-        
-        return CGSize(width: width - Constants.hSpacing, height: Constants.cellDefaultHeight)
-    }
 }
 
 extension MediaDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -111,9 +104,7 @@ extension MediaDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSo
         switch viewModel {
         case let vm as MovieDetailsBackdropImageViewModel: (cell as? MovieDetailsBackdropImageView)?.configure(viewModel: vm)
         case let vm as MovieDetailsTitleViewModel: (cell as? MovieDetailsTitleView)?.configure(viewModel: vm)
-        case let vm as MovieDetailsWatchlistOverviewViewModel:
-            (cell as? MovieDetailsWatchlistOverviewView)?.configure(viewModel: vm)
-            collectionView.collectionViewLayout.invalidateLayout()
+        case let vm as MovieDetailsWatchlistOverviewViewModel: (cell as? MovieDetailsWatchlistOverviewView)?.configure(viewModel: vm)
         case let vm as MovieDetailsCastListViewModel: (cell as? MovieDetailsCastList)?.configure(viewModel: vm)
         case let vm as MovieDetailsSubDetailsViewModel: (cell as? MovieDetailsSubDetailsView)?.configure(viewModel: vm)
         case let vm as MovieDetailsProductionViewModel: (cell as? MovieDetailsProductionView)?.configure(viewModel: vm)
@@ -125,19 +116,27 @@ extension MediaDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSo
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if let size = cachedCollectionViewCellHeights[indexPath] {
+            return size
+        }
+        
         let viewModel = viewModels[indexPath.row]
         let width = collectionView.frame.width
         
+        let size: CGSize
         switch viewModel {
-        case is MovieDetailsSubDetailsViewModel: return CGSize(width: width - Constants.hSpacing, height: 25)
-        case is MovieDetailsBackdropImageViewModel: return CGSize(width: width, height: width * 0.55)
-        case let vm as MovieDetailsTitleViewModel: return CGSize(width: width - Constants.hSpacing, height: vm.isTaglineAvailable ? 70 : 55)
-        case is MovieDetailsWatchlistOverviewViewModel: return dynamicHeightForCell(viewModel: viewModel, width: width)
-        case is MovieDetailsCastListViewModel: return CGSize(width: width - Constants.hSpacing, height: 150)
-        case is MovieDetailsProductionViewModel: return CGSize(width: width - Constants.hSpacing, height: 50)
-        case is MovieDetailsRateAndShareViewModel: return CGSize(width: width - Constants.biggerHSpacing, height: 40)
+        case is MovieDetailsSubDetailsViewModel: size = CGSize(width: width - Constants.hSpacing, height: 25)
+        case is MovieDetailsBackdropImageViewModel: size = CGSize(width: width, height: width * 0.55)
+        case let vm as MovieDetailsTitleViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.isTaglineAvailable ? 70 : 55)
+        case let vm as MovieDetailsWatchlistOverviewViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
+        case is MovieDetailsCastListViewModel: size = CGSize(width: width - Constants.hSpacing, height: 150)
+        case is MovieDetailsProductionViewModel: size = CGSize(width: width - Constants.hSpacing, height: 50)
+        case is MovieDetailsRateAndShareViewModel: size = CGSize(width: width - Constants.biggerHSpacing, height: 40)
         default: return CGSize(width: width, height: Constants.cellDefaultHeight)
         }
+        
+        cachedCollectionViewCellHeights[indexPath] = size
+        return size
     }
 }
 
@@ -192,6 +191,12 @@ extension MediaDetailsScreenVC: MediaDetailsScreenViewProtocol {
         self.viewModels.append(MovieDetailsProductionViewModel(companies: details.productionCompanies, countries: details.productionCountries))
         self.viewModels.append(MovieDetailsRateAndShareViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton))
         
-        self.collectionView.reloadData()
+        DispatchQueue.main.async {
+            self.collectionView.setNeedsLayout()
+            self.collectionView.layoutIfNeeded()
+            self.collectionView.reloadData()
+            self.collectionView.performBatchUpdates(nil)
+        }
+        
     }
 }
