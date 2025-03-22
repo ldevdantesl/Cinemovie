@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-struct MediaDetailsCastListViewModel: MovieDetailsCellViewModel {
+struct MediaDetailsCastListViewModel: MediaDetailsCellViewModel {
     let identifier: String = "MediaDetailsCastList"
     
     let cast: [Cast]?

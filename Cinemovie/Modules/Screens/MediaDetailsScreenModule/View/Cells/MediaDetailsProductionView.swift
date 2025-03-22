@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-struct MediaDetailsProductionViewModel: MovieDetailsCellViewModel {
+struct MediaDetailsProductionViewModel: MediaDetailsCellViewModel {
     let identifier: String = "MediaDetailsProductionView"
     
     let companies: [ProductionCompany]

@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-struct MediaDetailsBackdropImageViewModel: MovieDetailsCellViewModel {
+struct MediaDetailsBackdropImageViewModel: MediaDetailsCellViewModel {
     let identifier = "MediaDetailsBackdropImageView"
     let imageURL: URL?
     

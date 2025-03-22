@@ -7,6 +7,6 @@
 
 import Foundation
 
-protocol MovieDetailsCellViewModel {
+protocol MediaDetailsCellViewModel {
     var identifier: String { get }
 }

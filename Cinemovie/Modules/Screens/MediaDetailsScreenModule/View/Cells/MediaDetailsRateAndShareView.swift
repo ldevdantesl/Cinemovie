@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-struct MediaDetailsRateAndShareViewModel: MovieDetailsCellViewModel {
+struct MediaDetailsRateAndShareViewModel: MediaDetailsCellViewModel {
     let identifier: String = "MediaDetailsRateAndShareView"
     
     let didTapShareButton: (() -> Void)?

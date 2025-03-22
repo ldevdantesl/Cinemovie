@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-struct MediaDetailsWatchlistOverviewViewModel: MovieDetailsCellViewModel {
+struct MediaDetailsWatchlistOverviewViewModel: MediaDetailsCellViewModel {
     let identifier: String = "MediaDetailsWatchlistOverviewView"
     let movieOverview: String
     let cellHeight: CGFloat

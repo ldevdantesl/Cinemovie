@@ -34,7 +34,7 @@ final class MediaDetailsScreenVC: UIViewController {
     var presenter: MediaDetailsScreenPresenterProtocol?
     
     // MARK: - PROPERTIES
-    private var viewModels: [MovieDetailsCellViewModel] = []
+    private var viewModels: [MediaDetailsCellViewModel] = []
     private var cachedCollectionViewCellHeights: [IndexPath : CGSize] = [:]
     
     // MARK: - VIEW PROPERTIES
