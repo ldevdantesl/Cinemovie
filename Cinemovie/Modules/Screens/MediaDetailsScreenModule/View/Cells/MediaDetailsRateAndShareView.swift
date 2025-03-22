@@ -8,16 +8,16 @@
 import UIKit
 import SnapKit
 
-struct MovieDetailsRateAndShareViewModel: MovieDetailsCellViewModel {
-    let identifier: String = "MovieDetailsRateAndShareView"
+struct MediaDetailsRateAndShareViewModel: MovieDetailsCellViewModel {
+    let identifier: String = "MediaDetailsRateAndShareView"
     
     let didTapShareButton: (() -> Void)?
     let didTapRateButton: (() -> Void)?
 }
 
-final class MovieDetailsRateAndShareView: UICollectionViewCell {
+final class MediaDetailsRateAndShareView: UICollectionViewCell {
     // MARK: - STATIC
-    static let identifier = "MovieDetailsRateAndShareView"
+    static let identifier = "MediaDetailsRateAndShareView"
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -26,7 +26,7 @@ final class MovieDetailsRateAndShareView: UICollectionViewCell {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: MovieDetailsRateAndShareViewModel?
+    private var viewModel: MediaDetailsRateAndShareViewModel?
     
     // MARK: - VIEW PROPERTIES
     private lazy var rateImageView: UIImageView = {
@@ -61,7 +61,7 @@ final class MovieDetailsRateAndShareView: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MovieDetailsRateAndShareViewModel) {
+    public func configure(viewModel: MediaDetailsRateAndShareViewModel) {
         self.viewModel = viewModel
     }
     

@@ -51,13 +51,13 @@ final class MediaDetailsScreenVC: UIViewController {
         
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.backgroundColor = CMColor.cmBackground
-        cv.register(MovieDetailsRateAndShareView.self, forCellWithReuseIdentifier: MovieDetailsRateAndShareView.identifier)
-        cv.register(MovieDetailsProductionView.self, forCellWithReuseIdentifier: MovieDetailsProductionView.identifier)
-        cv.register(MovieDetailsSubDetailsView.self, forCellWithReuseIdentifier: MovieDetailsSubDetailsView.identifier)
-        cv.register(MovieDetailsBackdropImageView.self, forCellWithReuseIdentifier: MovieDetailsBackdropImageView.identifier)
-        cv.register(MovieDetailsTitleView.self, forCellWithReuseIdentifier: MovieDetailsTitleView.identifier)
-        cv.register(MovieDetailsCastList.self, forCellWithReuseIdentifier: MovieDetailsCastList.identifier)
-        cv.register(MovieDetailsWatchlistOverviewView.self, forCellWithReuseIdentifier: MovieDetailsWatchlistOverviewView.identifier)
+        cv.register(MediaDetailsRateAndShareView.self, forCellWithReuseIdentifier: MediaDetailsRateAndShareView.identifier)
+        cv.register(MediaDetailsProductionView.self, forCellWithReuseIdentifier: MediaDetailsProductionView.identifier)
+        cv.register(MediaDetailsSubDetailsView.self, forCellWithReuseIdentifier: MediaDetailsSubDetailsView.identifier)
+        cv.register(MediaDetailsBackdropImageView.self, forCellWithReuseIdentifier: MediaDetailsBackdropImageView.identifier)
+        cv.register(MediaDetailsTitleView.self, forCellWithReuseIdentifier: MediaDetailsTitleView.identifier)
+        cv.register(MediaDetailsCastList.self, forCellWithReuseIdentifier: MediaDetailsCastList.identifier)
+        cv.register(MediaDetailsWatchlistOverviewView.self, forCellWithReuseIdentifier: MediaDetailsWatchlistOverviewView.identifier)
         cv.delegate = self
         cv.dataSource = self
         cv.translatesAutoresizingMaskIntoConstraints = false
@@ -102,13 +102,13 @@ extension MediaDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSo
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.identifier, for: indexPath)
 
         switch viewModel {
-        case let vm as MovieDetailsBackdropImageViewModel: (cell as? MovieDetailsBackdropImageView)?.configure(viewModel: vm)
-        case let vm as MovieDetailsTitleViewModel: (cell as? MovieDetailsTitleView)?.configure(viewModel: vm)
-        case let vm as MovieDetailsWatchlistOverviewViewModel: (cell as? MovieDetailsWatchlistOverviewView)?.configure(viewModel: vm)
-        case let vm as MovieDetailsCastListViewModel: (cell as? MovieDetailsCastList)?.configure(viewModel: vm)
-        case let vm as MovieDetailsSubDetailsViewModel: (cell as? MovieDetailsSubDetailsView)?.configure(viewModel: vm)
-        case let vm as MovieDetailsProductionViewModel: (cell as? MovieDetailsProductionView)?.configure(viewModel: vm)
-        case let vm as MovieDetailsRateAndShareViewModel: (cell as? MovieDetailsRateAndShareView)?.configure(viewModel: vm)
+        case let vm as MediaDetailsBackdropImageViewModel: (cell as? MediaDetailsBackdropImageView)?.configure(viewModel: vm)
+        case let vm as MediaDetailsTitleViewModel: (cell as? MediaDetailsTitleView)?.configure(viewModel: vm)
+        case let vm as MediaDetailsWatchlistOverviewViewModel: (cell as? MediaDetailsWatchlistOverviewView)?.configure(viewModel: vm)
+        case let vm as MediaDetailsCastListViewModel: (cell as? MediaDetailsCastList)?.configure(viewModel: vm)
+        case let vm as MediaDetailsSubDetailsViewModel: (cell as? MediaDetailsSubDetailsView)?.configure(viewModel: vm)
+        case let vm as MediaDetailsProductionViewModel: (cell as? MediaDetailsProductionView)?.configure(viewModel: vm)
+        case let vm as MediaDetailsRateAndShareViewModel: (cell as? MediaDetailsRateAndShareView)?.configure(viewModel: vm)
         default: break
         }
         
@@ -125,13 +125,13 @@ extension MediaDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSo
         
         let size: CGSize
         switch viewModel {
-        case is MovieDetailsSubDetailsViewModel: size = CGSize(width: width - Constants.hSpacing, height: 25)
-        case is MovieDetailsBackdropImageViewModel: size = CGSize(width: width, height: width * 0.55)
-        case let vm as MovieDetailsTitleViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.isTaglineAvailable ? 70 : 55)
-        case let vm as MovieDetailsWatchlistOverviewViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
-        case is MovieDetailsCastListViewModel: size = CGSize(width: width - Constants.hSpacing, height: 150)
-        case is MovieDetailsProductionViewModel: size = CGSize(width: width - Constants.hSpacing, height: 50)
-        case is MovieDetailsRateAndShareViewModel: size = CGSize(width: width - Constants.biggerHSpacing, height: 40)
+        case is MediaDetailsSubDetailsViewModel: size = CGSize(width: width - Constants.hSpacing, height: 25)
+        case is MediaDetailsBackdropImageViewModel: size = CGSize(width: width, height: width * 0.55)
+        case let vm as MediaDetailsTitleViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.isTaglineAvailable ? 70 : 55)
+        case let vm as MediaDetailsWatchlistOverviewViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
+        case is MediaDetailsCastListViewModel: size = CGSize(width: width - Constants.hSpacing, height: 150)
+        case is MediaDetailsProductionViewModel: size = CGSize(width: width - Constants.hSpacing, height: 50)
+        case is MediaDetailsRateAndShareViewModel: size = CGSize(width: width - Constants.biggerHSpacing, height: 40)
         default: return CGSize(width: width, height: Constants.cellDefaultHeight)
         }
         
@@ -172,24 +172,24 @@ extension MediaDetailsScreenVC: MediaDetailsScreenViewProtocol {
         }
         
         self.viewModels = [
-            MovieDetailsBackdropImageViewModel(imagePath: details.backdropPath, size: .w1280),
-            MovieDetailsTitleViewModel(movieName: details.title, movieTagline: details.tagline),
+            MediaDetailsBackdropImageViewModel(imagePath: details.backdropPath, size: .w1280),
+            MediaDetailsTitleViewModel(movieName: details.title, movieTagline: details.tagline),
             
-            MovieDetailsSubDetailsViewModel(
+            MediaDetailsSubDetailsViewModel(
                 year: details.releaseDate, released: CMDateFormatter.isDatePassed(details.releaseDate),
                 duration: RuntimeHelper.runtime(details.runtime), imdbPath: details.imdbID,
                 didTapIMDB: presenter?.didTapIMDBImage
             ),
             
-            MovieDetailsWatchlistOverviewViewModel(movieOverview: details.overview),
+            MediaDetailsWatchlistOverviewViewModel(movieOverview: details.overview),
         ]
         
         if let cast = cast, !cast.isEmpty {
-            self.viewModels.append(MovieDetailsCastListViewModel(cast: cast, didSelectCast: presenter?.didSelectActor))
+            self.viewModels.append(MediaDetailsCastListViewModel(cast: cast, didSelectCast: presenter?.didSelectActor))
         }
         
-        self.viewModels.append(MovieDetailsProductionViewModel(companies: details.productionCompanies, countries: details.productionCountries))
-        self.viewModels.append(MovieDetailsRateAndShareViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton))
+        self.viewModels.append(MediaDetailsProductionViewModel(companies: details.productionCompanies, countries: details.productionCountries))
+        self.viewModels.append(MediaDetailsRateAndShareViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton))
         
         DispatchQueue.main.async {
             self.collectionView.setNeedsLayout()

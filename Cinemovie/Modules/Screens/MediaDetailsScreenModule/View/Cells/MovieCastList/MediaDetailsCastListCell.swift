@@ -9,14 +9,14 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-struct MovieDetailsCastListCellViewModel {
+struct MediaDetailsCastListCellViewModel {
     let cast: Cast?
 }
 
-final class MovieDetailsCastListCell: UICollectionViewCell {
+final class MediaDetailsCastListCell: UICollectionViewCell {
     
     // MARK: - STATIC
-    static let identifier = "MovieDetailsCastListCell"
+    static let identifier = "MediaDetailsCastListCell"
     
     // MARK: - CONSTANTS
     fileprivate enum Paddings {
@@ -90,7 +90,7 @@ final class MovieDetailsCastListCell: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC METHOD
-    public func configure(viewModel: MovieDetailsCastListCellViewModel) {
+    public func configure(viewModel: MediaDetailsCastListCellViewModel) {
         guard let cast = viewModel.cast else { return }
         DispatchQueue.main.async {
             if let imageURL = URLHelper.getImageURL(with: cast.profilePath, size: .original){

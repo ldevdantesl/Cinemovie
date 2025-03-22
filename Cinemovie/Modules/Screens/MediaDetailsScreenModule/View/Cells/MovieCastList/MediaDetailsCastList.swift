@@ -8,8 +8,8 @@
 import UIKit
 import SnapKit
 
-struct MovieDetailsCastListViewModel: MovieDetailsCellViewModel {
-    let identifier: String = "MovieDetailsCastList"
+struct MediaDetailsCastListViewModel: MovieDetailsCellViewModel {
+    let identifier: String = "MediaDetailsCastList"
     
     let cast: [Cast]?
     let didSelectCast: ((Cast) -> Void)?
@@ -20,9 +20,9 @@ struct MovieDetailsCastListViewModel: MovieDetailsCellViewModel {
     }
 }
 
-final class MovieDetailsCastList: UICollectionViewCell {
+final class MediaDetailsCastList: UICollectionViewCell {
     // MARK: - STATIC
-    static let identifier = "MovieDetailsCastList"
+    static let identifier = "MediaDetailsCastList"
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -33,7 +33,7 @@ final class MovieDetailsCastList: UICollectionViewCell {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: MovieDetailsCastListViewModel?
+    private var viewModel: MediaDetailsCastListViewModel?
     
     // MARK: - VIEW PROPERTIES
     private lazy var castLabel: UILabel = {
@@ -54,7 +54,7 @@ final class MovieDetailsCastList: UICollectionViewCell {
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.showsHorizontalScrollIndicator = false
         cv.backgroundColor = CMColor.cmBackground
-        cv.register(MovieDetailsCastListCell.self, forCellWithReuseIdentifier: MovieDetailsCastListCell.identifier)
+        cv.register(MediaDetailsCastListCell.self, forCellWithReuseIdentifier: MediaDetailsCastListCell.identifier)
         cv.delegate = self
         cv.dataSource = self
         cv.translatesAutoresizingMaskIntoConstraints = false
@@ -73,7 +73,7 @@ final class MovieDetailsCastList: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNCTIONS
-    public func configure(viewModel: MovieDetailsCastListViewModel) {
+    public func configure(viewModel: MediaDetailsCastListViewModel) {
         self.viewModel = viewModel
     }
     
@@ -95,18 +95,18 @@ final class MovieDetailsCastList: UICollectionViewCell {
     }
 }
 
-extension MovieDetailsCastList: UICollectionViewDelegate, UICollectionViewDataSource {
+extension MediaDetailsCastList: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return viewModel?.cast?.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: MovieDetailsCastListCell.identifier, for: indexPath
-        ) as? MovieDetailsCastListCell else {
+            withReuseIdentifier: MediaDetailsCastListCell.identifier, for: indexPath
+        ) as? MediaDetailsCastListCell else {
             return UICollectionViewCell()
         }
-        let vm = MovieDetailsCastListCellViewModel(cast: viewModel?.cast?[indexPath.row])
+        let vm = MediaDetailsCastListCellViewModel(cast: viewModel?.cast?[indexPath.row])
         cell.configure(viewModel: vm)
         return cell
     }

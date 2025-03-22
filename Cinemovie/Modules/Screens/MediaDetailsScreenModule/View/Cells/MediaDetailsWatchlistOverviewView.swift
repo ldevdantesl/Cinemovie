@@ -8,8 +8,8 @@
 import UIKit
 import SnapKit
 
-struct MovieDetailsWatchlistOverviewViewModel: MovieDetailsCellViewModel {
-    let identifier: String = "MovieDetailsWatchlistOverviewView"
+struct MediaDetailsWatchlistOverviewViewModel: MovieDetailsCellViewModel {
+    let identifier: String = "MediaDetailsWatchlistOverviewView"
     let movieOverview: String
     let cellHeight: CGFloat
     
@@ -31,10 +31,10 @@ struct MovieDetailsWatchlistOverviewViewModel: MovieDetailsCellViewModel {
     }
 }
 
-final class MovieDetailsWatchlistOverviewView: UICollectionViewCell {
+final class MediaDetailsWatchlistOverviewView: UICollectionViewCell {
     
     // MARK: - STATIC
-    static let identifier = "MovieDetailsWatchlistOverviewView"
+    static let identifier = "MediaDetailsWatchlistOverviewView"
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -90,7 +90,7 @@ final class MovieDetailsWatchlistOverviewView: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MovieDetailsWatchlistOverviewViewModel) {
+    public func configure(viewModel: MediaDetailsWatchlistOverviewViewModel) {
         movieOverviewLabel.text = viewModel.movieOverview
     }
     

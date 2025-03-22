@@ -8,14 +8,14 @@
 import UIKit
 import SnapKit
 
-struct MovieDetailsProductionViewModel: MovieDetailsCellViewModel {
-    let identifier: String = "MovieDetailsProductionView"
+struct MediaDetailsProductionViewModel: MovieDetailsCellViewModel {
+    let identifier: String = "MediaDetailsProductionView"
     
     let companies: [ProductionCompany]
     let countries: [ProductionCountry]
 }
 
-final class MovieDetailsProductionView: UICollectionViewCell {
+final class MediaDetailsProductionView: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let spacer = 5.0
@@ -23,7 +23,7 @@ final class MovieDetailsProductionView: UICollectionViewCell {
     }
     
     // MARK: - STATIC
-    static let identifier = "MovieDetailsProductionView"
+    static let identifier = "MediaDetailsProductionView"
     
     // MARK: - PROPERTIES
     private let companiesLabel: UILabel = {
@@ -76,7 +76,7 @@ final class MovieDetailsProductionView: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MovieDetailsProductionViewModel) {
+    public func configure(viewModel: MediaDetailsProductionViewModel) {
         let countriesStr = viewModel.countries.prefix(2).map(\.name).joined(separator: ", ")
         let companiesStr = viewModel.companies.filter { $0.name != nil }.prefix(2).map(\.name!).joined(separator: ", ")
         
