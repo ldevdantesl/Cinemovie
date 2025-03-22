@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 
 protocol MovieDetailsScreenRouterProtocol {
+    func goBack()
     func navigateToPersonDetails(creditID: String)
     func navigateToAnotherMovie(movie: QueryMovie)
     func presentShareView(movie: MovieDetails)
@@ -63,5 +64,9 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
         
         let activityViewController = UIActivityViewController(activityItems: [activityText], applicationActivities: nil)
         viewController?.present(activityViewController, animated: true)
+    }
+    
+    func goBack() {
+        viewController?.navigationController?.popViewController(animated: true)
     }
 }

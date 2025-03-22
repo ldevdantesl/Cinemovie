@@ -8,33 +8,54 @@
 import UIKit
 import SnapKit
 
-final class CMCircularButton: UIButton {
+struct CMCircularButtonViewModel {
+    let systemName: String
+    let backColor: UIColor
+    let foreColor: UIColor
+    let didTapAction: (() -> Void)?
     
-    // MARK: - PROPERTIES
-    private var buttonSize: CGFloat
-    
-    // MARK: - LIFECYCLE
     init(
         systemName: String,
-        size: CGFloat = 44,
-        backColor: UIColor = .cmSecondary,
-        foreColor: UIColor = .cmLabel
-    ) {
-        self.buttonSize = size
-        super.init(frame: .zero)
-        setupUI(systemName: systemName, backColor: backColor, foreColor: foreColor)
-    }
-    
-    convenience init(
-        systemName: String,
-        size: CGFloat = 44,
         backColor: UIColor = .cmSecondary,
         foreColor: UIColor = .cmLabel,
-        target: Any?,
-        action: Selector
+        didTapAction: (() -> Void)? = nil
     ) {
-        self.init(systemName: systemName, size: size, backColor: backColor, foreColor: foreColor)
-        addTarget(target, action: action, for: .touchUpInside)
+        self.systemName = systemName
+        self.backColor = backColor
+        self.foreColor = foreColor
+        self.didTapAction = didTapAction
+    }
+}
+
+final class CMCircularButton: UIView {
+    
+    // MARK: - PROPERTIES
+    private var viewModel: CMCircularButtonViewModel?
+    
+    // MARK: - VIEW PROPERTIES
+    private var imageView: UIImageView = {
+        let image = UIImageView()
+        image.isUserInteractionEnabled = true
+        image.contentMode = .scaleAspectFit
+        image.translatesAutoresizingMaskIntoConstraints = false
+        return image
+    }()
+    
+    // MARK: - LIFECYCLE
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+    
+    convenience init(viewModel: CMCircularButtonViewModel) {
+        self.init(frame: .zero)
+        self.viewModel = viewModel
+        self.clipsToBounds = true
+        self.isUserInteractionEnabled = true
+        self.backgroundColor = viewModel.backColor
+        imageView.image = UIImage(systemName: viewModel.systemName)
+        imageView.tintColor = viewModel.foreColor
+        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapButton)))
     }
     
     @available(*, unavailable)
@@ -44,26 +65,32 @@ final class CMCircularButton: UIButton {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        self.layer.cornerRadius = buttonSize / 2
+        self.layer.cornerRadius = self.bounds.width / 2
     }
     
-    // MARK: - Private Methods
-    private func setupUI(systemName: String, backColor: UIColor, foreColor: UIColor) {
-        self.setImage(UIImage(systemName: systemName), for: .normal)
-        self.imageView?.tintColor = foreColor
-        self.backgroundColor = backColor
-        self.imageView?.contentMode = .center
-        
+    // MARK: - PUBLIC FUNC
+    public func configure(viewModel: CMCircularButtonViewModel) {
+        self.viewModel = viewModel
         self.clipsToBounds = true
-        self.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: buttonSize * 0.6 , weight: .medium), forImageIn: .normal)
-        self.translatesAutoresizingMaskIntoConstraints = false
-        self.snp.makeConstraints {
-            $0.size.equalTo(buttonSize)
+        self.isUserInteractionEnabled = true
+        self.backgroundColor = viewModel.backColor
+        imageView.image = UIImage(systemName: viewModel.systemName)
+        imageView.tintColor = viewModel.foreColor
+        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapButton)))
+    }
+    
+    // MARK: - PRIVATE FUNC
+    private func setupUI() {
+        addSubview(imageView)
+        imageView.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.size.equalToSuperview().multipliedBy(0.6)
         }
     }
     
-    // MARK: - Public Methods
-    public func setAction(target: Any?, action: Selector) {
-        addTarget(target, action: action, for: .touchUpInside)
+    // MARK: - OBJC FUNC
+    @objc private func didTapButton() {
+        guard let viewModel = viewModel else { return }
+        viewModel.didTapAction?()
     }
 }

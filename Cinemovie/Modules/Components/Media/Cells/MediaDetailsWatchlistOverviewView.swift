@@ -27,7 +27,7 @@ struct MediaDetailsWatchlistOverviewViewModel: MediaDetailsCellViewModel {
             attributes: [.font: font],
             context: nil
         )
-        return ceil(bounding.height) + 60
+        return ceil(bounding.height) + 40
     }
 }
 

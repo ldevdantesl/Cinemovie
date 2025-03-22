@@ -58,45 +58,6 @@ final class HomeScreenFeaturedMovieView: UIView {
         image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapOnMovieImage)))
         return image
     }()
-    
-    private let myListButton: CMButton = {
-        let vm = CMButtonViewModel(
-            text: "+ My List",
-            foreColor: CMColor.cmLabel,
-            font: CMFont.font(size: .subtitle, fontName: .avenirBold),
-            backColor: CMColor.cmAccent,
-            cornerRadius: Constants.buttonCornerRadius
-        )
-        
-        let button = CMButton(viewModel: vm)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
-    private let watchListButton: CMButton = {
-        let vm = CMButtonViewModel(
-            text: "+ Watchlist",
-            foreColor: CMColor.cmLabel,
-            font: CMFont.font(size: .subtitle, fontName: .avenirBold),
-            backColor: CMColor.cmSuccess,
-            cornerRadius: Constants.buttonCornerRadius
-        )
-        let button = CMButton(viewModel: vm)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
-    private lazy var hStack: UIStackView = {
-        let view = UIStackView(arrangedSubviews: [myListButton, watchListButton])
-        view.axis = .horizontal
-        view.spacing = Constants.bigSpacing
-        view.alignment = .center
-        view.distribution = .fill
-        view.isLayoutMarginsRelativeArrangement = true
-        view.layoutMargins = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
 
     // MARK: - LIFECYCLE
     override init(frame: CGRect) {
@@ -137,22 +98,7 @@ final class HomeScreenFeaturedMovieView: UIView {
         
         addSubview(movieImage)
         movieImage.snp.makeConstraints {
-            $0.top.leading.trailing.bottom.equalToSuperview()
-        }
-        
-        addSubview(hStack)
-        hStack.snp.makeConstraints {
-            $0.bottom.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(Constants.stackHeight)
-        }
-        
-        myListButton.snp.makeConstraints {
-            $0.height.equalTo(Constants.buttonSize)
-        }
-        
-        watchListButton.snp.makeConstraints {
-            $0.height.equalTo(Constants.buttonSize)
+            $0.edges.equalToSuperview()
         }
     }
     
@@ -195,21 +141,19 @@ final class HomeScreenFeaturedMovieView: UIView {
         if gradientLayer == nil {
             let newGradientLayer = CAGradientLayer()
             newGradientLayer.colors = [
-                UIColor.black.cgColor,
-                UIColor.clear.cgColor
+                UIColor.black.withAlphaComponent(0.6).cgColor,
+                UIColor.clear.cgColor,
+                UIColor.clear.cgColor,
+                UIColor.black.withAlphaComponent(0.6).cgColor
             ]
-            newGradientLayer.startPoint = CGPoint(x: 0.5, y: 1)
-            newGradientLayer.endPoint = CGPoint(x: 0.5, y: 0)
+            newGradientLayer.locations = [0.0, 0.2, 0.8, 1.0]
+            newGradientLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
+            newGradientLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
             movieImage.layer.insertSublayer(newGradientLayer, at: 0)
             gradientLayer = newGradientLayer
         }
-        
-        gradientLayer?.frame = CGRect(
-            x: 0,
-            y: movieImage.bounds.height * 0.8,
-            width: movieImage.bounds.width,
-            height: movieImage.bounds.height * 0.2
-        )
+
+        gradientLayer?.frame = movieImage.bounds
     }
     
     // MARK: - OBJC FUNCTIONS

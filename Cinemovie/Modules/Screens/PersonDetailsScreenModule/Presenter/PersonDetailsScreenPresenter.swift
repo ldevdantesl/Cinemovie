@@ -12,6 +12,7 @@ protocol PersonDetailsScreenPresenterProtocol: AnyObject {
     
     func didTapBackButton()
     func didTapLogoImage(sourceID: String, sourceType: ExternalSource.SourceTypes)
+    func didTapMovie(movie: QueryMovie)
     
     func didGetPersonID(_ id: Int)
     func didGetPersonDetails(_ details: PersonDetails)
@@ -101,5 +102,9 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
     func didGetPersonTVShows(_ tvShows: [QueryTVShow]) {
         self.personTVShows = tvShows
         downloadGroup.leave()
+    }
+    
+    func didTapMovie(movie: QueryMovie) {
+        router.navigateToMovie(movieID: movie.id)
     }
 }

@@ -46,22 +46,17 @@ final class PersonDetailsHeaderView: UICollectionViewCell {
         return indicator
     }()
     
-    private lazy var avatarImageView: UIImageView = {
+    private let avatarImageView: UIImageView = {
         let image = UIImageView()
         image.contentMode = .scaleAspectFill
         image.clipsToBounds = true
         image.isUserInteractionEnabled = true
         image.translatesAutoresizingMaskIntoConstraints = false
-        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapAvaImage)))
         return image
     }()
     
     private lazy var backButton: CMCircularButton = {
-        let button = CMCircularButton(
-            systemName: Constants.backButtonImage, size: Constants.backButtonSize,
-            backColor: CMColor.cmSecondaryBackground, foreColor: CMColor.cmAccent,
-            target: self, action: #selector(didTapBackButton)
-        )
+        let button = CMCircularButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -85,18 +80,26 @@ final class PersonDetailsHeaderView: UICollectionViewCell {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: PersonDetailsHeaderViewModel) {
         self.viewModel = viewModel
-        if let url = URLHelper.getImageURL(with: viewModel.imagePath, size: .w780) {
-            loadingIndicator.startAnimating()
-            avatarImageView.sd_setImage(with: url) { [weak self] _, _, _, _ in
-                guard let self = self else { return }
-                self.loadingIndicator.stopAnimating()
-            }
-        } else {
+        let vm = CMCircularButtonViewModel(
+            systemName: Constants.backButtonImage, backColor: CMColor.cmSecondaryBackground,
+            foreColor: CMColor.cmAccent, didTapAction: viewModel.didTapBackButton
+        )
+        
+        backButton.configure(viewModel: vm)
+        
+        guard let url = URLHelper.getImageURL(with: viewModel.imagePath, size: .w780) else {
             loadingIndicator.stopAnimating()
             avatarImageView.preferredSymbolConfiguration = .init(pointSize: Constants.avaImageSize * 0.6, weight: .bold)
             avatarImageView.contentMode = .center
             avatarImageView.image = UIImage(systemName: Constants.avaDefaultImageName)
             avatarImageView.backgroundColor = CMColor.cmSecondaryBackground
+            return
+        }
+        
+        loadingIndicator.startAnimating()
+        avatarImageView.sd_setImage(with: url) { [weak self] _, _, _, _ in
+            guard let self = self else { return }
+            self.loadingIndicator.stopAnimating()
         }
     }
     
@@ -106,6 +109,7 @@ final class PersonDetailsHeaderView: UICollectionViewCell {
         backButton.snp.makeConstraints {
             $0.top.equalToSuperview().offset(Constants.vPadding)
             $0.leading.equalToSuperview()
+            $0.size.equalTo(Constants.backButtonSize)
         }
         
         avatarImageView.addSubview(loadingIndicator)
@@ -120,11 +124,6 @@ final class PersonDetailsHeaderView: UICollectionViewCell {
             $0.centerX.equalToSuperview()
             $0.width.height.equalTo(Constants.avaImageSize)
         }
-    }
-    
-    // MARK: - OBJC FUNC
-    @objc private func didTapBackButton() {
-        viewModel?.didTapBackButton?()
     }
     
     @objc private func didTapAvaImage() {

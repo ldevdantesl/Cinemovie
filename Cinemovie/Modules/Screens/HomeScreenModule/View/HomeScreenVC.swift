@@ -56,20 +56,13 @@ final class HomeScreenVC: UIViewController {
     }()
     
     private lazy var headerView: HomeScreenHeaderView = {
-        let firstButton = CMCircularButton(
+        let vm = CMCircularButtonViewModel(
             systemName: "magnifyingglass",
-            size: Constants.headerViewFirstButtonSize,
-            backColor: .clear,
-            foreColor: .cmLabel,
-            target: self,
-            action: #selector(didTapSearchButton)
+            backColor: .clear, foreColor: .cmLabel
         )
-        
-        let header = HomeScreenHeaderView(
-            headerTitle: "For Dantes",
-            firstButton: firstButton,
-            secondButton: nil
-        )
+        let firstButton = CMCircularButton(viewModel: vm)
+        let headerVM = HomeScreenHeaderViewModel(headerTitle: "For Dantes", firstButton: firstButton)
+        let header = HomeScreenHeaderView(viewModel: headerVM)
         header.translatesAutoresizingMaskIntoConstraints = false
         return header
     }()
@@ -127,8 +120,7 @@ final class HomeScreenVC: UIViewController {
         view.addSubview(headerView)
         headerView.snp.makeConstraints {
             $0.top.equalTo(view.snp.top)
-            $0.leading.equalToSuperview()
-            $0.trailing.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
             $0.height.equalTo(Constants.headerViewHeight)
         }
         view.bringSubviewToFront(headerView)
@@ -152,8 +144,7 @@ final class HomeScreenVC: UIViewController {
         contentView.addSubview(featuredMovieView)
         featuredMovieView.snp.makeConstraints {
             $0.top.equalTo(contentView.snp.top)
-            $0.leading.equalTo(contentView.snp.leading).offset(Constants.featuredMovieViewHorPadding)
-            $0.trailing.equalTo(contentView.snp.trailing).offset(-Constants.featuredMovieViewHorPadding)
+            $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
             $0.height.equalTo(Constants.featuredMovieHeight)
         }
         
@@ -188,11 +179,6 @@ final class HomeScreenVC: UIViewController {
         contentView.snp.makeConstraints {
             $0.bottom.equalTo(nowPlayingMoviesList.snp.bottom).offset(Paddings.bigSpacing)
         }
-    }
-    
-    // MARK: - OBJC FUNCTIONS
-    @objc private func didTapSearchButton() {
-        print("Tapped Search Button")
     }
 }
 

@@ -10,6 +10,7 @@ import UIKit
 protocol PersonDetailsScreenRouterProtocol {
     func goBack()
     func openSource(sourceID: String, sourceType: ExternalSource.SourceTypes)
+    func navigateToMovie(movieID: Int)
 }
 
 final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
@@ -22,6 +23,11 @@ final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
     
     func goBack() {
         viewController?.navigationController?.popViewController(animated: true)
+    }
+    
+    func navigateToMovie(movieID: Int) {
+        let movieDetailsVC = MovieDetailsScreenAssembler.assemble(movieID: movieID, tmdbService: tmdbService)
+        viewController?.navigationController?.pushViewController(movieDetailsVC, animated: true)
     }
     
     func openSource(sourceID: String, sourceType: ExternalSource.SourceTypes) {

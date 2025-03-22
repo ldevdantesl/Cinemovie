@@ -8,10 +8,32 @@
 import SnapKit
 import UIKit
 
-final class HomeScreenHeaderView: UIView {
+struct HomeScreenHeaderViewModel {
+    let headerTitle: String
+    let firstButton: CMCircularButton
+    let secondButton: CMCircularButton?
     
-    private let headerLabel: UILabel = {
+    init(headerTitle: String, firstButton: CMCircularButton, secondButton: CMCircularButton? = nil) {
+        self.headerTitle = headerTitle
+        self.firstButton = firstButton
+        self.secondButton = secondButton
+    }
+}
+
+final class HomeScreenHeaderView: UIView {
+    // MARK: - CONSTANTS
+    fileprivate enum Constants {
+        static let spacing = 5.0
+        static let biggerSpacing = 10.0
+    }
+    
+    // MARK: - PROPERTIES
+    private var viewModel: HomeScreenHeaderViewModel
+    
+    // MARK: - VIEW PROPERTIES
+    private lazy var headerLabel: UILabel = {
         let label = UILabel()
+        label.text = viewModel.headerTitle
         label.font = CMFont.font(size: .title, weight: .bold)
         label.textColor = CMColor.cmLabel
         label.numberOfLines = 1
@@ -19,19 +41,21 @@ final class HomeScreenHeaderView: UIView {
         return label
     }()
     
-    private let firstButton: CMCircularButton
-    private let secondButton: CMCircularButton?
+    private lazy var hStack: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [headerLabel, UIView(), viewModel.firstButton])
+        stack.axis = .horizontal
+        stack.spacing = Constants.biggerSpacing
+        stack.distribution = .fill
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        if let secondButton = viewModel.secondButton { stack.addArrangedSubview(secondButton) }
+        return stack
+    }()
     
-    init(
-        headerTitle: String,
-        firstButton: CMCircularButton,
-        secondButton: CMCircularButton? = nil
-    ) {
-        self.firstButton = firstButton
-        self.secondButton = secondButton
+    // MARK: - LIFECYCLE
+    init(viewModel: HomeScreenHeaderViewModel) {
+        self.viewModel = viewModel
         super.init(frame: .zero)
-        
-        self.setupUI(headerTitle: headerTitle)
+        self.setupUI()
     }
     
     @available(*, unavailable)
@@ -39,41 +63,22 @@ final class HomeScreenHeaderView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Private Methods
-    private func setupUI(headerTitle: String) {
-        headerLabel.text = headerTitle
-        self.backgroundColor = CMColor.cmBackground
+    // MARK: - PUBLIC FUNC
+    public func configure(viewModel: HomeScreenHeaderViewModel) {
+        self.viewModel = viewModel
+        headerLabel.text = viewModel.headerTitle
         
-        let spacer = UIView()
-        let hStack = UIStackView(arrangedSubviews: [headerLabel, spacer, firstButton])
-        hStack.axis = .horizontal
-        hStack.spacing = 10
-        hStack.distribution = .fill
-        hStack.translatesAutoresizingMaskIntoConstraints = false
-
-        if let secondButton = secondButton {
-            hStack.addArrangedSubview(secondButton)
+        hStack.arrangedSubviews.forEach {
+            hStack.removeArrangedSubview($0)
+            $0.removeFromSuperview()
         }
         
-        addSubview(hStack)
-        
-        hStack.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(10)
-            $0.trailing.equalToSuperview().offset(-10)
-            $0.bottom.equalToSuperview().offset(-10)
-        }
-        
-        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-
-        headerLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        headerLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        
-        firstButton.setContentHuggingPriority(.defaultHigh, for: .horizontal)
-        firstButton.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+        hStack.addArrangedSubview(headerLabel)
+        hStack.addArrangedSubview(UIView())
+        hStack.addArrangedSubview(viewModel.firstButton)
+        if let secondButton = viewModel.secondButton { hStack.addArrangedSubview(secondButton) }
     }
     
-    // MARK: - Public Methods
     public func addShadowToHeader() {
         UIView.transition(with: self, duration: 0.2, options: .transitionCrossDissolve) { [weak self] in
             guard let self = self else { return }
@@ -94,6 +99,16 @@ final class HomeScreenHeaderView: UIView {
         UIView.transition(with: self, duration: 0.2) { [weak self] in
             guard let self = self else { return }
             self.layer.shadowOpacity = 0
+        }
+    }
+    
+    // MARK: - PRIVATE FUNC
+    private func setupUI() {
+        self.backgroundColor = CMColor.cmBackground
+        
+        addSubview(hStack)
+        hStack.snp.makeConstraints {
+            $0.edges.equalToSuperview()
         }
     }
 }

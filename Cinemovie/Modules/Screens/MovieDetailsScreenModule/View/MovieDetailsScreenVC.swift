@@ -38,7 +38,7 @@ final class MovieDetailsScreenVC: UIViewController {
     private var cachedCollectionViewCellHeights: [IndexPath : CGSize] = [:]
     
     // MARK: - VIEW PROPERTIES
-    private lazy var downloadingView: CMSplashView = {
+    private let downloadingView: CMSplashView = {
         let view = CMSplashView(frame: .zero, showsLoadingLabel: true)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -74,6 +74,11 @@ final class MovieDetailsScreenVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.isHidden = true
+    }
+    
+    deinit {
+        print("MovieDetails is deinited")
+        SDImageCache.shared.clearMemory()
     }
     
     // MARK: - PRIVATE FUNCTIONS
@@ -171,8 +176,13 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             self.downloadingView.isHidden = true
         }
         
+        let isBackButtonHidden = navigationController?.viewControllers.count ?? 0 > 1
+        
         self.viewModels = [
-            MediaDetailsBackdropImageViewModel(imagePath: details.backdropPath, size: .w1280),
+            MediaDetailsBackdropImageViewModel(
+                imagePath: details.backdropPath, size: .w1280,
+                isBackButtonHidden: isBackButtonHidden, didTapBackButtonAction: presenter?.didTapBackButton
+            ),
             MediaDetailsTitleViewModel(movieName: details.title, movieTagline: details.tagline),
             
             MediaDetailsSubDetailsViewModel(

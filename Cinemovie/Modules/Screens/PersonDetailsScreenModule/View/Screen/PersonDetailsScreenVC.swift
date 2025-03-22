@@ -172,10 +172,10 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
             gender: details.gender
         ))
     
-        viewModels.append(PersonDetailsBiographyViewModel(biography: details.biography))
+        !details.biography.isEmpty ? viewModels.append(PersonDetailsBiographyViewModel(biography: details.biography)) : ()
         viewModels.append(PersonDetailsSourcesViewModel(externalSource: sources, didTapLogo: presenter?.didTapLogoImage))
         
-        !movies.isEmpty ? viewModels.append(PersonDetailsMediaViewModel(headerTitle: "Movies", headerSubtitle: nil, movies: movies)) : ()
+        !movies.isEmpty ? viewModels.append(PersonDetailsMediaViewModel(headerTitle: "Movies", headerSubtitle: nil, movies: movies, didTapMovieAction: presenter?.didTapMovie)) : ()
         !tvShows.isEmpty ? viewModels.append(PersonDetailsMediaViewModel(headerTitle: "TV Shows", headerSubtitle: nil, tvShows: tvShows)) : ()
         
         DispatchQueue.main.async {

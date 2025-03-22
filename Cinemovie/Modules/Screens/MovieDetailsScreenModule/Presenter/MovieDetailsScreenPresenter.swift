@@ -14,6 +14,7 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didTapIMDBImage()
     func didTapShareButton()
     func didTapRateButton()
+    func didTapBackButton()
     func didSelectActor(_ actor: Cast)
     
     func didGetMovieDetails(_ details: MovieDetails)
@@ -128,5 +129,9 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     func didGetMovieRecommendations(queryMovies: [QueryMovie]) {
         movieRecommends = queryMovies
         dispatchGroup.leave()
+    }
+    
+    func didTapBackButton() {
+        router.goBack()
     }
 }
