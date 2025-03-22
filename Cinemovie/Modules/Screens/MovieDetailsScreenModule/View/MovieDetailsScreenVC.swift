@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-protocol MediaDetailsScreenViewProtocol: AnyObject {
+protocol MovieDetailsScreenViewProtocol: AnyObject {
     func didRecieveError(_ errorStr: String)
     func didDownloadAllData(
         details: MovieDetails, videos: [DomainVideo]?,
@@ -19,7 +19,7 @@ protocol MediaDetailsScreenViewProtocol: AnyObject {
     )
 }
 
-final class MediaDetailsScreenVC: UIViewController {
+final class MovieDetailsScreenVC: UIViewController {
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -31,7 +31,7 @@ final class MediaDetailsScreenVC: UIViewController {
     }
     
     // MARK: - VIPER
-    var presenter: MediaDetailsScreenPresenterProtocol?
+    var presenter: MovieDetailsScreenPresenterProtocol?
     
     // MARK: - PROPERTIES
     private var viewModels: [MediaDetailsCellViewModel] = []
@@ -92,7 +92,7 @@ final class MediaDetailsScreenVC: UIViewController {
     }
 }
 
-extension MediaDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+extension MovieDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return viewModels.count
     }
@@ -140,7 +140,7 @@ extension MediaDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSo
     }
 }
 
-extension MediaDetailsScreenVC: MediaDetailsScreenViewProtocol {
+extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
     func didRecieveError(_ errorStr: String) {
         let alert = UIAlertController(
             title: "Oops..",

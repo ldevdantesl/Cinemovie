@@ -55,7 +55,7 @@ final class HomeScreenVC: UIViewController {
         return contentView
     }()
     
-    private lazy var headerView: CMHeaderView = {
+    private lazy var headerView: HomeScreenHeaderView = {
         let firstButton = CMCircularButton(
             systemName: "magnifyingglass",
             size: Constants.headerViewFirstButtonSize,
@@ -65,7 +65,7 @@ final class HomeScreenVC: UIViewController {
             action: #selector(didTapSearchButton)
         )
         
-        let header = CMHeaderView(
+        let header = HomeScreenHeaderView(
             headerTitle: "For Dantes",
             firstButton: firstButton,
             secondButton: nil
@@ -74,8 +74,8 @@ final class HomeScreenVC: UIViewController {
         return header
     }()
 
-    private let featuredMovieView: CMFeaturedMovieView = {
-        let movie = CMFeaturedMovieView()
+    private let featuredMovieView: HomeScreenFeaturedMovieView = {
+        let movie = HomeScreenFeaturedMovieView()
         movie.translatesAutoresizingMaskIntoConstraints = false
         return movie
     }()
@@ -217,7 +217,7 @@ extension HomeScreenVC: HomeScreenViewProtocol {
         DispatchQueue.main.async {
             let vm = CMMediaListViewModel(movies: movies, listTitle: "Popular Movies", didTapMovie: self.presenter?.didTapMovie)
             self.popularMoviesList.configure(viewModel: vm)
-            let featuredVM = CMFeaturedMovieViewModel(movies: movies, didTapMovie: self.presenter?.didTapMovie)
+            let featuredVM = HomeScreenFeaturedMovieViewModel(movies: movies, didTapMovie: self.presenter?.didTapMovie)
             self.featuredMovieView.configure(viewModel: featuredVM)
         }
     }

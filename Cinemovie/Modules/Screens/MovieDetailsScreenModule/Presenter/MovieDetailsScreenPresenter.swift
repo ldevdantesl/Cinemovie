@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol MediaDetailsScreenPresenterProtocol: AnyObject {
+protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
 
     func didTapAnotherMovie(movie: QueryMovie)
@@ -24,10 +24,12 @@ protocol MediaDetailsScreenPresenterProtocol: AnyObject {
     func didGetMovieReviews(_ reviews: [DomainReview], reviewCount: Int)
 }
 
-final class MediaDetailsScreenPresenter {
-    weak var view: MediaDetailsScreenViewProtocol?
-    var router: MediaDetailsScreenRouterProtocol
-    var interactor: MediaDetailsScreenInteractorProtocol
+final class MovieDetailsScreenPresenter {
+    weak var view: MovieDetailsScreenViewProtocol?
+    var router: MovieDetailsScreenRouterProtocol
+    var interactor: MovieDetailsScreenInteractorProtocol
+    
+    private let movieID: Int
     
     private let dispatchGroup = DispatchGroup()
     
@@ -39,28 +41,29 @@ final class MediaDetailsScreenPresenter {
     private var movieReviews: [DomainReview]?
     private var movieReviewCount: Int?
 
-    init(interactor: MediaDetailsScreenInteractorProtocol, router: MediaDetailsScreenRouterProtocol) {
+    init(movieID: Int, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
+        self.movieID = movieID
         self.interactor = interactor
         self.router = router
     }
 }
 
-extension MediaDetailsScreenPresenter: MediaDetailsScreenPresenterProtocol {
+extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     func viewDidLoad() {
         dispatchGroup.enter()
-        interactor.getMovieDetails()
+        interactor.getMovieDetails(movieID: movieID)
         
         dispatchGroup.enter()
-        interactor.getMovieCast()
+        interactor.getMovieCast(movieID: movieID)
         
         dispatchGroup.enter()
-        interactor.getMovieRecommendations()
+        interactor.getMovieRecommendations(movieID: movieID)
         
         dispatchGroup.enter()
-        interactor.getMovieVideos()
+        interactor.getMovieVideos(movieID: movieID)
         
         dispatchGroup.enter()
-        interactor.getMovieReviews()
+        interactor.getMovieReviews(movieID: movieID)
         
         dispatchGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }

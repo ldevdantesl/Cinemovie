@@ -8,15 +8,15 @@
 import UIKit
 import SnapKit
 
-protocol MediaDetailsScreenRouterProtocol {
+protocol MovieDetailsScreenRouterProtocol {
     func navigateToPersonDetails(creditID: String)
     func navigateToAnotherMovie(movie: QueryMovie)
     func presentShareView(movie: MovieDetails)
     func presentActor(actor: Cast)
 }
 
-final class MediaDetailsScreenRouter: MediaDetailsScreenRouterProtocol {
-    weak var viewController: MediaDetailsScreenVC?
+final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
+    weak var viewController: MovieDetailsScreenVC?
     weak var tmdbService: TMDBService?
     
     init(tmdbService: TMDBService?) {
@@ -26,7 +26,7 @@ final class MediaDetailsScreenRouter: MediaDetailsScreenRouterProtocol {
     func navigateToPerson(personID: Int) { }
     
     func navigateToAnotherMovie(movie: QueryMovie) {
-        let newMovieDetails = MediaDetailsScreenAssembler.assemble(movieID: movie.id, tmdbService: tmdbService)
+        let newMovieDetails = MovieDetailsScreenAssembler.assemble(movieID: movie.id, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(newMovieDetails, animated: true)
     }
     

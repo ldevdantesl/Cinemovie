@@ -8,7 +8,7 @@
 import SnapKit
 import UIKit
 
-final class CMHeaderView: UIView {
+final class HomeScreenHeaderView: UIView {
     
     private let headerLabel: UILabel = {
         let label = UILabel()

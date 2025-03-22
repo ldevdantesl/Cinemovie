@@ -5,25 +5,23 @@
 //  Created by Buzurg Rakhimzoda on 18.02.2025
 //
 
-protocol MediaDetailsScreenInteractorProtocol: AnyObject {
-    func getMovieDetails()
-    func getMovieCast()
-    func getMovieRecommendations()
-    func getMovieVideos()
-    func getMovieReviews()
+protocol MovieDetailsScreenInteractorProtocol: AnyObject {
+    func getMovieDetails(movieID: Int)
+    func getMovieCast(movieID: Int)
+    func getMovieRecommendations(movieID: Int)
+    func getMovieVideos(movieID: Int)
+    func getMovieReviews(movieID: Int)
 }
 
-final class MediaDetailsScreenInteractor: MediaDetailsScreenInteractorProtocol {
-    weak var presenter: MediaDetailsScreenPresenterProtocol?
+final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
+    weak var presenter: MovieDetailsScreenPresenterProtocol?
     weak var tmdbService: TMDBService?
-    private let movieID: Int
     
-    init(movieID: Int, tmdbService: TMDBService?) {
-        self.movieID = movieID
+    init(tmdbService: TMDBService?) {
         self.tmdbService = tmdbService
     }
     
-    func getMovieDetails() {
+    func getMovieDetails(movieID: Int) {
         tmdbService?.getMovieDetails(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
             switch result {
@@ -33,7 +31,7 @@ final class MediaDetailsScreenInteractor: MediaDetailsScreenInteractorProtocol {
         }
     }
     
-    func getMovieCast() {
+    func getMovieCast(movieID: Int) {
         tmdbService?.getMovieCast(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
             switch result {
@@ -43,7 +41,7 @@ final class MediaDetailsScreenInteractor: MediaDetailsScreenInteractorProtocol {
         }
     }
     
-    func getMovieRecommendations() {
+    func getMovieRecommendations(movieID: Int) {
         tmdbService?.getMovieRecommendations(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
             switch result {
@@ -53,7 +51,7 @@ final class MediaDetailsScreenInteractor: MediaDetailsScreenInteractorProtocol {
         }
     }
     
-    func getMovieVideos() {
+    func getMovieVideos(movieID: Int) {
         tmdbService?.getMovieVideos(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
             switch result {
@@ -63,7 +61,7 @@ final class MediaDetailsScreenInteractor: MediaDetailsScreenInteractorProtocol {
         }
     }
     
-    func getMovieReviews() {
+    func getMovieReviews(movieID: Int) {
         tmdbService?.getMovieReviews(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
             switch result {
