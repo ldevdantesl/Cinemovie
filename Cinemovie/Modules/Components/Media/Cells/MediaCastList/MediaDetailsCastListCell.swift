@@ -48,16 +48,8 @@ final class MediaDetailsCastListCell: UICollectionViewCell {
     
     private lazy var avatarImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.contentMode = .center
         imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = Constants.imageViewCornerRadius
-        imageView.layer.borderColor = CMColor.cmAccent.cgColor
-        imageView.layer.borderWidth = Constants.imageViewBorderWidth
-        imageView.image = UIImage(
-            systemName: Constants.imageViewImageName,
-            withConfiguration: UIImage.SymbolConfiguration(pointSize: Constants.imageViewImagePointSize, weight: .bold)
-        )
-        imageView.backgroundColor = CMColor.cmSecondaryBackground
+        imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
@@ -89,22 +81,44 @@ final class MediaDetailsCastListCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        avatarImageView.layer.cornerRadius = Constants.imageViewCornerRadius
+        avatarImageView.layer.borderColor = CMColor.cmAccent.cgColor
+        avatarImageView.layer.borderWidth = Constants.imageViewBorderWidth
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        self.avatarImageView.image = nil
+        self.nameLabel.text = nil
+        self.characterName.text = nil
+        self.avatarImageView.sd_cancelCurrentImageLoad()
+    }
+    
     // MARK: - PUBLIC METHOD
     public func configure(viewModel: MediaDetailsCastListCellViewModel) {
         guard let cast = viewModel.cast else { return }
         DispatchQueue.main.async {
-            if let imageURL = URLHelper.getImageURL(with: cast.profilePath, size: .original){
-                self.loadingIndicator.startAnimating()
-                self.avatarImageView.contentMode = .scaleAspectFill
-                self.avatarImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
-                    guard let self = self else { return }
-                    self.loadingIndicator.stopAnimating()
-                    self.avatarImageView.setNeedsLayout()
-                    self.avatarImageView.layoutIfNeeded()
-                }
-            }
             self.nameLabel.text = cast.name
             self.characterName.text = cast.character ?? cast.job ?? Constants.unknownText
+            guard let imageURL = URLHelper.getImageURL(with: cast.profilePath, size: .original) else {
+                self.avatarImageView.contentMode = .center
+                self.avatarImageView.image = UIImage(
+                    systemName: Constants.imageViewImageName,
+                    withConfiguration: UIImage.SymbolConfiguration(pointSize: Constants.imageViewImagePointSize, weight: .bold)
+                )
+                self.avatarImageView.backgroundColor = CMColor.cmSecondaryBackground
+                return
+            }
+            self.loadingIndicator.startAnimating()
+            self.avatarImageView.contentMode = .scaleAspectFill
+            self.avatarImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
+                guard let self = self else { return }
+                self.loadingIndicator.stopAnimating()
+                self.avatarImageView.setNeedsLayout()
+                self.avatarImageView.layoutIfNeeded()
+            }
         }
     }
     

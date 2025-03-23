@@ -108,10 +108,13 @@ final class HomeScreenVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: true)
+        tabBarController?.tabBar.barTintColor = CMColor.cmBackground
+        tabBarController?.tabBar.isTranslucent = false
     }
     
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
+        view.backgroundColor = CMColor.cmBackground
         view.addSubview(scrollView)
         scrollView.snp.makeConstraints {
             $0.edges.equalToSuperview()

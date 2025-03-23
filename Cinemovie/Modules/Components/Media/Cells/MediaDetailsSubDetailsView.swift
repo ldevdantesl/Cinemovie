@@ -15,15 +15,24 @@ struct MediaDetailsSubDetailsViewModel: MediaDetailsCellViewModel {
     let released: Bool
     let duration: String
     let imdbPath: String?
+    let mediaType: MediaTypes
     let didTapIMDB: (() -> Void)?
+    let didTapNotIMDB: ((UIView, String) -> Void)?
     let cellHeight = 25.0
     
-    init(year: String, released: Bool, duration: String, imdbPath: String?, didTapIMDB: (() -> Void)? = nil) {
+    init(
+        year: String, released: Bool,
+        mediaType: MediaTypes = .movie, duration: String,
+        imdbPath: String?, didTapIMDB: (() -> Void)? = nil,
+        didTapNotIMDB: ((UIView, String) -> Void)? = nil
+    ) {
         self.year = year
+        self.mediaType = mediaType
         self.released = released
         self.duration = duration
         self.imdbPath = imdbPath
         self.didTapIMDB = didTapIMDB
+        self.didTapNotIMDB = didTapNotIMDB
     }
 }
 
@@ -46,7 +55,7 @@ final class MediaDetailsSubDetailsView: UICollectionViewCell {
         let stackView = UIStackView(arrangedSubviews: [
             movieYearLabel, movieReleasedImageView,
             movieDurationLabel, movieHDStatusImageView,
-            UIView(), imdbImageView
+            mediaTypeImageView, UIView(), imdbImageView
         ])
         stackView.axis = .horizontal
         stackView.alignment = .center
@@ -55,36 +64,58 @@ final class MediaDetailsSubDetailsView: UICollectionViewCell {
         return stackView
     }()
     
-    private var movieYearLabel: UILabel = {
+    private lazy var movieYearLabel: UILabel = {
         let label = UILabel()
         label.textColor = CMColor.cmLabel
         label.numberOfLines = 1
+        label.accessibilityIdentifier = "ReleaseYearLabel"
+        label.isUserInteractionEnabled = true
+        label.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(showTooltip)))
         label.font = CMFont.font(size: .caption, fontName: .avenirDemiBold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    private var movieReleasedImageView: UIImageView = {
+    private lazy var movieReleasedImageView: UIImageView = {
         let image = UIImageView()
+        image.accessibilityIdentifier = "ReleasedImage"
         image.contentMode = .scaleAspectFit
         image.clipsToBounds = true
+        image.isUserInteractionEnabled = true
+        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(showTooltip)))
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
     
-    private var movieHDStatusImageView: UIImageView = {
+    private lazy var movieHDStatusImageView: UIImageView = {
         let image = UIImageView()
+        image.accessibilityIdentifier = "HDStatusImage"
         image.image = UIImage(named: ImageNames.HD.rawValue)
         image.contentMode = .scaleAspectFit
         image.clipsToBounds = true
+        image.isUserInteractionEnabled = true
+        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(showTooltip)))
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
+
+    private lazy var mediaTypeImageView: UIImageView = {
+        let view = UIImageView()
+        view.accessibilityIdentifier = "MediaTypeImage"
+        view.contentMode = .scaleAspectFit
+        view.isUserInteractionEnabled = true
+        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(showTooltip)))
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
-    private var movieDurationLabel: UILabel = {
+    private lazy var movieDurationLabel: UILabel = {
         let label = UILabel()
+        label.accessibilityIdentifier = "DurationLabel"
         label.textColor = CMColor.cmLabel
         label.numberOfLines = 1
+        label.isUserInteractionEnabled = true
+        label.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(showTooltip)))
         label.font = CMFont.font(size: .caption, fontName: .avenirDemiBold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -119,6 +150,7 @@ final class MediaDetailsSubDetailsView: UICollectionViewCell {
         UIImage(named: ImageNames.released.rawValue) : UIImage(named: ImageNames.notReleased.rawValue)
         movieDurationLabel.text = viewModel.duration
         imdbImageView.image = viewModel.imdbPath != nil ? UIImage(named: ImageNames.imdbLogo.rawValue) : nil
+        mediaTypeImageView.image = UIImage(named: viewModel.mediaType == .movie ? ImageNames.movieID.rawValue : ImageNames.tvSeriesID.rawValue)
     }
     
     // MARK: - PRIVATE FUNC
@@ -135,6 +167,10 @@ final class MediaDetailsSubDetailsView: UICollectionViewCell {
             $0.size.equalTo(Constants.imageSizes)
         }
         
+        mediaTypeImageView.snp.makeConstraints {
+            $0.size.equalTo(Constants.imageSizes)
+        }
+        
         contentView.addSubview(hStackView)
         hStackView.snp.makeConstraints {
             $0.edges.equalToSuperview()
@@ -144,5 +180,11 @@ final class MediaDetailsSubDetailsView: UICollectionViewCell {
     // MARK: - OBJC FUNC
     @objc private func didTapIMDB() {
         viewModel?.didTapIMDB?()
+    }
+    
+    @objc private func showTooltip(_ sender: UITapGestureRecognizer) {
+        guard let view = sender.view else { return }
+        guard let id = view.accessibilityIdentifier else { return }
+        viewModel?.didTapNotIMDB?(view, id)
     }
 }

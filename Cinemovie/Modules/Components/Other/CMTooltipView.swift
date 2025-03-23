@@ -6,46 +6,61 @@
 //
 
 import UIKit
+import SnapKit
 
 final class CMTooltipView: UIView {
+    // MARK: - CONSTANTS
+    fileprivate enum Constants {
+        static let padding: CGFloat = 10
+        static let cornerRadius: CGFloat = 8
+    }
     
+    // MARK: - PROPERTIES
     private let label: UILabel = {
         let lbl = UILabel()
         lbl.textColor = .white
-        lbl.font = .systemFont(ofSize: 14, weight: .medium)
+        lbl.font = CMFont.font(size: .footnote, fontName: .avenirBoldItalic)
         lbl.numberOfLines = 0
         lbl.textAlignment = .center
         return lbl
     }()
     
-    private let padding: CGFloat = 10
-    private let cornerRadius: CGFloat = 8
-    
     init(text: String) {
         super.init(frame: .zero)
-        backgroundColor = CMColor.cmBackground.withAlphaComponent(0.85)
-        layer.cornerRadius = cornerRadius
         label.text = text
-        addSubview(label)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        
-        label.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(padding)
-        }
+        setup()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func show(from sourceView: UIView, in parentView: UIView) {
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        self.layer.cornerRadius = Constants.cornerRadius
+    }
+    
+    // MARK: - PRIVATE FUNC
+    private func setup() {
+        self.backgroundColor = CMColor.cmBackground.withAlphaComponent(0.85)
+        
+        addSubview(label)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        label.snp.makeConstraints {
+            $0.edges.equalToSuperview().inset(Constants.padding)
+        }
+    }
+    
+    // MARK: - PUBLIC FUNC
+    public func show(from sourceView: UIView, in parentView: UIView) {
         parentView.addSubview(self)
         
         self.translatesAutoresizingMaskIntoConstraints = false
 
         let screenWidth = UIConstants.screenWidth
         let sourceFrame = sourceView.convert(sourceView.bounds, to: parentView)
-        let tooltipWidth: CGFloat = 200
+        let tooltipWidth: CGFloat = 150
         
         self.snp.makeConstraints {
             $0.top.equalTo(sourceView.snp.bottom).offset(5)
@@ -66,7 +81,7 @@ final class CMTooltipView: UIView {
         }
     }
     
-    func dismiss() {
+    public func dismiss() {
         UIView.animate(withDuration: 0.2, animations: {
             self.alpha = 0
         }) { _ in

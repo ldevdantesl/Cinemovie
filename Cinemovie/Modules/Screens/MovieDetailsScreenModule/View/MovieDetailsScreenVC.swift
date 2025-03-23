@@ -33,6 +33,9 @@ final class MovieDetailsScreenVC: UIViewController {
     // MARK: - VIPER
     var presenter: MovieDetailsScreenPresenterProtocol?
     
+    private var activeTooltipView: CMTooltipView?
+    private var currentTooltipWorkItem: DispatchWorkItem?
+    
     // MARK: - PROPERTIES
     private var viewModels: [MediaDetailsCellViewModel] = []
     private var cachedCollectionViewCellHeights: [IndexPath : CGSize] = [:]
@@ -88,6 +91,7 @@ final class MovieDetailsScreenVC: UIViewController {
     
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
+        view.backgroundColor = CMColor.cmBackground
         view.addSubview(downloadingView)
         downloadingView.snp.makeConstraints {
             $0.edges.equalToSuperview()
@@ -99,6 +103,33 @@ final class MovieDetailsScreenVC: UIViewController {
         }
         
         view.bringSubviewToFront(downloadingView)
+    }
+    
+    private func showTooltipView(sendedBy view: UIView, message: String) {
+        currentTooltipWorkItem?.cancel()
+        activeTooltipView?.dismiss()
+        
+        var tooltipMsg: String = "Unknown"
+        switch message {
+        case "ReleaseYearLabel": tooltipMsg = "Release year"
+        case "ReleasedImage": tooltipMsg = "Released"
+        case "DurationLabel": tooltipMsg = "Duration"
+        case "HDStatusImage": tooltipMsg = "HD Resolution Available"
+        case "MediaTypeImage": tooltipMsg = "Is Movie"
+        default: break
+        }
+        
+        let tooltip = CMTooltipView(text: tooltipMsg)
+        tooltip.show(from: view, in: self.view)
+        self.activeTooltipView = tooltip
+        
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            self.activeTooltipView?.dismiss()
+            self.activeTooltipView = nil
+        }
+        currentTooltipWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: workItem)
     }
 }
 
@@ -195,7 +226,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             MediaDetailsSubDetailsViewModel(
                 year: details.releaseDate, released: CMDateFormatter.isDatePassed(details.releaseDate),
                 duration: RuntimeHelper.runtime(details.runtime), imdbPath: details.imdbID,
-                didTapIMDB: presenter?.didTapIMDBImage
+                didTapIMDB: presenter?.didTapIMDBImage, didTapNotIMDB: self.showTooltipView
             ),
             
             MediaDetailsWatchlistOverviewViewModel(movieOverview: details.overview),

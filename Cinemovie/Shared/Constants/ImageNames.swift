@@ -17,6 +17,8 @@ enum ImageNames: String {
     case share = "Share"
     case star = "Star"
     case halfStar = "HalfStar"
+    case movieID = "MovieID"
+    case tvSeriesID = "TVSeriesID"
     
     // MARK: - LOGOS
     case imdbLogo = "IMDBLogo"
