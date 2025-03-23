@@ -9,12 +9,12 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-struct MovieDetailsActorPopupViewModel {
+struct MediaDetailsActorPopupViewModel {
     let actor: Cast
     let didTapActorDetails: ((String) -> Void)?
 }
 
-final class MovieDetailsActorPopupView: UIView {
+final class MediaDetailsActorPopupView: UIView {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let buttonImageName = "person"
@@ -35,7 +35,7 @@ final class MovieDetailsActorPopupView: UIView {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: MovieDetailsActorPopupViewModel?
+    private var viewModel: MediaDetailsActorPopupViewModel?
     
     // MARK: - VIEW PROPERTIES
     private lazy var blurView: UIVisualEffectView = {
@@ -151,7 +151,7 @@ final class MovieDetailsActorPopupView: UIView {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MovieDetailsActorPopupViewModel) {
+    public func configure(viewModel: MediaDetailsActorPopupViewModel) {
         self.viewModel = viewModel
         self.actorNameLabel.text = "Name:  " + viewModel.actor.name
         self.actorGenderLabel.text = "Gender:  " + (viewModel.actor.gender == 1 ? "Female" : "Male")

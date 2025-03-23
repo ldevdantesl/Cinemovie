@@ -8,26 +8,23 @@
 import UIKit
 import SnapKit
 
-struct MediaDetailsSubDetailsViewModel: MediaDetailsCellViewModel {
-    let identifier: String = "MediaDetailsSubDetailsView"
+struct MovieDetailsSubDetailsViewModel: MediaDetailsCellViewModel {
+    let identifier: String = "MovieDetailsSubDetailsView"
     
     let year: String
     let released: Bool
     let duration: String
     let imdbPath: String?
-    let mediaType: MediaTypes
     let didTapIMDB: (() -> Void)?
     let didTapNotIMDB: ((UIView, String) -> Void)?
     let cellHeight = 25.0
     
     init(
-        year: String, released: Bool,
-        mediaType: MediaTypes = .movie, duration: String,
+        year: String, released: Bool, duration: String,
         imdbPath: String?, didTapIMDB: (() -> Void)? = nil,
         didTapNotIMDB: ((UIView, String) -> Void)? = nil
     ) {
         self.year = year
-        self.mediaType = mediaType
         self.released = released
         self.duration = duration
         self.imdbPath = imdbPath
@@ -36,7 +33,7 @@ struct MediaDetailsSubDetailsViewModel: MediaDetailsCellViewModel {
     }
 }
 
-final class MediaDetailsSubDetailsView: UICollectionViewCell {
+final class MovieDetailsSubDetailsView: UICollectionViewCell {
 
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -45,15 +42,15 @@ final class MediaDetailsSubDetailsView: UICollectionViewCell {
     }
     
     // MARK: - STATIC
-    static let identifier = "MediaDetailsSubDetailsView"
+    static let identifier = "MovieDetailsSubDetailsView"
     
     // MARK: - PROPERTIES
-    private var viewModel: MediaDetailsSubDetailsViewModel?
+    private var viewModel: MovieDetailsSubDetailsViewModel?
     
     // MARK: - VIEW PROPERTIES
     private lazy var hStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [
-            movieYearLabel, movieReleasedImageView,
+            releaseYearLabel, movieReleasedImageView,
             movieDurationLabel, movieHDStatusImageView,
             mediaTypeImageView, UIView(), imdbImageView
         ])
@@ -64,7 +61,7 @@ final class MediaDetailsSubDetailsView: UICollectionViewCell {
         return stackView
     }()
     
-    private lazy var movieYearLabel: UILabel = {
+    private lazy var releaseYearLabel: UILabel = {
         let label = UILabel()
         label.textColor = CMColor.cmLabel
         label.numberOfLines = 1
@@ -143,14 +140,14 @@ final class MediaDetailsSubDetailsView: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MediaDetailsSubDetailsViewModel) {
+    public func configure(viewModel: MovieDetailsSubDetailsViewModel) {
         self.viewModel = viewModel
-        movieYearLabel.text = CMDateFormatter.formatToYearOnly(dateString: viewModel.year)
+        releaseYearLabel.text = CMDateFormatter.formatToYearOnly(dateString: viewModel.year)
         movieReleasedImageView.image = viewModel.released ?
         UIImage(named: ImageNames.released.rawValue) : UIImage(named: ImageNames.notReleased.rawValue)
         movieDurationLabel.text = viewModel.duration
         imdbImageView.image = viewModel.imdbPath != nil ? UIImage(named: ImageNames.imdbLogo.rawValue) : nil
-        mediaTypeImageView.image = UIImage(named: viewModel.mediaType == .movie ? ImageNames.movieID.rawValue : ImageNames.tvSeriesID.rawValue)
+        mediaTypeImageView.image = UIImage(named: ImageNames.movieID.rawValue)
     }
     
     // MARK: - PRIVATE FUNC

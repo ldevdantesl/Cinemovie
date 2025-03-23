@@ -14,16 +14,12 @@ protocol HomeScreenPresenterProtocol: AnyObject {
     
     // MARK: - FINISHING
     func didDownloadPopularMovies(queryMovies: [Movie])
-    func didDownloadPopularMovies(withError error: NetworkError)
-    
     func didDownloadUpcomingMovies(queryMovies: [Movie])
-    func didDownloadUpcomingMovies(withError error: NetworkError)
-    
     func didDownloadTopRatedMovies(queryMovies: [Movie])
-    func didDownloadTopRatedMovies(withError error: NetworkError)
-    
     func didDownloadNowPlayingMovies(queryMovies: [Movie])
-    func didDownloadNowPlayingMovies(withError error: NetworkError)
+    
+    // MARK: - ERROR
+    func didRecieveError(_ error: Error)
 }
 
 final class HomeScreenPresenter {
@@ -57,18 +53,10 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
         }
     }
     
-    func didDownloadPopularMovies(withError error: NetworkError) {
-        recieveErrorHandler(error)
-    }
-    
     func didDownloadUpcomingMovies(queryMovies: [Movie]) {
         DispatchQueue.main.async { [weak self] in
             self?.view?.didRecieveUpcomingMovies(queryMovies)
         }
-    }
-    
-    func didDownloadUpcomingMovies(withError error: NetworkError) {
-        recieveErrorHandler(error)
     }
     
     func didDownloadTopRatedMovies(queryMovies: [Movie]) {
@@ -77,23 +65,15 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
         }
     }
     
-    func didDownloadTopRatedMovies(withError error: NetworkError) {
-        recieveErrorHandler(error)
-    }
-    
     func didDownloadNowPlayingMovies(queryMovies: [Movie]) {
-        DispatchQueue.main.async { [weak self] in
-            self?.view?.didRecieveNowPlayingMovies(queryMovies)
+        DispatchQueue.main.async {
+            self.view?.didRecieveNowPlayingMovies(queryMovies)
         }
     }
     
-    func didDownloadNowPlayingMovies(withError error: NetworkError) {
-        recieveErrorHandler(error)
-    }
-    
-    private func recieveErrorHandler(_ error: NetworkError) {
-        DispatchQueue.main.async { [weak self] in
-            self?.view?.didRecieveError(error.localizedDescription)
+    func didRecieveError(_ error: Error) {
+        DispatchQueue.main.async {
+            self.view?.didRecieveError(error.localizedDescription)
         }
     }
 }

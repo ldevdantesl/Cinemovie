@@ -8,33 +8,34 @@
 import UIKit
 
 struct TVSeriesDetails: APIResponse {
-    let adult: Bool
-    let backdropPath: String
+    let adult: Bool?
+    let backdropPath: String?
     let createdBy: [CreatedBy]
     let episodeRunTime: [Int]
     let firstAirDate: String
     let genres: [Genre]
-    let homepage: String
+    let homepage: String?
     let id: Int
-    let inProduction: Bool
+    let inProduction: Bool?
     let languages: [String]
-    let lastAirDate: String
-    let lastEpisodeToAir: LastEpisodeToAir
+    let lastAirDate: String?
+    let lastEpisodeToAir: EpisodeToAir?
     let name: String
-    let nextEpisodeToAir: String?
+    let nextEpisodeToAir: EpisodeToAir?
     let networks: [Network]
-    let numberOfEpisodes, numberOfSeasons: Int
+    let numberOfEpisodes, numberOfSeasons: Int?
     let originCountry: [String]
     let originalLanguage, originalName, overview: String
-    let popularity: Double
-    let posterPath: String
+    let popularity: Double?
+    let posterPath: String?
     let productionCompanies: [ProductionCompany]
     let productionCountries: [ProductionCountry]
     let seasons: [Season]
     let spokenLanguages: [SpokenLanguage]
-    let status, tagline, type: String
-    let voteAverage: Double
-    let voteCount: Int
+    let status: TVSeriesStatus?
+    let tagline, type: String
+    let voteAverage: Double?
+    let voteCount: Int?
     
     enum CodingKeys: String, CodingKey {
         case adult
@@ -65,4 +66,13 @@ struct TVSeriesDetails: APIResponse {
         case voteAverage = "vote_average"
         case voteCount = "vote_count"
     }
+}
+
+enum TVSeriesStatus: String, Codable {
+    case returningSeries = "Returning Series"
+    case ended = "Ended"
+    case canceled = "Canceled"
+    case inProduction = "In Production"
+    case planned = "Planned"
+    case pilot = "Pilot"
 }

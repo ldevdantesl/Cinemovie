@@ -13,6 +13,7 @@ protocol PersonDetailsScreenPresenterProtocol: AnyObject {
     func didTapBackButton()
     func didTapLogoImage(sourceID: String, sourceType: ExternalSource.SourceTypes)
     func didTapMovie(movie: Movie)
+    func didTapTVSeries(series: TVSeries)
     
     func didGetPersonID(_ id: Int)
     func didGetPersonDetails(_ details: PersonDetails)
@@ -41,6 +42,11 @@ final class PersonDetailsScreenPresenter {
 }
 
 extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
+    func didTapTVSeries(series: TVSeries) {
+        print("SeriesID", series.id )
+        router.navigateToSeries(seriesID: series.id)
+    }
+    
     func viewDidLoad() {
         downloadGroup.enter()
         interactor.getPersonID()

@@ -24,52 +24,41 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
     
     func downloadPopularMovies() {
         tmdbService?.getPopularMovies { [weak self] result in
-            self?.downloadHandler(
-                result: result,
-                success: { movies in self?.presenter?.didDownloadPopularMovies(queryMovies: movies) },
-                failure: { error in self?.presenter?.didDownloadPopularMovies(withError: error) }
-            )
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didDownloadPopularMovies(queryMovies: success.movies)
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
         }
     }
     
     func downloadUpcomingMovies() {
         tmdbService?.getUpcomingMovies { [weak self] result in
-            self?.downloadHandler(
-                result: result,
-                success: { movies in self?.presenter?.didDownloadUpcomingMovies(queryMovies: movies) },
-                failure: { error in self?.presenter?.didDownloadUpcomingMovies(withError: error) }
-            )
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didDownloadUpcomingMovies(queryMovies: success.movies)
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
         }
     }
     
     func downloadTopRatedMovies() {
         tmdbService?.getTopRatedMovies { [weak self] result in
-            self?.downloadHandler(
-                result: result,
-                success: { movies in self?.presenter?.didDownloadTopRatedMovies(queryMovies: movies) },
-                failure: { error in self?.presenter?.didDownloadTopRatedMovies(withError: error) }
-            )
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didDownloadTopRatedMovies(queryMovies: success.movies)
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
         }
     }
     
     func downloadNowPlayingMovies() {
         tmdbService?.getNowPlayingMovies { [weak self] result in
-            self?.downloadHandler(
-                result: result,
-                success: { movies in self?.presenter?.didDownloadNowPlayingMovies(queryMovies: movies) },
-                failure: { error in self?.presenter?.didDownloadNowPlayingMovies(withError: error) }
-            )
-        }
-    }
-    
-    private func downloadHandler(
-        result: Result<MovieListsAPIResponse, NetworkError>,
-        success: ([Movie]) -> Void,
-        failure: (NetworkError) -> Void
-    ) {
-        switch result {
-        case .success(let response): success(response.movies)
-        case .failure(let error): failure(error)
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didDownloadNowPlayingMovies(queryMovies: success.movies)
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
         }
     }
 }

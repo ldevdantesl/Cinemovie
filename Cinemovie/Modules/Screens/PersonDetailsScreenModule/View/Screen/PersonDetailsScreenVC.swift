@@ -181,7 +181,7 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
         viewModels.append(PersonDetailsSourcesViewModel(externalSource: sources, didTapLogo: presenter?.didTapLogoImage))
         
         !movies.isEmpty ? viewModels.append(PersonDetailsMediaViewModel(headerTitle: "Movies", headerSubtitle: "Movies in which \(details.name) has played", movies: movies, didTapMovieAction: presenter?.didTapMovie)) : ()
-        !tvShows.isEmpty ? viewModels.append(PersonDetailsMediaViewModel(headerTitle: "TV Shows", headerSubtitle: "TV Shows in which \(details.name) has played", tvShows: tvShows)) : ()
+        !tvShows.isEmpty ? viewModels.append(PersonDetailsMediaViewModel(headerTitle: "TV Shows", headerSubtitle: "TV Shows in which \(details.name) has played", tvShows: tvShows, didTapTVShowAction: presenter?.didTapTVSeries)) : ()
         
         DispatchQueue.main.async {
             self.collectionView.setNeedsLayout()

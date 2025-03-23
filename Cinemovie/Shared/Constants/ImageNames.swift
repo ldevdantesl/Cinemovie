@@ -8,17 +8,32 @@
 import Foundation
 
 enum ImageNames: String {
+    // MARK: - GENERAL
     case logoTransparent = "LogoXTransparent"
     case logoAlt = "LogoXAlt"
+    
+    // MARK: - MOVIES
     case released = "Released"
     case notReleased = "NotReleased"
-    case HD = "HD"
+    case movieID = "MovieID"
+
+    // MARK: - SHARED
     case like = "Like"
     case share = "Share"
     case star = "Star"
     case halfStar = "HalfStar"
-    case movieID = "MovieID"
+    case HD = "HD"
+    case homepage = "Homepage"
+    
+    // MARK: - TV
     case tvSeriesID = "TVSeriesID"
+    case tvSeriesReturningStatus = "TVSeriesStatus_Returning Series"
+    case tvSeriesEndedStatus = "TVSeriesStatus_Ended"
+    case tvSeriesCanceledStatus = "TVSeriesStatus_Canceled"
+    case tvSeriesInProductionStatus = "TVSeriesStatus_In Production"
+    case tvSeriesPlannedStatus = "TVSeriesStatus_Planned"
+    case tvSeriesPilotStatus = "TVSeriesStatus_Pilot"
+    case soon = "Soon"
     
     // MARK: - LOGOS
     case imdbLogo = "IMDBLogo"

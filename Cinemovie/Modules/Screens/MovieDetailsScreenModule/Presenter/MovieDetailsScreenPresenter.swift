@@ -75,6 +75,7 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
                 recommends: movieRecommends, reviews: movieReviews,
                 reviewCount: movieReviewCount
             )
+            print("Gave all data")
         }
     }
 

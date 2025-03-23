@@ -11,6 +11,7 @@ protocol PersonDetailsScreenRouterProtocol {
     func goBack()
     func openSource(sourceID: String, sourceType: ExternalSource.SourceTypes)
     func navigateToMovie(movieID: Int)
+    func navigateToSeries(seriesID: Int)
 }
 
 final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
@@ -43,5 +44,10 @@ final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
         
         guard let url = url else { return }
         AppOpener.openURL(url)
+    }
+    
+    func navigateToSeries(seriesID: Int) {
+        let seriesVC = TVSeriesDetailsScreenAssembler.assemble(seriesID: seriesID, tmdbService: tmdbService)
+        viewController?.navigationController?.pushViewController(seriesVC, animated: true)
     }
 }

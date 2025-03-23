@@ -32,8 +32,8 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
     }
     
     func presentActor(actor: Cast) {
-        let vm = MovieDetailsActorPopupViewModel(actor: actor, didTapActorDetails: navigateToPersonDetails)
-        let popupView = MovieDetailsActorPopupView()
+        let vm = MediaDetailsActorPopupViewModel(actor: actor, didTapActorDetails: navigateToPersonDetails)
+        let popupView = MediaDetailsActorPopupView()
         popupView.translatesAutoresizingMaskIntoConstraints = false
         popupView.configure(viewModel: vm)
 

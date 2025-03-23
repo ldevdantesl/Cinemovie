@@ -76,15 +76,21 @@ final class TMBDServiceImpl: TMDBService {
     
     // MARK: - TV SERIES
     func getTVSeriesDetails(seriesID: Int, completion: @escaping (Result<TVSeriesDetails, NetworkError>) -> Void) {
-        
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getTVSeriesDetailsEndpoint(seriesID: seriesID, queryParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
     }
     
     func getTVSeriesCast(seriesID: Int, completion: @escaping (Result<MediaCastAPIResponse, NetworkError>) -> Void) {
-        
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getTVSeriesCastEndpoint(seriesID: seriesID, queryParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
     }
     
     func getTVSeriesVideos(seriesID: Int, completion: @escaping (Result<MediaVideosAPIResponse, NetworkError>) -> Void) {
-        
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getTVSeriesVideosEndpoint(seriesID: seriesID, queryParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
     }
     
     // MARK: - PRESET LIST IMPLEMENTATIONS

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct LastEpisodeToAir: Codable {
+struct EpisodeToAir: Codable {
     let id: Int
     let name, overview: String
     let voteAverage: Double
@@ -15,8 +15,9 @@ struct LastEpisodeToAir: Codable {
     let airDate: String
     let episodeNumber: Int
     let episodeType, productionCode: String
-    let runtime, seasonNumber, showID: Int
-    let stillPath: String
+    let runtime: Int?
+    let seasonNumber, showID: Int
+    let stillPath: String?
     
     enum CodingKeys: String, CodingKey {
         case id, name, overview
