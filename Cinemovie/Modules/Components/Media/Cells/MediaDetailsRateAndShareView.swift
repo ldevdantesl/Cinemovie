@@ -13,6 +13,7 @@ struct MediaDetailsRateAndShareViewModel: MediaDetailsCellViewModel {
     
     let didTapShareButton: (() -> Void)?
     let didTapRateButton: (() -> Void)?
+    let cellHeight = 25.0
 }
 
 final class MediaDetailsRateAndShareView: UICollectionViewCell {

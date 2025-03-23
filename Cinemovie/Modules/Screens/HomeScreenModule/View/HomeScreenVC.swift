@@ -210,14 +210,14 @@ extension HomeScreenVC: HomeScreenViewProtocol {
     
     func didRecieveTopRatedMovies(_ movies: [QueryMovie]) {
         DispatchQueue.main.async {
-            let vm = CMMediaListViewModel(movies: movies, listTitle: "Upcoming Movies", didTapMovie: self.presenter?.didTapMovie)
+            let vm = CMMediaListViewModel(movies: movies, listTitle: "Top Rated Movies", didTapMovie: self.presenter?.didTapMovie)
             self.topRatedMoviesList.configure(viewModel: vm)
         }
     }
     
     func didRecieveUpcomingMovies(_ movies: [QueryMovie]) {
         DispatchQueue.main.async {
-            let vm = CMMediaListViewModel(movies: movies, listTitle: "Top Rated Movies", didTapMovie: self.presenter?.didTapMovie)
+            let vm = CMMediaListViewModel(movies: movies, listTitle: "Upcoming Movies", didTapMovie: self.presenter?.didTapMovie)
             self.upcomingMoviesList.configure(viewModel: vm)
         }
     }

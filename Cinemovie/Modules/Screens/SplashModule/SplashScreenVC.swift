@@ -23,6 +23,11 @@ final class SplashScreenVC: UIViewController {
         setup()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        splashView.animateLogo()
+    }
+    
     private func setup() {
         view.backgroundColor = CMColor.cmError
         view.addSubview(splashView)

@@ -13,6 +13,7 @@ struct MediaDetailsProductionViewModel: MediaDetailsCellViewModel {
     
     let companies: [ProductionCompany]
     let countries: [ProductionCountry]
+    let cellHeight = 50.0
 }
 
 final class MediaDetailsProductionView: UICollectionViewCell {

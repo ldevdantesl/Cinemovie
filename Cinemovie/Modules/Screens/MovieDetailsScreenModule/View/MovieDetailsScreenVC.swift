@@ -76,6 +76,11 @@ final class MovieDetailsScreenVC: UIViewController {
         navigationController?.navigationBar.isHidden = true
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        downloadingView.animateLogo()
+    }
+    
     deinit {
         print("MovieDetails is deinited")
         SDImageCache.shared.clearMemory()
@@ -130,13 +135,13 @@ extension MovieDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSo
         
         let size: CGSize
         switch viewModel {
-        case is MediaDetailsSubDetailsViewModel: size = CGSize(width: width - Constants.hSpacing, height: 25)
-        case is MediaDetailsBackdropImageViewModel: size = CGSize(width: width, height: width * 0.55)
-        case let vm as MediaDetailsTitleViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.isTaglineAvailable ? 70 : 55)
+        case let vm as MediaDetailsSubDetailsViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
+        case let vm as MediaDetailsBackdropImageViewModel: size = CGSize(width: width, height: vm.cellHeight)
+        case let vm as MediaDetailsTitleViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
         case let vm as MediaDetailsWatchlistOverviewViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
-        case is MediaDetailsCastListViewModel: size = CGSize(width: width - Constants.hSpacing, height: 150)
-        case is MediaDetailsProductionViewModel: size = CGSize(width: width - Constants.hSpacing, height: 50)
-        case is MediaDetailsRateAndShareViewModel: size = CGSize(width: width - Constants.biggerHSpacing, height: 40)
+        case let vm as MediaDetailsCastListViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
+        case let vm as MediaDetailsProductionViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
+        case let vm as MediaDetailsRateAndShareViewModel: size = CGSize(width: width - Constants.biggerHSpacing, height: vm.cellHeight)
         default: return CGSize(width: width, height: Constants.cellDefaultHeight)
         }
         
@@ -159,7 +164,9 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         }
 
         alert.addAction(action)
-        self.present(alert, animated: true, completion: nil)
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+        }
     }
     
     func didDownloadAllData(
@@ -207,6 +214,5 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             self.collectionView.reloadData()
             self.collectionView.performBatchUpdates(nil)
         }
-        
     }
 }

@@ -115,6 +115,8 @@ final class PersonDetailsInfoView: UICollectionViewCell {
     public func configure(viewModel: PersonDetailsInfoViewModel) {
         self.viewModel = viewModel
         
+        infoStackView.arrangedSubviews.forEach { infoStackView.removeArrangedSubview($0); $0.removeFromSuperview() }
+        
         labelConfig(labelDescription: "Name:", text: viewModel.name, view: nameLabel)
         labelConfig(labelDescription: "Job: ", text: viewModel.job, view: jobLabel)
         labelConfig(labelDescription: "Birthday: ", text: CMDateFormatter.formatToNormalDate(dateString: viewModel.birthday ?? ""), view: birthdayLabel)

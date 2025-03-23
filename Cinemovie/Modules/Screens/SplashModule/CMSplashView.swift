@@ -28,7 +28,11 @@ final class CMSplashView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
-        animateLogo()
+    }
+    
+    convenience init(frame: CGRect, showsLoadingLabel: Bool) {
+        self.init(frame: frame)
+        showsLoadingLabel ? setupLoadingLabel() : ()
     }
     
     @available(*, unavailable)
@@ -36,11 +40,14 @@ final class CMSplashView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    convenience init(frame: CGRect, showsLoadingLabel: Bool) {
-        self.init(frame: frame)
-        setup()
-        animateLogo()
-        showsLoadingLabel ? setupLoadingLabel() : ()
+    // MARK: - PUBLIC FUNC
+    public func animateLogo() {
+        DispatchQueue.main.async {       
+            UIView.animate(withDuration: Constants.aniDuration, delay: 0, options: [.autoreverse, .repeat, .curveEaseInOut]) { [weak self] in
+                guard let self = self else { return }
+                self.appLogo.transform = CGAffineTransform(translationX: 0, y: Constants.appLogoTranslationY)
+            }
+        }
     }
     
     // MARK: - PRIVATE FUNC
@@ -76,17 +83,5 @@ final class CMSplashView: UIView {
             $0.leading.equalToSuperview().offset(20)
             $0.trailing.equalToSuperview().offset(-20)
         }
-    }
-    
-    private func animateLogo() {
-        UIView.animate(
-            withDuration: Constants.aniDuration,
-            delay: 0,
-            options: [.autoreverse, .repeat, .curveEaseInOut],
-            animations: {
-                self.appLogo.transform = CGAffineTransform(translationX: 0, y: Constants.appLogoTranslationY)
-            },
-            completion: nil
-        )
     }
 }

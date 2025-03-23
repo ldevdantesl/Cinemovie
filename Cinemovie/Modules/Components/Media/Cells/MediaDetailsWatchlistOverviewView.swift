@@ -19,6 +19,9 @@ struct MediaDetailsWatchlistOverviewViewModel: MediaDetailsCellViewModel {
     }
     
     private static func calculateCellHeight(for overview: String) -> CGFloat {
+        guard !overview.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return 40.0
+        }
         let width = UIConstants.screenWidth - 20
         let font = CMFont.font(size: .footnote, fontName: .avenirDemiBold)
         let bounding = NSString(string: overview).boundingRect(
@@ -27,7 +30,7 @@ struct MediaDetailsWatchlistOverviewViewModel: MediaDetailsCellViewModel {
             attributes: [.font: font],
             context: nil
         )
-        return ceil(bounding.height) + 40
+        return ceil(bounding.height) + 50
     }
 }
 
@@ -68,7 +71,7 @@ final class MediaDetailsWatchlistOverviewView: UICollectionViewCell {
     }()
     
     private lazy var vStack: UIStackView = {
-        let stack = UIStackView(arrangedSubviews: [addToWatchlistButton, movieOverviewLabel])
+        let stack = UIStackView(arrangedSubviews: [addToWatchlistButton])
         stack.axis = .vertical
         stack.spacing = Constants.spacing
         stack.alignment = .fill
@@ -91,7 +94,10 @@ final class MediaDetailsWatchlistOverviewView: UICollectionViewCell {
     
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: MediaDetailsWatchlistOverviewViewModel) {
+        guard !viewModel.movieOverview.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        vStack.removeArrangedSubview(movieOverviewLabel)
         movieOverviewLabel.text = viewModel.movieOverview
+        vStack.addArrangedSubview(movieOverviewLabel)
     }
     
     // MARK: - PRIVATE FUNC

@@ -16,6 +16,7 @@ struct MediaDetailsSubDetailsViewModel: MediaDetailsCellViewModel {
     let duration: String
     let imdbPath: String?
     let didTapIMDB: (() -> Void)?
+    let cellHeight = 25.0
     
     init(year: String, released: Bool, duration: String, imdbPath: String?, didTapIMDB: (() -> Void)? = nil) {
         self.year = year

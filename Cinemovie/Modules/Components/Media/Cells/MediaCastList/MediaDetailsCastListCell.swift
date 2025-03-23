@@ -125,7 +125,7 @@ final class MediaDetailsCastListCell: UICollectionViewCell {
         
         contentView.addSubview(nameLabel)
         nameLabel.snp.makeConstraints {
-            $0.top.equalTo(avatarImageView.snp.bottom).offset(Paddings.spacer)
+            $0.top.equalTo(avatarImageView.snp.bottom)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(Constants.labelWidth)
         }
@@ -135,7 +135,7 @@ final class MediaDetailsCastListCell: UICollectionViewCell {
             $0.top.equalTo(nameLabel.snp.bottom)
             $0.centerX.equalToSuperview()
             $0.width.lessThanOrEqualTo(Constants.labelWidth)
-            $0.bottom.lessThanOrEqualToSuperview()
+            $0.bottom.equalToSuperview()
         }
     }
 }

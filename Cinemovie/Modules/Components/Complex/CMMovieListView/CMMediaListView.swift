@@ -62,7 +62,7 @@ final class CMMediaListView: UIView {
     // MARK: - VIEW PROPERTIES
     private let listTitleLabel: UILabel = {
         let label = UILabel()
-        label.font = CMFont.font(size: .subtitle, weight: .medium)
+        label.font = CMFont.font(size: .subtitle, fontName: .avenirDemiBold)
         label.textColor = CMColor.cmLabel
         label.textAlignment = .left
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -71,7 +71,7 @@ final class CMMediaListView: UIView {
     
     private let listSubtitleLabel: UILabel = {
         let label = UILabel()
-        label.font = CMFont.font(size: .body, weight: .light)
+        label.font = CMFont.font(size: .footnote, fontName: .avenirMediumItalic)
         label.textColor = CMColor.cmSecondary
         label.textAlignment = .left
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -81,7 +81,7 @@ final class CMMediaListView: UIView {
     private lazy var vStack: UIStackView = {
         let vStack = UIStackView(arrangedSubviews: [listTitleLabel])
         vStack.axis = .vertical
-        vStack.spacing = Paddings.spacing
+        vStack.spacing = 0
         vStack.alignment = .leading
         vStack.translatesAutoresizingMaskIntoConstraints = false
         return vStack

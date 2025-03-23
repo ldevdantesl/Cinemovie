@@ -14,6 +14,7 @@ struct MediaDetailsBackdropImageViewModel: MediaDetailsCellViewModel {
     let imageURL: URL?
     let didTapBackButtonAction: (() -> Void)?
     let isBackButtonHidden: Bool
+    let cellHeight = UIConstants.screenWidth * 0.55
     
     init(imagePath: String?, size: ImageSizes, isBackButtonHidden: Bool, didTapBackButtonAction: (() -> Void)? = nil) {
         self.imageURL = URLHelper.getImageURL(with: imagePath, size: size)

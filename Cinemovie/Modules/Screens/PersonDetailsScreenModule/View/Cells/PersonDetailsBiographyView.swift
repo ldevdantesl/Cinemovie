@@ -27,7 +27,7 @@ struct PersonDetailsBiographyViewModel: PersonDetailsCellViewModel {
             attributes: [.font: font],
             context: nil
         )
-        return ceil(bounding.height) + 20
+        return ceil(bounding.height)
     }
 }
 

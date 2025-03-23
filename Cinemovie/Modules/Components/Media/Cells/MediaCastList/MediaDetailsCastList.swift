@@ -13,6 +13,7 @@ struct MediaDetailsCastListViewModel: MediaDetailsCellViewModel {
     
     let cast: [Cast]?
     let didSelectCast: ((Cast) -> Void)?
+    let cellHeight = 130.0
     
     init(cast: [Cast]?, didSelectCast: ((Cast) -> Void)?) {
         self.cast = cast
@@ -29,14 +30,14 @@ final class MediaDetailsCastList: UICollectionViewCell {
         static let spacing: CGFloat = 5
         static let hSpacing: CGFloat = 15
         static let itemWidth = UIConstants.screenWidth / 4
-        static let itemHeight = 120.0
+        static let itemHeight = 105.0
     }
     
     // MARK: - PROPERTIES
     private var viewModel: MediaDetailsCastListViewModel?
     
     // MARK: - VIEW PROPERTIES
-    private lazy var castLabel: UILabel = {
+    private let castLabel: UILabel = {
         let label = UILabel()
         label.text = "Cast"
         label.font = CMFont.font(size: .body, fontName: .avenirBold)

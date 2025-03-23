@@ -69,6 +69,11 @@ final class PersonDetailsScreenVC: UIViewController {
         self.navigationController?.navigationBar.isHidden = true
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        downloadingView.animateLogo()
+    }
+    
     // MARK: - PRIVATE FUNC
     private func setupUI() {
         view.addSubview(downloadingView)
@@ -117,7 +122,7 @@ extension PersonDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataS
         switch viewModel {
         case let vm as PersonDetailsBiographyViewModel: size = CGSize(width: width - 20, height: vm.cellHeight)
         case is PersonDetailsHeaderViewModel: size = CGSize(width: width - 20, height: 200)
-        case is PersonDetailsMediaViewModel: size = CGSize(width: width - 20, height: 200)
+        case is PersonDetailsMediaViewModel: size = CGSize(width: width - 20, height: 220)
         case let vm as PersonDetailsInfoViewModel: size = CGSize(width: width - 20, height: vm.cellHeight)
         case is PersonDetailsSourcesViewModel: size = CGSize(width: width - 30, height: 30)
         default: size = CGSize(width: width - 20, height: Constants.defaultCellHeight)
@@ -175,8 +180,8 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
         !details.biography.isEmpty ? viewModels.append(PersonDetailsBiographyViewModel(biography: details.biography)) : ()
         viewModels.append(PersonDetailsSourcesViewModel(externalSource: sources, didTapLogo: presenter?.didTapLogoImage))
         
-        !movies.isEmpty ? viewModels.append(PersonDetailsMediaViewModel(headerTitle: "Movies", headerSubtitle: nil, movies: movies, didTapMovieAction: presenter?.didTapMovie)) : ()
-        !tvShows.isEmpty ? viewModels.append(PersonDetailsMediaViewModel(headerTitle: "TV Shows", headerSubtitle: nil, tvShows: tvShows)) : ()
+        !movies.isEmpty ? viewModels.append(PersonDetailsMediaViewModel(headerTitle: "Movies", headerSubtitle: "Movies in which \(details.name) has played", movies: movies, didTapMovieAction: presenter?.didTapMovie)) : ()
+        !tvShows.isEmpty ? viewModels.append(PersonDetailsMediaViewModel(headerTitle: "TV Shows", headerSubtitle: "TV Shows in which \(details.name) has played", tvShows: tvShows)) : ()
         
         DispatchQueue.main.async {
             self.collectionView.setNeedsLayout()

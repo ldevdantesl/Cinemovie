@@ -64,6 +64,12 @@ final class PersonDetailsSourcesView: UICollectionViewCell {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: PersonDetailsSourcesViewModel) {
         self.viewModel = viewModel
+        
+        sourcesStack.arrangedSubviews.forEach {
+            sourcesStack.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+        
         addSource(id: viewModel.externalSource.instagramID, image: .instaLogo)
         addSource(id: viewModel.externalSource.facebookID, image: .facebookLogo)
         addSource(id: viewModel.externalSource.twitterID, image: .twitterLogo)

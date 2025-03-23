@@ -13,14 +13,19 @@ struct MediaDetailsTitleViewModel: MediaDetailsCellViewModel {
     
     let movieName: String
     let movieTagline: String
+    var cellHeight: CGFloat
     
     init(movieName: String, movieTagline: String) {
         self.movieName = movieName
         self.movieTagline = CMTextFormatter.formatToCleanString(movieTagline)
+        self.cellHeight = Self.calculateCellHeight(tagline: CMTextFormatter.formatToCleanString(movieTagline))
     }
     
-    var isTaglineAvailable: Bool {
-        !movieTagline.isEmpty
+    private static func calculateCellHeight(tagline: String) -> CGFloat {
+        if tagline.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return 45.0
+        }
+        return 65.0
     }
 }
 
@@ -37,14 +42,14 @@ final class MediaDetailsTitleView: UICollectionViewCell {
     }
     
     // MARK: - PROPERTIES
-    private lazy var cinemovieLogoImageView: UIImageView = {
+    private let cinemovieLogoImageView: UIImageView = {
         let image = UIImageView(image: UIImage(named: ImageNames.logoAlt.rawValue))
         image.contentMode = .scaleAspectFit
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
 
-    private lazy var cinemovieLabel: UILabel = {
+    private let cinemovieLabel: UILabel = {
         let label = UILabel()
         label.text = "Cinemovie"
         label.font = CMFont.font(size: .caption, fontName: .avenirBold)
@@ -53,7 +58,16 @@ final class MediaDetailsTitleView: UICollectionViewCell {
         return label
     }()
     
-    private lazy var movieNameLabel: UILabel = {
+    private lazy var hStack: UIStackView = {
+        let hStack = UIStackView(arrangedSubviews: [cinemovieLogoImageView, cinemovieLabel, UIView()])
+        hStack.axis = .horizontal
+        hStack.spacing = Constants.spacer
+        hStack.alignment = .bottom
+        hStack.distribution = .fill
+        return hStack
+    }()
+    
+    private let movieNameLabel: UILabel = {
         let label = UILabel()
         label.textColor = CMColor.cmLabel
         label.font = CMFont.font(size: .body, fontName: .avenirDemiBold)
@@ -61,13 +75,21 @@ final class MediaDetailsTitleView: UICollectionViewCell {
         return label
     }()
     
-    private lazy var movieTaglineLabel: UILabel = {
+    private let movieTaglineLabel: UILabel = {
         let label = UILabel()
         label.textColor = CMColor.cmSecondary
         label.font = CMFont.font(size: .footnote, fontName: .avenirDemiBold)
         label.translatesAutoresizingMaskIntoConstraints = false
         label.adjustsFontForContentSizeCategory = true
         return label
+    }()
+    
+    private lazy var vStack: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [movieNameLabel])
+        stack.axis = .vertical
+        stack.spacing = Constants.spacer
+        stack.alignment = .leading
+        return stack
     }()
     
     // MARK: - LIFECYCLE
@@ -84,17 +106,14 @@ final class MediaDetailsTitleView: UICollectionViewCell {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: MediaDetailsTitleViewModel) {
         movieNameLabel.text = viewModel.movieName
+        guard !viewModel.movieTagline.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        vStack.removeArrangedSubview(movieTaglineLabel)
         movieTaglineLabel.text = viewModel.movieTagline
+        vStack.addArrangedSubview(movieTaglineLabel)
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        let hStack = UIStackView(arrangedSubviews: [cinemovieLogoImageView, cinemovieLabel, UIView()])
-        hStack.axis = .horizontal
-        hStack.spacing = 5
-        hStack.alignment = .bottom
-        hStack.distribution = .fill
-        
         cinemovieLogoImageView.snp.makeConstraints {
             $0.size.equalTo(Constants.cinemovieLogoSize)
         }
@@ -102,19 +121,13 @@ final class MediaDetailsTitleView: UICollectionViewCell {
         addSubview(hStack)
         hStack.snp.makeConstraints {
             $0.top.equalToSuperview()
-            $0.leading.trailing.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
         }
         
-        addSubview(movieNameLabel)
-        movieNameLabel.snp.makeConstraints {
+        addSubview(vStack)
+        vStack.snp.makeConstraints {
             $0.top.equalTo(hStack.snp.bottom).offset(Constants.spacer)
-            $0.leading.trailing.equalToSuperview()
-        }
-        
-        addSubview(movieTaglineLabel)
-        movieTaglineLabel.snp.makeConstraints {
-            $0.top.equalTo(movieNameLabel.snp.bottom).offset(Constants.spacer)
-            $0.leading.trailing.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
     }
