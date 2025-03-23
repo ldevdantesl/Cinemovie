@@ -14,12 +14,12 @@ struct PersonDetailsMediaViewModel: PersonDetailsCellViewModel {
     
     let headerTitle: String
     let headerSubtitle: String?
-    let movies: [QueryMovie]
-    let tvShows: [QueryTVShow]
-    let didTapMovieAction: ((QueryMovie) -> Void)?
-    let didTapTVShowAction: ((QueryTVShow) -> Void)?
+    let movies: [Movie]
+    let tvShows: [TVSeries]
+    let didTapMovieAction: ((Movie) -> Void)?
+    let didTapTVShowAction: ((TVSeries) -> Void)?
     
-    init(headerTitle: String, headerSubtitle: String?, movies: [QueryMovie], didTapMovieAction: ((QueryMovie) -> Void)? = nil) {
+    init(headerTitle: String, headerSubtitle: String?, movies: [Movie], didTapMovieAction: ((Movie) -> Void)? = nil) {
         self.isMovieType = true
         self.headerTitle = headerTitle
         self.headerSubtitle = headerSubtitle
@@ -29,7 +29,7 @@ struct PersonDetailsMediaViewModel: PersonDetailsCellViewModel {
         self.didTapTVShowAction = nil
     }
     
-    init(headerTitle: String, headerSubtitle: String?, tvShows: [QueryTVShow], didTapTVShowAction: ((QueryTVShow) -> Void)? = nil) {
+    init(headerTitle: String, headerSubtitle: String?, tvShows: [TVSeries], didTapTVShowAction: ((TVSeries) -> Void)? = nil) {
         self.isMovieType = false
         self.headerTitle = headerTitle
         self.headerSubtitle = headerSubtitle

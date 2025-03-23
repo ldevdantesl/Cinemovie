@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct QueryPerson: APIResponse {
+struct Person: APIResponse {
     let id: Int
     let name, originalName, mediaType: String
     let adult: Bool

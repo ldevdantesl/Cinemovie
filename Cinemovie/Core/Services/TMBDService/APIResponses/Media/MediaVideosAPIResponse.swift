@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct MovieVideosAPIResponse: APIResponse {
+struct MediaVideosAPIResponse: APIResponse {
     let id: Int
-    let results: [DomainVideo]
+    let results: [Video]
 }

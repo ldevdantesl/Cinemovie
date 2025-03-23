@@ -10,16 +10,16 @@ import UIKit
 
 struct CMMediaListViewCellViewModel {
     private(set) var isMovieMedia: Bool
-    let movie: QueryMovie?
-    let tvShow: QueryTVShow?
+    let movie: Movie?
+    let tvShow: TVSeries?
     
-    init(movie: QueryMovie) {
+    init(movie: Movie) {
         self.isMovieMedia = true
         self.movie = movie
         self.tvShow = nil
     }
     
-    init(tvShow: QueryTVShow) {
+    init(tvShow: TVSeries) {
         self.isMovieMedia = false
         self.movie = nil
         self.tvShow = tvShow

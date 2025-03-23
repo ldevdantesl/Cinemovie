@@ -10,7 +10,7 @@ import Foundation
 struct MovieListsAPIResponse: APIResponse {
     let dates: Dates?
     let page: Int
-    let movies: [QueryMovie]
+    let movies: [Movie]
     let totalPages: Int?
     let totalResults: Int?
 
@@ -20,8 +20,4 @@ struct MovieListsAPIResponse: APIResponse {
         case totalPages = "total_pages"
         case totalResults = "total_results"
     }
-}
-
-struct Dates: Codable {
-    let maximum, minimum: String?
 }

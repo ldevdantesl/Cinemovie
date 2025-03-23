@@ -14,7 +14,7 @@ final class TMBDServiceImpl: TMDBService {
         self.networkService = networkService
     }
 
-    // MARK: - PERSON DETAILS
+    // MARK: - PERSON
     func getPersonID(creditID: String, completion: @escaping (Result<CreditDetailsAPIResponse, NetworkError>) -> Void) {
         let endpoint = TMDBEndpoints.getPersonIDEndpoint(creditID: creditID)
         handleRequest(endpoint: endpoint, completion: completion)
@@ -43,14 +43,14 @@ final class TMBDServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    // MARK: - MOVIE DETAILS
+    // MARK: - MOVIE
     func getMovieDetails(movieID: Int, completion: @escaping (Result<MovieDetails, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
         let endpoint = TMDBEndpoints.getMovieDetailsEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func getMovieCast(movieID: Int, completion: @escaping (Result<MovieCastAPIResponse, NetworkError>) -> Void) {
+    func getMovieCast(movieID: Int, completion: @escaping (Result<MediaCastAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
         let endpoint = TMDBEndpoints.getMovieCastEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
@@ -62,7 +62,7 @@ final class TMBDServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func getMovieVideos(movieID: Int, completion: @escaping (Result<MovieVideosAPIResponse, NetworkError>) -> Void) {
+    func getMovieVideos(movieID: Int, completion: @escaping (Result<MediaVideosAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "en-US"]
         let endpoint = TMDBEndpoints.getMovieVideosEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
@@ -72,6 +72,19 @@ final class TMBDServiceImpl: TMDBService {
         let queryParams = ["page" : "1"]
         let endpoint = TMDBEndpoints.getMovieReviewsEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    // MARK: - TV SERIES
+    func getTVSeriesDetails(seriesID: Int, completion: @escaping (Result<TVSeriesDetails, NetworkError>) -> Void) {
+        
+    }
+    
+    func getTVSeriesCast(seriesID: Int, completion: @escaping (Result<MediaCastAPIResponse, NetworkError>) -> Void) {
+        
+    }
+    
+    func getTVSeriesVideos(seriesID: Int, completion: @escaping (Result<MediaVideosAPIResponse, NetworkError>) -> Void) {
+        
     }
     
     // MARK: - PRESET LIST IMPLEMENTATIONS

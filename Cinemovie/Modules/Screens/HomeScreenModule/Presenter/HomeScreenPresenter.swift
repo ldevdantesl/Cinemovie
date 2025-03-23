@@ -10,19 +10,19 @@ import UIKit
 protocol HomeScreenPresenterProtocol: AnyObject {
     // MARK: - STARTING
     func viewDidLoaded()
-    func didTapMovie(_ movie: QueryMovie)
+    func didTapMovie(_ movie: Movie)
     
     // MARK: - FINISHING
-    func didDownloadPopularMovies(queryMovies: [QueryMovie])
+    func didDownloadPopularMovies(queryMovies: [Movie])
     func didDownloadPopularMovies(withError error: NetworkError)
     
-    func didDownloadUpcomingMovies(queryMovies: [QueryMovie])
+    func didDownloadUpcomingMovies(queryMovies: [Movie])
     func didDownloadUpcomingMovies(withError error: NetworkError)
     
-    func didDownloadTopRatedMovies(queryMovies: [QueryMovie])
+    func didDownloadTopRatedMovies(queryMovies: [Movie])
     func didDownloadTopRatedMovies(withError error: NetworkError)
     
-    func didDownloadNowPlayingMovies(queryMovies: [QueryMovie])
+    func didDownloadNowPlayingMovies(queryMovies: [Movie])
     func didDownloadNowPlayingMovies(withError error: NetworkError)
 }
 
@@ -46,12 +46,12 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
         interactor.downloadNowPlayingMovies()
     }
     
-    func didTapMovie(_ movie: QueryMovie) {
+    func didTapMovie(_ movie: Movie) {
         router.navigateToMovieDetails(movieID: movie.id)
     }
 
     // MARK: - FINISHING
-    func didDownloadPopularMovies(queryMovies: [QueryMovie]) {
+    func didDownloadPopularMovies(queryMovies: [Movie]) {
         DispatchQueue.main.async { [weak self] in
             self?.view?.didRecievePopularMovies(queryMovies)
         }
@@ -61,7 +61,7 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
         recieveErrorHandler(error)
     }
     
-    func didDownloadUpcomingMovies(queryMovies: [QueryMovie]) {
+    func didDownloadUpcomingMovies(queryMovies: [Movie]) {
         DispatchQueue.main.async { [weak self] in
             self?.view?.didRecieveUpcomingMovies(queryMovies)
         }
@@ -71,7 +71,7 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
         recieveErrorHandler(error)
     }
     
-    func didDownloadTopRatedMovies(queryMovies: [QueryMovie]) {
+    func didDownloadTopRatedMovies(queryMovies: [Movie]) {
         DispatchQueue.main.async { [weak self] in
             self?.view?.didRecieveTopRatedMovies(queryMovies)
         }
@@ -81,7 +81,7 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
         recieveErrorHandler(error)
     }
     
-    func didDownloadNowPlayingMovies(queryMovies: [QueryMovie]) {
+    func didDownloadNowPlayingMovies(queryMovies: [Movie]) {
         DispatchQueue.main.async { [weak self] in
             self?.view?.didRecieveNowPlayingMovies(queryMovies)
         }

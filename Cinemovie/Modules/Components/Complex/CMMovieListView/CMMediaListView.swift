@@ -10,14 +10,14 @@ import UIKit
 
 struct CMMediaListViewModel {
     private(set) var isMovieMedia: Bool
-    let movies: [QueryMovie]
-    let tvShows: [QueryTVShow]
+    let movies: [Movie]
+    let tvShows: [TVSeries]
     let listTitle: String?
     let listSubtitle: String?
-    let didTapMovie: ((QueryMovie) -> Void)?
-    let didTapTVShow: ((QueryTVShow) -> Void)?
+    let didTapMovie: ((Movie) -> Void)?
+    let didTapTVShow: ((TVSeries) -> Void)?
     
-    init(movies: [QueryMovie], listTitle: String?, listSubtitle: String? = nil, didTapMovie: ((QueryMovie) -> Void)? = nil) {
+    init(movies: [Movie], listTitle: String?, listSubtitle: String? = nil, didTapMovie: ((Movie) -> Void)? = nil) {
         self.isMovieMedia = true
         self.movies = movies
         self.listTitle = listTitle
@@ -27,7 +27,7 @@ struct CMMediaListViewModel {
         self.didTapTVShow = nil
     }
     
-    init(tvShows: [QueryTVShow], listTitle: String?, listSubtitle: String? = nil, didTapTVShow: ((QueryTVShow) -> Void)? = nil) {
+    init(tvShows: [TVSeries], listTitle: String?, listSubtitle: String? = nil, didTapTVShow: ((TVSeries) -> Void)? = nil) {
         self.isMovieMedia = false
         self.movies = []
         self.listTitle = listTitle
@@ -154,8 +154,8 @@ extension CMMediaListView: UICollectionViewDelegate, UICollectionViewDataSource 
         guard let viewModel = viewModel else { return }
         let selectedMedia: Media = viewModel.isMovieMedia ? viewModel.movies[indexPath.row] : viewModel.tvShows[indexPath.row]
         switch selectedMedia {
-        case let movie as QueryMovie: viewModel.didTapMovie?(movie)
-        case let tvshow as QueryTVShow: viewModel.didTapTVShow?(tvshow)
+        case let movie as Movie: viewModel.didTapMovie?(movie)
+        case let tvshow as TVSeries: viewModel.didTapTVShow?(tvshow)
         default: ()
         }
     }

@@ -12,7 +12,7 @@ protocol PersonDetailsScreenViewProtocol: AnyObject {
     func didRecieveError(_ errorStr: String)
     func didGetAllPersonData(
         _ details: PersonDetails, sources: ExternalSource,
-        movies: [QueryMovie], tvShows: [QueryTVShow]
+        movies: [Movie], tvShows: [TVSeries]
     )
 }
 
@@ -154,7 +154,7 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
     
     func didGetAllPersonData(
         _ details: PersonDetails, sources: ExternalSource,
-        movies: [QueryMovie], tvShows: [QueryTVShow]
+        movies: [Movie], tvShows: [TVSeries]
     ) {
         DispatchQueue.main.async {
             UIView.animate(withDuration: Constants.aniDuration, delay: Constants.aniDuration, options: .showHideTransitionViews) { [weak self] in

@@ -12,9 +12,9 @@ import SDWebImage
 protocol MovieDetailsScreenViewProtocol: AnyObject {
     func didRecieveError(_ errorStr: String)
     func didDownloadAllData(
-        details: MovieDetails, videos: [DomainVideo]?,
+        details: MovieDetails, videos: [Video]?,
         cast: [Cast]?, crew: [Cast]?,
-        recommends: [QueryMovie]?, reviews: [DomainReview]?,
+        recommends: [Movie]?, reviews: [Review]?,
         reviewCount: Int?
     )
 }
@@ -201,9 +201,9 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
     }
     
     func didDownloadAllData(
-        details: MovieDetails, videos: [DomainVideo]?,
+        details: MovieDetails, videos: [Video]?,
         cast: [Cast]?, crew: [Cast]?,
-        recommends: [QueryMovie]?, reviews: [DomainReview]?,
+        recommends: [Movie]?, reviews: [Review]?,
         reviewCount: Int?
     ) {
         UIView.animate(withDuration: Constants.aniDuration, delay: Constants.aniDuration, options: .showHideTransitionViews) { [weak self] in

@@ -12,13 +12,13 @@ protocol PersonDetailsScreenPresenterProtocol: AnyObject {
     
     func didTapBackButton()
     func didTapLogoImage(sourceID: String, sourceType: ExternalSource.SourceTypes)
-    func didTapMovie(movie: QueryMovie)
+    func didTapMovie(movie: Movie)
     
     func didGetPersonID(_ id: Int)
     func didGetPersonDetails(_ details: PersonDetails)
     func didGetPersonExternalSources(_ sources: ExternalSource)
-    func didGetPersonMovies(_ movies: [QueryMovie])
-    func didGetPersonTVShows(_ tvShows: [QueryTVShow])
+    func didGetPersonMovies(_ movies: [Movie])
+    func didGetPersonTVShows(_ tvShows: [TVSeries])
     func didRecieveError(_ error: Error)
 }
 
@@ -30,8 +30,8 @@ final class PersonDetailsScreenPresenter {
     private var personID: Int?
     private var personDetails: PersonDetails?
     private var personExternalSources: ExternalSource?
-    private var personMovies: [QueryMovie] = []
-    private var personTVShows: [QueryTVShow] = []
+    private var personMovies: [Movie] = []
+    private var personTVShows: [TVSeries] = []
     private let downloadGroup = DispatchGroup()
 
     init(interactor: PersonDetailsScreenInteractorProtocol, router: PersonDetailsScreenRouterProtocol) {
@@ -94,17 +94,17 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
         router.openSource(sourceID: sourceID, sourceType: sourceType)
     }
     
-    func didGetPersonMovies(_ movies: [QueryMovie]) {
+    func didGetPersonMovies(_ movies: [Movie]) {
         self.personMovies = movies
         downloadGroup.leave()
     }
     
-    func didGetPersonTVShows(_ tvShows: [QueryTVShow]) {
+    func didGetPersonTVShows(_ tvShows: [TVSeries]) {
         self.personTVShows = tvShows
         downloadGroup.leave()
     }
     
-    func didTapMovie(movie: QueryMovie) {
+    func didTapMovie(movie: Movie) {
         router.navigateToMovie(movieID: movie.id)
     }
 }

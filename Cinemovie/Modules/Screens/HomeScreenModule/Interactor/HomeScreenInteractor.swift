@@ -64,7 +64,7 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
     
     private func downloadHandler(
         result: Result<MovieListsAPIResponse, NetworkError>,
-        success: ([QueryMovie]) -> Void,
+        success: ([Movie]) -> Void,
         failure: (NetworkError) -> Void
     ) {
         switch result {

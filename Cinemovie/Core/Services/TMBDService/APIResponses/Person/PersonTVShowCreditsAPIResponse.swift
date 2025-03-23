@@ -9,6 +9,6 @@ import Foundation
 
 public struct PersonTVShowCreditAPIResponse: APIResponse {
     let id: Int
-    let cast: [QueryTVShow]
-    let crew: [QueryTVShow]
+    let cast: [TVSeries]
+    let crew: [TVSeries]
 }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct DomainReview: APIResponse, Hashable {
+struct Review: APIResponse, Hashable {
     let author: String
     let authorDetails: ReviewAuthorDetails
     let content, createdAt, id, updatedAt: String

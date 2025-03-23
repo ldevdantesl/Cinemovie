@@ -10,12 +10,12 @@ import SnapKit
 import SDWebImage
 
 final class HomeScreenFeaturedMovieViewModel {
-    let movies: [QueryMovie]
+    let movies: [Movie]
     let changeInSeconds: TimeInterval
-    let didTapMovie: ((QueryMovie) -> Void)?
-    var currentMovie: QueryMovie?
+    let didTapMovie: ((Movie) -> Void)?
+    var currentMovie: Movie?
     
-    init(movies: [QueryMovie], changeInSeconds: TimeInterval = 5.0,didTapMovie: ((QueryMovie) -> Void)? = nil) {
+    init(movies: [Movie], changeInSeconds: TimeInterval = 5.0,didTapMovie: ((Movie) -> Void)? = nil) {
         self.movies = movies
         self.changeInSeconds = changeInSeconds
         self.didTapMovie = didTapMovie
@@ -102,7 +102,7 @@ final class HomeScreenFeaturedMovieView: UIView {
         }
     }
     
-    private func startMovieLoop(movies: [QueryMovie]) {
+    private func startMovieLoop(movies: [Movie]) {
         guard let viewModel = viewModel else { return }
         movieWorkItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
@@ -117,7 +117,7 @@ final class HomeScreenFeaturedMovieView: UIView {
         DispatchQueue.main.asyncAfter(deadline: .now() + viewModel.changeInSeconds, execute: workItem)
     }
     
-    private func updateMovie(with movie: QueryMovie) {
+    private func updateMovie(with movie: Movie) {
         guard let url = URLHelper.getImageURL(with: movie.posterPath, size: .original) else { return }
         loadingIndicator.startAnimating()
         

@@ -8,7 +8,7 @@
 import Foundation
 
 // MARK: - MovieCastResult
-struct MovieCastAPIResponse: APIResponse {
+struct MediaCastAPIResponse: APIResponse {
     let id: Int
     let cast: [Cast]
     let crew: [Cast]

@@ -11,7 +11,7 @@ import SnapKit
 protocol MovieDetailsScreenRouterProtocol {
     func goBack()
     func navigateToPersonDetails(creditID: String)
-    func navigateToAnotherMovie(movie: QueryMovie)
+    func navigateToAnotherMovie(movie: Movie)
     func presentShareView(movie: MovieDetails)
     func presentActor(actor: Cast)
 }
@@ -26,7 +26,7 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
     
     func navigateToPerson(personID: Int) { }
     
-    func navigateToAnotherMovie(movie: QueryMovie) {
+    func navigateToAnotherMovie(movie: Movie) {
         let newMovieDetails = MovieDetailsScreenAssembler.assemble(movieID: movie.id, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(newMovieDetails, animated: true)
     }

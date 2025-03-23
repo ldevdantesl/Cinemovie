@@ -9,10 +9,10 @@ import SnapKit
 import UIKit
 
 protocol HomeScreenViewProtocol: AnyObject {
-    func didRecievePopularMovies(_ movies: [QueryMovie])
-    func didRecieveTopRatedMovies(_ movies: [QueryMovie])
-    func didRecieveUpcomingMovies(_ movies: [QueryMovie])
-    func didRecieveNowPlayingMovies(_ movies: [QueryMovie])
+    func didRecievePopularMovies(_ movies: [Movie])
+    func didRecieveTopRatedMovies(_ movies: [Movie])
+    func didRecieveUpcomingMovies(_ movies: [Movie])
+    func didRecieveNowPlayingMovies(_ movies: [Movie])
 
     func didRecieveError(_ errorStr: String)
 }
@@ -196,7 +196,7 @@ extension HomeScreenVC: UIScrollViewDelegate {
 }
 
 extension HomeScreenVC: HomeScreenViewProtocol {
-    func didRecievePopularMovies(_ movies: [QueryMovie]) {
+    func didRecievePopularMovies(_ movies: [Movie]) {
         DispatchQueue.main.async {
             let vm = CMMediaListViewModel(movies: movies, listTitle: "Popular Movies", didTapMovie: self.presenter?.didTapMovie)
             self.popularMoviesList.configure(viewModel: vm)
@@ -205,21 +205,21 @@ extension HomeScreenVC: HomeScreenViewProtocol {
         }
     }
     
-    func didRecieveTopRatedMovies(_ movies: [QueryMovie]) {
+    func didRecieveTopRatedMovies(_ movies: [Movie]) {
         DispatchQueue.main.async {
             let vm = CMMediaListViewModel(movies: movies, listTitle: "Top Rated Movies", didTapMovie: self.presenter?.didTapMovie)
             self.topRatedMoviesList.configure(viewModel: vm)
         }
     }
     
-    func didRecieveUpcomingMovies(_ movies: [QueryMovie]) {
+    func didRecieveUpcomingMovies(_ movies: [Movie]) {
         DispatchQueue.main.async {
             let vm = CMMediaListViewModel(movies: movies, listTitle: "Upcoming Movies", didTapMovie: self.presenter?.didTapMovie)
             self.upcomingMoviesList.configure(viewModel: vm)
         }
     }
     
-    func didRecieveNowPlayingMovies(_ movies: [QueryMovie]) {
+    func didRecieveNowPlayingMovies(_ movies: [Movie]) {
         DispatchQueue.main.async {
             let vm = CMMediaListViewModel(movies: movies, listTitle: "Now Playing Movies", didTapMovie: self.presenter?.didTapMovie)
             self.nowPlayingMoviesList.configure(viewModel: vm)

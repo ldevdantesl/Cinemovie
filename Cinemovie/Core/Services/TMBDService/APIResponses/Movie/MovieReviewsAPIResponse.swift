@@ -10,7 +10,7 @@ import Foundation
 // MARK: - MovieReviewsAPIResponse
 struct MovieReviewsAPIResponse: APIResponse {
     let id, page: Int
-    let results: [DomainReview]
+    let results: [Review]
     let totalPages, totalResults: Int
 
     enum CodingKeys: String, CodingKey {

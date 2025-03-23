@@ -13,7 +13,7 @@ struct CreditDetailsAPIResponse: APIResponse {
     let department: String
     let job: String
     let mediaType: String
-    let person: QueryPerson
+    let person: Person
     let media: Media
     
     enum CodingKeys: String, CodingKey {
@@ -30,13 +30,13 @@ struct CreditDetailsAPIResponse: APIResponse {
         department = try container.decode(String.self, forKey: .department)
         job = try container.decode(String.self, forKey: .job)
         mediaType = try container.decode(String.self, forKey: .mediaType)
-        person = try container.decode(QueryPerson.self, forKey: .person)
+        person = try container.decode(Person.self, forKey: .person)
         
         let mediaDecoder = try container.superDecoder(forKey: .media)
      
         switch mediaType {
-        case "movie": media = try QueryMovie(from: mediaDecoder)
-        case "tv": media = try QueryTVShow(from: mediaDecoder)
+        case "movie": media = try Movie(from: mediaDecoder)
+        case "tv": media = try TVSeries(from: mediaDecoder)
         default: throw DecodingError.dataCorruptedError(forKey: .mediaType, in: container, debugDescription: "Unsupported media type: \(mediaType)")
         }
     }

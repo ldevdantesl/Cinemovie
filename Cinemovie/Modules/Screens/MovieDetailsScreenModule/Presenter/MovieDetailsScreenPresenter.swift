@@ -10,7 +10,7 @@ import UIKit
 protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
 
-    func didTapAnotherMovie(movie: QueryMovie)
+    func didTapAnotherMovie(movie: Movie)
     func didTapIMDBImage()
     func didTapShareButton()
     func didTapRateButton()
@@ -20,9 +20,9 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didGetMovieDetails(_ details: MovieDetails)
     func didRecieveError(_ error: String)
     func didGetMovieCast(cast: [Cast], crew: [Cast])
-    func didGetMovieRecommendations(queryMovies: [QueryMovie])
-    func didGetMovieVideos(videos: [DomainVideo])
-    func didGetMovieReviews(_ reviews: [DomainReview], reviewCount: Int)
+    func didGetMovieRecommendations(queryMovies: [Movie])
+    func didGetMovieVideos(videos: [Video])
+    func didGetMovieReviews(_ reviews: [Review], reviewCount: Int)
 }
 
 final class MovieDetailsScreenPresenter {
@@ -35,11 +35,11 @@ final class MovieDetailsScreenPresenter {
     private let dispatchGroup = DispatchGroup()
     
     private var movieDetails: MovieDetails?
-    private var movieVideos: [DomainVideo]?
+    private var movieVideos: [Video]?
     private var movieCast: [Cast]?
     private var movieCrew: [Cast]?
-    private var movieRecommends: [QueryMovie]?
-    private var movieReviews: [DomainReview]?
+    private var movieRecommends: [Movie]?
+    private var movieReviews: [Review]?
     private var movieReviewCount: Int?
 
     init(movieID: Int, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
@@ -82,7 +82,7 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         view?.didRecieveError(error)
     }
     
-    func didTapAnotherMovie(movie: QueryMovie) {
+    func didTapAnotherMovie(movie: Movie) {
         router.navigateToAnotherMovie(movie: movie)
     }
     
@@ -104,13 +104,13 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         router.presentActor(actor: actor)
     }
     
-    func didGetMovieReviews(_ reviews: [DomainReview], reviewCount: Int) {
+    func didGetMovieReviews(_ reviews: [Review], reviewCount: Int) {
         movieReviews = reviews
         movieReviewCount = reviewCount
         dispatchGroup.leave()
     }
     
-    func didGetMovieVideos(videos: [DomainVideo]) {
+    func didGetMovieVideos(videos: [Video]) {
         movieVideos = videos
         dispatchGroup.leave()
     }
@@ -126,7 +126,7 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         dispatchGroup.leave()
     }
     
-    func didGetMovieRecommendations(queryMovies: [QueryMovie]) {
+    func didGetMovieRecommendations(queryMovies: [Movie]) {
         movieRecommends = queryMovies
         dispatchGroup.leave()
     }

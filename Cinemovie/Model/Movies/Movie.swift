@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct QueryMovie: APIResponse, Media {
+struct Movie: APIResponse, Media {
     let id: Int
     let title: String
     let voteAverage: Double?
