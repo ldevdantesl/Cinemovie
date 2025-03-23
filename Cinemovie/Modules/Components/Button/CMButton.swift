@@ -14,16 +14,17 @@ public struct CMButtonViewModel {
     public var image: UIImage?
     public var backColor: UIColor
     public var cornerRadius: CGFloat
+    public var borderColor: UIColor?
+    public var borderWidth: CGFloat?
     
     public var didTapAction: (() -> Void)?
     
     init(
-        text: String,
-        foreColor: UIColor = CMColor.cmLabel,
-        font: UIFont,
-        image: UIImage? = nil,
+        text: String, foreColor: UIColor = CMColor.cmLabel,
+        font: UIFont, image: UIImage? = nil,
         backColor: UIColor = CMColor.cmSecondary,
         cornerRadius: CGFloat = 8,
+        borderColor: UIColor? = nil, borderWidth: CGFloat? = nil,
         didTapAction: (() -> Void)? = nil
     ) {
         self.text = text
@@ -32,6 +33,8 @@ public struct CMButtonViewModel {
         self.image = image
         self.backColor = backColor
         self.cornerRadius = cornerRadius
+        self.borderColor = borderColor
+        self.borderWidth = borderWidth
         self.didTapAction = didTapAction
     }
 }
@@ -56,12 +59,14 @@ final class CMButton: UIButton {
     override func layoutSubviews() {
         super.layoutSubviews()
         self.layer.cornerRadius = viewModel.cornerRadius
+        self.clipsToBounds = true
+        self.layer.borderColor = (viewModel.borderColor ?? .clear).cgColor
+        self.layer.borderWidth = viewModel.borderWidth ?? 0
     }
     
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: CMButtonViewModel) {
         self.viewModel = viewModel
-        self.layoutIfNeeded()
         setup()
     }
     
@@ -80,12 +85,12 @@ final class CMButton: UIButton {
             ]
         )
         
+        
         self.setTitleColor(.white, for: .normal)
         self.backgroundColor = viewModel.backColor
         self.configuration = .borderedTinted()
         self.translatesAutoresizingMaskIntoConstraints = false
         self.setAttributedTitle(attrTitle, for: .normal)
-        self.clipsToBounds = true
         
         if let buttonImage = viewModel.image?.withRenderingMode(.alwaysTemplate) {
             self.setImage(buttonImage, for: .normal)

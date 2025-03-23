@@ -26,9 +26,9 @@ final class HomeScreenVC: UIViewController {
     }
     
     fileprivate enum Constants {
-        static let headerViewFirstButtonSize: CGFloat = 30
-        static let headerViewHeight: CGFloat = 80
         static let featuredMovieViewHorPadding = 20
+        static let featuredMovieTopPadding: CGFloat = 70
+        static let headerViewHeight = 115
         static let featuredMovieHeight = UIConstants.screenHeight * 0.55
         static let mediaListViewHeight: CGFloat = 200
     }
@@ -36,8 +36,10 @@ final class HomeScreenVC: UIViewController {
     // MARK: - VIPER
     var presenter: HomeScreenPresenterProtocol?
     
+    private var lastContentOffset: CGFloat = 0
+    
     // MARK: - PROPERTIES
-    private var isShadowVisible = false
+    private var isBlurVisible = false
     
     // MARK: - VIEW PROPERTIES
     private lazy var scrollView: UIScrollView = {
@@ -56,12 +58,7 @@ final class HomeScreenVC: UIViewController {
     }()
     
     private lazy var headerView: HomeScreenHeaderView = {
-        let vm = CMCircularButtonViewModel(
-            systemName: "magnifyingglass",
-            backColor: .clear, foreColor: .cmLabel
-        )
-        let firstButton = CMCircularButton(viewModel: vm)
-        let headerVM = HomeScreenHeaderViewModel(headerTitle: "For Dantes", firstButton: firstButton)
+        let headerVM = HomeScreenHeaderViewModel(headerTitle: "For Dantes")
         let header = HomeScreenHeaderView(viewModel: headerVM)
         header.translatesAutoresizingMaskIntoConstraints = false
         return header
@@ -115,22 +112,16 @@ final class HomeScreenVC: UIViewController {
     
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
-        view.backgroundColor = CMColor.cmBackground
-    
+        view.addSubview(scrollView)
+        scrollView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
         view.addSubview(headerView)
         headerView.snp.makeConstraints {
             $0.top.equalTo(view.snp.top)
-            $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
+            $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(Constants.headerViewHeight)
-        }
-        view.bringSubviewToFront(headerView)
-        
-        view.addSubview(scrollView)
-        scrollView.snp.makeConstraints {
-            $0.top.equalTo(headerView.snp.bottom)
-            $0.leading.equalToSuperview()
-            $0.trailing.equalToSuperview()
-            $0.bottom.equalToSuperview()
         }
         
         scrollView.addSubview(contentView)
@@ -143,7 +134,7 @@ final class HomeScreenVC: UIViewController {
         
         contentView.addSubview(featuredMovieView)
         featuredMovieView.snp.makeConstraints {
-            $0.top.equalTo(contentView.snp.top)
+            $0.top.equalTo(contentView.snp.top).offset(Constants.featuredMovieTopPadding)
             $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
             $0.height.equalTo(Constants.featuredMovieHeight)
         }
@@ -184,15 +175,18 @@ final class HomeScreenVC: UIViewController {
 
 extension HomeScreenVC: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let shouldShowShadow = scrollView.contentOffset.y >= 10
-
-        if shouldShowShadow != isShadowVisible {
-            isShadowVisible = shouldShowShadow
-
-            if shouldShowShadow {
-                headerView.addShadowToHeader()
-            } else {
-                headerView.removeShadowFromHeader()
+        let headerBottomY = headerView.convert(headerView.bounds, to: view).maxY
+        let featuredTopY = featuredMovieView.convert(featuredMovieView.bounds, to: view).minY
+        
+        if headerBottomY >= featuredTopY {
+            if !isBlurVisible {
+                isBlurVisible = true
+                headerView.addBlurToHeader()
+            }
+        } else {
+            if isBlurVisible {
+                isBlurVisible = false
+                headerView.removeBlurFromHeader()
             }
         }
     }

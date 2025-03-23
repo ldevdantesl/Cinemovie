@@ -10,13 +10,11 @@ import UIKit
 
 struct HomeScreenHeaderViewModel {
     let headerTitle: String
-    let firstButton: CMCircularButton
-    let secondButton: CMCircularButton?
+    let didTapSearchButton: (() -> Void)?
     
-    init(headerTitle: String, firstButton: CMCircularButton, secondButton: CMCircularButton? = nil) {
+    init(headerTitle: String, didTapSearchButton: (() -> Void)? = nil) {
         self.headerTitle = headerTitle
-        self.firstButton = firstButton
-        self.secondButton = secondButton
+        self.didTapSearchButton = didTapSearchButton
     }
 }
 
@@ -25,6 +23,10 @@ final class HomeScreenHeaderView: UIView {
     fileprivate enum Constants {
         static let spacing = 5.0
         static let biggerSpacing = 10.0
+        static let searchButtonSystemName = "magnifyingglass"
+        static let searchButtonSize = 25.0
+        static let buttonsCornerRadius = 15.0
+        static let buttonsBorderWidth = 1.0
     }
     
     // MARK: - PROPERTIES
@@ -34,21 +36,87 @@ final class HomeScreenHeaderView: UIView {
     private lazy var headerLabel: UILabel = {
         let label = UILabel()
         label.text = viewModel.headerTitle
-        label.font = CMFont.font(size: .title, weight: .bold)
+        label.font = CMFont.font(size: .title, fontName: .avenirDemiBold)
         label.textColor = CMColor.cmLabel
         label.numberOfLines = 1
-        label.textAlignment = .center
         return label
     }()
     
-    private lazy var hStack: UIStackView = {
-        let stack = UIStackView(arrangedSubviews: [headerLabel, UIView(), viewModel.firstButton])
+    private lazy var blurView: UIVisualEffectView = {
+        let blur = UIBlurEffect(style: .systemUltraThinMaterialDark)
+        let view = UIVisualEffectView(effect: blur)
+        view.isHidden = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let searchButtonImageView: UIImageView = {
+        let view = UIImageView()
+        view.contentMode = .scaleAspectFit
+        view.image = UIImage(systemName: Constants.searchButtonSystemName)
+        view.tintColor = CMColor.cmAccent
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let tvShowButton: CMButton = {
+        let vm = CMButtonViewModel(
+            text: "TV Show", foreColor: .cmLabel,
+            font: CMFont.font(size: .footnote, fontName: .avenirBold), image: nil,
+            backColor: CMColor.cmBackground, cornerRadius: Constants.buttonsCornerRadius,
+            borderColor: CMColor.cmLabel, borderWidth: Constants.buttonsBorderWidth
+        )
+        let button = CMButton(viewModel: vm)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private let moviesButton: CMButton = {
+        let vm = CMButtonViewModel(
+            text: "Movies", foreColor: .cmLabel,
+            font: CMFont.font(size: .footnote, fontName: .avenirBold), image: nil,
+            backColor: CMColor.cmBackground, cornerRadius: Constants.buttonsCornerRadius,
+            borderColor: CMColor.cmLabel, borderWidth: Constants.buttonsBorderWidth
+        )
+        let button = CMButton(viewModel: vm)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private lazy var headerStack: UIStackView = {
+        let spacer = UIView()
+        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        
+        let stack = UIStackView(arrangedSubviews: [headerLabel, spacer, searchButtonImageView])
         stack.axis = .horizontal
         stack.spacing = Constants.biggerSpacing
+        stack.alignment = .center
         stack.distribution = .fill
         stack.translatesAutoresizingMaskIntoConstraints = false
-        if let secondButton = viewModel.secondButton { stack.addArrangedSubview(secondButton) }
         return stack
+    }()
+    
+    private lazy var buttonsStack: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [tvShowButton, moviesButton, UIView()])
+        stack.axis = .horizontal
+        stack.spacing = Constants.biggerSpacing
+        stack.alignment = .leading
+        stack.distribution = .fill
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+    
+    private lazy var vStack: UIStackView = {
+        let vStack = UIStackView(arrangedSubviews: [headerStack, buttonsStack])
+        vStack.axis = .vertical
+        vStack.distribution = .equalSpacing
+        vStack.spacing = Constants.spacing
+        vStack.alignment = .fill
+        vStack.isLayoutMarginsRelativeArrangement = true
+        vStack.layoutMargins = UIEdgeInsets(top: Constants.biggerSpacing, left: Constants.biggerSpacing, bottom: Constants.biggerSpacing, right: Constants.biggerSpacing)
+        vStack.translatesAutoresizingMaskIntoConstraints = false
+        return vStack
     }()
     
     // MARK: - LIFECYCLE
@@ -67,48 +135,42 @@ final class HomeScreenHeaderView: UIView {
     public func configure(viewModel: HomeScreenHeaderViewModel) {
         self.viewModel = viewModel
         headerLabel.text = viewModel.headerTitle
-        
-        hStack.arrangedSubviews.forEach {
-            hStack.removeArrangedSubview($0)
-            $0.removeFromSuperview()
-        }
-        
-        hStack.addArrangedSubview(headerLabel)
-        hStack.addArrangedSubview(UIView())
-        hStack.addArrangedSubview(viewModel.firstButton)
-        if let secondButton = viewModel.secondButton { hStack.addArrangedSubview(secondButton) }
     }
     
-    public func addShadowToHeader() {
+    public func addBlurToHeader() {
         UIView.transition(with: self, duration: 0.2, options: .transitionCrossDissolve) { [weak self] in
             guard let self = self else { return }
-            self.layer.masksToBounds = false
-            self.layer.shadowColor = UIColor.black.cgColor
-            self.layer.shadowOpacity = 1
-            self.layer.shadowOffset = CGSize(width: 0, height: 3)
-            self.layer.shadowRadius = 2
-            self.layer.zPosition = 1
-            
-            let shadowHeight: CGFloat = 4
-            let shadowRect = CGRect(x: 0, y: self.bounds.height - shadowHeight, width: self.bounds.width, height: shadowHeight)
-            self.layer.shadowPath = UIBezierPath(rect: shadowRect).cgPath
+            self.blurView.isHidden = false
         }
     }
-
-    public func removeShadowFromHeader() {
-        UIView.transition(with: self, duration: 0.2) { [weak self] in
+    
+    public func removeBlurFromHeader() {
+        UIView.transition(with: self, duration: 0.2, options: .transitionCrossDissolve) { [weak self] in
             guard let self = self else { return }
-            self.layer.shadowOpacity = 0
+            self.blurView.isHidden = true
         }
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        self.backgroundColor = CMColor.cmBackground
-        
-        addSubview(hStack)
-        hStack.snp.makeConstraints {
+        self.backgroundColor = .clear
+        addSubview(blurView)
+        blurView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
+        
+        addSubview(vStack)
+        vStack.snp.makeConstraints {
+            $0.top.lessThanOrEqualToSuperview()
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.lessThanOrEqualToSuperview()
+        }
+        
+        searchButtonImageView.snp.makeConstraints {
+            $0.width.height.equalTo(Constants.searchButtonSize)
+        }
+        
+        tvShowButton.setContentHuggingPriority(.required, for: .horizontal)
+        moviesButton.setContentHuggingPriority(.required, for: .horizontal)
     }
 }

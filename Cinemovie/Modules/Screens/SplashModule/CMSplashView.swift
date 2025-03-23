@@ -24,6 +24,13 @@ final class CMSplashView: UIView {
         return image
     }()
     
+    private let blurView: UIVisualEffectView = {
+        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
+        let blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.translatesAutoresizingMaskIntoConstraints = false
+        return blurView
+    }()
+    
     // MARK: - LIFECYCLE
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -54,11 +61,7 @@ final class CMSplashView: UIView {
     private func setup() {
         backgroundColor = .clear
 
-        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
-        let blurView = UIVisualEffectView(effect: blurEffect)
-        blurView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(blurView)
-
         blurView.snp.makeConstraints { $0.edges.equalToSuperview() }
 
         addSubview(appLogo)

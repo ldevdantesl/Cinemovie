@@ -57,14 +57,14 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         dispatchGroup.enter()
         interactor.getMovieCast(movieID: movieID)
         
-        dispatchGroup.enter()
-        interactor.getMovieRecommendations(movieID: movieID)
-        
-        dispatchGroup.enter()
-        interactor.getMovieVideos(movieID: movieID)
-        
-        dispatchGroup.enter()
-        interactor.getMovieReviews(movieID: movieID)
+//        dispatchGroup.enter()
+//        interactor.getMovieRecommendations(movieID: movieID)
+//        
+//        dispatchGroup.enter()
+//        interactor.getMovieVideos(movieID: movieID)
+//        
+//        dispatchGroup.enter()
+//        interactor.getMovieReviews(movieID: movieID)
         
         dispatchGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }

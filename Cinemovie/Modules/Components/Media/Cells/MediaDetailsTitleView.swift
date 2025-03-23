@@ -25,7 +25,7 @@ struct MediaDetailsTitleViewModel: MediaDetailsCellViewModel {
         if tagline.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return 45.0
         }
-        return 65.0
+        return 70.0
     }
 }
 
