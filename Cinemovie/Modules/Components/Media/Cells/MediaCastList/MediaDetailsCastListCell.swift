@@ -33,8 +33,6 @@ final class MediaDetailsCastListCell: UICollectionViewCell {
         static let imageViewImageName = "person"
         static let imageViewImagePointSize: CGFloat = 20
         
-        static let labelWidth: CGFloat = 90
-        
         static let unknownText: String = "Unknown"
     }
     
@@ -140,14 +138,14 @@ final class MediaDetailsCastListCell: UICollectionViewCell {
         nameLabel.snp.makeConstraints {
             $0.top.equalTo(avatarImageView.snp.bottom)
             $0.centerX.equalToSuperview()
-            $0.width.equalTo(Constants.labelWidth)
+            $0.width.equalTo(Constants.imageSize)
         }
         
         contentView.addSubview(characterName)
         characterName.snp.makeConstraints {
             $0.top.equalTo(nameLabel.snp.bottom)
             $0.centerX.equalToSuperview()
-            $0.width.lessThanOrEqualTo(Constants.labelWidth)
+            $0.width.lessThanOrEqualTo(Constants.imageSize)
             $0.bottom.equalToSuperview()
         }
     }

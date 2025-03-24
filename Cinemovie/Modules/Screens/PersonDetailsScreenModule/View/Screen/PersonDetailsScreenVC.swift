@@ -122,7 +122,7 @@ extension PersonDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataS
         switch viewModel {
         case let vm as PersonDetailsBiographyViewModel: size = CGSize(width: width - 20, height: vm.cellHeight)
         case is PersonDetailsHeaderViewModel: size = CGSize(width: width - 20, height: 200)
-        case is PersonDetailsMediaViewModel: size = CGSize(width: width - 20, height: 220)
+        case let vm as PersonDetailsMediaViewModel: size = CGSize(width: width - 20, height: vm.cellHeight)
         case let vm as PersonDetailsInfoViewModel: size = CGSize(width: width - 20, height: vm.cellHeight)
         case is PersonDetailsSourcesViewModel: size = CGSize(width: width - 30, height: 30)
         default: size = CGSize(width: width - 20, height: Constants.defaultCellHeight)

@@ -28,6 +28,7 @@ final class HomeScreenVC: UIViewController {
     fileprivate enum Constants {
         static let featuredMovieViewHorPadding = 20
         static let headerViewHeight = 70.0
+        static let headerViewTopMargin: CGFloat = 15
         static let featuredMovieHeight = UIConstants.screenHeight * 0.55
         static let mediaListViewHeight: CGFloat = 200
     }
@@ -40,6 +41,10 @@ final class HomeScreenVC: UIViewController {
     // MARK: - PROPERTIES
     private var isBlurVisible = false
     private var headerViewHeightConstraint: Constraint?
+    private var popularListHeightConstraint: Constraint?
+    private var upcomingListHeightConstraint: Constraint?
+    private var topRatedListHeightConstraint: Constraint?
+    private var nowPlayingListHeightConstraint: Constraint?
     
     // MARK: - VIEW PROPERTIES
     private lazy var scrollView: UIScrollView = {
@@ -142,7 +147,7 @@ final class HomeScreenVC: UIViewController {
         
         contentView.addSubview(featuredMovieView)
         featuredMovieView.snp.makeConstraints {
-            $0.top.equalTo(contentView.safeAreaLayoutGuide.snp.top).offset(Constants.headerViewHeight + 15)
+            $0.top.equalTo(contentView.safeAreaLayoutGuide.snp.top).offset(Constants.headerViewHeight + Constants.headerViewTopMargin)
             $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
             $0.height.equalTo(Constants.featuredMovieHeight)
         }
@@ -151,28 +156,28 @@ final class HomeScreenVC: UIViewController {
         popularMoviesList.snp.makeConstraints {
             $0.top.equalTo(featuredMovieView.snp.bottom).offset(Paddings.bigSpacing)
             $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
-            $0.height.equalTo(Constants.mediaListViewHeight)
+            popularListHeightConstraint = $0.height.equalTo(Constants.mediaListViewHeight).constraint
         }
         
         contentView.addSubview(upcomingMoviesList)
         upcomingMoviesList.snp.makeConstraints {
             $0.top.equalTo(popularMoviesList.snp.bottom).offset(Paddings.bigSpacing)
             $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
-            $0.height.equalTo(Constants.mediaListViewHeight)
+            upcomingListHeightConstraint = $0.height.equalTo(Constants.mediaListViewHeight).constraint
         }
         
         contentView.addSubview(topRatedMoviesList)
         topRatedMoviesList.snp.makeConstraints {
             $0.top.equalTo(upcomingMoviesList.snp.bottom).offset(Paddings.bigSpacing)
             $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
-            $0.height.equalTo(Constants.mediaListViewHeight)
+            topRatedListHeightConstraint = $0.height.equalTo(Constants.mediaListViewHeight).constraint
         }
         
         contentView.addSubview(nowPlayingMoviesList)
         nowPlayingMoviesList.snp.makeConstraints {
             $0.top.equalTo(topRatedMoviesList.snp.bottom).offset(Paddings.bigSpacing)
             $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
-            $0.height.equalTo(Constants.mediaListViewHeight)
+            nowPlayingListHeightConstraint = $0.height.equalTo(Constants.mediaListViewHeight).constraint
         }
         
         contentView.snp.makeConstraints {
@@ -205,6 +210,7 @@ extension HomeScreenVC: HomeScreenViewProtocol {
         DispatchQueue.main.async {
             let vm = CMMediaListViewModel(movies: movies, listTitle: "Popular Movies", didTapMovie: self.presenter?.didTapMovie)
             self.popularMoviesList.configure(viewModel: vm)
+            self.popularListHeightConstraint?.update(offset: vm.cellHeight + Paddings.bigSpacing)
             let featuredVM = HomeScreenFeaturedMovieViewModel(movies: movies, didTapMovie: self.presenter?.didTapMovie)
             self.featuredMovieView.configure(viewModel: featuredVM)
         }
@@ -214,6 +220,7 @@ extension HomeScreenVC: HomeScreenViewProtocol {
         DispatchQueue.main.async {
             let vm = CMMediaListViewModel(movies: movies, listTitle: "Top Rated Movies", didTapMovie: self.presenter?.didTapMovie)
             self.topRatedMoviesList.configure(viewModel: vm)
+            self.topRatedListHeightConstraint?.update(offset: vm.cellHeight + Paddings.bigSpacing)
         }
     }
     
@@ -221,6 +228,7 @@ extension HomeScreenVC: HomeScreenViewProtocol {
         DispatchQueue.main.async {
             let vm = CMMediaListViewModel(movies: movies, listTitle: "Upcoming Movies", didTapMovie: self.presenter?.didTapMovie)
             self.upcomingMoviesList.configure(viewModel: vm)
+            self.upcomingListHeightConstraint?.update(offset: vm.cellHeight + Paddings.bigSpacing)
         }
     }
     
@@ -228,6 +236,7 @@ extension HomeScreenVC: HomeScreenViewProtocol {
         DispatchQueue.main.async {
             let vm = CMMediaListViewModel(movies: movies, listTitle: "Now Playing Movies", didTapMovie: self.presenter?.didTapMovie)
             self.nowPlayingMoviesList.configure(viewModel: vm)
+            self.nowPlayingListHeightConstraint?.update(offset: vm.cellHeight + Paddings.bigSpacing)
         }
     }
 

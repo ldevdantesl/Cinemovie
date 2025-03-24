@@ -18,6 +18,7 @@ struct PersonDetailsMediaViewModel: PersonDetailsCellViewModel {
     let tvShows: [TVSeries]
     let didTapMovieAction: ((Movie) -> Void)?
     let didTapTVShowAction: ((TVSeries) -> Void)?
+    let cellHeight: CGFloat
     
     init(headerTitle: String, headerSubtitle: String?, movies: [Movie], didTapMovieAction: ((Movie) -> Void)? = nil) {
         self.isMovieType = true
@@ -27,6 +28,7 @@ struct PersonDetailsMediaViewModel: PersonDetailsCellViewModel {
         self.tvShows = []
         self.didTapMovieAction = didTapMovieAction
         self.didTapTVShowAction = nil
+        self.cellHeight = Self.calculateCellHeight(subtitle: headerSubtitle)
     }
     
     init(headerTitle: String, headerSubtitle: String?, tvShows: [TVSeries], didTapTVShowAction: ((TVSeries) -> Void)? = nil) {
@@ -37,6 +39,14 @@ struct PersonDetailsMediaViewModel: PersonDetailsCellViewModel {
         self.tvShows = tvShows
         self.didTapTVShowAction = didTapTVShowAction
         self.didTapMovieAction = nil
+        self.cellHeight = Self.calculateCellHeight(subtitle: headerSubtitle)
+    }
+    
+    static func calculateCellHeight(subtitle: String?) -> CGFloat {
+        guard let _ = subtitle else {
+            return (UIConstants.screenWidth / 3) * 1.3 + 25
+        }
+        return (UIConstants.screenWidth / 3) * 1.3 + 40
     }
 }
 

@@ -12,12 +12,13 @@ struct CMMediaListViewModel {
     private(set) var isMovieMedia: Bool
     let movies: [Movie]
     let tvShows: [TVSeries]
-    let listTitle: String?
+    let listTitle: String
     let listSubtitle: String?
     let didTapMovie: ((Movie) -> Void)?
     let didTapTVShow: ((TVSeries) -> Void)?
+    let cellHeight: CGFloat
     
-    init(movies: [Movie], listTitle: String?, listSubtitle: String? = nil, didTapMovie: ((Movie) -> Void)? = nil) {
+    init(movies: [Movie], listTitle: String, listSubtitle: String? = nil, didTapMovie: ((Movie) -> Void)? = nil) {
         self.isMovieMedia = true
         self.movies = movies
         self.listTitle = listTitle
@@ -25,9 +26,10 @@ struct CMMediaListViewModel {
         self.didTapMovie = didTapMovie
         self.tvShows = []
         self.didTapTVShow = nil
+        self.cellHeight = Self.calculateCellHeight(listSubtitle: listSubtitle)
     }
     
-    init(tvShows: [TVSeries], listTitle: String?, listSubtitle: String? = nil, didTapTVShow: ((TVSeries) -> Void)? = nil) {
+    init(tvShows: [TVSeries], listTitle: String, listSubtitle: String? = nil, didTapTVShow: ((TVSeries) -> Void)? = nil) {
         self.isMovieMedia = false
         self.movies = []
         self.listTitle = listTitle
@@ -35,6 +37,14 @@ struct CMMediaListViewModel {
         self.didTapMovie = nil
         self.tvShows = tvShows
         self.didTapTVShow = didTapTVShow
+        self.cellHeight = Self.calculateCellHeight(listSubtitle: listSubtitle)
+    }
+    
+    static func calculateCellHeight(listSubtitle: String?) -> CGFloat {
+        guard let _ = listSubtitle else {
+            return ((UIConstants.screenWidth / 3) * 1.3) + 25
+        }
+        return ((UIConstants.screenWidth / 3) * 1.3) + 40
     }
 }
 
@@ -90,7 +100,7 @@ final class CMMediaListView: UIView {
     private lazy var collectionView: UICollectionView = {
         let flow = UICollectionViewFlowLayout()
         flow.scrollDirection = .horizontal
-        flow.minimumLineSpacing = 10
+        flow.minimumLineSpacing = Paddings.biggerSpacing
         flow.itemSize = CGSize(width: Constants.cellWidth, height: Constants.cellHeight)
 
         let cv = UICollectionView(frame: .zero, collectionViewLayout: flow)
