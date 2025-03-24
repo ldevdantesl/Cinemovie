@@ -29,7 +29,7 @@ enum ImageNames: String {
     case tvSeriesID = "TVSeriesID"
     case tvSeriesReturningStatus = "TVSeriesStatus_Returning Series"
     case tvSeriesEndedStatus = "TVSeriesStatus_Ended"
-    case tvSeriesCanceledStatus = "TVSeriesStatus_Canceled"
+    case tvSeriesCancelledStatus = "TVSeriesStatus_Cancelled"
     case tvSeriesInProductionStatus = "TVSeriesStatus_In Production"
     case tvSeriesPlannedStatus = "TVSeriesStatus_Planned"
     case tvSeriesPilotStatus = "TVSeriesStatus_Pilot"
