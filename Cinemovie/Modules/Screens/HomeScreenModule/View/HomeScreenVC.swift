@@ -27,8 +27,7 @@ final class HomeScreenVC: UIViewController {
     
     fileprivate enum Constants {
         static let featuredMovieViewHorPadding = 20
-        static let featuredMovieTopPadding: CGFloat = 70
-        static let headerViewHeight = 115
+        static let headerViewHeight = 70.0
         static let featuredMovieHeight = UIConstants.screenHeight * 0.55
         static let mediaListViewHeight: CGFloat = 200
     }
@@ -40,6 +39,7 @@ final class HomeScreenVC: UIViewController {
     
     // MARK: - PROPERTIES
     private var isBlurVisible = false
+    private var headerViewHeightConstraint: Constraint?
     
     // MARK: - VIEW PROPERTIES
     private lazy var scrollView: UIScrollView = {
@@ -112,6 +112,11 @@ final class HomeScreenVC: UIViewController {
         tabBarController?.tabBar.isTranslucent = false
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        headerViewHeightConstraint?.update(offset: Constants.headerViewHeight + view.safeAreaInsets.top + 5)
+    }
+    
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
         view.backgroundColor = CMColor.cmBackground
@@ -122,9 +127,9 @@ final class HomeScreenVC: UIViewController {
         
         view.addSubview(headerView)
         headerView.snp.makeConstraints {
-            $0.top.equalTo(view.snp.top)
+            $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(Constants.headerViewHeight)
+            headerViewHeightConstraint = $0.height.equalTo(Constants.headerViewHeight).constraint
         }
         
         scrollView.addSubview(contentView)
@@ -137,7 +142,7 @@ final class HomeScreenVC: UIViewController {
         
         contentView.addSubview(featuredMovieView)
         featuredMovieView.snp.makeConstraints {
-            $0.top.equalTo(contentView.snp.top).offset(Constants.featuredMovieTopPadding)
+            $0.top.equalTo(contentView.safeAreaLayoutGuide.snp.top).offset(Constants.headerViewHeight + 15)
             $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
             $0.height.equalTo(Constants.featuredMovieHeight)
         }
