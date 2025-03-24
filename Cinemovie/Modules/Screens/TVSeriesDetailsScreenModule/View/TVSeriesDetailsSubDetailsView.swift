@@ -165,7 +165,7 @@ final class TVSeriesDetailsSubDetailsView: UICollectionViewCell {
         self.airDateLabel.text = CMDateFormatter.formatToYearOnly(dateString: viewModel.firstAirDate)
         self.statusImageView.image = UIImage(named: "TVSeriesStatus_\(viewModel.status.rawValue)")
         self.statusImageView.accessibilityIdentifier = "TVSeriesStatus_\(viewModel.status.rawValue)"
-        self.seriesDurationLabel.text = "\(viewModel.numberOfSeasons)S \(viewModel.numberOfEpisodes)E"
+        self.seriesDurationLabel.text = "\(viewModel.numberOfSeasons) Seasons"
         self.mediaTypeImageView.image = UIImage(named: ImageNames.tvSeriesID.rawValue)
         guard let homepage = viewModel.homepage, !homepage.isEmpty else { return }
         self.homepageImageView.image = UIImage(named: ImageNames.homepage.rawValue)

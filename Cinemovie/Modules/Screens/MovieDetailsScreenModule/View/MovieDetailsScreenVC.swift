@@ -44,6 +44,7 @@ final class MovieDetailsScreenVC: UIViewController {
     // MARK: - PROPERTIES
     private var viewModels: [MediaDetailsCellViewModel] = []
     private var cachedCollectionViewCellHeights: [IndexPath : CGSize] = [:]
+    private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
     
     // MARK: - VIEW PROPERTIES
     private let downloadingView: CMSplashView = {
@@ -169,7 +170,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
 
         let action = UIAlertAction(title: "OK", style: .cancel) { [weak self] _ in
             guard let self = self else { return }
-            self.dismiss(animated: true)
+            isFirstScreen ? self.dismiss(animated: true) : presenter?.didTapBackButton()
         }
 
         alert.addAction(action)
@@ -185,13 +186,11 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         reviewCount: Int?
     ) {
         self.downloadingView.hide()
-    
-        let isBackButtonHidden = navigationController?.viewControllers.count ?? 0 > 1
         
         self.viewModels = [
             MediaDetailsBackdropImageViewModel(
                 imagePath: details.backdropPath, size: .w1280,
-                isBackButtonHidden: isBackButtonHidden, didTapBackButtonAction: presenter?.didTapBackButton
+                isBackButtonHidden: isFirstScreen, didTapBackButtonAction: presenter?.didTapBackButton
             ),
             MediaDetailsTitleViewModel(movieName: details.title, movieTagline: details.tagline),
             

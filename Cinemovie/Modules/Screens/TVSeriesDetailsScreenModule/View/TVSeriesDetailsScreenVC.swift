@@ -24,6 +24,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
         static let collectionViewSpacing = 10.0
         static let aniDuration = 1.0
         static let hSpacing = 20.0
+        static let biggerHSpacing = 30.0
         static let cellDefaultHeight = 100.0
     }
 
@@ -36,6 +37,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
     // MARK: - PROPERTIES
     private var viewModels: [MediaDetailsCellViewModel] = []
     private var cachedCollectionViewCellHeights: [IndexPath : CGSize] = [:]
+    private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
     
     // MARK: - VIEW PROPERTIES
     private let downloadingView: CMSplashView = {
@@ -135,6 +137,7 @@ extension TVSeriesDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDel
         case let vm as MediaDetailsWatchlistOverviewViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
         case let vm as MediaDetailsCastListViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
         case let vm as MediaDetailsProductionViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
+        case let vm as MediaDetailsRateAndShareViewModel: size = CGSize(width: width - Constants.biggerHSpacing, height: vm.cellHeight)
         default: return CGSize(width: width, height: Constants.cellDefaultHeight)
         }
         
@@ -151,9 +154,12 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
             preferredStyle: .alert
         )
         
-        alert.addAction(
-            UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        let action = UIAlertAction(title: "OK", style: .cancel) { [weak self] _ in
+            guard let self = self else { return }
+            isFirstScreen ? self.dismiss(animated: true) : presenter?.didTapBackButton()
+        }
         
+        alert.addAction(action)
         DispatchQueue.main.async {
             self.present(alert, animated: true, completion: nil)
         }
@@ -162,12 +168,10 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
     func didGetAllTVSeriesData(_ details: TVSeriesDetails, cast: [Cast], videos: [Video]) {
         self.downloadingView.hide()
         
-        let isBackButtonHidden = navigationController?.viewControllers.count ?? 0 > 1
-        
         self.viewModels = [
             MediaDetailsBackdropImageViewModel(
                 imagePath: details.backdropPath, size: .w1280,
-                isBackButtonHidden: isBackButtonHidden, didTapBackButtonAction: presenter?.didTapBackButton
+                isBackButtonHidden: isFirstScreen, didTapBackButtonAction: presenter?.didTapBackButton
             ),
             MediaDetailsTitleViewModel(movieName: details.name, movieTagline: details.tagline),
             

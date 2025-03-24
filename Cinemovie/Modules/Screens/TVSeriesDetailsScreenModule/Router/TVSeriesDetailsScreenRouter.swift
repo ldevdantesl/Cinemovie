@@ -71,7 +71,7 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
         case "TVSeriesStatus_Planned": tooltipMsg = "Only Announced"
         case "TVSeriesStatus_Pilot": tooltipMsg = "Pilot Episode Only"
         case "TVSeriesStatus_Ended": tooltipMsg = "Series has concluded"
-        case "SeriesDurationLabel": tooltipMsg = "Total Seasons & Episodes"
+        case "SeriesDurationLabel": tooltipMsg = "Total Seasons"
         case "HDStatusImage": tooltipMsg = "HD Resolution Available"
         case "MediaTypeImage": tooltipMsg = "Is TV Series"
         default: break
