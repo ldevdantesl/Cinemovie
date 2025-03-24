@@ -10,10 +10,15 @@ import SnapKit
 import SDWebImage
 
 protocol MovieDetailsScreenViewProtocol: AnyObject {
+    var activeTooltipView: CMTooltipView? { get set }
+    var activeTooltipWorkItem: DispatchWorkItem? { get set }
+    
+    var activePopUpView: MediaDetailsActorPopupView? { get set }
+
     func didRecieveError(_ errorStr: String)
     func didDownloadAllData(
         details: MovieDetails, videos: [Video]?,
-        cast: [Cast]?, crew: [Cast]?,
+        cast: [Cast], crew: [Cast],
         recommends: [Movie]?, reviews: [Review]?,
         reviewCount: Int?
     )
@@ -32,9 +37,9 @@ final class MovieDetailsScreenVC: UIViewController {
     
     // MARK: - VIPER
     var presenter: MovieDetailsScreenPresenterProtocol?
-    
-    private var activeTooltipView: CMTooltipView?
-    private var currentTooltipWorkItem: DispatchWorkItem?
+    var activeTooltipView: CMTooltipView?
+    var activeTooltipWorkItem: DispatchWorkItem?
+    var activePopUpView: MediaDetailsActorPopupView?
     
     // MARK: - PROPERTIES
     private var viewModels: [MediaDetailsCellViewModel] = []
@@ -103,33 +108,6 @@ final class MovieDetailsScreenVC: UIViewController {
         }
         
         view.bringSubviewToFront(downloadingView)
-    }
-    
-    private func showTooltipView(sendedBy view: UIView, message: String) {
-        currentTooltipWorkItem?.cancel()
-        activeTooltipView?.dismiss()
-        
-        var tooltipMsg: String = "Unknown"
-        switch message {
-        case "ReleaseYearLabel": tooltipMsg = "Release year"
-        case "ReleasedImage": tooltipMsg = "Released"
-        case "DurationLabel": tooltipMsg = "Duration"
-        case "HDStatusImage": tooltipMsg = "HD Resolution Available"
-        case "MediaTypeImage": tooltipMsg = "Is Movie"
-        default: break
-        }
-        
-        let tooltip = CMTooltipView(text: tooltipMsg)
-        tooltip.show(from: view, in: self.view)
-        self.activeTooltipView = tooltip
-        
-        let workItem = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
-            self.activeTooltipView?.dismiss()
-            self.activeTooltipView = nil
-        }
-        currentTooltipWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: workItem)
     }
 }
 
@@ -202,18 +180,12 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
     
     func didDownloadAllData(
         details: MovieDetails, videos: [Video]?,
-        cast: [Cast]?, crew: [Cast]?,
+        cast: [Cast], crew: [Cast],
         recommends: [Movie]?, reviews: [Review]?,
         reviewCount: Int?
     ) {
-        UIView.animate(withDuration: Constants.aniDuration, delay: Constants.aniDuration, options: .showHideTransitionViews) { [weak self] in
-            guard let self = self else { return }
-            self.downloadingView.alpha = 0
-        } completion: { [weak self] _ in
-            guard let self = self else { return }
-            self.downloadingView.isHidden = true
-        }
-        
+        self.downloadingView.hide()
+    
         let isBackButtonHidden = navigationController?.viewControllers.count ?? 0 > 1
         
         self.viewModels = [
@@ -226,15 +198,13 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             MovieDetailsSubDetailsViewModel(
                 year: details.releaseDate, released: CMDateFormatter.isDatePassed(details.releaseDate),
                 duration: RuntimeHelper.runtime(details.runtime), imdbPath: details.imdbID,
-                didTapIMDB: presenter?.didTapIMDBImage, didTapNotIMDB: self.showTooltipView
+                didTapIMDB: presenter?.didTapIMDBImage, didTapSubDetails: presenter?.didTapToSubDetails
             ),
             
             MediaDetailsWatchlistOverviewViewModel(movieOverview: details.overview),
         ]
         
-        if let cast = cast, !cast.isEmpty {
-            self.viewModels.append(MediaDetailsCastListViewModel(cast: cast, didSelectCast: presenter?.didSelectActor))
-        }
+        !cast.isEmpty ? self.viewModels.append(MediaDetailsCastListViewModel(cast: cast, didSelectCast: presenter?.didSelectActor)) : ()
         
         self.viewModels.append(MediaDetailsProductionViewModel(companies: details.productionCompanies, countries: details.productionCountries))
         self.viewModels.append(MediaDetailsRateAndShareViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton))

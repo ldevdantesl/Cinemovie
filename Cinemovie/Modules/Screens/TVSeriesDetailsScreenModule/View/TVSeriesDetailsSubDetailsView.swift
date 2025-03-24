@@ -60,7 +60,6 @@ final class TVSeriesDetailsSubDetailsView: UICollectionViewCell {
     fileprivate enum Constants {
         static let hStackSpacing = 10.0
         static let imageSizes: CGFloat = 20
-        static let imdbImageSize: CGFloat = 25
     }
     
     // MARK: - STATIC
@@ -73,8 +72,8 @@ final class TVSeriesDetailsSubDetailsView: UICollectionViewCell {
     private lazy var hStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [
             airDateLabel, statusImageView,
-            seriesDurationLabel, hdStatusImageView, mediaTypeImageView,
-            UIView(), nextEpisodeToAirImageView, homepageImageView
+            seriesDurationLabel, hdStatusImageView,
+             mediaTypeImageView, UIView(), homepageImageView
         ])
         stackView.axis = .horizontal
         stackView.alignment = .center
@@ -97,7 +96,6 @@ final class TVSeriesDetailsSubDetailsView: UICollectionViewCell {
     
     private lazy var statusImageView: UIImageView = {
         let image = UIImageView()
-        image.accessibilityIdentifier = "ReleasedImage"
         image.contentMode = .scaleAspectFit
         image.clipsToBounds = true
         image.isUserInteractionEnabled = true
@@ -141,16 +139,6 @@ final class TVSeriesDetailsSubDetailsView: UICollectionViewCell {
         return label
     }()
     
-    private lazy var nextEpisodeToAirImageView: UIImageView = {
-        let image = UIImageView()
-        image.image = UIImage(named: ImageNames.imdbLogo.rawValue)
-        image.contentMode = .scaleAspectFit
-        image.translatesAutoresizingMaskIntoConstraints = false
-        image.isUserInteractionEnabled = true
-        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(showTooltip)))
-        return image
-    }()
-    
     private lazy var homepageImageView: UIImageView = {
         let view = UIImageView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -176,9 +164,10 @@ final class TVSeriesDetailsSubDetailsView: UICollectionViewCell {
         self.viewModel = viewModel
         self.airDateLabel.text = CMDateFormatter.formatToYearOnly(dateString: viewModel.firstAirDate)
         self.statusImageView.image = UIImage(named: "TVSeriesStatus_\(viewModel.status.rawValue)")
+        self.statusImageView.accessibilityIdentifier = "TVSeriesStatus_\(viewModel.status.rawValue)"
         self.seriesDurationLabel.text = "\(viewModel.numberOfSeasons)S \(viewModel.numberOfEpisodes)E"
         self.mediaTypeImageView.image = UIImage(named: ImageNames.tvSeriesID.rawValue)
-        self.nextEpisodeToAirImageView.image = viewModel.nextEpisodeToAir != nil ? UIImage(named: ImageNames.soon.rawValue) : nil
+        guard let homepage = viewModel.homepage, !homepage.isEmpty else { return }
         self.homepageImageView.image = UIImage(named: ImageNames.homepage.rawValue)
     }
     
@@ -186,10 +175,6 @@ final class TVSeriesDetailsSubDetailsView: UICollectionViewCell {
     private func setupUI() {
         hdStatusImageView.snp.makeConstraints {
             $0.size.equalTo(Constants.imageSizes)
-        }
-        
-        nextEpisodeToAirImageView.snp.makeConstraints {
-            $0.size.equalTo(Constants.imdbImageSize)
         }
         
         statusImageView.snp.makeConstraints {

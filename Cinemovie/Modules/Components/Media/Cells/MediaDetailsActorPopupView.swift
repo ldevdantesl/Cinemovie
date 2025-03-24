@@ -12,6 +12,7 @@ import SDWebImage
 struct MediaDetailsActorPopupViewModel {
     let actor: Cast
     let didTapActorDetails: ((String) -> Void)?
+    let didTapClose: (() -> Void)?
 }
 
 final class MediaDetailsActorPopupView: UIView {
@@ -35,7 +36,7 @@ final class MediaDetailsActorPopupView: UIView {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: MediaDetailsActorPopupViewModel?
+    private var viewModel: MediaDetailsActorPopupViewModel
     
     // MARK: - VIEW PROPERTIES
     private lazy var blurView: UIVisualEffectView = {
@@ -55,7 +56,7 @@ final class MediaDetailsActorPopupView: UIView {
         return indicator
     }()
     
-    private let actorImageView: UIImageView = {
+    private lazy var actorImageView: UIImageView = {
         let view = UIImageView()
         view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
@@ -64,8 +65,9 @@ final class MediaDetailsActorPopupView: UIView {
         return view
     }()
     
-    private let departmentLabel: UILabel = {
+    private lazy var departmentLabel: UILabel = {
         let view = UILabel()
+        view.text = viewModel.actor.knownForDepartment
         view.font = CMFont.font(size: .footnote, fontName: .avenirDemiBold)
         view.textColor = CMColor.cmSecondary
         view.numberOfLines = 1
@@ -74,8 +76,9 @@ final class MediaDetailsActorPopupView: UIView {
         return view
     }()
     
-    private let actorNameLabel: UILabel = {
+    private lazy var actorNameLabel: UILabel = {
         let view = UILabel()
+        view.text = "Name:  " + viewModel.actor.name
         view.font = CMFont.font(size: .caption, fontName: .avenirBold)
         view.textColor = CMColor.cmLabel
         view.numberOfLines = 1
@@ -83,8 +86,11 @@ final class MediaDetailsActorPopupView: UIView {
         return view
     }()
     
-    private let actorCharacterLabel: UILabel = {
+    private lazy var actorCharacterLabel: UILabel = {
         let view = UILabel()
+        if let character = viewModel.actor.character, !character.isEmpty {
+            view.text = "Role:  " + character
+        }
         view.font = CMFont.font(size: .caption, fontName: .avenirBold)
         view.textColor = CMColor.cmLabel
         view.numberOfLines = 1
@@ -96,17 +102,20 @@ final class MediaDetailsActorPopupView: UIView {
         let vm = CMButtonViewModel(
             text: "Additional Details", foreColor: .cmLabel,
             font: CMFont.font(size: .body, fontName: .avenirDemiBold), image: nil,
-            backColor: CMColor.cmSuccess, cornerRadius: Constants.buttonCornerRadius,
-            didTapAction: didTapDetails
-        )
+            backColor: CMColor.cmSuccess, cornerRadius: Constants.buttonCornerRadius
+        ) { [weak self] in
+            guard let self = self else { return }
+            self.viewModel.didTapActorDetails?(viewModel.actor.creditID)
+        }
         
         let button = CMButton(viewModel: vm)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
-    private let actorGenderLabel: UILabel = {
+    private lazy var actorGenderLabel: UILabel = {
         let label = UILabel()
+        label.text = "Gender:  " + (viewModel.actor.gender == 1 ? "Female" : "Male")
         label.textColor = CMColor.cmLabel
         label.font = CMFont.font(size: .caption, fontName: .avenirBold)
         label.numberOfLines = 1
@@ -114,7 +123,7 @@ final class MediaDetailsActorPopupView: UIView {
         return label
     }()
     
-    private let containerView: UIView = {
+    private lazy var containerView: UIView = {
         let containerView = UIView()
         containerView.backgroundColor = CMColor.cmSecondaryBackground
         containerView.translatesAutoresizingMaskIntoConstraints = false
@@ -130,9 +139,23 @@ final class MediaDetailsActorPopupView: UIView {
     }()
     
     // MARK: - LIFECYCLE
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(viewModel: MediaDetailsActorPopupViewModel) {
+        self.viewModel = viewModel
+        super.init(frame: .zero)
         setupUI()
+        
+        guard let url = URLHelper.getImageURL(with: viewModel.actor.profilePath, size: .w342) else {
+            self.actorImageView.contentMode = .center
+            self.actorImageView.preferredSymbolConfiguration = .init(pointSize: Constants.avaSystemImageSize, weight: .bold)
+            self.actorImageView.image = UIImage(systemName: Constants.buttonImageName)
+            return
+        }
+        
+        loadingIndicator.startAnimating()
+        self.actorImageView.sd_setImage(with: url) { [weak self] _, _, _, _ in
+            guard let self = self else { return }
+            self.loadingIndicator.stopAnimating()
+        }
     }
     
     @available(*, unavailable)
@@ -151,25 +174,39 @@ final class MediaDetailsActorPopupView: UIView {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MediaDetailsActorPopupViewModel) {
-        self.viewModel = viewModel
-        self.actorNameLabel.text = "Name:  " + viewModel.actor.name
-        self.actorGenderLabel.text = "Gender:  " + (viewModel.actor.gender == 1 ? "Female" : "Male")
-        self.departmentLabel.text = viewModel.actor.knownForDepartment
-        if let character = viewModel.actor.character, !character.isEmpty {
-            self.actorCharacterLabel.text =  "Role:  " + character
+    public func show(in parentView: UIView) {
+        parentView.addSubview(self)
+        
+        self.translatesAutoresizingMaskIntoConstraints = false
+        
+        parentView.addSubview(self)
+        self.snp.makeConstraints {
+            $0.edges.equalToSuperview()
         }
         
-        if let url = URLHelper.getImageURL(with: viewModel.actor.profilePath, size: .w342) {
-            loadingIndicator.startAnimating()
-            self.actorImageView.sd_setImage(with: url) { [weak self] _, _, _, _ in
-                guard let self = self else { return }
-                self.loadingIndicator.stopAnimating()
-            }
-        } else {
-            actorImageView.contentMode = .center
-            actorImageView.preferredSymbolConfiguration = .init(pointSize: Constants.avaSystemImageSize, weight: .bold)
-            actorImageView.image = UIImage(systemName: Constants.buttonImageName)
+        self.alpha = 0
+        self.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseOut) { [weak self] in
+            guard let self = self else { return }
+            self.alpha = 1
+            self.transform = .identity
+        }
+    }
+    
+    public func dismiss() {
+        UIView.animate(
+            withDuration: 0.5, delay: 0,
+            usingSpringWithDamping: 0.7, initialSpringVelocity: 1,
+            options: .curveEaseOut
+        ) { [weak self] in
+            guard let self = self else { return }
+            self.alpha = 0
+            self.transform = CGAffineTransform(scaleX: 0.8, y: 0.8).concatenating(CGAffineTransform(translationX: 0, y: 30))
+        } completion: { [weak self] _ in
+            guard let self = self else { return }
+            self.removeFromSuperview()
+            self.viewModel.didTapClose?()
         }
     }
     
@@ -222,18 +259,6 @@ final class MediaDetailsActorPopupView: UIView {
     
     // MARK: - OBJC FUNC
     @objc private func didTapClose() {
-        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseOut) { [weak self] in
-            guard let self = self else { return }
-            self.alpha = 0
-            self.transform = CGAffineTransform(scaleX: 0.8, y: 0.8).concatenating(CGAffineTransform(translationX: 0, y: 30))
-        } completion: { [weak self] _ in
-            guard let self = self else { return }
-            self.removeFromSuperview()
-        }
-    }
-    
-    @objc private func didTapDetails() {
-        guard let creditID = viewModel?.actor.creditID else { return }
-        viewModel?.didTapActorDetails?(creditID)
+        dismiss()
     }
 }

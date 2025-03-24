@@ -9,6 +9,10 @@ import UIKit
 import SnapKit
 
 protocol TVSeriesDetailsScreenViewProtocol: AnyObject {
+    var activeTooltipView: CMTooltipView? { get set }
+    var activeTooltipWorkItem: DispatchWorkItem? { get set }
+    var activeActorPopUpView: MediaDetailsActorPopupView? { get set }
+    
     func didRecieveError(_ errorStr: String)
     func didGetAllTVSeriesData(_ details: TVSeriesDetails, cast: [Cast], videos: [Video])
 }
@@ -25,13 +29,13 @@ final class TVSeriesDetailsScreenVC: UIViewController {
 
     // MARK: - VIPER
     var presenter: TVSeriesDetailsScreenPresenterProtocol?
+    var activeTooltipView: CMTooltipView?
+    var activeTooltipWorkItem: DispatchWorkItem?
+    var activeActorPopUpView: MediaDetailsActorPopupView?
     
     // MARK: - PROPERTIES
     private var viewModels: [MediaDetailsCellViewModel] = []
-    
     private var cachedCollectionViewCellHeights: [IndexPath : CGSize] = [:]
-    private var activeTooltipView: CMTooltipView?
-    private var currentTooltipWorkItem: DispatchWorkItem?
     
     // MARK: - VIEW PROPERTIES
     private let downloadingView: CMSplashView = {
@@ -46,6 +50,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
         layout.minimumLineSpacing = Constants.collectionViewSpacing
         
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        cv.backgroundColor = CMColor.cmBackground
         cv.register(MediaDetailsRateAndShareView.self, forCellWithReuseIdentifier: MediaDetailsRateAndShareView.identifier)
         cv.register(MediaDetailsProductionView.self, forCellWithReuseIdentifier: MediaDetailsProductionView.identifier)
         cv.register(MediaDetailsBackdropImageView.self, forCellWithReuseIdentifier: MediaDetailsBackdropImageView.identifier)
@@ -76,8 +81,6 @@ final class TVSeriesDetailsScreenVC: UIViewController {
         downloadingView.animateLogo()
     }
     
-    // MARK: - PUBLIC FUNC
-    
     // MARK: - PRIVATE FUNC
     private func setupUI() {
         view.backgroundColor = CMColor.cmBackground
@@ -90,33 +93,8 @@ final class TVSeriesDetailsScreenVC: UIViewController {
         collectionView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-    }
-    
-    private func showTooltipView(sendedBy view: UIView, message: String) {
-        currentTooltipWorkItem?.cancel()
-        activeTooltipView?.dismiss()
         
-        var tooltipMsg: String = "Unknown"
-        switch message {
-        case "ReleaseYearLabel": tooltipMsg = "Release year"
-        case "ReleasedImage": tooltipMsg = "Released"
-        case "DurationLabel": tooltipMsg = "Duration"
-        case "HDStatusImage": tooltipMsg = "HD Resolution Available"
-        case "MediaTypeImage": tooltipMsg = "Is Movie"
-        default: break
-        }
-        
-        let tooltip = CMTooltipView(text: tooltipMsg)
-        tooltip.show(from: view, in: self.view)
-        self.activeTooltipView = tooltip
-        
-        let workItem = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
-            self.activeTooltipView?.dismiss()
-            self.activeTooltipView = nil
-        }
-        currentTooltipWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: workItem)
+        view.bringSubviewToFront(downloadingView)
     }
 }
 
@@ -182,6 +160,8 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
     }
     
     func didGetAllTVSeriesData(_ details: TVSeriesDetails, cast: [Cast], videos: [Video]) {
+        self.downloadingView.hide()
+        
         let isBackButtonHidden = navigationController?.viewControllers.count ?? 0 > 1
         
         self.viewModels = [
@@ -191,7 +171,12 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
             ),
             MediaDetailsTitleViewModel(movieName: details.name, movieTagline: details.tagline),
             
-            TVSeriesDetailsSubDetailsViewModel(firstAirDate: details.firstAirDate, numberOfSeasons: details.numberOfSeasons ?? 1, numberOfEpisodes: details.numberOfEpisodes ?? 1, homepage: details.homepage, status: details.status ?? .canceled, nextEpisodeToAir: details.nextEpisodeToAir?.airDate, didTapView: showTooltipView, didTapHomepage: nil),
+            TVSeriesDetailsSubDetailsViewModel(
+                firstAirDate: details.firstAirDate, numberOfSeasons: details.numberOfSeasons ?? 1,
+                numberOfEpisodes: details.numberOfEpisodes ?? 1, homepage: details.homepage,
+                status: details.status ?? .canceled, nextEpisodeToAir: details.nextEpisodeToAir?.airDate,
+                didTapView: presenter?.didTapTooltipView, didTapHomepage: presenter?.didTapHomepage
+            ),
             
             MediaDetailsWatchlistOverviewViewModel(movieOverview: details.overview),
         ]

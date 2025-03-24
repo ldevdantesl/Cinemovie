@@ -57,6 +57,17 @@ final class CMSplashView: UIView {
         }
     }
     
+    public func hide() {
+        UIView.animate(withDuration: Constants.aniDuration, delay: Constants.aniDuration, options: .showHideTransitionViews) { [weak self] in
+            guard let self = self else { return }
+            self.alpha = 0
+        } completion: { [weak self] _ in
+            guard let self = self else { return }
+            self.isHidden = true
+            self.removeFromSuperview()
+        }
+    }
+    
     // MARK: - PRIVATE FUNC
     private func setup() {
         backgroundColor = .clear

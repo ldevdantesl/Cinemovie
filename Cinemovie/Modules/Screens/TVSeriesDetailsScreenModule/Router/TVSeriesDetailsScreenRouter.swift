@@ -9,10 +9,12 @@ import UIKit
 protocol TVSeriesDetailsScreenRouterProtocol {
     func goBack()
     
+    func openHomepage(homepage: String)
+    func showTooltipView(sendedBy view: UIView, message: String)
     func navigateToPersonDetails(creditID: String)
     func navigateToAnotherTVSeries(series: TVSeries)
     func presentShareView(details: TVSeriesDetails)
-    func presentActor(actor: Cast)
+    func showActorPopUp(actor: Cast)
 }
 
 final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
@@ -23,31 +25,17 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
         self.tmdbService = tmdbService
     }
     
-    func navigateToPerson(personID: Int) { }
-    
     func navigateToAnotherTVSeries(series: TVSeries) {
         let newSeriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(newSeriesDetails, animated: true)
     }
     
-    func presentActor(actor: Cast) {
-        let vm = MediaDetailsActorPopupViewModel(actor: actor, didTapActorDetails: navigateToPersonDetails)
-        let popupView = MediaDetailsActorPopupView()
-        popupView.translatesAutoresizingMaskIntoConstraints = false
-        popupView.configure(viewModel: vm)
-
-        viewController?.view.addSubview(popupView)
-        popupView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-
-        popupView.alpha = 0
-        popupView.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
-
-        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseOut) {
-            popupView.alpha = 1
-            popupView.transform = .identity
-        }
+    func showActorPopUp(actor: Cast) {
+        guard let vcView = viewController?.view else { return }
+        let vm = MediaDetailsActorPopupViewModel(actor: actor, didTapActorDetails: self.navigateToPersonDetails, didTapClose: self.hideActorPopUp)
+        let popupView = MediaDetailsActorPopupView(viewModel: vm)
+        popupView.show(in: vcView)
+        viewController?.activeActorPopUpView = popupView
     }
     
     func navigateToPersonDetails(creditID: String) {
@@ -67,5 +55,49 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     
     func goBack() {
         viewController?.navigationController?.popViewController(animated: true)
+    }
+    
+    func showTooltipView(sendedBy view: UIView, message: String) {
+        guard let vcView = viewController?.view else { return }
+        viewController?.activeTooltipWorkItem?.cancel()
+        viewController?.activeTooltipView?.dismiss()
+    
+        var tooltipMsg: String = "Unknown"
+        switch message {
+        case "AirDateLabel": tooltipMsg = "First Aired Year"
+        case "TVSeriesStatus_Cancelled": tooltipMsg = "Series Was Canceled"
+        case "TVSeriesStatus_In Production": tooltipMsg = "Currently In Production"
+        case "TVSeriesStatus_Returning Series": tooltipMsg = "Actively Airing"
+        case "TVSeriesStatus_Planned": tooltipMsg = "Only Announced"
+        case "TVSeriesStatus_Pilot": tooltipMsg = "Pilot Episode Only"
+        case "TVSeriesStatus_Ended": tooltipMsg = "Series has concluded"
+        case "SeriesDurationLabel": tooltipMsg = "Total Seasons & Episodes"
+        case "HDStatusImage": tooltipMsg = "HD Resolution Available"
+        case "MediaTypeImage": tooltipMsg = "Is TV Series"
+        default: break
+        }
+        
+        let tooltip = CMTooltipView(text: tooltipMsg)
+        tooltip.show(from: view, in: vcView)
+        viewController?.activeTooltipView = tooltip
+        
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            viewController?.activeTooltipView?.dismiss()
+            viewController?.activeTooltipView = nil
+        }
+    
+        viewController?.activeTooltipWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: workItem)
+    }
+    
+    func openHomepage(homepage: String) {
+        guard let url = URLHelper.stringToURL(urlString: homepage) else { return }
+        AppOpener.openURL(url)
+    }
+    
+    // MARK: - PRIVATE FUNC
+    private func hideActorPopUp() {
+        self.viewController?.activeActorPopUpView = nil
     }
 }

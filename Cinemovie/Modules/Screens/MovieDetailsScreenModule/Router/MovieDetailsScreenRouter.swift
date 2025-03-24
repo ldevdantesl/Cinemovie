@@ -13,7 +13,8 @@ protocol MovieDetailsScreenRouterProtocol {
     func navigateToPersonDetails(creditID: String)
     func navigateToAnotherMovie(movie: Movie)
     func presentShareView(movie: MovieDetails)
-    func presentActor(actor: Cast)
+    func showActorPopUp(actor: Cast)
+    func showTooltipView(sendedBy view: UIView, message: String)
 }
 
 final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
@@ -24,31 +25,17 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
         self.tmdbService = tmdbService
     }
     
-    func navigateToPerson(personID: Int) { }
-    
     func navigateToAnotherMovie(movie: Movie) {
         let newMovieDetails = MovieDetailsScreenAssembler.assemble(movieID: movie.id, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(newMovieDetails, animated: true)
     }
     
-    func presentActor(actor: Cast) {
-        let vm = MediaDetailsActorPopupViewModel(actor: actor, didTapActorDetails: navigateToPersonDetails)
-        let popupView = MediaDetailsActorPopupView()
-        popupView.translatesAutoresizingMaskIntoConstraints = false
-        popupView.configure(viewModel: vm)
-
-        viewController?.view.addSubview(popupView)
-        popupView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-
-        popupView.alpha = 0
-        popupView.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
-
-        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseOut) {
-            popupView.alpha = 1
-            popupView.transform = .identity
-        }
+    func showActorPopUp(actor: Cast) {
+        guard let vcView = viewController?.view else { return }
+        let vm = MediaDetailsActorPopupViewModel(actor: actor, didTapActorDetails: self.navigateToPersonDetails, didTapClose: self.hideActorPopUp)
+        let popupView = MediaDetailsActorPopupView(viewModel: vm)
+        popupView.show(in: vcView)
+        self.viewController?.activePopUpView = popupView
     }
     
     func navigateToPersonDetails(creditID: String) {
@@ -68,5 +55,42 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
     
     func goBack() {
         viewController?.navigationController?.popViewController(animated: true)
+    }
+    
+    func showTooltipView(sendedBy view: UIView, message: String) {
+        guard let vcView = viewController?.view else { return }
+        viewController?.activeTooltipWorkItem?.cancel()
+        viewController?.activeTooltipView?.dismiss()
+        
+        var tooltipMsg: String = "Unknown"
+        switch message {
+        case "ReleaseYearLabel": tooltipMsg = "Release year"
+        case "ReleasedImage": tooltipMsg = "Movie is Released"
+        case "NotReleasedImage": tooltipMsg = "Not Released Yet"
+        case "DurationLabel": tooltipMsg = "Movie Duration"
+        case "HDStatusImage": tooltipMsg = "HD Resolution Available"
+        case "MediaTypeImage": tooltipMsg = "Is Movie"
+        default: break
+        }
+        
+        let tooltip = CMTooltipView(text: tooltipMsg)
+        tooltip.show(from: view, in: vcView)
+        viewController?.activeTooltipView = tooltip
+        
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            viewController?.activeTooltipView?.dismiss()
+            viewController?.activeTooltipView = nil
+        }
+        viewController?.activeTooltipWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: workItem)
+    }
+    
+    // MARK: - PRIVATE FUNC
+    private func hideActorPopUp() {
+        DispatchQueue.main.async {
+            self.viewController?.activePopUpView?.removeFromSuperview()
+            self.viewController?.activePopUpView = nil
+        }
     }
 }

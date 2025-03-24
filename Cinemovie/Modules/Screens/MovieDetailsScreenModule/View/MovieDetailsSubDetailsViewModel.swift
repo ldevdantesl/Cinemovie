@@ -16,20 +16,20 @@ struct MovieDetailsSubDetailsViewModel: MediaDetailsCellViewModel {
     let duration: String
     let imdbPath: String?
     let didTapIMDB: (() -> Void)?
-    let didTapNotIMDB: ((UIView, String) -> Void)?
+    let didTapSubDetails: ((UIView, String) -> Void)?
     let cellHeight = 25.0
     
     init(
         year: String, released: Bool, duration: String,
         imdbPath: String?, didTapIMDB: (() -> Void)? = nil,
-        didTapNotIMDB: ((UIView, String) -> Void)? = nil
+        didTapSubDetails: ((UIView, String) -> Void)? = nil
     ) {
         self.year = year
         self.released = released
         self.duration = duration
         self.imdbPath = imdbPath
         self.didTapIMDB = didTapIMDB
-        self.didTapNotIMDB = didTapNotIMDB
+        self.didTapSubDetails = didTapSubDetails
     }
 }
 
@@ -145,6 +145,7 @@ final class MovieDetailsSubDetailsView: UICollectionViewCell {
         releaseYearLabel.text = CMDateFormatter.formatToYearOnly(dateString: viewModel.year)
         movieReleasedImageView.image = viewModel.released ?
         UIImage(named: ImageNames.released.rawValue) : UIImage(named: ImageNames.notReleased.rawValue)
+        movieReleasedImageView.accessibilityIdentifier = "\(viewModel.released ? "Released" : "NotReleased")Image"
         movieDurationLabel.text = viewModel.duration
         imdbImageView.image = viewModel.imdbPath != nil ? UIImage(named: ImageNames.imdbLogo.rawValue) : nil
         mediaTypeImageView.image = UIImage(named: ImageNames.movieID.rawValue)
@@ -182,6 +183,6 @@ final class MovieDetailsSubDetailsView: UICollectionViewCell {
     @objc private func showTooltip(_ sender: UITapGestureRecognizer) {
         guard let view = sender.view else { return }
         guard let id = view.accessibilityIdentifier else { return }
-        viewModel?.didTapNotIMDB?(view, id)
+        viewModel?.didTapSubDetails?(view, id)
     }
 }

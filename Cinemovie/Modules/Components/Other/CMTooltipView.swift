@@ -40,6 +40,10 @@ final class CMTooltipView: UIView {
         self.layer.cornerRadius = Constants.cornerRadius
     }
     
+    deinit {
+        print("Tooltip Deinited")
+    }
+    
     // MARK: - PRIVATE FUNC
     private func setup() {
         self.backgroundColor = CMColor.cmBackground.withAlphaComponent(0.85)
@@ -82,9 +86,11 @@ final class CMTooltipView: UIView {
     }
     
     public func dismiss() {
-        UIView.animate(withDuration: 0.2, animations: {
+        UIView.animate(withDuration: 0.2) { [weak self]  in
+            guard let self = self else { return }
             self.alpha = 0
-        }) { _ in
+        } completion: { [weak self] _ in
+            guard let self = self else { return }
             self.removeFromSuperview()
         }
     }

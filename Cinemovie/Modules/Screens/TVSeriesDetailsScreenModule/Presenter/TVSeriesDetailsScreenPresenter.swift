@@ -15,6 +15,8 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
     func didTapRateButton()
     func didTapBackButton()
     func didSelectActor(_ actor: Cast)
+    func didTapTooltipView(sendedBy view: UIView, withMessage text: String)
+    func didTapHomepage(homepage: String)
     
     func didGetTVSeriesDetails(_ details: TVSeriesDetails)
     func didGetTVSeriesCast(_ cast: [Cast])
@@ -89,10 +91,18 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
     }
     
     func didSelectActor(_ actor: Cast) {
-        router.presentActor(actor: actor)
+        router.showActorPopUp(actor: actor)
     }
     
     func didTapBackButton() {
         router.goBack()
+    }
+    
+    func didTapTooltipView(sendedBy view: UIView, withMessage text: String) {
+        router.showTooltipView(sendedBy: view, message: text)
+    }
+    
+    func didTapHomepage(homepage: String) {
+        router.openHomepage(homepage: homepage)
     }
 }

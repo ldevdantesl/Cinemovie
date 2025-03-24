@@ -19,6 +19,10 @@ enum ImageSizes: String {
 }
 
 public struct URLHelper {
+    static func stringToURL(urlString: String) -> URL? {
+        return URL(string: urlString)
+    }
+    
     static func getPersonInstagramURL(withID id: String?) -> URL? {
         guard let id = id, !id.isEmpty else { return nil }
         return URL(string: "https://www.instagram.com/\(id)/")

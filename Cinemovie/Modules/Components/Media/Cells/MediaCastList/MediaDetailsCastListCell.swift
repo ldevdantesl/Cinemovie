@@ -99,26 +99,25 @@ final class MediaDetailsCastListCell: UICollectionViewCell {
     // MARK: - PUBLIC METHOD
     public func configure(viewModel: MediaDetailsCastListCellViewModel) {
         guard let cast = viewModel.cast else { return }
-        DispatchQueue.main.async {
-            self.nameLabel.text = cast.name
-            self.characterName.text = cast.character ?? cast.job ?? Constants.unknownText
-            guard let imageURL = URLHelper.getImageURL(with: cast.profilePath, size: .original) else {
-                self.avatarImageView.contentMode = .center
-                self.avatarImageView.image = UIImage(
-                    systemName: Constants.imageViewImageName,
-                    withConfiguration: UIImage.SymbolConfiguration(pointSize: Constants.imageViewImagePointSize, weight: .bold)
-                )
-                self.avatarImageView.backgroundColor = CMColor.cmSecondaryBackground
-                return
-            }
-            self.loadingIndicator.startAnimating()
-            self.avatarImageView.contentMode = .scaleAspectFill
-            self.avatarImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
-                guard let self = self else { return }
-                self.loadingIndicator.stopAnimating()
-                self.avatarImageView.setNeedsLayout()
-                self.avatarImageView.layoutIfNeeded()
-            }
+        
+        self.nameLabel.text = cast.name
+        self.characterName.text = cast.character ?? cast.job ?? Constants.unknownText
+        guard let imageURL = URLHelper.getImageURL(with: cast.profilePath, size: .original) else {
+            self.avatarImageView.contentMode = .center
+            self.avatarImageView.image = UIImage(
+                systemName: Constants.imageViewImageName,
+                withConfiguration: UIImage.SymbolConfiguration(pointSize: Constants.imageViewImagePointSize, weight: .bold)
+            )
+            self.avatarImageView.backgroundColor = CMColor.cmSecondaryBackground
+            return
+        }
+        self.loadingIndicator.startAnimating()
+        self.avatarImageView.contentMode = .scaleAspectFill
+        self.avatarImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
+            guard let self = self else { return }
+            self.loadingIndicator.stopAnimating()
+            self.avatarImageView.setNeedsLayout()
+            self.avatarImageView.layoutIfNeeded()
         }
     }
     

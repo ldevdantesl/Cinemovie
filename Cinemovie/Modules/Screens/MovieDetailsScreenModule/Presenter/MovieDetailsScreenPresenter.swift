@@ -16,6 +16,7 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didTapRateButton()
     func didTapBackButton()
     func didSelectActor(_ actor: Cast)
+    func didTapToSubDetails(sendedBy view: UIView, message: String)
     
     func didGetMovieDetails(_ details: MovieDetails)
     func didRecieveError(_ error: String)
@@ -36,8 +37,8 @@ final class MovieDetailsScreenPresenter {
     
     private var movieDetails: MovieDetails?
     private var movieVideos: [Video]?
-    private var movieCast: [Cast]?
-    private var movieCrew: [Cast]?
+    private var movieCast: [Cast] = []
+    private var movieCrew: [Cast] = []
     private var movieRecommends: [Movie]?
     private var movieReviews: [Review]?
     private var movieReviewCount: Int?
@@ -51,6 +52,7 @@ final class MovieDetailsScreenPresenter {
 
 extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     func viewDidLoad() {
+        print("MovieID: ", movieID)
         dispatchGroup.enter()
         interactor.getMovieDetails(movieID: movieID)
         
@@ -75,7 +77,6 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
                 recommends: movieRecommends, reviews: movieReviews,
                 reviewCount: movieReviewCount
             )
-            print("Gave all data")
         }
     }
 
@@ -102,7 +103,7 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     }
     
     func didSelectActor(_ actor: Cast) {
-        router.presentActor(actor: actor)
+        router.showActorPopUp(actor: actor)
     }
     
     func didGetMovieReviews(_ reviews: [Review], reviewCount: Int) {
@@ -134,5 +135,9 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     
     func didTapBackButton() {
         router.goBack()
+    }
+    
+    func didTapToSubDetails(sendedBy view: UIView, message: String) {
+        router.showTooltipView(sendedBy: view, message: message)
     }
 }
