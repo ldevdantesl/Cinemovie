@@ -8,7 +8,7 @@
 import SnapKit
 import UIKit
 
-struct CMMediaListViewCellViewModel {
+struct MediaItemCellViewModel {
     private(set) var isMovieMedia: Bool
     let movie: Movie?
     let tvShow: TVSeries?
@@ -26,9 +26,9 @@ struct CMMediaListViewCellViewModel {
     }
 }
 
-final class CMMediaListViewCell: UICollectionViewCell {
+final class MediaItemCell: UICollectionViewCell {
     // MARK: - STATIC
-    static let identifier = "CMMediaListViewCell"
+    static let identifier = "MediaItemCell"
     
     // MARK: - PROPERTIES
     private let loadingIndicator: UIActivityIndicatorView = {
@@ -64,7 +64,7 @@ final class CMMediaListViewCell: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    func configure(viewModel: CMMediaListViewCellViewModel) {
+    func configure(viewModel: MediaItemCellViewModel) {
         let posterPath: String?
         switch viewModel.isMovieMedia {
         case true:

@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-final class HomeScreenFeaturedMovieViewModel {
+final class FeaturedMovieViewModel {
     let movies: [Movie]
     let changeInSeconds: TimeInterval
     let didTapMovie: ((Movie) -> Void)?
@@ -22,7 +22,7 @@ final class HomeScreenFeaturedMovieViewModel {
     }
 }
 
-final class HomeScreenFeaturedMovieView: UIView {
+final class FeaturedMovieCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let selfCornerRadius = 10.0
@@ -37,7 +37,7 @@ final class HomeScreenFeaturedMovieView: UIView {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: HomeScreenFeaturedMovieViewModel?
+    private var viewModel: FeaturedMovieViewModel?
     private var movieWorkItem: DispatchWorkItem?
     private var gradientLayer: CAGradientLayer?
     
@@ -84,7 +84,7 @@ final class HomeScreenFeaturedMovieView: UIView {
     }
     
     // MARK: - PUBLIC FUNCTION
-    public func configure(viewModel: HomeScreenFeaturedMovieViewModel) {
+    public func configure(viewModel: FeaturedMovieViewModel) {
         self.viewModel = viewModel
         startMovieLoop(movies: viewModel.movies)
     }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TVSeries: APIResponse, Media {
+struct TVSeries: APIResponse, Media, Hashable {
     let adult: Bool?
     let backdropPath: String?
     let genreIDS: [Int]

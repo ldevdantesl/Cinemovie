@@ -20,11 +20,6 @@ protocol HomeScreenViewProtocol: AnyObject {
 final class HomeScreenVC: UIViewController {
 
     // MARK: - CONSTANTS
-    fileprivate enum Paddings {
-        static let bigSpacing: CGFloat = 10
-        static let spacing = 5.0
-    }
-    
     fileprivate enum Constants {
         static let featuredMovieViewHorPadding = 20
         static let headerViewHeight = 70.0
@@ -33,81 +28,36 @@ final class HomeScreenVC: UIViewController {
         static let mediaListViewHeight: CGFloat = 200
     }
     
+    enum HomeSection: Int, CaseIterable {
+        case featured
+        case popular
+    }
+
+    enum HomeItem: Hashable {
+        case featured([Movie])
+        case mediaList(MediaListCellViewModel)
+    }
+    
     // MARK: - VIPER
     var presenter: HomeScreenPresenterProtocol?
     
-    private var lastContentOffset: CGFloat = 0
-    
-    // MARK: - PROPERTIES
-    private var isBlurVisible = false
-    private var headerViewHeightConstraint: Constraint?
-    private var popularListHeightConstraint: Constraint?
-    private var upcomingListHeightConstraint: Constraint?
-    private var topRatedListHeightConstraint: Constraint?
-    private var nowPlayingListHeightConstraint: Constraint?
-    
     // MARK: - VIEW PROPERTIES
-    private lazy var scrollView: UIScrollView = {
-        let scroll = UIScrollView()
-        scroll.showsVerticalScrollIndicator = true
-        scroll.alwaysBounceVertical = true
-        scroll.translatesAutoresizingMaskIntoConstraints = false
-        scroll.delegate = self
-        return scroll
-    }()
-
-    private lazy var contentView: UIView = {
-        let contentView = UIView()
-        contentView.translatesAutoresizingMaskIntoConstraints = false
-        return contentView
+    private lazy var collectionView: UICollectionView = {
+        let layout = createLayout()
+        let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        cv.backgroundColor = CMColor.cmBackground
+        cv.translatesAutoresizingMaskIntoConstraints = false
+        return cv
     }()
     
-    private lazy var headerView: HomeScreenHeaderView = {
-        let headerVM = HomeScreenHeaderViewModel(headerTitle: "For Dantes")
-        let header = HomeScreenHeaderView(viewModel: headerVM)
-        header.translatesAutoresizingMaskIntoConstraints = false
-        return header
-    }()
-
-    private let featuredMovieView: HomeScreenFeaturedMovieView = {
-        let movie = HomeScreenFeaturedMovieView()
-        movie.translatesAutoresizingMaskIntoConstraints = false
-        return movie
-    }()
-
-    private let popularMoviesList: CMMediaListView = {
-        let list = CMMediaListView()
-        list.translatesAutoresizingMaskIntoConstraints = false
-        list.isUserInteractionEnabled = true
-        return list
-    }()
+    private var diffableDataSource: UICollectionViewDiffableDataSource<HomeSection, HomeItem>!
     
-    private let upcomingMoviesList: CMMediaListView = {
-        let list = CMMediaListView()
-        list.translatesAutoresizingMaskIntoConstraints = false
-        list.isUserInteractionEnabled = true
-        return list
-    }()
-    
-    private let nowPlayingMoviesList: CMMediaListView = {
-        let list = CMMediaListView()
-        list.translatesAutoresizingMaskIntoConstraints = false
-        list.isUserInteractionEnabled = true
-        return list
-    }()
-    
-    private let topRatedMoviesList: CMMediaListView = {
-        let list = CMMediaListView()
-        list.translatesAutoresizingMaskIntoConstraints = false
-        list.isUserInteractionEnabled = true
-        return list
-    }()
-
     // MARK: - LIFECYCLE
     override func viewDidLoad() {
         super.viewDidLoad()
-        presenter?.viewDidLoaded()
         setupUI()
+        configureDataSource()
+        presenter?.viewDidLoaded()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -117,128 +67,112 @@ final class HomeScreenVC: UIViewController {
         tabBarController?.tabBar.isTranslucent = false
     }
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        headerViewHeightConstraint?.update(offset: Constants.headerViewHeight + view.safeAreaInsets.top + 5)
-    }
-    
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
-        view.backgroundColor = CMColor.cmBackground
-        view.addSubview(scrollView)
-        scrollView.snp.makeConstraints {
+        view.addSubview(collectionView)
+        collectionView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-        
-        view.addSubview(headerView)
-        headerView.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview()
-            headerViewHeightConstraint = $0.height.equalTo(Constants.headerViewHeight).constraint
-        }
-        
-        scrollView.addSubview(contentView)
-        contentView.snp.makeConstraints {
-            $0.top.equalTo(scrollView.snp.top)
-            $0.leading.trailing.equalTo(scrollView)
-            $0.bottom.equalTo(scrollView.snp.bottom)
-            $0.width.equalToSuperview()
-        }
-        
-        contentView.addSubview(featuredMovieView)
-        featuredMovieView.snp.makeConstraints {
-            $0.top.equalTo(contentView.safeAreaLayoutGuide.snp.top).offset(Constants.headerViewHeight + Constants.headerViewTopMargin)
-            $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
-            $0.height.equalTo(Constants.featuredMovieHeight)
-        }
-        
-        contentView.addSubview(popularMoviesList)
-        popularMoviesList.snp.makeConstraints {
-            $0.top.equalTo(featuredMovieView.snp.bottom).offset(Paddings.bigSpacing)
-            $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
-            popularListHeightConstraint = $0.height.equalTo(Constants.mediaListViewHeight).constraint
-        }
-        
-        contentView.addSubview(upcomingMoviesList)
-        upcomingMoviesList.snp.makeConstraints {
-            $0.top.equalTo(popularMoviesList.snp.bottom).offset(Paddings.bigSpacing)
-            $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
-            upcomingListHeightConstraint = $0.height.equalTo(Constants.mediaListViewHeight).constraint
-        }
-        
-        contentView.addSubview(topRatedMoviesList)
-        topRatedMoviesList.snp.makeConstraints {
-            $0.top.equalTo(upcomingMoviesList.snp.bottom).offset(Paddings.bigSpacing)
-            $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
-            topRatedListHeightConstraint = $0.height.equalTo(Constants.mediaListViewHeight).constraint
-        }
-        
-        contentView.addSubview(nowPlayingMoviesList)
-        nowPlayingMoviesList.snp.makeConstraints {
-            $0.top.equalTo(topRatedMoviesList.snp.bottom).offset(Paddings.bigSpacing)
-            $0.horizontalEdges.equalToSuperview().inset(Paddings.bigSpacing)
-            nowPlayingListHeightConstraint = $0.height.equalTo(Constants.mediaListViewHeight).constraint
-        }
-        
-        contentView.snp.makeConstraints {
-            $0.bottom.equalTo(nowPlayingMoviesList.snp.bottom).offset(Paddings.bigSpacing)
+    }
+    
+    private func createLayout() -> UICollectionViewCompositionalLayout {
+        return UICollectionViewCompositionalLayout { sectionIndex, _ in
+            guard let section = HomeSection(rawValue: sectionIndex) else { return nil }
+            switch section {
+            case .featured: return self.featuredMovieSection()
+            case .popular:
+                let height = MediaListCellViewModel.calculateCellHeight(listSubtitle: nil)
+                return self.verticalListSection(height: height)
+            }
         }
     }
-}
+    
+    private func featuredMovieSection() -> NSCollectionLayoutSection {
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .fractionalHeight(1.0)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-extension HomeScreenVC: UIScrollViewDelegate {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let headerBottomY = headerView.convert(headerView.bounds, to: view).maxY
-        let featuredTopY = featuredMovieView.convert(featuredMovieView.bounds, to: view).minY
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1),
+            heightDimension: .absolute(UIConstants.screenHeight * 0.55)
+        )
         
-        if headerBottomY >= featuredTopY {
-            if !isBlurVisible {
-                isBlurVisible = true
-                headerView.addBlurToHeader()
-            }
-        } else {
-            if isBlurVisible {
-                isBlurVisible = false
-                headerView.removeBlurFromHeader()
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+
+        let section = NSCollectionLayoutSection(group: group)
+        return section
+    }
+    
+    private func verticalListSection(height: CGFloat) -> NSCollectionLayoutSection {
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .fractionalHeight(1.0)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .absolute(height)
+        )
+        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+
+        let section = NSCollectionLayoutSection(group: group)
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 15, trailing: 0)
+        return section
+    }
+    
+    private func configureDataSource() {
+        let featuredCellRegistration = UICollectionView.CellRegistration<FeaturedMovieCell, [Movie]> { cell, indexPath, movies in
+            let viewModel = FeaturedMovieViewModel(movies: movies)
+            cell.configure(viewModel: viewModel)
+        }
+        
+        let mediaListCellRegistration = UICollectionView.CellRegistration<MediaListCell, MediaListCellViewModel> { cell, indexPath, viewModel in
+            cell.configure(viewModel: viewModel)
+        }
+        
+        diffableDataSource = UICollectionViewDiffableDataSource<HomeSection, HomeItem>(collectionView: collectionView){ collectionView, indexPath, item in
+            switch item {
+            case .featured(let movies): return collectionView.dequeueConfiguredReusableCell(using: featuredCellRegistration, for: indexPath, item: movies)
+            case .mediaList(let vm): return collectionView.dequeueConfiguredReusableCell(using: mediaListCellRegistration, for: indexPath, item: vm)
             }
         }
+    }
+    
+    private func applySnapshot(featuredMovies: [Movie]) {
+        var snapshot = NSDiffableDataSourceSnapshot<HomeSection, HomeItem>()
+        snapshot.appendSections([.featured])
+        snapshot.appendItems([.featured(featuredMovies)], toSection: .featured)
+        diffableDataSource.apply(snapshot, animatingDifferences: true)
+    }
+    
+    private func applySnapshot(viewModel: MediaListCellViewModel, to section: HomeSection) {
+        var snapshot = NSDiffableDataSourceSnapshot<HomeSection, HomeItem>()
+        snapshot.appendSections([.popular])
+        snapshot.appendItems([.mediaList(viewModel)], toSection: section)
+        diffableDataSource.apply(snapshot, animatingDifferences: true)
     }
 }
 
 extension HomeScreenVC: HomeScreenViewProtocol {
     func didRecievePopularMovies(_ movies: [Movie]) {
         DispatchQueue.main.async {
-            let vm = CMMediaListViewModel(movies: movies, listTitle: "Popular Movies", didTapMovie: self.presenter?.didTapMovie)
-            self.popularMoviesList.configure(viewModel: vm)
-            self.popularListHeightConstraint?.update(offset: vm.cellHeight + Paddings.bigSpacing)
-            let featuredVM = HomeScreenFeaturedMovieViewModel(movies: movies, didTapMovie: self.presenter?.didTapMovie)
-            self.featuredMovieView.configure(viewModel: featuredVM)
+            let viewModel = MediaListCellViewModel(movies: movies, listTitle: "Popular")
+            var snapshot = NSDiffableDataSourceSnapshot<HomeSection, HomeItem>()
+            snapshot.appendSections([.featured, .popular])
+            snapshot.appendItems([.featured(movies)], toSection: .featured)
+            snapshot.appendItems([.mediaList(viewModel)], toSection: .popular)
+            self.diffableDataSource.apply(snapshot, animatingDifferences: true)
         }
     }
     
-    func didRecieveTopRatedMovies(_ movies: [Movie]) {
-        DispatchQueue.main.async {
-            let vm = CMMediaListViewModel(movies: movies, listTitle: "Top Rated Movies", didTapMovie: self.presenter?.didTapMovie)
-            self.topRatedMoviesList.configure(viewModel: vm)
-            self.topRatedListHeightConstraint?.update(offset: vm.cellHeight + Paddings.bigSpacing)
-        }
-    }
+    func didRecieveTopRatedMovies(_ movies: [Movie]) { }
     
-    func didRecieveUpcomingMovies(_ movies: [Movie]) {
-        DispatchQueue.main.async {
-            let vm = CMMediaListViewModel(movies: movies, listTitle: "Upcoming Movies", didTapMovie: self.presenter?.didTapMovie)
-            self.upcomingMoviesList.configure(viewModel: vm)
-            self.upcomingListHeightConstraint?.update(offset: vm.cellHeight + Paddings.bigSpacing)
-        }
-    }
+    func didRecieveUpcomingMovies(_ movies: [Movie]) { }
     
-    func didRecieveNowPlayingMovies(_ movies: [Movie]) {
-        DispatchQueue.main.async {
-            let vm = CMMediaListViewModel(movies: movies, listTitle: "Now Playing Movies", didTapMovie: self.presenter?.didTapMovie)
-            self.nowPlayingMoviesList.configure(viewModel: vm)
-            self.nowPlayingListHeightConstraint?.update(offset: vm.cellHeight + Paddings.bigSpacing)
-        }
-    }
+    func didRecieveNowPlayingMovies(_ movies: [Movie]) { }
 
     func didRecieveError(_ errorStr: String) {
         let alert = UIAlertController(

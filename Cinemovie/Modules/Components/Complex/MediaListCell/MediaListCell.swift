@@ -8,7 +8,7 @@
 import SnapKit
 import UIKit
 
-struct CMMediaListViewModel {
+struct MediaListCellViewModel {
     private(set) var isMovieMedia: Bool
     let movies: [Movie]
     let tvShows: [TVSeries]
@@ -48,7 +48,23 @@ struct CMMediaListViewModel {
     }
 }
 
-final class CMMediaListView: UIView {
+extension MediaListCellViewModel: Hashable {
+    static func == (lhs: MediaListCellViewModel, rhs: MediaListCellViewModel) -> Bool {
+        lhs.movies == rhs.movies &&
+        lhs.tvShows == rhs.tvShows &&
+        lhs.listTitle == rhs.listTitle &&
+        lhs.listSubtitle == rhs.listSubtitle
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(movies)
+        hasher.combine(tvShows)
+        hasher.combine(listTitle)
+        hasher.combine(listSubtitle)
+    }
+}
+
+final class MediaListCell: UICollectionViewCell {
     
     // MARK: - CONSTANTS
     fileprivate enum Paddings {
@@ -67,7 +83,7 @@ final class CMMediaListView: UIView {
         viewModel?.isMovieMedia ?? true
     }
     
-    private var viewModel: CMMediaListViewModel?
+    private var viewModel: MediaListCellViewModel?
     
     // MARK: - VIEW PROPERTIES
     private let listTitleLabel: UILabel = {
@@ -113,8 +129,8 @@ final class CMMediaListView: UIView {
         cv.showsHorizontalScrollIndicator = false
         cv.translatesAutoresizingMaskIntoConstraints = false
         cv.register(
-            CMMediaListViewCell.self,
-            forCellWithReuseIdentifier: CMMediaListViewCell.identifier
+            MediaItemCell.self,
+            forCellWithReuseIdentifier: MediaItemCell.identifier
         )
         return cv
     }()
@@ -131,7 +147,7 @@ final class CMMediaListView: UIView {
     }
     
     // MARK: - PUBLIC FUNCTIONS
-    public func configure(viewModel: CMMediaListViewModel) {
+    public func configure(viewModel: MediaListCellViewModel) {
         self.vStack.removeArrangedSubview(self.listSubtitleLabel)
         self.viewModel = viewModel
         self.listTitleLabel.text = viewModel.listTitle
@@ -159,7 +175,7 @@ final class CMMediaListView: UIView {
     }
 }
 
-extension CMMediaListView: UICollectionViewDelegate, UICollectionViewDataSource {
+extension MediaListCell: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let viewModel = viewModel else { return }
         let selectedMedia: Media = viewModel.isMovieMedia ? viewModel.movies[indexPath.row] : viewModel.tvShows[indexPath.row]
@@ -183,14 +199,14 @@ extension CMMediaListView: UICollectionViewDelegate, UICollectionViewDataSource 
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: CMMediaListViewCell.identifier, for: indexPath
-        ) as? CMMediaListViewCell else {
+            withReuseIdentifier: MediaItemCell.identifier, for: indexPath
+        ) as? MediaItemCell else {
             fatalError("CMMovieListCell is not registered")
         }
         
         guard let viewModel = viewModel else { return cell }
-        let vm = isShowingMovieMedia ? CMMediaListViewCellViewModel(movie: viewModel.movies[indexPath.row]) :
-        CMMediaListViewCellViewModel(tvShow: viewModel.tvShows[indexPath.row])
+        let vm = isShowingMovieMedia ? MediaItemCellViewModel(movie: viewModel.movies[indexPath.row]) :
+        MediaItemCellViewModel(tvShow: viewModel.tvShows[indexPath.row])
         cell.configure(viewModel: vm)
         return cell
     }

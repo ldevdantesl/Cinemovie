@@ -60,8 +60,8 @@ final class PersonDetailsMediaView: UICollectionViewCell {
     // MARK: - PROPERTIES
     private var viewModel: PersonDetailsMediaViewModel?
     
-    private lazy var mediaListView: CMMediaListView = {
-        let view = CMMediaListView()
+    private lazy var mediaListView: MediaListCell = {
+        let view = MediaListCell()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -81,8 +81,8 @@ final class PersonDetailsMediaView: UICollectionViewCell {
     public func configure(viewModel: PersonDetailsMediaViewModel) {
         self.viewModel = viewModel
         let vm = viewModel.isMovieType ?
-        CMMediaListViewModel(movies: viewModel.movies, listTitle: viewModel.headerTitle, listSubtitle: viewModel.headerSubtitle, didTapMovie: viewModel.didTapMovieAction) :
-        CMMediaListViewModel(tvShows: viewModel.tvShows, listTitle: viewModel.headerTitle, listSubtitle: viewModel.headerSubtitle, didTapTVShow: viewModel.didTapTVShowAction)
+        MediaListCellViewModel(movies: viewModel.movies, listTitle: viewModel.headerTitle, listSubtitle: viewModel.headerSubtitle, didTapMovie: viewModel.didTapMovieAction) :
+        MediaListCellViewModel(tvShows: viewModel.tvShows, listTitle: viewModel.headerTitle, listSubtitle: viewModel.headerSubtitle, didTapTVShow: viewModel.didTapTVShowAction)
         self.mediaListView.configure(viewModel: vm)
     }
     
