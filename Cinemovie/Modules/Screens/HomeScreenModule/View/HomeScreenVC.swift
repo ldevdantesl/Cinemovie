@@ -36,6 +36,8 @@ final class HomeScreenVC: UIViewController {
     
     // MARK: - PROPERTIES
     private var viewModels: [CellViewModel] = []
+    private var headerViewHeightConstraint: Constraint?
+    private var isBlurToHeaderVisible: Bool = false
     
     // MARK: - VIEW PROPERTIES
     private lazy var collectionView: CMCollectionView = {
@@ -69,20 +71,25 @@ final class HomeScreenVC: UIViewController {
         tabBarController?.tabBar.isTranslucent = false
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        headerViewHeightConstraint?.update(offset: Constants.headerViewHeight + view.safeAreaInsets.top + 5)
+    }
+    
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
         view.addSubview(collectionView)
         collectionView.snp.makeConstraints {
-            $0.top.equalTo(view.snp.topMargin).offset(Constants.headerViewHeight)
+            $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
         
         view.addSubview(headerView)
         headerView.snp.makeConstraints {
-            $0.top.equalTo(view.snp.topMargin)
+            $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(Constants.headerViewHeight)
+            headerViewHeightConstraint = $0.height.equalTo(Constants.headerViewHeight).constraint
         }
     }
     
@@ -147,9 +154,9 @@ final class HomeScreenVC: UIViewController {
             layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(Constants.featuredMovieHeight)),
             subitems: [item]
         )
-        group.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
-        
-        return NSCollectionLayoutSection(group: group)
+        let section = NSCollectionLayoutSection(group: group)
+        section.contentInsets = NSDirectionalEdgeInsets(top: Constants.headerViewHeight + 10, leading: 10, bottom: 10, trailing: 10)
+        return section
     }
     
     private func sectionForMovieLists() -> NSCollectionLayoutSection {
@@ -177,13 +184,15 @@ final class HomeScreenVC: UIViewController {
 
 extension HomeScreenVC: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let headerMaxY = headerView.frame.maxY
-        let collectionMinY = collectionView.frame.minY
-        let isHeaderAboveCollection = headerMaxY <= collectionMinY
+        let contentOffsetY = scrollView.contentOffset.y + scrollView.adjustedContentInset.top
         
-        if isHeaderAboveCollection {
+        if contentOffsetY >= 5 && !isBlurToHeaderVisible {
+            isBlurToHeaderVisible = true
             headerView.addBlurToHeader()
-        } else {
+        }
+        
+        if contentOffsetY < 5 && isBlurToHeaderVisible {
+            isBlurToHeaderVisible = false
             headerView.removeBlurFromHeader()
         }
     }
