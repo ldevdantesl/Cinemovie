@@ -11,10 +11,14 @@ import UIKit
 struct HomeScreenHeaderViewModel {
     let headerTitle: String
     let didTapSearchButton: (() -> Void)?
+    let didTapMovieButton: (() -> Void)?
+    let didTapTVSeriesButton: (() -> Void)?
     
-    init(headerTitle: String, didTapSearchButton: (() -> Void)? = nil) {
+    init(headerTitle: String, didTapSearchButton: (() -> Void)? = nil, didTapMovieButton: (() -> Void)? = nil, didTapTVSeriesButton: (() -> Void)? = nil) {
         self.headerTitle = headerTitle
         self.didTapSearchButton = didTapSearchButton
+        self.didTapTVSeriesButton = didTapTVSeriesButton
+        self.didTapMovieButton = didTapMovieButton
     }
 }
 
@@ -27,6 +31,8 @@ final class HomeScreenHeaderView: UIView {
         static let searchButtonSize = 25.0
         static let buttonsCornerRadius = 15.0
         static let buttonsBorderWidth = 1.0
+        static let xbuttonSize = 30.0
+        static let xButtonName = "xmark"
     }
     
     // MARK: - PROPERTIES
@@ -59,26 +65,35 @@ final class HomeScreenHeaderView: UIView {
         return view
     }()
     
-    private let tvShowButton: CMButton = {
+    private lazy var tvSeriesButton: CMButton = {
         let vm = CMButtonViewModel(
-            text: "TV Show", foreColor: .cmLabel,
+            text: "TV Series", foreColor: .cmLabel,
             font: CMFont.font(size: .footnote, fontName: .avenirBold), image: nil,
             backColor: CMColor.cmBackground, cornerRadius: Constants.buttonsCornerRadius,
-            borderColor: CMColor.cmLabel, borderWidth: Constants.buttonsBorderWidth
+            borderColor: CMColor.cmLabel, borderWidth: Constants.buttonsBorderWidth,
+            didTapAction: didTapTVSeriesButton
         )
         let button = CMButton(viewModel: vm)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
-    private let moviesButton: CMButton = {
+    private lazy var moviesButton: CMButton = {
         let vm = CMButtonViewModel(
             text: "Movies", foreColor: .cmLabel,
             font: CMFont.font(size: .footnote, fontName: .avenirBold), image: nil,
             backColor: CMColor.cmBackground, cornerRadius: Constants.buttonsCornerRadius,
-            borderColor: CMColor.cmLabel, borderWidth: Constants.buttonsBorderWidth
+            borderColor: CMColor.cmLabel, borderWidth: Constants.buttonsBorderWidth,
+            didTapAction: didTapMovieButton
         )
         let button = CMButton(viewModel: vm)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private lazy var xmarkButton: CMCircularButton = {
+        let vm = CMCircularButtonViewModel(systemName: Constants.xButtonName, backColor: CMColor.cmSecondaryBackground, foreColor: .cmLabel, didTapAction: didTapXButton)
+        let button = CMCircularButton(viewModel: vm)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -98,7 +113,7 @@ final class HomeScreenHeaderView: UIView {
     }()
     
     private lazy var buttonsStack: UIStackView = {
-        let stack = UIStackView(arrangedSubviews: [tvShowButton, moviesButton, UIView()])
+        let stack = UIStackView(arrangedSubviews: [tvSeriesButton, moviesButton, UIView()])
         stack.axis = .horizontal
         stack.spacing = Constants.biggerSpacing
         stack.alignment = .leading
@@ -137,14 +152,14 @@ final class HomeScreenHeaderView: UIView {
         headerLabel.text = viewModel.headerTitle
     }
     
-    public func addBlurToHeader() {
+    public func addBlur() {
         UIView.transition(with: self, duration: 0.2, options: .transitionCrossDissolve) { [weak self] in
             guard let self = self else { return }
             self.blurView.isHidden = false
         }
     }
     
-    public func removeBlurFromHeader() {
+    public func removeBlur() {
         UIView.transition(with: self, duration: 0.2, options: .transitionCrossDissolve) { [weak self] in
             guard let self = self else { return }
             self.blurView.isHidden = true
@@ -167,10 +182,55 @@ final class HomeScreenHeaderView: UIView {
         }
         
         searchButtonImageView.snp.makeConstraints {
-            $0.width.height.equalTo(Constants.searchButtonSize)
+            $0.size.equalTo(Constants.searchButtonSize)
         }
         
-        tvShowButton.setContentHuggingPriority(.required, for: .horizontal)
+        xmarkButton.snp.makeConstraints {
+            $0.size.equalTo(Constants.xbuttonSize)
+        }
+        
+        tvSeriesButton.setContentHuggingPriority(.required, for: .horizontal)
         moviesButton.setContentHuggingPriority(.required, for: .horizontal)
+    }
+    
+    private func didTapTVSeriesButton() {
+        UIView.transition(with: buttonsStack, duration: 0.3, options: .transitionCrossDissolve) { [weak self] in
+            guard let self = self else { return }
+            
+            self.buttonsStack.arrangedSubviews.forEach {
+                self.buttonsStack.removeArrangedSubview($0)
+                $0.removeFromSuperview()
+            }
+            
+            [xmarkButton, tvSeriesButton, UIView()].forEach { self.buttonsStack.addArrangedSubview($0) }
+        }
+        viewModel.didTapTVSeriesButton?()
+    }
+    
+    private func didTapMovieButton() {
+        UIView.transition(with: buttonsStack, duration: 0.3, options: .transitionCrossDissolve) { [weak self] in
+            guard let self = self else { return }
+            
+            self.buttonsStack.arrangedSubviews.forEach {
+                self.buttonsStack.removeArrangedSubview($0)
+                $0.removeFromSuperview()
+            }
+            
+            [xmarkButton, moviesButton, UIView()].forEach { self.buttonsStack.addArrangedSubview($0) }
+        }
+        viewModel.didTapMovieButton?()
+    }
+    
+    private func didTapXButton() {
+        UIView.transition(with: buttonsStack, duration: 0.3, options: .transitionCrossDissolve) { [weak self] in
+            guard let self = self else { return }
+            
+            self.buttonsStack.arrangedSubviews.forEach {
+                self.buttonsStack.removeArrangedSubview($0)
+                $0.removeFromSuperview()
+            }
+            
+            [tvSeriesButton, moviesButton, UIView()].forEach { self.buttonsStack.addArrangedSubview($0) }
+        }
     }
 }

@@ -32,4 +32,10 @@ protocol TMDBService: AnyObject {
     func getPopularMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
     func getTopRatedMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
     func getNowPlayingMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
+    
+    // MARK: - LIST OF PRESET TV SERIES
+    func getPopularTVSeries(completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
+    func getTopRatedTVSeries(completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
+    func getOnTheAirTVSeries(completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
+    func getAiringTodayTVSeries(completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
 }

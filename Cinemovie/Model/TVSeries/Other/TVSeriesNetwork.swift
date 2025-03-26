@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Network: Codable {
+struct TVSeriesNetwork: Codable {
     let id: Int
     let logoPath: String?
     let name, originCountry: String

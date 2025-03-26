@@ -13,4 +13,10 @@ struct TVSeriesListAPIResponse: APIResponse {
     let results: [TVSeries]
     let totalPages: Int
     let totalResults: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case page, results, dates
+        case totalPages = "total_pages"
+        case totalResults = "total_results"
+    }
 }

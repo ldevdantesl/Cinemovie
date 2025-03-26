@@ -22,7 +22,7 @@ struct TVSeriesDetails: APIResponse {
     let lastEpisodeToAir: EpisodeToAir?
     let name: String
     let nextEpisodeToAir: EpisodeToAir?
-    let networks: [Network]
+    let networks: [TVSeriesNetwork]
     let numberOfEpisodes, numberOfSeasons: Int?
     let originCountry: [String]
     let originalLanguage, originalName, overview: String

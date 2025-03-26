@@ -11,27 +11,6 @@ struct TMDBEndpoints {
     static let baseURL = CONSTANTS.baseURLString
     static let bearerToken = CONSTANTS.bearerToken
     
-    // MARK: - PERSON
-    static func getPersonIDEndpoint(creditID: String) -> Endpoint {
-        return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/credit/\(creditID)")
-    }
-    
-    static func getPersonDetailsEndpoint(personID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)", queryParams: queryParams)
-    }
-    
-    static func getPersonExternalSourcesEndpoint(personID: Int) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)/external_ids")
-    }
-    
-    static func getPersonMovieCredits(personID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)/movie_credits", queryParams: queryParams)
-    }
-    
-    static func getPersonTVShowCredits(personID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)/tv_credits", queryParams: queryParams)
-    }
-    
     // MARK: - MOVIE
     static func getMovieCastEndpoint(movieID: Int, queryParams: [String : String]? = nil) -> Endpoint {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/\(movieID)/credits", queryParams: queryParams)
@@ -66,7 +45,28 @@ struct TMDBEndpoints {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)/videos", queryParams: queryParams)
     }
     
-    // MARK: - PRESET LIST MOVIES
+    // MARK: - PERSON
+    static func getPersonIDEndpoint(creditID: String) -> Endpoint {
+        return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/credit/\(creditID)")
+    }
+    
+    static func getPersonDetailsEndpoint(personID: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)", queryParams: queryParams)
+    }
+    
+    static func getPersonExternalSourcesEndpoint(personID: Int) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)/external_ids")
+    }
+    
+    static func getPersonMovieCredits(personID: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)/movie_credits", queryParams: queryParams)
+    }
+    
+    static func getPersonTVShowCredits(personID: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)/tv_credits", queryParams: queryParams)
+    }
+    
+    // MARK: - PRESET LIST OF MOVIES
     static func getNowPlayingMoviesEndpoint(queryParams: [String : String]? = nil) -> Endpoint {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/now_playing", queryParams: queryParams)
     }
@@ -81,5 +81,22 @@ struct TMDBEndpoints {
     
     static func getUpcomingMoviesEndpoint(queryParams: [String : String]? = nil) -> Endpoint {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/upcoming", queryParams: queryParams)
+    }
+    
+    // MARK: - PRESET LIST OF TV SERIES
+    static func getPopularTVSeriesEndpoint(queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/popular", queryParams: queryParams)
+    }
+    
+    static func getTopRatedTVSeriesEndpoint(queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/top_rated", queryParams: queryParams)
+    }
+    
+    static func getOnTheAirTVSeriesEndpoint(queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/on_the_air", queryParams: queryParams)
+    }
+    
+    static func getAiringTodayTVSeriesEndpoint(queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/airing_today", queryParams: queryParams)
     }
 }

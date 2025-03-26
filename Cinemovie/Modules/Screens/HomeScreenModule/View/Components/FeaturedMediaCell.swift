@@ -9,21 +9,20 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-final class FeaturedMovieCellViewModel: CellViewModel, Hashable {
+struct FeaturedMediaCellViewModel: CellViewModel, Hashable {
     let id = UUID()
-    var cellIdentifier: String = "FeaturedMovieCell"
-    let movies: [Movie]
+    var cellIdentifier: String = "FeaturedMediaCell"
+    let media: [Media]
     let changeInSeconds: TimeInterval
-    let didTapMovie: ((Movie) -> Void)?
-    var currentMovie: Movie?
+    let didTapMedia: ((Movie) -> Void)?
     
-    init(movies: [Movie], changeInSeconds: TimeInterval = 5.0,didTapMovie: ((Movie) -> Void)? = nil) {
-        self.movies = movies
+    init(media: [Media], changeInSeconds: TimeInterval = 5.0, didTapMedia: ((Movie) -> Void)? = nil) {
+        self.media = media
         self.changeInSeconds = changeInSeconds
-        self.didTapMovie = didTapMovie
+        self.didTapMedia = didTapMedia
     }
     
-    static func == (lhs: FeaturedMovieCellViewModel, rhs: FeaturedMovieCellViewModel) -> Bool {
+    static func == (lhs: FeaturedMediaCellViewModel, rhs: FeaturedMediaCellViewModel) -> Bool {
         lhs.id == rhs.id
     }
     
@@ -32,8 +31,8 @@ final class FeaturedMovieCellViewModel: CellViewModel, Hashable {
     }
 }
 
-final class FeaturedMovieCell: UICollectionViewCell, ReusableCell {
-    typealias ViewModel = FeaturedMovieCellViewModel
+final class FeaturedMediaCell: UICollectionViewCell, ReusableCell {
+    typealias ViewModel = FeaturedMediaCellViewModel
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -49,8 +48,8 @@ final class FeaturedMovieCell: UICollectionViewCell, ReusableCell {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: FeaturedMovieCellViewModel?
-    private var movieWorkItem: DispatchWorkItem?
+    private var viewModel: FeaturedMediaCellViewModel?
+    private var mediaWorkItem: DispatchWorkItem?
     private var gradientLayer: CAGradientLayer?
     
     // MARK: - VIEW PROPERTIES
@@ -62,12 +61,12 @@ final class FeaturedMovieCell: UICollectionViewCell, ReusableCell {
         return view
     }()
     
-    private lazy var movieImage: UIImageView = {
+    private lazy var mediaImage: UIImageView = {
         let image = UIImageView()
         image.contentMode = .scaleAspectFill
         image.clipsToBounds = true
         image.isUserInteractionEnabled = true
-        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapOnMovieImage)))
+        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapOnMediaImage)))
         return image
     }()
 
@@ -92,59 +91,58 @@ final class FeaturedMovieCell: UICollectionViewCell, ReusableCell {
     }
     
     deinit {
-        movieWorkItem?.cancel()
+        mediaWorkItem?.cancel()
     }
     
     // MARK: - PUBLIC FUNCTION
-    public func configure(with viewModel: FeaturedMovieCellViewModel) {
+    public func configure(with viewModel: FeaturedMediaCellViewModel) {
         self.viewModel = viewModel
-        startMovieLoop(movies: viewModel.movies)
+        startMediaLoop(media: viewModel.media)
     }
     
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
-        movieImage.addSubview(loadingIndicator)
+        mediaImage.addSubview(loadingIndicator)
         loadingIndicator.snp.makeConstraints {
             $0.center.equalToSuperview()
         }
         
-        addSubview(movieImage)
-        movieImage.snp.makeConstraints {
+        addSubview(mediaImage)
+        mediaImage.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
     }
     
-    private func startMovieLoop(movies: [Movie]) {
+    private func startMediaLoop(media: [Media]) {
         guard let viewModel = viewModel else { return }
-        movieWorkItem?.cancel()
+        mediaWorkItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
-            guard let movie = movies.randomElement() else { return }
-            self.viewModel?.currentMovie = movie
-            self.updateMovie(with: movie)
+            guard let randomMedia = media.randomElement() else { return }
+            self.updateMedia(with: randomMedia)
             
-            self.startMovieLoop(movies: movies)
+            self.startMediaLoop(media: media)
         }
-        movieWorkItem = workItem
+        mediaWorkItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + viewModel.changeInSeconds, execute: workItem)
     }
     
-    private func updateMovie(with movie: Movie) {
-        guard let url = URLHelper.getImageURL(with: movie.posterPath, size: .original) else { return }
+    private func updateMedia(with media: Media) {
+        guard let url = URLHelper.getImageURL(with: media.posterPath, size: .original) else { return }
         loadingIndicator.startAnimating()
         
         UIView.animate(withDuration: 0.3) { [weak self] in
             guard let self = self else { return }
-            self.movieImage.alpha = 0
+            self.mediaImage.alpha = 0
         } completion: { [weak self] _ in
             guard let self = self else { return }
-            movieImage.sd_setImage(with: url) { [weak self] _, _, _, _ in
+            mediaImage.sd_setImage(with: url) { [weak self] _, _, _, _ in
                 guard let self = self else { return }
                 self.loadingIndicator.stopAnimating()
             }
     
             UIView.animate(withDuration: 0.3) {
-                self.movieImage.alpha = 1.0
+                self.mediaImage.alpha = 1.0
             }
         }
     }
@@ -161,17 +159,15 @@ final class FeaturedMovieCell: UICollectionViewCell, ReusableCell {
             newGradientLayer.locations = [0.0, 0.2, 0.8, 1.0]
             newGradientLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
             newGradientLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
-            movieImage.layer.insertSublayer(newGradientLayer, at: 0)
+            mediaImage.layer.insertSublayer(newGradientLayer, at: 0)
             gradientLayer = newGradientLayer
         }
 
-        gradientLayer?.frame = movieImage.bounds
+        gradientLayer?.frame = mediaImage.bounds
     }
     
     // MARK: - OBJC FUNCTIONS
-    @objc private func didTapOnMovieImage() {
+    @objc private func didTapOnMediaImage() {
         guard let viewModel = viewModel else { return }
-        guard let currentMovie = viewModel.currentMovie else { return }
-        viewModel.didTapMovie?(currentMovie)
     }
 }

@@ -10,6 +10,7 @@ import UIKit
 
 protocol HomeScreenViewProtocol: AnyObject {
     func didRecieveAllMovies(popularMovies: [Movie], upcomingMovies: [Movie], topRatedMovies: [Movie], nowPlayingMovies: [Movie], allMovies: [Movie])
+    //func didRecieveAllTVSeries(popularTVSeries: [TVSeries], topRatedTVSeries: [TVSeries], onTheAirTVSeries: [TVSeries], airingTodayTVSeries: [TVSeries], allTVSeries: [TVSeries])
     func didRecieveError(_ errorStr: String)
 }
 
@@ -27,7 +28,7 @@ final class HomeScreenVC: UIViewController {
     }
 
     enum HomeItem: Hashable {
-        case featured(FeaturedMovieCellViewModel)
+        case featured(FeaturedMediaCellViewModel)
         case posterCell(MediaPosterImageCellViewModel)
     }
     
@@ -43,15 +44,15 @@ final class HomeScreenVC: UIViewController {
     private lazy var collectionView: CMCollectionView = {
         let view = CMCollectionView<HomeSection, HomeItem>(layout: createLayout())
         view.registerSupplementaryHeaderItem(cellClass: MediaListsHeaderCell.self)
-        view.register(cellClass: FeaturedMovieCell.self)
+        view.register(cellClass: FeaturedMediaCell.self)
         view.register(cellClass: MediaPosterImageCell.self)
         view.delegate = self
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
         return view
     }()
-    private let headerView: HomeScreenHeaderView = {
-        let view = HomeScreenHeaderView(viewModel: .init(headerTitle: "Discover"))
+    private lazy var headerView: HomeScreenHeaderView = {
+        let view = HomeScreenHeaderView(viewModel: .init(headerTitle: "Discover", didTapMovieButton: switchToMovies, didTapTVSeriesButton: switchToTVShows))
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -97,7 +98,7 @@ final class HomeScreenVC: UIViewController {
         collectionView.configureDataSource { collectionView, indexPath, homeItem in
             switch homeItem {
             case .featured(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? FeaturedMovieCell
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? FeaturedMediaCell
                 cell?.configure(with: vm)
                 return cell
                 
@@ -180,6 +181,38 @@ final class HomeScreenVC: UIViewController {
         section.boundarySupplementaryItems = [header]
         return section
     }
+    
+    private func switchToTVShows() {
+        guard let presenter = presenter else { return }
+        DispatchQueue.main.async {
+            self.collectionView.applySnapshot(
+                sections: [.featured, .popular, .upcoming, .topRated, .nowPlaying],
+                itemsBySection: [
+                    .featured : [.featured(FeaturedMediaCellViewModel(media: presenter.allTVSeries))],
+                    .popular : presenter.popularTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
+                    .upcoming : presenter.onTheAirTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
+                    .topRated : presenter.topRatedTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
+                    .nowPlaying : presenter.airingTodayTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
+                ]
+            )
+        }
+    }
+    
+    private func switchToMovies() {
+        guard let presenter = presenter else { return }
+        DispatchQueue.main.async {
+            self.collectionView.applySnapshot(
+                sections: [.featured, .popular, .upcoming, .topRated, .nowPlaying],
+                itemsBySection: [
+                    .featured : [.featured(FeaturedMediaCellViewModel(media: presenter.allMovies))],
+                    .popular : presenter.popularMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
+                    .upcoming : presenter.upcomingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
+                    .topRated : presenter.topRatedMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
+                    .nowPlaying : presenter.nowPlayingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
+                ]
+            )
+        }
+    }
 }
 
 extension HomeScreenVC: UICollectionViewDelegate {
@@ -188,12 +221,12 @@ extension HomeScreenVC: UICollectionViewDelegate {
         
         if contentOffsetY >= 5 && !isBlurToHeaderVisible {
             isBlurToHeaderVisible = true
-            headerView.addBlurToHeader()
+            headerView.addBlur()
         }
         
         if contentOffsetY < 5 && isBlurToHeaderVisible {
             isBlurToHeaderVisible = false
-            headerView.removeBlurFromHeader()
+            headerView.removeBlur()
         }
     }
 }
@@ -204,7 +237,7 @@ extension HomeScreenVC: HomeScreenViewProtocol {
             self.collectionView.applySnapshot(
                 sections: [.featured, .popular, .upcoming, .topRated, .nowPlaying],
                 itemsBySection: [
-                    .featured: [.featured(FeaturedMovieCellViewModel(movies: allMovies))],
+                    .featured: [.featured(FeaturedMediaCellViewModel(media: allMovies))],
                     .popular: popularMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMovie)) },
                     .upcoming: upcomingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMovie)) },
                     .topRated: topRatedMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMovie)) },
@@ -221,9 +254,10 @@ extension HomeScreenVC: HomeScreenViewProtocol {
             preferredStyle: .alert
         )
 
-        alert.addAction(
-            UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
 
-        self.present(alert, animated: true, completion: nil)
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+        }
     }
 }
