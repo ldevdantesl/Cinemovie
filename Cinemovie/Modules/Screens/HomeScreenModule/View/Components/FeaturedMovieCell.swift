@@ -9,7 +9,9 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-final class FeaturedMovieViewModel {
+final class FeaturedMovieCellViewModel: CellViewModel, Hashable {
+    let id = UUID()
+    var cellIdentifier: String = "FeaturedMovieCell"
     let movies: [Movie]
     let changeInSeconds: TimeInterval
     let didTapMovie: ((Movie) -> Void)?
@@ -20,9 +22,19 @@ final class FeaturedMovieViewModel {
         self.changeInSeconds = changeInSeconds
         self.didTapMovie = didTapMovie
     }
+    
+    static func == (lhs: FeaturedMovieCellViewModel, rhs: FeaturedMovieCellViewModel) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
-final class FeaturedMovieCell: UICollectionViewCell {
+final class FeaturedMovieCell: UICollectionViewCell, ReusableCell {
+    typealias ViewModel = FeaturedMovieCellViewModel
+    
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let selfCornerRadius = 10.0
@@ -37,7 +49,7 @@ final class FeaturedMovieCell: UICollectionViewCell {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: FeaturedMovieViewModel?
+    private var viewModel: FeaturedMovieCellViewModel?
     private var movieWorkItem: DispatchWorkItem?
     private var gradientLayer: CAGradientLayer?
     
@@ -84,7 +96,7 @@ final class FeaturedMovieCell: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNCTION
-    public func configure(viewModel: FeaturedMovieViewModel) {
+    public func configure(with viewModel: FeaturedMovieCellViewModel) {
         self.viewModel = viewModel
         startMovieLoop(movies: viewModel.movies)
     }

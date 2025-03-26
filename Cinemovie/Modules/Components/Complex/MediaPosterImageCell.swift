@@ -1,0 +1,110 @@
+//
+//  CMMovieListComponent.swift
+//  Cinemovie
+//
+//  Created by Buzurg Rakhimzoda on 6.02.2025.
+//
+
+import SnapKit
+import UIKit
+
+struct MediaPosterImageCellViewModel: CellViewModel, Hashable {
+    let id = UUID()
+    let cellIdentifier: String = "MediaPosterImageCell"
+    let media: Media
+    let didTapMedia: ((Movie) -> Void)?
+    
+    init(media: Media, didTapMedia: ((Movie) -> Void)? = nil) {
+        self.media = media
+        self.didTapMedia = didTapMedia
+    }
+    
+    static func == (lhs: MediaPosterImageCellViewModel, rhs: MediaPosterImageCellViewModel) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
+
+final class MediaPosterImageCell: UICollectionViewCell, ReusableCell {
+    // MARK: - TYPEALIAS
+    typealias ViewModel = MediaPosterImageCellViewModel
+    
+    // MARK: - CONSTANTS
+    fileprivate enum Constants {
+        static let cornerRadius = 10.0
+        static let borderWidth = 0.2
+    }
+    
+    // MARK: - PROPERTIES
+    private var viewModel: MediaPosterImageCellViewModel?
+    
+    // MARK: - VIEW PROPERTIES
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .white
+        indicator.hidesWhenStopped = true
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
+    }()
+    
+    private lazy var posterImageView: UIImageView = {
+        let view = UIImageView()
+        view.contentMode = .scaleAspectFill
+        view.clipsToBounds = true
+        view.backgroundColor = CMColor.cmSecondaryBackground
+        view.isUserInteractionEnabled = true
+        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapMedia)))
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    // MARK: - LIFECYCLE
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        self.posterImageView.layer.cornerRadius = Constants.cornerRadius
+        self.posterImageView.layer.borderColor = CMColor.cmLabel.cgColor
+        self.posterImageView.layer.borderWidth = Constants.borderWidth
+    }
+    
+    // MARK: - PUBLIC FUNCTIONS
+    public func configure(with viewModel: MediaPosterImageCellViewModel) {
+        self.viewModel = viewModel
+        guard let url = URLHelper.getImageURL(with: viewModel.media.posterPath, size: .w1280) else { return }
+        self.loadingIndicator.startAnimating()
+        self.posterImageView.sd_setImage(with: url) { [weak self] _, _, _, _ in
+            guard let self = self else { return }
+            self.loadingIndicator.stopAnimating()
+        }
+    }
+    
+    // MARK: - PRIVATE FUNCTIONS
+    private func setupUI() {
+        posterImageView.addSubview(loadingIndicator)
+        loadingIndicator.snp.makeConstraints {
+            $0.center.equalToSuperview()
+        }
+        
+        addSubview(posterImageView)
+        posterImageView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+    }
+    
+    // MARK: - OBJC FUNC
+    @objc private func didTapMedia() {
+        viewModel?.didTapMedia?(viewModel?.media as! Movie)
+    }
+}

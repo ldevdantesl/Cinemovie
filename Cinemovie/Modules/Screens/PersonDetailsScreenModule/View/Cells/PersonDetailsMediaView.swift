@@ -59,12 +59,7 @@ final class PersonDetailsMediaView: UICollectionViewCell {
     
     // MARK: - PROPERTIES
     private var viewModel: PersonDetailsMediaViewModel?
-    
-    private lazy var mediaListView: MediaListCell = {
-        let view = MediaListCell()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
+
     
     // MARK: - LIFECYCLE
     override init(frame: CGRect) {
@@ -80,17 +75,8 @@ final class PersonDetailsMediaView: UICollectionViewCell {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: PersonDetailsMediaViewModel) {
         self.viewModel = viewModel
-        let vm = viewModel.isMovieType ?
-        MediaListCellViewModel(movies: viewModel.movies, listTitle: viewModel.headerTitle, listSubtitle: viewModel.headerSubtitle, didTapMovie: viewModel.didTapMovieAction) :
-        MediaListCellViewModel(tvShows: viewModel.tvShows, listTitle: viewModel.headerTitle, listSubtitle: viewModel.headerSubtitle, didTapTVShow: viewModel.didTapTVShowAction)
-        self.mediaListView.configure(viewModel: vm)
     }
     
     // MARK: - PRIVATE FUNC
-    private func setupUI() {
-        addSubview(mediaListView)
-        mediaListView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-    }
+    private func setupUI() { }
 }

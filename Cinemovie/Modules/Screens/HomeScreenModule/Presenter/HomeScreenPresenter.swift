@@ -27,6 +27,13 @@ final class HomeScreenPresenter {
     var router: HomeScreenRouterProtocol
     var interactor: HomeScreenInteractorProtocol
 
+    private var downloadGroup = DispatchGroup()
+    private var popularMovies: [Movie] = []
+    private var upcomingMovies: [Movie] = []
+    private var topRatedMovies: [Movie] = []
+    private var nowPlayingMovies: [Movie] = []
+    private var allMovies: [Movie] = []
+    
     init(interactor: HomeScreenInteractorProtocol, router: HomeScreenRouterProtocol) {
         self.interactor = interactor
         self.router = router
@@ -36,10 +43,26 @@ final class HomeScreenPresenter {
 extension HomeScreenPresenter: HomeScreenPresenterProtocol {
     // MARK: - STARTING
     func viewDidLoaded() {
+        downloadGroup.enter()
         interactor.downloadPopularMovies()
+        
+        downloadGroup.enter()
         interactor.downloadUpcomingMovies()
+        
+        downloadGroup.enter()
         interactor.downloadTopRatedMovies()
+        
+        downloadGroup.enter()
         interactor.downloadNowPlayingMovies()
+        
+        downloadGroup.notify(queue: .main) { [weak self] in
+            guard let self = self else { return }
+            self.view?.didRecieveAllMovies(
+                popularMovies: popularMovies, upcomingMovies: upcomingMovies,
+                topRatedMovies: topRatedMovies, nowPlayingMovies: nowPlayingMovies,
+                allMovies: allMovies
+            )
+        }
     }
     
     func didTapMovie(_ movie: Movie) {
@@ -48,32 +71,30 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
 
     // MARK: - FINISHING
     func didDownloadPopularMovies(queryMovies: [Movie]) {
-        DispatchQueue.main.async { [weak self] in
-            self?.view?.didRecievePopularMovies(queryMovies)
-        }
+        self.popularMovies = queryMovies
+        allMovies.append(contentsOf: queryMovies)
+        downloadGroup.leave()
     }
     
     func didDownloadUpcomingMovies(queryMovies: [Movie]) {
-        DispatchQueue.main.async { [weak self] in
-            self?.view?.didRecieveUpcomingMovies(queryMovies)
-        }
+        self.upcomingMovies = queryMovies
+        allMovies.append(contentsOf: queryMovies)
+        downloadGroup.leave()
     }
     
     func didDownloadTopRatedMovies(queryMovies: [Movie]) {
-        DispatchQueue.main.async { [weak self] in
-            self?.view?.didRecieveTopRatedMovies(queryMovies)
-        }
+        self.topRatedMovies = queryMovies
+        allMovies.append(contentsOf: queryMovies)
+        downloadGroup.leave()
     }
     
     func didDownloadNowPlayingMovies(queryMovies: [Movie]) {
-        DispatchQueue.main.async {
-            self.view?.didRecieveNowPlayingMovies(queryMovies)
-        }
+        self.nowPlayingMovies = queryMovies
+        allMovies.append(contentsOf: queryMovies)
+        downloadGroup.leave()
     }
     
     func didRecieveError(_ error: Error) {
-        DispatchQueue.main.async {
-            self.view?.didRecieveError(error.localizedDescription)
-        }
+        view?.didRecieveError(error.localizedDescription)
     }
 }
