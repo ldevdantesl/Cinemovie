@@ -12,9 +12,9 @@ struct MediaPosterImageCellViewModel: CellViewModel, Hashable {
     let id = UUID()
     let cellIdentifier: String = "MediaPosterImageCell"
     let media: Media
-    let didTapMedia: ((Movie) -> Void)?
+    let didTapMedia: ((Media) -> Void)?
     
-    init(media: Media, didTapMedia: ((Movie) -> Void)? = nil) {
+    init(media: Media, didTapMedia: ((Media) -> Void)? = nil) {
         self.media = media
         self.didTapMedia = didTapMedia
     }
@@ -105,6 +105,7 @@ final class MediaPosterImageCell: UICollectionViewCell, ReusableCell {
     
     // MARK: - OBJC FUNC
     @objc private func didTapMedia() {
-        viewModel?.didTapMedia?(viewModel?.media as! Movie)
+        guard let media = viewModel?.media else { return }
+        viewModel?.didTapMedia?(media)
     }
 }

@@ -12,7 +12,7 @@ final class CMCollectionView<Section: Hashable, Item: Hashable>: UICollectionVie
     typealias DataSource = UICollectionViewDiffableDataSource<Section, Item>
     
     // MARK: - PROPERTIES
-    private var diffableDataSource: UICollectionViewDiffableDataSource<Section, Item>!
+    var diffableDataSource: UICollectionViewDiffableDataSource<Section, Item>!
     
     // MARK: - LIFECYCLE
     init(layout: UICollectionViewLayout) {

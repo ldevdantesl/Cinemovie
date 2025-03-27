@@ -14,9 +14,9 @@ struct FeaturedMediaCellViewModel: CellViewModel, Hashable {
     var cellIdentifier: String = "FeaturedMediaCell"
     let media: [Media]
     let changeInSeconds: TimeInterval
-    let didTapMedia: ((Movie) -> Void)?
+    let didTapMedia: ((Media) -> Void)?
     
-    init(media: [Media], changeInSeconds: TimeInterval = 5.0, didTapMedia: ((Movie) -> Void)? = nil) {
+    init(media: [Media], changeInSeconds: TimeInterval = 5.0, didTapMedia: ((Media) -> Void)? = nil) {
         self.media = media
         self.changeInSeconds = changeInSeconds
         self.didTapMedia = didTapMedia
@@ -49,6 +49,7 @@ final class FeaturedMediaCell: UICollectionViewCell, ReusableCell {
     
     // MARK: - PROPERTIES
     private var viewModel: FeaturedMediaCellViewModel?
+    private var currentMedia: Media?
     private var mediaWorkItem: DispatchWorkItem?
     private var gradientLayer: CAGradientLayer?
     
@@ -129,6 +130,7 @@ final class FeaturedMediaCell: UICollectionViewCell, ReusableCell {
     
     private func updateMedia(with media: Media) {
         guard let url = URLHelper.getImageURL(with: media.posterPath, size: .original) else { return }
+        self.currentMedia = media
         loadingIndicator.startAnimating()
         
         UIView.animate(withDuration: 0.3) { [weak self] in
@@ -140,7 +142,7 @@ final class FeaturedMediaCell: UICollectionViewCell, ReusableCell {
                 guard let self = self else { return }
                 self.loadingIndicator.stopAnimating()
             }
-    
+
             UIView.animate(withDuration: 0.3) {
                 self.mediaImage.alpha = 1.0
             }
@@ -168,6 +170,7 @@ final class FeaturedMediaCell: UICollectionViewCell, ReusableCell {
     
     // MARK: - OBJC FUNCTIONS
     @objc private func didTapOnMediaImage() {
-        guard let viewModel = viewModel else { return }
+        guard let currentMedia = currentMedia else { return }
+        viewModel?.didTapMedia?(currentMedia)
     }
 }

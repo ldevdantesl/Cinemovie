@@ -10,7 +10,7 @@ import UIKit
 protocol HomeScreenPresenterProtocol: AnyObject {
     // MARK: - STARTING
     func viewDidLoaded()
-    func didTapMovie(_ movie: Movie)
+    func didTapMedia(_ media: Media)
     
     // MARK: - MOVIES
     func didDownloadPopularMovies(queryMovies: [Movie])
@@ -105,8 +105,12 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
         }
     }
     
-    func didTapMovie(_ movie: Movie) {
-        router.navigateToMovieDetails(movieID: movie.id)
+    func didTapMedia(_ media: any Media) {
+        switch media {
+        case is Movie: router.navigateToMovieDetails(movieID: media.id)
+        case is TVSeries: router.navigateToTVSeriesDetails(seriesID: media.id)
+        default: fatalError("Media not supported")
+        }
     }
 
     // MARK: - MOVIES

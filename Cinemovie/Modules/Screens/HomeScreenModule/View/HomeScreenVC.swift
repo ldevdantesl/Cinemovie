@@ -24,7 +24,8 @@ final class HomeScreenVC: UIViewController {
     
     enum HomeSection: Int, CaseIterable {
         case featured
-        case popular, upcoming, topRated, nowPlaying
+        case popularMovies, upcomingMovies, topRatedMovies, nowPlayingMovies
+        case popularTVSeries, onTheAirTVSeries, topRatedTVSeries, airingTodayTVSeries
     }
 
     enum HomeItem: Hashable {
@@ -51,6 +52,7 @@ final class HomeScreenVC: UIViewController {
         view.backgroundColor = CMColor.cmBackground
         return view
     }()
+    
     private lazy var headerView: HomeScreenHeaderView = {
         let view = HomeScreenHeaderView(viewModel: .init(headerTitle: "Discover", didTapMovieButton: switchToMovies, didTapTVSeriesButton: switchToTVShows))
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -110,27 +112,29 @@ final class HomeScreenVC: UIViewController {
         }
         
         collectionView.setSupplementaryViewProvider { collectionView, elementKind, indexPath in
-            let section = HomeSection.allCases[indexPath.section]
+            let snapshot = self.collectionView.diffableDataSource.snapshot()
+            let section = snapshot.sectionIdentifiers[indexPath.section]
+                
             let cell = collectionView.dequeueReusableSupplementaryView(
                 ofKind: elementKind, withReuseIdentifier: MediaListsHeaderCell.identifier, for: indexPath
             ) as? MediaListsHeaderCell
             
+            let titleText: String
+            let subtitleText: String
             switch section {
-            case .popular:
-                let vm = MediaListsHeaderCellViewModel(titleText: "Popular Movies", subtitleText: "Popular movies in your area")
-                cell?.configure(with: vm)
-            case .upcoming:
-                let vm = MediaListsHeaderCellViewModel(titleText: "Upcoming Movies", subtitleText: "Movies to come soon")
-                cell?.configure(with: vm)
-            case .topRated:
-                let vm = MediaListsHeaderCellViewModel(titleText: "Top Rated Movies", subtitleText: "Worldwide top rated movies")
-                cell?.configure(with: vm)
-            case .nowPlaying:
-                let vm = MediaListsHeaderCellViewModel(titleText: "Now Playing Movies", subtitleText: "Movies now playing in your area")
-                cell?.configure(with: vm)
+            case .popularMovies: titleText = "Popular Movies"; subtitleText = "Popular movies in your area"
+            case .upcomingMovies: titleText = "Upcoming Movies"; subtitleText = "Movies to come soon"
+            case .topRatedMovies: titleText = "Top Rated Movies"; subtitleText = "Worldwide top rated movies"
+            case .nowPlayingMovies: titleText = "Now Playing Movies"; subtitleText = "Movies now playing in your area"
+            case .popularTVSeries: titleText = "Popular Series"; subtitleText = "Series popular in your area"
+            case .onTheAirTVSeries: titleText = "On the Air Series"; subtitleText = "Series currently broadcasting new episodes"
+            case .topRatedTVSeries: titleText = "Top Rated Series"; subtitleText = "Top rated series in your area"
+            case .airingTodayTVSeries: titleText = "Airing Today Series"; subtitleText = "Series airing today"
             default: return nil
             }
             
+            let vm = MediaListsHeaderCellViewModel(titleText: titleText, subtitleText: subtitleText)
+            cell?.configure(with: vm)
             return cell
         }
     }
@@ -141,10 +145,14 @@ final class HomeScreenVC: UIViewController {
             
             switch section {
             case .featured: return self.sectionForFeatured()
-            case .popular: return self.sectionForMovieLists()
-            case .upcoming: return self.sectionForMovieLists()
-            case .topRated: return self.sectionForMovieLists()
-            case .nowPlaying: return self.sectionForMovieLists()
+            case .popularMovies: return self.sectionForMovieLists()
+            case .upcomingMovies: return self.sectionForMovieLists()
+            case .topRatedMovies: return self.sectionForMovieLists()
+            case .nowPlayingMovies: return self.sectionForMovieLists()
+            case .popularTVSeries: return self.sectionForMovieLists()
+            case .airingTodayTVSeries: return self.sectionForMovieLists()
+            case .onTheAirTVSeries: return self.sectionForMovieLists()
+            case .topRatedTVSeries: return self.sectionForMovieLists()
             }
         }
     }
@@ -186,13 +194,13 @@ final class HomeScreenVC: UIViewController {
         guard let presenter = presenter else { return }
         DispatchQueue.main.async {
             self.collectionView.applySnapshot(
-                sections: [.featured, .popular, .upcoming, .topRated, .nowPlaying],
+                sections: [.featured, .popularTVSeries, .onTheAirTVSeries, .topRatedTVSeries, .airingTodayTVSeries],
                 itemsBySection: [
-                    .featured : [.featured(FeaturedMediaCellViewModel(media: presenter.allTVSeries))],
-                    .popular : presenter.popularTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
-                    .upcoming : presenter.onTheAirTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
-                    .topRated : presenter.topRatedTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
-                    .nowPlaying : presenter.airingTodayTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
+                    .featured : [.featured(FeaturedMediaCellViewModel(media: presenter.allTVSeries, didTapMedia: self.presenter?.didTapMedia))],
+                    .popularTVSeries : presenter.popularTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
+                    .onTheAirTVSeries : presenter.onTheAirTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
+                    .topRatedTVSeries : presenter.topRatedTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
+                    .airingTodayTVSeries : presenter.airingTodayTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
                 ]
             )
         }
@@ -202,13 +210,13 @@ final class HomeScreenVC: UIViewController {
         guard let presenter = presenter else { return }
         DispatchQueue.main.async {
             self.collectionView.applySnapshot(
-                sections: [.featured, .popular, .upcoming, .topRated, .nowPlaying],
+                sections: [.featured, .popularMovies, .upcomingMovies, .topRatedMovies, .nowPlayingMovies],
                 itemsBySection: [
-                    .featured : [.featured(FeaturedMediaCellViewModel(media: presenter.allMovies))],
-                    .popular : presenter.popularMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
-                    .upcoming : presenter.upcomingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
-                    .topRated : presenter.topRatedMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
-                    .nowPlaying : presenter.nowPlayingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0)) },
+                    .featured : [.featured(FeaturedMediaCellViewModel(media: presenter.allMovies, didTapMedia: self.presenter?.didTapMedia))],
+                    .popularMovies : presenter.popularMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
+                    .upcomingMovies : presenter.upcomingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
+                    .topRatedMovies : presenter.topRatedMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
+                    .nowPlayingMovies : presenter.nowPlayingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
                 ]
             )
         }
@@ -235,13 +243,13 @@ extension HomeScreenVC: HomeScreenViewProtocol {
     func didRecieveAllMovies(popularMovies: [Movie], upcomingMovies: [Movie], topRatedMovies: [Movie], nowPlayingMovies: [Movie], allMovies: [Movie]) {
         DispatchQueue.main.async {
             self.collectionView.applySnapshot(
-                sections: [.featured, .popular, .upcoming, .topRated, .nowPlaying],
+                sections: [.featured, .popularMovies, .upcomingMovies, .topRatedMovies, .nowPlayingMovies],
                 itemsBySection: [
-                    .featured: [.featured(FeaturedMediaCellViewModel(media: allMovies))],
-                    .popular: popularMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMovie)) },
-                    .upcoming: upcomingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMovie)) },
-                    .topRated: topRatedMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMovie)) },
-                    .nowPlaying: nowPlayingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMovie)) }
+                    .featured: [.featured(FeaturedMediaCellViewModel(media: allMovies, didTapMedia: self.presenter?.didTapMedia))],
+                    .popularMovies: popularMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
+                    .upcomingMovies: upcomingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
+                    .topRatedMovies: topRatedMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
+                    .nowPlayingMovies: nowPlayingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) }
                 ]
             )
         }

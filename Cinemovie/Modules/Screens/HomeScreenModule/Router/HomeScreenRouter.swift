@@ -9,6 +9,7 @@ import UIKit
 
 protocol HomeScreenRouterProtocol {
     func navigateToMovieDetails(movieID: Int)
+    func navigateToTVSeriesDetails(seriesID: Int)
 }
 
 final class HomeScreenRouter: HomeScreenRouterProtocol {
@@ -24,5 +25,11 @@ final class HomeScreenRouter: HomeScreenRouterProtocol {
         let movieDetails = MovieDetailsScreenAssembler.assemble(movieID: movieID, tmdbService: tmdbService)
         movieDetails.modalPresentationStyle = .pageSheet
         viewController?.present(UINavigationController(rootViewController: movieDetails), animated: true)
+    }
+    
+    func navigateToTVSeriesDetails(seriesID: Int) {
+        let seriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: seriesID, tmdbService: tmdbService)
+        seriesDetails.modalPresentationStyle = .overCurrentContext
+        viewController?.present(UINavigationController(rootViewController: seriesDetails), animated: true)
     }
 }
