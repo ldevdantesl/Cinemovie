@@ -24,13 +24,55 @@ final class HomeScreenVC: UIViewController {
     
     enum HomeSection: Int, CaseIterable {
         case featured
-        case popularMovies, upcomingMovies, topRatedMovies, nowPlayingMovies
-        case popularTVSeries, onTheAirTVSeries, topRatedTVSeries, airingTodayTVSeries
+        case popularList
+        case upcomingList
+        case topRatedList
+        case nowPlayingList
+        
+        var titleForMovies: String{
+            switch self {
+            case .popularList: "Popular Movies"
+            case .upcomingList: "Upcoming Movies"
+            case .topRatedList: "Top Rated Movies"
+            case .nowPlayingList: "Now Playing Movies"
+            default: ""
+            }
+        }
+        
+        var subtitleForMovies: String? {
+            switch self {
+            case .popularList: "Popular Movies in your area"
+            case .upcomingList: "Movies coming soon"
+            case .topRatedList: "Worldwide top rated movies"
+            case .nowPlayingList: "Now playing movies"
+            default: nil
+            }
+        }
+        
+        var titleForTvSeries: String {
+            switch self {
+            case .popularList: "Popular TV Series & TV Shows"
+            case .upcomingList: "Airing Today Series"
+            case .topRatedList: "Top Rated Series"
+            case .nowPlayingList: "On the Air Series"
+            default: ""
+            }
+        }
+        
+        var subtitleForTvSeries: String? {
+            switch self {
+            case .popularList: "Popular Series & Shows in your area"
+            case .upcomingList: "Series coming today"
+            case .topRatedList: "Worldwide top rated Series"
+            case .nowPlayingList: "Series currently broadcasting new episodes"
+            default: nil
+            }
+        }
     }
 
     enum HomeItem: Hashable {
         case featured(FeaturedMediaCellViewModel)
-        case posterCell(MediaPosterImageCellViewModel)
+        case mediaListCell(MediaListCellViewModel)
     }
     
     // MARK: - VIPER
@@ -44,9 +86,8 @@ final class HomeScreenVC: UIViewController {
     // MARK: - VIEW PROPERTIES
     private lazy var collectionView: CMCollectionView = {
         let view = CMCollectionView<HomeSection, HomeItem>(layout: createLayout())
-        view.registerSupplementaryHeaderItem(cellClass: MediaListsHeaderCell.self)
         view.register(cellClass: FeaturedMediaCell.self)
-        view.register(cellClass: MediaPosterImageCell.self)
+        view.register(cellClass: MediaListCell.self)
         view.delegate = self
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
@@ -104,38 +145,11 @@ final class HomeScreenVC: UIViewController {
                 cell?.configure(with: vm)
                 return cell
                 
-            case .posterCell(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? MediaPosterImageCell
-                cell?.configure(with: vm)
+            case .mediaListCell(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? MediaListCell
+                cell?.configure(viewModel: vm)
                 return cell
             }
-        }
-        
-        collectionView.setSupplementaryViewProvider { collectionView, elementKind, indexPath in
-            let snapshot = self.collectionView.diffableDataSource.snapshot()
-            let section = snapshot.sectionIdentifiers[indexPath.section]
-                
-            let cell = collectionView.dequeueReusableSupplementaryView(
-                ofKind: elementKind, withReuseIdentifier: MediaListsHeaderCell.identifier, for: indexPath
-            ) as? MediaListsHeaderCell
-            
-            let titleText: String
-            let subtitleText: String
-            switch section {
-            case .popularMovies: titleText = "Popular Movies"; subtitleText = "Popular movies in your area"
-            case .upcomingMovies: titleText = "Upcoming Movies"; subtitleText = "Movies to come soon"
-            case .topRatedMovies: titleText = "Top Rated Movies"; subtitleText = "Worldwide top rated movies"
-            case .nowPlayingMovies: titleText = "Now Playing Movies"; subtitleText = "Movies now playing in your area"
-            case .popularTVSeries: titleText = "Popular Series"; subtitleText = "Series popular in your area"
-            case .onTheAirTVSeries: titleText = "On the Air Series"; subtitleText = "Series currently broadcasting new episodes"
-            case .topRatedTVSeries: titleText = "Top Rated Series"; subtitleText = "Top rated series in your area"
-            case .airingTodayTVSeries: titleText = "Airing Today Series"; subtitleText = "Series airing today"
-            default: return nil
-            }
-            
-            let vm = MediaListsHeaderCellViewModel(titleText: titleText, subtitleText: subtitleText)
-            cell?.configure(with: vm)
-            return cell
         }
     }
     
@@ -145,14 +159,10 @@ final class HomeScreenVC: UIViewController {
             
             switch section {
             case .featured: return self.sectionForFeatured()
-            case .popularMovies: return self.sectionForMovieLists()
-            case .upcomingMovies: return self.sectionForMovieLists()
-            case .topRatedMovies: return self.sectionForMovieLists()
-            case .nowPlayingMovies: return self.sectionForMovieLists()
-            case .popularTVSeries: return self.sectionForMovieLists()
-            case .airingTodayTVSeries: return self.sectionForMovieLists()
-            case .onTheAirTVSeries: return self.sectionForMovieLists()
-            case .topRatedTVSeries: return self.sectionForMovieLists()
+            case .popularList: return self.sectionForMovieLists()
+            case .upcomingList: return self.sectionForMovieLists()
+            case .topRatedList: return self.sectionForMovieLists()
+            case .nowPlayingList: return self.sectionForMovieLists()
             }
         }
     }
@@ -169,54 +179,84 @@ final class HomeScreenVC: UIViewController {
     }
     
     private func sectionForMovieLists() -> NSCollectionLayoutSection {
-        let itemWidth = UIConstants.screenWidth / 3
-        let itemHeight = itemWidth * 1.3
-        let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1/3), heightDimension: .absolute(itemHeight)))
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(0.9), heightDimension: .absolute(itemHeight)), subitems: [item])
-        group.interItemSpacing = NSCollectionLayoutSpacing.fixed(10)
-        
+        let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(MediaListCellViewModel.cellHeight)))
+        let group = NSCollectionLayoutGroup.vertical(layoutSize: item.layoutSize, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
-        section.interGroupSpacing = 10
         section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
-        section.orthogonalScrollingBehavior = .continuous
-        
-        let header = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(40)),
-            elementKind: UICollectionView.elementKindSectionHeader,
-            alignment: .top
-        )
-        header.pinToVisibleBounds = true
-        section.boundarySupplementaryItems = [header]
         return section
     }
     
     private func switchToTVShows() {
         guard let presenter = presenter else { return }
+        let featuredVM = FeaturedMediaCellViewModel(media: presenter.allTVSeries, didTapMedia: self.presenter?.didTapMedia)
+        
+        let popularListVM = MediaListCellViewModel(
+            mediaItems: presenter.popularTVSeries, listName: HomeSection.popularList.titleForTvSeries,
+            listSubtitle: HomeSection.popularList.subtitleForTvSeries, didTapMediaItem: presenter.didTapMedia
+        )
+        
+        let upcomingListVM = MediaListCellViewModel(
+            mediaItems: presenter.airingTodayTVSeries, listName: HomeSection.upcomingList.titleForTvSeries,
+            listSubtitle: HomeSection.upcomingList.subtitleForTvSeries, didTapMediaItem: presenter.didTapMedia
+        )
+        
+        let topListVM = MediaListCellViewModel(
+            mediaItems: presenter.topRatedTVSeries, listName: HomeSection.topRatedList.titleForTvSeries,
+            listSubtitle: HomeSection.topRatedList.subtitleForTvSeries, didTapMediaItem: presenter.didTapMedia
+        )
+        
+        let nowListVM = MediaListCellViewModel(
+            mediaItems: presenter.onTheAirTVSeries, listName: HomeSection.nowPlayingList.titleForTvSeries,
+            listSubtitle: HomeSection.nowPlayingList.subtitleForTvSeries, didTapMediaItem: presenter.didTapMedia
+        )
+        
         DispatchQueue.main.async {
             self.collectionView.applySnapshot(
-                sections: [.featured, .popularTVSeries, .onTheAirTVSeries, .topRatedTVSeries, .airingTodayTVSeries],
+                sections: [.featured, .popularList, .upcomingList, .topRatedList, .nowPlayingList],
                 itemsBySection: [
-                    .featured : [.featured(FeaturedMediaCellViewModel(media: presenter.allTVSeries, didTapMedia: self.presenter?.didTapMedia))],
-                    .popularTVSeries : presenter.popularTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
-                    .onTheAirTVSeries : presenter.onTheAirTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
-                    .topRatedTVSeries : presenter.topRatedTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
-                    .airingTodayTVSeries : presenter.airingTodayTVSeries.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
+                    .featured : [.featured(featuredVM)],
+                    .popularList : [.mediaListCell(popularListVM)],
+                    .upcomingList : [.mediaListCell(upcomingListVM)],
+                    .topRatedList : [.mediaListCell(topListVM)],
+                    .nowPlayingList : [.mediaListCell(nowListVM)]
                 ]
             )
         }
+
     }
     
     private func switchToMovies() {
         guard let presenter = presenter else { return }
+        let featuredVM = FeaturedMediaCellViewModel(media: presenter.allMovies, didTapMedia: self.presenter?.didTapMedia)
+        let popularListVM = MediaListCellViewModel(
+            mediaItems: presenter.popularMovies, listName: HomeSection.popularList.titleForMovies,
+            listSubtitle: HomeSection.popularList.subtitleForMovies, didTapMediaItem: presenter.didTapMedia
+        )
+        
+        let upcomingListVM = MediaListCellViewModel(
+            mediaItems: presenter.upcomingMovies, listName: HomeSection.upcomingList.titleForMovies,
+            listSubtitle: HomeSection.upcomingList.subtitleForMovies, didTapMediaItem: presenter.didTapMedia
+        )
+        
+        let topListVM = MediaListCellViewModel(
+            mediaItems: presenter.topRatedMovies, listName: HomeSection.topRatedList.titleForMovies,
+            listSubtitle: HomeSection.topRatedList.subtitleForMovies, didTapMediaItem: presenter.didTapMedia
+        )
+        
+        let nowListVM = MediaListCellViewModel(
+            mediaItems: presenter.nowPlayingMovies, listName: HomeSection.nowPlayingList.titleForMovies,
+            listSubtitle: HomeSection.nowPlayingList.subtitleForMovies, didTapMediaItem: presenter.didTapMedia
+        )
+        
         DispatchQueue.main.async {
             self.collectionView.applySnapshot(
-                sections: [.featured, .popularMovies, .upcomingMovies, .topRatedMovies, .nowPlayingMovies],
+                sections: [.featured, .popularList, .upcomingList, .topRatedList, .nowPlayingList],
                 itemsBySection: [
-                    .featured : [.featured(FeaturedMediaCellViewModel(media: presenter.allMovies, didTapMedia: self.presenter?.didTapMedia))],
-                    .popularMovies : presenter.popularMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
-                    .upcomingMovies : presenter.upcomingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
-                    .topRatedMovies : presenter.topRatedMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
-                    .nowPlayingMovies : presenter.nowPlayingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
+                    .featured : [.featured(featuredVM)],
+                    .popularList : [.mediaListCell(popularListVM)],
+                    .upcomingList : [.mediaListCell(upcomingListVM)],
+                    .topRatedList : [.mediaListCell(topListVM)],
+                    .nowPlayingList : [.mediaListCell(nowListVM)]
                 ]
             )
         }
@@ -241,15 +281,35 @@ extension HomeScreenVC: UICollectionViewDelegate {
 
 extension HomeScreenVC: HomeScreenViewProtocol {
     func didRecieveAllMovies(popularMovies: [Movie], upcomingMovies: [Movie], topRatedMovies: [Movie], nowPlayingMovies: [Movie], allMovies: [Movie]) {
+        let popularListVM = MediaListCellViewModel(
+            mediaItems: popularMovies, listName: HomeSection.popularList.titleForMovies,
+            listSubtitle: HomeSection.popularList.subtitleForMovies, didTapMediaItem: presenter?.didTapMedia
+        )
+        
+        let upcomingListVM = MediaListCellViewModel(
+            mediaItems: upcomingMovies, listName: HomeSection.upcomingList.titleForMovies,
+            listSubtitle: HomeSection.upcomingList.subtitleForMovies, didTapMediaItem: presenter?.didTapMedia
+        )
+        
+        let topListVM = MediaListCellViewModel(
+            mediaItems: topRatedMovies, listName: HomeSection.topRatedList.titleForMovies,
+            listSubtitle: HomeSection.topRatedList.subtitleForMovies, didTapMediaItem: presenter?.didTapMedia
+        )
+        
+        let nowListVM = MediaListCellViewModel(
+            mediaItems: nowPlayingMovies, listName: HomeSection.nowPlayingList.titleForMovies,
+            listSubtitle: HomeSection.nowPlayingList.subtitleForMovies, didTapMediaItem: presenter?.didTapMedia
+        )
+        
         DispatchQueue.main.async {
             self.collectionView.applySnapshot(
-                sections: [.featured, .popularMovies, .upcomingMovies, .topRatedMovies, .nowPlayingMovies],
+                sections: [.featured, .popularList, .upcomingList, .topRatedList, .nowPlayingList],
                 itemsBySection: [
                     .featured: [.featured(FeaturedMediaCellViewModel(media: allMovies, didTapMedia: self.presenter?.didTapMedia))],
-                    .popularMovies: popularMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
-                    .upcomingMovies: upcomingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
-                    .topRatedMovies: topRatedMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) },
-                    .nowPlayingMovies: nowPlayingMovies.map { .posterCell(MediaPosterImageCellViewModel(media: $0, didTapMedia: self.presenter?.didTapMedia)) }
+                    .popularList: [.mediaListCell(popularListVM)],
+                    .upcomingList: [.mediaListCell(upcomingListVM)],
+                    .topRatedList: [.mediaListCell(topListVM)],
+                    .nowPlayingList: [.mediaListCell(nowListVM)]
                 ]
             )
         }

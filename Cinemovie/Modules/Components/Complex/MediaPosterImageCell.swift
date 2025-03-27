@@ -29,9 +29,6 @@ struct MediaPosterImageCellViewModel: CellViewModel, Hashable {
 }
 
 final class MediaPosterImageCell: UICollectionViewCell, ReusableCell {
-    // MARK: - TYPEALIAS
-    typealias ViewModel = MediaPosterImageCellViewModel
-    
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let cornerRadius = 10.0
