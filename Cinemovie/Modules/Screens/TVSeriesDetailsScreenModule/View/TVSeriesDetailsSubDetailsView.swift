@@ -8,8 +8,10 @@
 import UIKit
 import SnapKit
 
-struct TVSeriesDetailsSubDetailsViewModel: MediaDetailsCellViewModel {
-    let identifier: String = "TVSeriesDetailsSubDetailsView"
+struct TVSeriesDetailsSubDetailsViewModel: CellViewModel {
+    let id: String = UUID().uuidString
+    
+    let cellIdentifier: String = "TVSeriesDetailsSubDetailsView"
     
     let firstAirDate: String
     let status: TVSeriesStatus
@@ -54,16 +56,13 @@ struct TVSeriesDetailsSubDetailsViewModel: MediaDetailsCellViewModel {
     }
 }
 
-final class TVSeriesDetailsSubDetailsView: UICollectionViewCell {
+final class TVSeriesDetailsSubDetailsView: UICollectionViewCell, ReusableCell {
 
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let hStackSpacing = 10.0
         static let imageSizes: CGFloat = 20
     }
-    
-    // MARK: - STATIC
-    static let identifier = "TVSeriesDetailsSubDetailsView"
     
     // MARK: - PROPERTIES
     private var viewModel: TVSeriesDetailsSubDetailsViewModel?

@@ -7,12 +7,13 @@
 
 import UIKit
 
-final class CMCollectionView<Section: Hashable, Item: Hashable>: UICollectionView {
+final class CMCollectionView<Section: Hashable, Item: Hashable>: UICollectionView, UICollectionViewDelegate {
     // MARK: - TYPEALIASES
     typealias DataSource = UICollectionViewDiffableDataSource<Section, Item>
     
     // MARK: - PROPERTIES
     var diffableDataSource: UICollectionViewDiffableDataSource<Section, Item>!
+    private var didSelectHandler: ((IndexPath) -> Void)?
     
     // MARK: - LIFECYCLE
     init(layout: UICollectionViewLayout) {
@@ -31,6 +32,17 @@ final class CMCollectionView<Section: Hashable, Item: Hashable>: UICollectionVie
     
     public func setSupplementaryViewProvider(_ provider: @escaping DataSource.SupplementaryViewProvider) {
         self.diffableDataSource.supplementaryViewProvider = provider
+    }
+    
+    public func setDidSelectHandler(_ handler: @escaping (IndexPath) -> Void) {
+        self.didSelectHandler = handler
+        self.delegate = self
+    }
+    
+    internal func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if let handler = self.didSelectHandler {
+            handler(indexPath)
+        }
     }
     
     public func applySnapshot(sections: [Section], itemsBySection: [Section: [Item]]) {

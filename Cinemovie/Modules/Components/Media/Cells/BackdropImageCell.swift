@@ -9,24 +9,32 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-struct MediaDetailsBackdropImageViewModel: MediaDetailsCellViewModel {
-    let identifier = "MediaDetailsBackdropImageView"
+struct BackdropImageCellViewModel: CellViewModel, Hashable {
+    let id = UUID().uuidString
+    let cellIdentifier: String = "BackdropImageCell"
     let imageURL: URL?
     let didTapBackButtonAction: (() -> Void)?
     let isBackButtonHidden: Bool
-    let cellHeight = UIConstants.screenWidth * 0.55
+    static let cellHeight = UIConstants.screenWidth * 0.55
     
     init(imagePath: String?, size: ImageSizes, isBackButtonHidden: Bool, didTapBackButtonAction: (() -> Void)? = nil) {
         self.imageURL = URLHelper.getImageURL(with: imagePath, size: size)
         self.didTapBackButtonAction = didTapBackButtonAction
         self.isBackButtonHidden = isBackButtonHidden
     }
+    
+    static func == (lhs: BackdropImageCellViewModel, rhs: BackdropImageCellViewModel) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
-final class MediaDetailsBackdropImageView: UICollectionViewCell {
-    
-    // MARK: - STATIC
-    static let identifier = "MediaDetailsBackdropImageView"
+final class BackdropImageCell: UICollectionViewCell, ReusableCell {
+    // MARK: - TYPEALIAS
+    typealias ViewModel = BackdropImageCellViewModel
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -40,7 +48,7 @@ final class MediaDetailsBackdropImageView: UICollectionViewCell {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: MediaDetailsBackdropImageViewModel?
+    private var viewModel: ViewModel?
     
     // MARK: - VIEW PROPERTIES
     private let loadingIndicator: UIActivityIndicatorView = {
@@ -80,7 +88,7 @@ final class MediaDetailsBackdropImageView: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MediaDetailsBackdropImageViewModel) {
+    public func configure(with viewModel: ViewModel) {
         self.viewModel = viewModel
         
         let vm = CMCircularButtonViewModel(

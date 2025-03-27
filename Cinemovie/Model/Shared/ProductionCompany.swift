@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ProductionCompany: Codable {
+struct ProductionCompany: Codable, Hashable {
     let id: Int
     let logoPath: String?
     let name, originCountry: String?

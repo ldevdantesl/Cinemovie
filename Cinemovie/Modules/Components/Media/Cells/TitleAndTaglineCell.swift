@@ -8,31 +8,22 @@
 import UIKit
 import SnapKit
 
-struct MediaDetailsTitleViewModel: MediaDetailsCellViewModel {
-    let identifier: String = "MediaDetailsTitleView"
+struct TitleAndTaglineCellViewModel: CellViewModel, Hashable {
+    let id: String = UUID().uuidString
+    let cellIdentifier: String = "TitleAndTaglineCell"
     
     let movieName: String
     let movieTagline: String
-    var cellHeight: CGFloat
+    static let estimatedCellHeight: CGFloat = 70.0
     
     init(movieName: String, movieTagline: String) {
         self.movieName = movieName
         self.movieTagline = CMTextFormatter.formatToCleanString(movieTagline)
-        self.cellHeight = Self.calculateCellHeight(tagline: CMTextFormatter.formatToCleanString(movieTagline))
-    }
-    
-    private static func calculateCellHeight(tagline: String) -> CGFloat {
-        if tagline.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return 45.0
-        }
-        return 70.0
     }
 }
 
-final class MediaDetailsTitleView: UICollectionViewCell {
-    
-    // MARK: - STATIC
-    static let identifier = "MediaDetailsTitleView"
+final class TitleAndTaglineCell: UICollectionViewCell, ReusableCell {
+    typealias ViewModel = TitleAndTaglineCellViewModel
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -104,7 +95,7 @@ final class MediaDetailsTitleView: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MediaDetailsTitleViewModel) {
+    public func configure(with viewModel: ViewModel) {
         movieNameLabel.text = viewModel.movieName
         guard !viewModel.movieTagline.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         vStack.removeArrangedSubview(movieTaglineLabel)

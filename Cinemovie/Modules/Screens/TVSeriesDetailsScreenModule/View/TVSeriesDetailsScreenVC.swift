@@ -35,7 +35,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
     var activeActorPopUpView: MediaDetailsActorPopupView?
     
     // MARK: - PROPERTIES
-    private var viewModels: [MediaDetailsCellViewModel] = []
+    private var viewModels: [CellViewModel] = []
     private var cachedCollectionViewCellHeights: [IndexPath : CGSize] = [:]
     private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
     
@@ -53,12 +53,11 @@ final class TVSeriesDetailsScreenVC: UIViewController {
         
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.backgroundColor = CMColor.cmBackground
-        cv.register(MediaDetailsRateAndShareView.self, forCellWithReuseIdentifier: MediaDetailsRateAndShareView.identifier)
-        cv.register(MediaDetailsProductionView.self, forCellWithReuseIdentifier: MediaDetailsProductionView.identifier)
-        cv.register(MediaDetailsBackdropImageView.self, forCellWithReuseIdentifier: MediaDetailsBackdropImageView.identifier)
-        cv.register(MediaDetailsTitleView.self, forCellWithReuseIdentifier: MediaDetailsTitleView.identifier)
-        cv.register(MediaDetailsCastList.self, forCellWithReuseIdentifier: MediaDetailsCastList.identifier)
-        cv.register(MediaDetailsWatchlistOverviewView.self, forCellWithReuseIdentifier: MediaDetailsWatchlistOverviewView.identifier)
+        cv.register(RateAndShareCell.self, forCellWithReuseIdentifier: RateAndShareCell.identifier)
+        cv.register(ProductionInfoCell.self, forCellWithReuseIdentifier: ProductionInfoCell.identifier)
+        cv.register(BackdropImageCell.self, forCellWithReuseIdentifier: BackdropImageCell.identifier)
+        cv.register(TitleAndTaglineCell.self, forCellWithReuseIdentifier: TitleAndTaglineCell.identifier)
+        cv.register(CastListCell.self, forCellWithReuseIdentifier: CastListCell.identifier)
         cv.register(TVSeriesDetailsSubDetailsView.self, forCellWithReuseIdentifier: TVSeriesDetailsSubDetailsView.identifier)
         cv.delegate = self
         cv.dataSource = self
@@ -107,15 +106,14 @@ extension TVSeriesDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDel
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let viewModel = viewModels[indexPath.row]
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.identifier, for: indexPath)
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.cellIdentifier, for: indexPath)
         switch viewModel {
-        case let vm as MediaDetailsBackdropImageViewModel: (cell as? MediaDetailsBackdropImageView)?.configure(viewModel: vm)
-        case let vm as MediaDetailsTitleViewModel: (cell as? MediaDetailsTitleView)?.configure(viewModel: vm)
-        case let vm as MediaDetailsWatchlistOverviewViewModel: (cell as? MediaDetailsWatchlistOverviewView)?.configure(viewModel: vm)
-        case let vm as MediaDetailsCastListViewModel: (cell as? MediaDetailsCastList)?.configure(viewModel: vm)
+        case let vm as BackdropImageCellViewModel: (cell as? BackdropImageCell)?.configure(with: vm)
+        case let vm as TitleAndTaglineCellViewModel: (cell as? TitleAndTaglineCell)?.configure(with: vm)
+        case let vm as CastListCellViewModel: (cell as? CastListCell)?.configure(viewModel: vm)
         case let vm as TVSeriesDetailsSubDetailsViewModel: (cell as? TVSeriesDetailsSubDetailsView)?.configure(viewModel: vm)
-        case let vm as MediaDetailsProductionViewModel: (cell as? MediaDetailsProductionView)?.configure(viewModel: vm)
-        case let vm as MediaDetailsRateAndShareViewModel: (cell as? MediaDetailsRateAndShareView)?.configure(viewModel: vm)
+        case let vm as ProductionInfoCellViewModel: (cell as? ProductionInfoCell)?.configure(with: vm)
+        case let vm as RateAndShareCellViewModel: (cell as? RateAndShareCell)?.configure(with: vm)
         default: break
         }
         return cell
@@ -132,12 +130,11 @@ extension TVSeriesDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDel
         let size: CGSize
         switch viewModel {
         case let vm as TVSeriesDetailsSubDetailsViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
-        case let vm as MediaDetailsBackdropImageViewModel: size = CGSize(width: width, height: vm.cellHeight)
-        case let vm as MediaDetailsTitleViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
-        case let vm as MediaDetailsWatchlistOverviewViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
-        case let vm as MediaDetailsCastListViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
-        case let vm as MediaDetailsProductionViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
-        case let vm as MediaDetailsRateAndShareViewModel: size = CGSize(width: width - Constants.biggerHSpacing, height: vm.cellHeight)
+//        case let vm as BackdropImageCellViewModel: size = CGSize(width: width, height: vm.cellHeight)
+//        case let vm as MediaDetailsTitleCellViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
+//        case let vm as CastListCellViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
+//        case let vm as ProductionInfoCellViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
+//        case let vm as RateAndShareCellViewModel: size = CGSize(width: width - Constants.biggerHSpacing, height: vm.cellHeight)
         default: return CGSize(width: width, height: Constants.cellDefaultHeight)
         }
         
@@ -169,11 +166,11 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
         self.downloadingView.hide()
         
         self.viewModels = [
-            MediaDetailsBackdropImageViewModel(
+            BackdropImageCellViewModel(
                 imagePath: details.backdropPath, size: .w1280,
                 isBackButtonHidden: isFirstScreen, didTapBackButtonAction: presenter?.didTapBackButton
             ),
-            MediaDetailsTitleViewModel(movieName: details.name, movieTagline: details.tagline),
+            TitleAndTaglineCellViewModel(movieName: details.name, movieTagline: details.tagline),
             
             TVSeriesDetailsSubDetailsViewModel(
                 firstAirDate: details.firstAirDate, numberOfSeasons: details.numberOfSeasons ?? 1,
@@ -181,14 +178,12 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
                 status: details.status ?? .canceled, nextEpisodeToAir: details.nextEpisodeToAir?.airDate,
                 didTapView: presenter?.didTapTooltipView, didTapHomepage: presenter?.didTapHomepage
             ),
-            
-            MediaDetailsWatchlistOverviewViewModel(movieOverview: details.overview),
         ]
         
-        !cast.isEmpty ? self.viewModels.append(MediaDetailsCastListViewModel(cast: cast, didSelectCast: presenter?.didSelectActor)) : ()
+        !cast.isEmpty ? self.viewModels.append(CastListCellViewModel(cast: cast, didSelectCast: presenter?.didSelectActor)) : ()
         
-        self.viewModels.append(MediaDetailsProductionViewModel(companies: details.productionCompanies, countries: details.productionCountries))
-        self.viewModels.append(MediaDetailsRateAndShareViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton))
+        self.viewModels.append(ProductionInfoCellViewModel(companies: details.productionCompanies, countries: details.productionCountries))
+        self.viewModels.append(RateAndShareCellViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton))
         
         DispatchQueue.main.async {
             self.collectionView.setNeedsLayout()

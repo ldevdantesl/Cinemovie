@@ -9,7 +9,7 @@ import SnapKit
 import UIKit
 
 struct MediaPosterImageCellViewModel: CellViewModel, Hashable {
-    let id = UUID()
+    let id = UUID().uuidString
     let cellIdentifier: String = "MediaPosterImageCell"
     let media: Media
     let didTapMedia: ((Media) -> Void)?

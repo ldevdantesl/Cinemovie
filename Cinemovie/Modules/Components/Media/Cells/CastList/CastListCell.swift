@@ -8,23 +8,28 @@
 import UIKit
 import SnapKit
 
-struct MediaDetailsCastListViewModel: MediaDetailsCellViewModel {
-    let identifier: String = "MediaDetailsCastList"
-    
-    let cast: [Cast]?
+struct CastListCellViewModel: CellViewModel, Hashable {
+    let id: String = UUID().uuidString
+    let cellIdentifier: String = "CastListCell"
+    let cast: [Cast]
     let didSelectCast: ((Cast) -> Void)?
-    let cellHeight = 130.0
+    static let cellHeight = 130.0
     
-    init(cast: [Cast]?, didSelectCast: ((Cast) -> Void)?) {
+    init(cast: [Cast], didSelectCast: ((Cast) -> Void)?) {
         self.cast = cast
         self.didSelectCast = didSelectCast
     }
+    
+    static func == (lhs: CastListCellViewModel, rhs: CastListCellViewModel) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
-final class MediaDetailsCastList: UICollectionViewCell {
-    // MARK: - STATIC
-    static let identifier = "MediaDetailsCastList"
-    
+final class CastListCell: UICollectionViewCell, ReusableCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let spacing: CGFloat = 5
@@ -34,8 +39,12 @@ final class MediaDetailsCastList: UICollectionViewCell {
         static let itemHeight = 105.0
     }
     
+    enum CastListSection: Hashable {
+        case main
+    }
+
     // MARK: - PROPERTIES
-    private var viewModel: MediaDetailsCastListViewModel?
+    private var viewModel: CastListCellViewModel?
     
     // MARK: - VIEW PROPERTIES
     private let castLabel: UILabel = {
@@ -47,18 +56,16 @@ final class MediaDetailsCastList: UICollectionViewCell {
         return label
     }()
     
-    private lazy var collectionView: UICollectionView = {
+    private lazy var collectionView: CMCollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = Constants.hSpacing
         layout.itemSize = CGSize(width: Constants.itemWidth, height: Constants.itemHeight)
         
-        let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        let cv = CMCollectionView<CastListSection, CastListItemCellViewModel>(layout: layout)
         cv.showsHorizontalScrollIndicator = false
         cv.backgroundColor = CMColor.cmBackground
-        cv.register(MediaDetailsCastListCell.self, forCellWithReuseIdentifier: MediaDetailsCastListCell.identifier)
-        cv.delegate = self
-        cv.dataSource = self
+        cv.register(cellClass: CastListItemCell.self)
         cv.translatesAutoresizingMaskIntoConstraints = false
         return cv
     }()
@@ -67,6 +74,7 @@ final class MediaDetailsCastList: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        configureDataSource()
     }
     
     @available(*, unavailable)
@@ -75,8 +83,12 @@ final class MediaDetailsCastList: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNCTIONS
-    public func configure(viewModel: MediaDetailsCastListViewModel) {
+    public func configure(viewModel: CastListCellViewModel) {
         self.viewModel = viewModel
+        self.collectionView.applySnapshot(
+            sections: [.main],
+            itemsBySection: [.main: viewModel.cast.map { CastListItemCellViewModel(cast: $0) }]
+        )
     }
     
     // MARK: - PRIVATE FUNCTIONS
@@ -95,26 +107,17 @@ final class MediaDetailsCastList: UICollectionViewCell {
             $0.bottom.equalToSuperview()
         }
     }
-}
-
-extension MediaDetailsCastList: UICollectionViewDelegate, UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel?.cast?.count ?? 0
-    }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: MediaDetailsCastListCell.identifier, for: indexPath
-        ) as? MediaDetailsCastListCell else {
-            return UICollectionViewCell()
+    private func configureDataSource() {
+        collectionView.configureDataSource { collectionView, indexPath, viewModel in
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CastListItemCell.identifier, for: indexPath) as? CastListItemCell
+            cell?.configure(viewModel: viewModel)
+            return cell
         }
-        let vm = MediaDetailsCastListCellViewModel(cast: viewModel?.cast?[indexPath.row])
-        cell.configure(viewModel: vm)
-        return cell
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let cast = viewModel?.cast?[indexPath.row] else { return }
-        viewModel?.didSelectCast?(cast)
+        
+        collectionView.setDidSelectHandler { indexPath in
+            guard let vm = self.viewModel else { return }
+            vm.didSelectCast?(vm.cast[indexPath.row])
+        }
     }
 }

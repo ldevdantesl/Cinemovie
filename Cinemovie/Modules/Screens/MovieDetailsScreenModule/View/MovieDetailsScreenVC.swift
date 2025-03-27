@@ -35,6 +35,28 @@ final class MovieDetailsScreenVC: UIViewController {
         static let cellDefaultHeight = 120.0
     }
     
+    private enum MovieDetailsSection: CaseIterable, Hashable {
+        case backdropImage
+        case titleAndTagline
+        case subDetails
+        case watchlistButton
+        case overview
+        case cast
+        case production
+        case rateAndShare
+    }
+    
+    private enum MovieDetailsItems: Hashable {
+        case backdropImage(BackdropImageCellViewModel)
+        case titleAndTagline(TitleAndTaglineCellViewModel)
+        case subDetails(MovieDetailsSubDetailsCellViewModel)
+        case watchListButton
+        case overview(OverviewCellViewModel)
+        case cast(CastListCellViewModel)
+        case production(ProductionInfoCellViewModel)
+        case rateAndShare(RateAndShareCellViewModel)
+    }
+    
     // MARK: - VIPER
     var presenter: MovieDetailsScreenPresenterProtocol?
     var activeTooltipView: CMTooltipView?
@@ -42,8 +64,7 @@ final class MovieDetailsScreenVC: UIViewController {
     var activePopUpView: MediaDetailsActorPopupView?
     
     // MARK: - PROPERTIES
-    private var viewModels: [MediaDetailsCellViewModel] = []
-    private var cachedCollectionViewCellHeights: [IndexPath : CGSize] = [:]
+    private var viewModels: [CellViewModel] = []
     private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
     
     // MARK: - VIEW PROPERTIES
@@ -53,22 +74,17 @@ final class MovieDetailsScreenVC: UIViewController {
         return view
     }()
     
-    private lazy var collectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .vertical
-        layout.minimumLineSpacing = Constants.collectionViewSpacing
-        
-        let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
+    private lazy var collectionView: CMCollectionView = {
+        let cv = CMCollectionView<MovieDetailsSection, MovieDetailsItems>(layout: createLayout())
         cv.backgroundColor = CMColor.cmBackground
-        cv.register(MediaDetailsRateAndShareView.self, forCellWithReuseIdentifier: MediaDetailsRateAndShareView.identifier)
-        cv.register(MediaDetailsProductionView.self, forCellWithReuseIdentifier: MediaDetailsProductionView.identifier)
-        cv.register(MovieDetailsSubDetailsView.self, forCellWithReuseIdentifier: MovieDetailsSubDetailsView.identifier)
-        cv.register(MediaDetailsBackdropImageView.self, forCellWithReuseIdentifier: MediaDetailsBackdropImageView.identifier)
-        cv.register(MediaDetailsTitleView.self, forCellWithReuseIdentifier: MediaDetailsTitleView.identifier)
-        cv.register(MediaDetailsCastList.self, forCellWithReuseIdentifier: MediaDetailsCastList.identifier)
-        cv.register(MediaDetailsWatchlistOverviewView.self, forCellWithReuseIdentifier: MediaDetailsWatchlistOverviewView.identifier)
-        cv.delegate = self
-        cv.dataSource = self
+        cv.register(cellClass: MovieDetailsSubDetailsCell.self)
+        cv.register(cellClass: WatchlistButtonCell.self)
+        cv.register(cellClass: OverviewCell.self)
+        cv.register(cellClass: RateAndShareCell.self)
+        cv.register(cellClass: ProductionInfoCell.self)
+        cv.register(cellClass: BackdropImageCell.self)
+        cv.register(cellClass: TitleAndTaglineCell.self)
+        cv.register(cellClass: CastListCell.self)
         cv.translatesAutoresizingMaskIntoConstraints = false
         return cv
     }()
@@ -78,6 +94,7 @@ final class MovieDetailsScreenVC: UIViewController {
         super.viewDidLoad()
         presenter?.viewDidLoad()
         setupUI()
+        configureDataSource()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -110,53 +127,76 @@ final class MovieDetailsScreenVC: UIViewController {
         
         view.bringSubviewToFront(downloadingView)
     }
-}
-
-extension MovieDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModels.count
+    
+    private func createLayout() -> UICollectionViewCompositionalLayout {
+        return UICollectionViewCompositionalLayout { sectionIndex, env in
+            let section = MovieDetailsSection.allCases[sectionIndex]
+            let heightDimension: NSCollectionLayoutDimension
+            var itemHeightDimension: NSCollectionLayoutDimension = .fractionalHeight(1)
+            var isBackdropImageSection: Bool = false
+            
+            switch section {
+            case .backdropImage: heightDimension = .absolute(BackdropImageCellViewModel.cellHeight); isBackdropImageSection = true
+            case .titleAndTagline: heightDimension = .estimated(TitleAndTaglineCellViewModel.estimatedCellHeight); itemHeightDimension = .estimated(50)
+            case .subDetails: heightDimension = .absolute(MovieDetailsSubDetailsCellViewModel.cellHeight)
+            case .watchlistButton: heightDimension = .absolute(WatchlistButtonCellViewModel.absoluteCellHeight)
+            case .overview: heightDimension = .estimated(OverviewCellViewModel.estimatedCellHeight); itemHeightDimension = .estimated(OverviewCellViewModel.estimatedCellHeight)
+            case .cast: heightDimension = .absolute(CastListCellViewModel.cellHeight)
+            case .production: heightDimension = .absolute(ProductionInfoCellViewModel.cellHeight)
+            case .rateAndShare: heightDimension = .absolute(RateAndShareCellViewModel.cellHeight)
+            }
+            
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: itemHeightDimension))
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: heightDimension), subitems: [item])
+            let layoutSection = NSCollectionLayoutSection(group: group)
+            layoutSection.contentInsets = !isBackdropImageSection ? NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 0, trailing: 10) : .zero
+            return layoutSection
+        }
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let viewModel = viewModels[indexPath.row]
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.identifier, for: indexPath)
-
-        switch viewModel {
-        case let vm as MediaDetailsBackdropImageViewModel: (cell as? MediaDetailsBackdropImageView)?.configure(viewModel: vm)
-        case let vm as MediaDetailsTitleViewModel: (cell as? MediaDetailsTitleView)?.configure(viewModel: vm)
-        case let vm as MediaDetailsWatchlistOverviewViewModel: (cell as? MediaDetailsWatchlistOverviewView)?.configure(viewModel: vm)
-        case let vm as MediaDetailsCastListViewModel: (cell as? MediaDetailsCastList)?.configure(viewModel: vm)
-        case let vm as MovieDetailsSubDetailsViewModel: (cell as? MovieDetailsSubDetailsView)?.configure(viewModel: vm)
-        case let vm as MediaDetailsProductionViewModel: (cell as? MediaDetailsProductionView)?.configure(viewModel: vm)
-        case let vm as MediaDetailsRateAndShareViewModel: (cell as? MediaDetailsRateAndShareView)?.configure(viewModel: vm)
-        default: break
+    private func configureDataSource() {
+        collectionView.configureDataSource { collectionView, indexPath, itemIdentifier in
+            switch itemIdentifier {
+            case .backdropImage(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? BackdropImageCell
+                cell?.configure(with: vm)
+                return cell
+                
+            case .subDetails(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? MovieDetailsSubDetailsCell
+                cell?.configure(viewModel: vm)
+                return cell
+                
+            case .watchListButton:
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: WatchlistButtonCell.identifier, for: indexPath) as? WatchlistButtonCell
+                return cell
+                
+            case .cast(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? CastListCell
+                cell?.configure(viewModel: vm)
+                return cell
+                
+            case .titleAndTagline(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? TitleAndTaglineCell
+                cell?.configure(with: vm)
+                return cell
+                
+            case .overview(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? OverviewCell
+                cell?.configure(with: vm)
+                return cell
+                
+            case .production(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? ProductionInfoCell
+                cell?.configure(with: vm)
+                return cell
+                
+            case .rateAndShare(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? RateAndShareCell
+                cell?.configure(with: vm)
+                return cell
+            }
         }
-        
-        return cell
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        if let size = cachedCollectionViewCellHeights[indexPath] {
-            return size
-        }
-        
-        let viewModel = viewModels[indexPath.row]
-        let width = collectionView.frame.width
-        
-        let size: CGSize
-        switch viewModel {
-        case let vm as MovieDetailsSubDetailsViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
-        case let vm as MediaDetailsBackdropImageViewModel: size = CGSize(width: width, height: vm.cellHeight)
-        case let vm as MediaDetailsTitleViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
-        case let vm as MediaDetailsWatchlistOverviewViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
-        case let vm as MediaDetailsCastListViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
-        case let vm as MediaDetailsProductionViewModel: size = CGSize(width: width - Constants.hSpacing, height: vm.cellHeight)
-        case let vm as MediaDetailsRateAndShareViewModel: size = CGSize(width: width - Constants.biggerHSpacing, height: vm.cellHeight)
-        default: return CGSize(width: width, height: Constants.cellDefaultHeight)
-        }
-        
-        cachedCollectionViewCellHeights[indexPath] = size
-        return size
     }
 }
 
@@ -186,30 +226,36 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         reviewCount: Int?
     ) {
         self.downloadingView.hide()
+        let backdropVM = BackdropImageCellViewModel(
+            imagePath: details.backdropPath, size: .w1280,
+            isBackButtonHidden: isFirstScreen, didTapBackButtonAction: presenter?.didTapBackButton
+        )
         
-        self.viewModels = [
-            MediaDetailsBackdropImageViewModel(
-                imagePath: details.backdropPath, size: .w1280,
-                isBackButtonHidden: isFirstScreen, didTapBackButtonAction: presenter?.didTapBackButton
-            ),
-            MediaDetailsTitleViewModel(movieName: details.title, movieTagline: details.tagline),
-            
-            MovieDetailsSubDetailsViewModel(
-                year: details.releaseDate, released: CMDateFormatter.isDatePassed(details.releaseDate),
-                duration: RuntimeHelper.runtime(details.runtime), imdbPath: details.imdbID,
-                didTapIMDB: presenter?.didTapIMDBImage, didTapSubDetails: presenter?.didTapToSubDetails
-            ),
-            
-            MediaDetailsWatchlistOverviewViewModel(movieOverview: details.overview),
-        ]
+        let titleVM = TitleAndTaglineCellViewModel(movieName: details.title, movieTagline: details.tagline)
+        let subDetailsVM = MovieDetailsSubDetailsCellViewModel(
+            year: details.releaseDate, released: CMDateFormatter.isDatePassed(details.releaseDate),
+            duration: RuntimeHelper.runtime(details.runtime), imdbPath: details.imdbID,
+            didTapIMDB: presenter?.didTapIMDBImage, didTapSubDetails: presenter?.didTapToSubDetails
+        )
         
-        !cast.isEmpty ? self.viewModels.append(MediaDetailsCastListViewModel(cast: cast, didSelectCast: presenter?.didSelectActor)) : ()
+        let overviewVM = OverviewCellViewModel(overviewText: details.overview)
         
-        self.viewModels.append(MediaDetailsProductionViewModel(companies: details.productionCompanies, countries: details.productionCountries))
-        self.viewModels.append(MediaDetailsRateAndShareViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton))
+        let castVM = CastListCellViewModel(cast: cast, didSelectCast: presenter?.didSelectActor)
+        let prodVM = ProductionInfoCellViewModel(companies: details.productionCompanies, countries: details.productionCountries)
+        let rateVM = RateAndShareCellViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton)
         
-        DispatchQueue.main.async {
-            self.collectionView.reloadData()
-        }
+        self.collectionView.applySnapshot(
+            sections: [.backdropImage, .titleAndTagline, .subDetails, .watchlistButton, .overview, .cast, .production, .rateAndShare],
+            itemsBySection: [
+                .backdropImage : [.backdropImage(backdropVM)],
+                .titleAndTagline : [.titleAndTagline(titleVM)],
+                .subDetails: [.subDetails(subDetailsVM)],
+                .watchlistButton: [.watchListButton],
+                .overview : [.overview(overviewVM)],
+                .cast : [.cast(castVM)],
+                .production : [.production(prodVM)],
+                .rateAndShare : [.rateAndShare(rateVM)]
+            ]
+        )
     }
 }

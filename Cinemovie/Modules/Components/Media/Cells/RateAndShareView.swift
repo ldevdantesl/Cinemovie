@@ -8,17 +8,25 @@
 import UIKit
 import SnapKit
 
-struct MediaDetailsRateAndShareViewModel: MediaDetailsCellViewModel {
-    let identifier: String = "MediaDetailsRateAndShareView"
+struct RateAndShareCellViewModel: CellViewModel, Hashable{
+    let id: String = UUID().uuidString
+    let cellIdentifier: String = "RateAndShareCell"
     
     let didTapShareButton: (() -> Void)?
     let didTapRateButton: (() -> Void)?
-    let cellHeight = 25.0
+    static let cellHeight = 25.0
+    
+    static func == (lhs: RateAndShareCellViewModel, rhs: RateAndShareCellViewModel) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
-final class MediaDetailsRateAndShareView: UICollectionViewCell {
-    // MARK: - STATIC
-    static let identifier = "MediaDetailsRateAndShareView"
+final class RateAndShareCell: UICollectionViewCell, ReusableCell {
+    typealias ViewModel = RateAndShareCellViewModel
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -27,7 +35,7 @@ final class MediaDetailsRateAndShareView: UICollectionViewCell {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: MediaDetailsRateAndShareViewModel?
+    private var viewModel: ViewModel?
     
     // MARK: - VIEW PROPERTIES
     private lazy var rateImageView: UIImageView = {
@@ -62,7 +70,7 @@ final class MediaDetailsRateAndShareView: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MediaDetailsRateAndShareViewModel) {
+    public func configure(with viewModel: ViewModel) {
         self.viewModel = viewModel
     }
     

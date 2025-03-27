@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 
 struct MediaListsHeaderCellViewModel: CellViewModel {
+    let id: String = UUID().uuidString
     var cellIdentifier: String = "MediaListsHeaderCell"
     let titleText: String
     let subtitleText: String

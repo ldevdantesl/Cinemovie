@@ -9,15 +9,12 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-struct MediaDetailsCastListCellViewModel {
+struct CastListItemCellViewModel: Hashable {
     let cast: Cast?
 }
 
-final class MediaDetailsCastListCell: UICollectionViewCell {
-    
-    // MARK: - STATIC
-    static let identifier = "MediaDetailsCastListCell"
-    
+final class CastListItemCell: UICollectionViewCell, ReusableCell {
+
     // MARK: - CONSTANTS
     fileprivate enum Paddings {
         static let imageViewTopPadding: CGFloat = 10
@@ -95,7 +92,7 @@ final class MediaDetailsCastListCell: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC METHOD
-    public func configure(viewModel: MediaDetailsCastListCellViewModel) {
+    public func configure(viewModel: CastListItemCellViewModel) {
         guard let cast = viewModel.cast else { return }
         
         self.nameLabel.text = cast.name

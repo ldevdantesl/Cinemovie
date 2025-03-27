@@ -8,8 +8,9 @@
 import UIKit
 import SnapKit
 
-struct MovieDetailsSubDetailsViewModel: MediaDetailsCellViewModel {
-    let identifier: String = "MovieDetailsSubDetailsView"
+struct MovieDetailsSubDetailsCellViewModel: CellViewModel, Hashable {
+    let id: String = UUID().uuidString
+    let cellIdentifier: String = "MovieDetailsSubDetailsCell"
     
     let year: String
     let released: Bool
@@ -17,7 +18,7 @@ struct MovieDetailsSubDetailsViewModel: MediaDetailsCellViewModel {
     let imdbPath: String?
     let didTapIMDB: (() -> Void)?
     let didTapSubDetails: ((UIView, String) -> Void)?
-    let cellHeight = 25.0
+    static let cellHeight = 25.0
     
     init(
         year: String, released: Bool, duration: String,
@@ -31,9 +32,17 @@ struct MovieDetailsSubDetailsViewModel: MediaDetailsCellViewModel {
         self.didTapIMDB = didTapIMDB
         self.didTapSubDetails = didTapSubDetails
     }
+    
+    static func == (lhs: MovieDetailsSubDetailsCellViewModel, rhs: MovieDetailsSubDetailsCellViewModel) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
-final class MovieDetailsSubDetailsView: UICollectionViewCell {
+final class MovieDetailsSubDetailsCell: UICollectionViewCell, ReusableCell {
 
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -41,11 +50,8 @@ final class MovieDetailsSubDetailsView: UICollectionViewCell {
         static let imdbImageSize: CGFloat = 25
     }
     
-    // MARK: - STATIC
-    static let identifier = "MovieDetailsSubDetailsView"
-    
     // MARK: - PROPERTIES
-    private var viewModel: MovieDetailsSubDetailsViewModel?
+    private var viewModel: MovieDetailsSubDetailsCellViewModel?
     
     // MARK: - VIEW PROPERTIES
     private lazy var hStackView: UIStackView = {
@@ -140,7 +146,7 @@ final class MovieDetailsSubDetailsView: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MovieDetailsSubDetailsViewModel) {
+    public func configure(viewModel: MovieDetailsSubDetailsCellViewModel) {
         self.viewModel = viewModel
         releaseYearLabel.text = CMDateFormatter.formatToYearOnly(dateString: viewModel.year)
         movieReleasedImageView.image = viewModel.released ?

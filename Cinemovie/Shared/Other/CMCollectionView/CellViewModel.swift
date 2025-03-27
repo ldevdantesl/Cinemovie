@@ -8,5 +8,6 @@
 import UIKit
 
 protocol CellViewModel {
+    var id: String { get }
     var cellIdentifier: String { get }
 }

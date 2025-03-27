@@ -8,7 +8,7 @@
 import Foundation
 
 // MARK: - Cast
-struct Cast: APIResponse {
+struct Cast: APIResponse, Hashable {
     let id: Int
     let castID: Int?
     let creditID: String

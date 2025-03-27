@@ -8,23 +8,22 @@
 import UIKit
 import SnapKit
 
-struct MediaDetailsProductionViewModel: MediaDetailsCellViewModel {
-    let identifier: String = "MediaDetailsProductionView"
-    
+struct ProductionInfoCellViewModel: CellViewModel, Hashable {
+    let id: String = UUID().uuidString
+    let cellIdentifier: String = "ProductionInfoCell"
     let companies: [ProductionCompany]
     let countries: [ProductionCountry]
-    let cellHeight = 50.0
+    static let cellHeight = 50.0
 }
 
-final class MediaDetailsProductionView: UICollectionViewCell {
+final class ProductionInfoCell: UICollectionViewCell, ReusableCell {
+    typealias ViewModel = ProductionInfoCellViewModel
+    
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let spacer = 5.0
         static let biggerSpacer = 10.0
     }
-    
-    // MARK: - STATIC
-    static let identifier = "MediaDetailsProductionView"
     
     // MARK: - PROPERTIES
     private let companiesLabel: UILabel = {
@@ -77,7 +76,7 @@ final class MediaDetailsProductionView: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: MediaDetailsProductionViewModel) {
+    public func configure(with viewModel: ViewModel) {
         let countriesStr = viewModel.countries.prefix(2).map(\.name).joined(separator: ", ")
         let companiesStr = viewModel.companies.filter { $0.name != nil }.prefix(2).map(\.name!).joined(separator: ", ")
         

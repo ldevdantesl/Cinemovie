@@ -8,9 +8,7 @@
 import UIKit
 
 protocol ReusableCell {
-    associatedtype ViewModel: CellViewModel
     static var identifier: String { get }
-    func configure(with viewModel: ViewModel)
 }
 
 extension ReusableCell {

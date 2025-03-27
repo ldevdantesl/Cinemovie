@@ -10,7 +10,7 @@ import SnapKit
 import SDWebImage
 
 struct FeaturedMediaCellViewModel: CellViewModel, Hashable {
-    let id = UUID()
+    let id: String = UUID().uuidString
     var cellIdentifier: String = "FeaturedMediaCell"
     let media: [Media]
     let changeInSeconds: TimeInterval
