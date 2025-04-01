@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Video: APIResponse {
+struct Video: APIResponse, Hashable {
     let iso639_1: String
     let iso3166_1: String
     let name, key: String

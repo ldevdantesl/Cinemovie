@@ -8,11 +8,14 @@
 import SnapKit
 import UIKit
 
-struct OverviewCellViewModel: CellViewModel, Hashable {
-    let id: String = UUID().uuidString
-    let cellIdentifier: String = "OverviewCell"
+final class OverviewCellViewModel: CellViewModelBaseClass {
     let overviewText: String?
     static let estimatedCellHeight = 200.0
+    
+    init(overviewText: String?) {
+        self.overviewText = overviewText
+        super.init(cellIdentifier: "OverviewCell")
+    }
 }
 
 final class OverviewCell: UICollectionViewCell, ReusableCell {

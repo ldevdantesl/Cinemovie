@@ -17,9 +17,9 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
 
     func didRecieveError(_ errorStr: String)
     func didDownloadAllData(
-        details: MovieDetails, videos: [Video]?,
+        details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
-        recommends: [Movie]?, reviews: [Review]?,
+        similar: [Movie], reviews: [Review],
         reviewCount: Int?
     )
 }
@@ -44,6 +44,7 @@ final class MovieDetailsScreenVC: UIViewController {
         case cast
         case production
         case rateAndShare
+        case mediaExtras
     }
     
     private enum MovieDetailsItems: Hashable {
@@ -55,6 +56,7 @@ final class MovieDetailsScreenVC: UIViewController {
         case cast(CastListCellViewModel)
         case production(ProductionInfoCellViewModel)
         case rateAndShare(RateAndShareCellViewModel)
+        case mediaExtras(MediaExtrasCellViewModel)
     }
     
     // MARK: - VIPER
@@ -64,7 +66,7 @@ final class MovieDetailsScreenVC: UIViewController {
     var activePopUpView: MediaDetailsActorPopupView?
     
     // MARK: - PROPERTIES
-    private var viewModels: [CellViewModel] = []
+    private var viewModels: [CellViewModelBaseClass] = []
     private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
     
     // MARK: - VIEW PROPERTIES
@@ -74,8 +76,8 @@ final class MovieDetailsScreenVC: UIViewController {
         return view
     }()
     
-    private lazy var collectionView: CMCollectionView = {
-        let cv = CMCollectionView<MovieDetailsSection, MovieDetailsItems>(layout: createLayout())
+    private lazy var collectionView: DiffableCollectionView = {
+        let cv = DiffableCollectionView<MovieDetailsSection, MovieDetailsItems>(layout: createLayout())
         cv.backgroundColor = CMColor.cmBackground
         cv.register(cellClass: MovieDetailsSubDetailsCell.self)
         cv.register(cellClass: WatchlistButtonCell.self)
@@ -85,6 +87,7 @@ final class MovieDetailsScreenVC: UIViewController {
         cv.register(cellClass: BackdropImageCell.self)
         cv.register(cellClass: TitleAndTaglineCell.self)
         cv.register(cellClass: CastListCell.self)
+        cv.register(cellClass: MediaExtrasCell.self)
         cv.translatesAutoresizingMaskIntoConstraints = false
         return cv
     }()
@@ -136,6 +139,7 @@ final class MovieDetailsScreenVC: UIViewController {
             var isBackdropImageSection: Bool = false
             
             switch section {
+            case .mediaExtras: itemHeightDimension = .estimated(500); heightDimension = itemHeightDimension
             case .backdropImage: heightDimension = .absolute(BackdropImageCellViewModel.cellHeight); isBackdropImageSection = true
             case .titleAndTagline: heightDimension = .estimated(TitleAndTaglineCellViewModel.estimatedCellHeight); itemHeightDimension = .estimated(50)
             case .subDetails: heightDimension = .absolute(MovieDetailsSubDetailsCellViewModel.cellHeight)
@@ -157,6 +161,11 @@ final class MovieDetailsScreenVC: UIViewController {
     private func configureDataSource() {
         collectionView.configureDataSource { collectionView, indexPath, itemIdentifier in
             switch itemIdentifier {
+            case .mediaExtras(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? MediaExtrasCell
+                cell?.configure(viewModel: vm)
+                return cell
+                
             case .backdropImage(let vm):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? BackdropImageCell
                 cell?.configure(with: vm)
@@ -220,9 +229,9 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
     }
     
     func didDownloadAllData(
-        details: MovieDetails, videos: [Video]?,
+        details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
-        recommends: [Movie]?, reviews: [Review]?,
+        similar: [Movie], reviews: [Review],
         reviewCount: Int?
     ) {
         self.downloadingView.hide()
@@ -243,9 +252,10 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         let castVM = CastListCellViewModel(cast: cast, didSelectCast: presenter?.didSelectActor)
         let prodVM = ProductionInfoCellViewModel(companies: details.productionCompanies, countries: details.productionCountries)
         let rateVM = RateAndShareCellViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton)
+        let extrasVM = MediaExtrasCellViewModel(seasons: [], belongsToCollection: details.belongsToCollection, similar: similar, videos: videos, reviews: reviews)
         
         self.collectionView.applySnapshot(
-            sections: [.backdropImage, .titleAndTagline, .subDetails, .watchlistButton, .overview, .cast, .production, .rateAndShare],
+            sections: [.backdropImage, .titleAndTagline, .subDetails, .watchlistButton, .overview, .cast, .production, .rateAndShare, .mediaExtras],
             itemsBySection: [
                 .backdropImage : [.backdropImage(backdropVM)],
                 .titleAndTagline : [.titleAndTagline(titleVM)],
@@ -254,7 +264,8 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
                 .overview : [.overview(overviewVM)],
                 .cast : [.cast(castVM)],
                 .production : [.production(prodVM)],
-                .rateAndShare : [.rateAndShare(rateVM)]
+                .rateAndShare : [.rateAndShare(rateVM)],
+                .mediaExtras : [.mediaExtras(extrasVM)]
             ]
         )
     }

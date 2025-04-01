@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class CMCollectionView<Section: Hashable, Item: Hashable>: UICollectionView, UICollectionViewDelegate {
+final class DiffableCollectionView<Section: Hashable, Item: Hashable>: UICollectionView, UICollectionViewDelegate {
     // MARK: - TYPEALIASES
     typealias DataSource = UICollectionViewDiffableDataSource<Section, Item>
     
@@ -52,6 +52,14 @@ final class CMCollectionView<Section: Hashable, Item: Hashable>: UICollectionVie
             snapshot.appendItems(itemsBySection[section] ?? [], toSection: section)
         }
         diffableDataSource.apply(snapshot, animatingDifferences: true)
+    }
+    
+    public func applySnapshot(snapshot: NSDiffableDataSourceSnapshot<Section, Item>) {
+        diffableDataSource.apply(snapshot, animatingDifferences: true)
+    }
+    
+    public func snapshot() -> NSDiffableDataSourceSnapshot<Section, Item> {
+        return diffableDataSource.snapshot()
     }
     
     public func register<Cell: UICollectionViewCell & ReusableCell>(cellClass: Cell.Type) {

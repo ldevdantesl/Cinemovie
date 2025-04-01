@@ -8,10 +8,7 @@
 import UIKit
 import SnapKit
 
-struct MovieDetailsSubDetailsCellViewModel: CellViewModel, Hashable {
-    let id: String = UUID().uuidString
-    let cellIdentifier: String = "MovieDetailsSubDetailsCell"
-    
+final class MovieDetailsSubDetailsCellViewModel: CellViewModelBaseClass {
     let year: String
     let released: Bool
     let duration: String
@@ -31,14 +28,7 @@ struct MovieDetailsSubDetailsCellViewModel: CellViewModel, Hashable {
         self.imdbPath = imdbPath
         self.didTapIMDB = didTapIMDB
         self.didTapSubDetails = didTapSubDetails
-    }
-    
-    static func == (lhs: MovieDetailsSubDetailsCellViewModel, rhs: MovieDetailsSubDetailsCellViewModel) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        super.init(cellIdentifier: "MovieDetailsSubDetailsCell")
     }
 }
 

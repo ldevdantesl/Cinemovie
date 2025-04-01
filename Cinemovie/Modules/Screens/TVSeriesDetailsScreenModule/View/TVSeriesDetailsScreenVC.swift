@@ -35,7 +35,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
     var activeActorPopUpView: MediaDetailsActorPopupView?
     
     // MARK: - PROPERTIES
-    private var viewModels: [CellViewModel] = []
+    private var viewModels: [CellViewModelBaseClass] = []
     private var cachedCollectionViewCellHeights: [IndexPath : CGSize] = [:]
     private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
     

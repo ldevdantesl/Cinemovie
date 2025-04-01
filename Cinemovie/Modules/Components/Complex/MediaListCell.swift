@@ -8,9 +8,7 @@
 import UIKit
 import SnapKit
 
-struct MediaListCellViewModel: CellViewModel, Hashable {
-    let id: String = UUID().uuidString
-    let cellIdentifier: String = "MediaListCell"
+final class MediaListCellViewModel: CellViewModelBaseClass {
     let listName: String
     let listSubtitle: String?
     let mediaItems: [Media]
@@ -22,14 +20,7 @@ struct MediaListCellViewModel: CellViewModel, Hashable {
         self.listName = listName
         self.listSubtitle = listSubtitle
         self.didTapMediaItem = didTapMediaItem
-    }
-    
-    static func == (lhs: MediaListCellViewModel, rhs: MediaListCellViewModel) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        super.init(cellIdentifier: "MediaListCell")
     }
 }
 
@@ -66,13 +57,13 @@ final class MediaListCell: UICollectionViewCell, ReusableCell {
         return label
     }()
     
-    private lazy var collectionView: CMCollectionView = {
+    private lazy var collectionView: DiffableCollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumInteritemSpacing = 10
         layout.itemSize = CGSize(width: Constants.itemWidth, height: Constants.itemHeight)
         
-        let view = CMCollectionView<MediaListSection, MediaPosterImageCellViewModel>(layout: layout)
+        let view = DiffableCollectionView<MediaListSection, MediaPosterImageCellViewModel>(layout: layout)
         view.showsHorizontalScrollIndicator = false
         view.backgroundColor = CMColor.cmBackground
         view.register(cellClass: MediaPosterImageCell.self)
@@ -131,12 +122,6 @@ final class MediaListCell: UICollectionViewCell, ReusableCell {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.cellIdentifier, for: indexPath) as? MediaPosterImageCell
             cell?.configure(with: viewModel)
             return cell
-        }
-        
-        collectionView.setDidSelectHandler { indexPath in
-            guard let viewModel = self.viewModel else { return }
-            let item = viewModel.mediaItems[indexPath.row]
-            viewModel.didTapMediaItem?(item)
         }
     }
 }

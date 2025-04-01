@@ -8,23 +8,14 @@
 import SnapKit
 import UIKit
 
-struct MediaPosterImageCellViewModel: CellViewModel, Hashable {
-    let id = UUID().uuidString
-    let cellIdentifier: String = "MediaPosterImageCell"
+final class MediaPosterImageCellViewModel: CellViewModelBaseClass {
     let media: Media
     let didTapMedia: ((Media) -> Void)?
     
     init(media: Media, didTapMedia: ((Media) -> Void)? = nil) {
         self.media = media
         self.didTapMedia = didTapMedia
-    }
-    
-    static func == (lhs: MediaPosterImageCellViewModel, rhs: MediaPosterImageCellViewModel) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        super.init(cellIdentifier: "MediaPosterImageCell")
     }
 }
 

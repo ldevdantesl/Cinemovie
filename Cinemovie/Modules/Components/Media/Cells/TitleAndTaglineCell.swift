@@ -8,10 +8,7 @@
 import UIKit
 import SnapKit
 
-struct TitleAndTaglineCellViewModel: CellViewModel, Hashable {
-    let id: String = UUID().uuidString
-    let cellIdentifier: String = "TitleAndTaglineCell"
-    
+final class TitleAndTaglineCellViewModel: CellViewModelBaseClass {
     let movieName: String
     let movieTagline: String
     static let estimatedCellHeight: CGFloat = 70.0
@@ -19,6 +16,7 @@ struct TitleAndTaglineCellViewModel: CellViewModel, Hashable {
     init(movieName: String, movieTagline: String) {
         self.movieName = movieName
         self.movieTagline = CMTextFormatter.formatToCleanString(movieTagline)
+        super.init(cellIdentifier: "TitleAndTaglineCell")
     }
 }
 

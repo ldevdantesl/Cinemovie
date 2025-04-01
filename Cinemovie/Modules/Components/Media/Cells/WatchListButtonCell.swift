@@ -8,12 +8,12 @@
 import UIKit
 import SnapKit
 
-struct WatchlistButtonCellViewModel: CellViewModel {
-    let id: String = UUID().uuidString
-    let cellIdentifier: String = "WatchlistButtonCell"
+final class WatchlistButtonCellViewModel: CellViewModelBaseClass {
     static let absoluteCellHeight = 40.0
     
-    init() { }
+    init() {
+        super.init(cellIdentifier: "WatchlistButtonCell")
+    }
 }
 
 final class WatchlistButtonCell: UICollectionViewCell, ReusableCell {

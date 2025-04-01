@@ -8,9 +8,7 @@
 import UIKit
 import SnapKit
 
-struct CastListCellViewModel: CellViewModel, Hashable {
-    let id: String = UUID().uuidString
-    let cellIdentifier: String = "CastListCell"
+final class CastListCellViewModel: CellViewModelBaseClass {
     let cast: [Cast]
     let didSelectCast: ((Cast) -> Void)?
     static let cellHeight = 130.0
@@ -18,14 +16,7 @@ struct CastListCellViewModel: CellViewModel, Hashable {
     init(cast: [Cast], didSelectCast: ((Cast) -> Void)?) {
         self.cast = cast
         self.didSelectCast = didSelectCast
-    }
-    
-    static func == (lhs: CastListCellViewModel, rhs: CastListCellViewModel) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        super.init(cellIdentifier: "CastListCell")
     }
 }
 
@@ -56,13 +47,13 @@ final class CastListCell: UICollectionViewCell, ReusableCell {
         return label
     }()
     
-    private lazy var collectionView: CMCollectionView = {
+    private lazy var collectionView: DiffableCollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = Constants.hSpacing
         layout.itemSize = CGSize(width: Constants.itemWidth, height: Constants.itemHeight)
         
-        let cv = CMCollectionView<CastListSection, CastListItemCellViewModel>(layout: layout)
+        let cv = DiffableCollectionView<CastListSection, CastListItemCellViewModel>(layout: layout)
         cv.showsHorizontalScrollIndicator = false
         cv.backgroundColor = CMColor.cmBackground
         cv.register(cellClass: CastListItemCell.self)
@@ -87,7 +78,7 @@ final class CastListCell: UICollectionViewCell, ReusableCell {
         self.viewModel = viewModel
         self.collectionView.applySnapshot(
             sections: [.main],
-            itemsBySection: [.main: viewModel.cast.map { CastListItemCellViewModel(cast: $0) }]
+            itemsBySection: [.main: viewModel.cast.map { CastListItemCellViewModel(cast: $0, didTapCast: viewModel.didSelectCast) }]
         )
     }
     
@@ -113,11 +104,6 @@ final class CastListCell: UICollectionViewCell, ReusableCell {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CastListItemCell.identifier, for: indexPath) as? CastListItemCell
             cell?.configure(viewModel: viewModel)
             return cell
-        }
-        
-        collectionView.setDidSelectHandler { indexPath in
-            guard let vm = self.viewModel else { return }
-            vm.didSelectCast?(vm.cast[indexPath.row])
         }
     }
 }

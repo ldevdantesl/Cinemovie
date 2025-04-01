@@ -9,9 +9,7 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-struct FeaturedMediaCellViewModel: CellViewModel, Hashable {
-    let id: String = UUID().uuidString
-    var cellIdentifier: String = "FeaturedMediaCell"
+final class FeaturedMediaCellViewModel: CellViewModelBaseClass {
     let media: [Media]
     let changeInSeconds: TimeInterval
     let didTapMedia: ((Media) -> Void)?
@@ -20,14 +18,7 @@ struct FeaturedMediaCellViewModel: CellViewModel, Hashable {
         self.media = media
         self.changeInSeconds = changeInSeconds
         self.didTapMedia = didTapMedia
-    }
-    
-    static func == (lhs: FeaturedMediaCellViewModel, rhs: FeaturedMediaCellViewModel) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        super.init(cellIdentifier: "FeaturedMediaCell")
     }
 }
 

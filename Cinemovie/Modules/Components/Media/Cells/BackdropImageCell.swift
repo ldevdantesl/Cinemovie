@@ -9,9 +9,7 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-struct BackdropImageCellViewModel: CellViewModel, Hashable {
-    let id = UUID().uuidString
-    let cellIdentifier: String = "BackdropImageCell"
+final class BackdropImageCellViewModel: CellViewModelBaseClass {
     let imageURL: URL?
     let didTapBackButtonAction: (() -> Void)?
     let isBackButtonHidden: Bool
@@ -21,14 +19,7 @@ struct BackdropImageCellViewModel: CellViewModel, Hashable {
         self.imageURL = URLHelper.getImageURL(with: imagePath, size: size)
         self.didTapBackButtonAction = didTapBackButtonAction
         self.isBackButtonHidden = isBackButtonHidden
-    }
-    
-    static func == (lhs: BackdropImageCellViewModel, rhs: BackdropImageCellViewModel) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        super.init(cellIdentifier: "BackdropImageCell")
     }
 }
 

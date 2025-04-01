@@ -21,7 +21,7 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didGetMovieDetails(_ details: MovieDetails)
     func didRecieveError(_ error: String)
     func didGetMovieCast(cast: [Cast], crew: [Cast])
-    func didGetMovieRecommendations(queryMovies: [Movie])
+    func didGetMovieSimilars(queryMovies: [Movie])
     func didGetMovieVideos(videos: [Video])
     func didGetMovieReviews(_ reviews: [Review], reviewCount: Int)
 }
@@ -36,11 +36,11 @@ final class MovieDetailsScreenPresenter {
     private let dispatchGroup = DispatchGroup()
     
     private var movieDetails: MovieDetails?
-    private var movieVideos: [Video]?
+    private var movieVideos: [Video] = []
     private var movieCast: [Cast] = []
     private var movieCrew: [Cast] = []
-    private var movieRecommends: [Movie]?
-    private var movieReviews: [Review]?
+    private var movieSimilars: [Movie] = []
+    private var movieReviews: [Review] = []
     private var movieReviewCount: Int?
 
     init(movieID: Int, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
@@ -59,14 +59,14 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         dispatchGroup.enter()
         interactor.getMovieCast(movieID: movieID)
         
-//        dispatchGroup.enter()
-//        interactor.getMovieRecommendations(movieID: movieID)
-//        
-//        dispatchGroup.enter()
-//        interactor.getMovieVideos(movieID: movieID)
-//        
-//        dispatchGroup.enter()
-//        interactor.getMovieReviews(movieID: movieID)
+        dispatchGroup.enter()
+        interactor.getMovieSimilars(movieID: movieID)
+        
+        dispatchGroup.enter()
+        interactor.getMovieVideos(movieID: movieID)
+        
+        dispatchGroup.enter()
+        interactor.getMovieReviews(movieID: movieID)
         
         dispatchGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
@@ -74,7 +74,7 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
             self.view?.didDownloadAllData(
                 details: details, videos: movieVideos,
                 cast: movieCast, crew: movieCrew,
-                recommends: movieRecommends, reviews: movieReviews,
+                similar: movieSimilars, reviews: movieReviews,
                 reviewCount: movieReviewCount
             )
         }
@@ -94,7 +94,7 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     }
     
     func didTapRateButton() {
-        print("DID tap rate button")
+        print("Did tap rate button")
     }
     
     func didTapShareButton() {
@@ -128,8 +128,8 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         dispatchGroup.leave()
     }
     
-    func didGetMovieRecommendations(queryMovies: [Movie]) {
-        movieRecommends = queryMovies
+    func didGetMovieSimilars(queryMovies: [Movie]) {
+        movieSimilars = queryMovies
         dispatchGroup.leave()
     }
     

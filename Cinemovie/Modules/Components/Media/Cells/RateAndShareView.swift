@@ -8,20 +8,15 @@
 import UIKit
 import SnapKit
 
-struct RateAndShareCellViewModel: CellViewModel, Hashable{
-    let id: String = UUID().uuidString
-    let cellIdentifier: String = "RateAndShareCell"
-    
+final class RateAndShareCellViewModel: CellViewModelBaseClass {
     let didTapShareButton: (() -> Void)?
     let didTapRateButton: (() -> Void)?
     static let cellHeight = 25.0
     
-    static func == (lhs: RateAndShareCellViewModel, rhs: RateAndShareCellViewModel) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+    init(didTapShareButton: (() -> Void)?, didTapRateButton: (() -> Void)?) {
+        self.didTapShareButton = didTapShareButton
+        self.didTapRateButton = didTapRateButton
+        super.init(cellIdentifier: "RateAndShareCell")
     }
 }
 

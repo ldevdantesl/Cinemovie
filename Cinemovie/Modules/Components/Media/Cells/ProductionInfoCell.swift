@@ -8,12 +8,16 @@
 import UIKit
 import SnapKit
 
-struct ProductionInfoCellViewModel: CellViewModel, Hashable {
-    let id: String = UUID().uuidString
-    let cellIdentifier: String = "ProductionInfoCell"
+final class ProductionInfoCellViewModel: CellViewModelBaseClass {
     let companies: [ProductionCompany]
     let countries: [ProductionCountry]
     static let cellHeight = 50.0
+    
+    init(companies: [ProductionCompany], countries: [ProductionCountry]) {
+        self.companies = companies
+        self.countries = countries
+        super.init(cellIdentifier: "ProductionInfoCell")
+    }
 }
 
 final class ProductionInfoCell: UICollectionViewCell, ReusableCell {

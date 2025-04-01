@@ -8,11 +8,7 @@
 import UIKit
 import SnapKit
 
-struct TVSeriesDetailsSubDetailsViewModel: CellViewModel {
-    let id: String = UUID().uuidString
-    
-    let cellIdentifier: String = "TVSeriesDetailsSubDetailsView"
-    
+final class TVSeriesDetailsSubDetailsViewModel: CellViewModelBaseClass {
     let firstAirDate: String
     let status: TVSeriesStatus
     let numberOfSeasons: Int
@@ -36,6 +32,7 @@ struct TVSeriesDetailsSubDetailsViewModel: CellViewModel {
         self.didTapView = didTapView
         self.homepage = nil
         self.didTapHomepage = nil
+        super.init(cellIdentifier: "TVSeriesDetailsSubDetailsView")
     }
     
     init(
@@ -53,6 +50,7 @@ struct TVSeriesDetailsSubDetailsViewModel: CellViewModel {
         self.didTapView = didTapView
         self.homepage = homepage
         self.didTapHomepage = didTapHomepage
+        super.init(cellIdentifier: "TVSeriesDetailsSubDetailsView")
     }
 }
 

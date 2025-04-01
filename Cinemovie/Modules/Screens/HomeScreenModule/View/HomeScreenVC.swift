@@ -79,13 +79,13 @@ final class HomeScreenVC: UIViewController {
     var presenter: HomeScreenPresenterProtocol?
     
     // MARK: - PROPERTIES
-    private var viewModels: [CellViewModel] = []
+    private var viewModels: [CellViewModelBaseClass] = []
     private var headerViewHeightConstraint: Constraint?
     private var isBlurToHeaderVisible: Bool = false
     
     // MARK: - VIEW PROPERTIES
-    private lazy var collectionView: CMCollectionView = {
-        let view = CMCollectionView<HomeSection, HomeItem>(layout: createLayout())
+    private lazy var collectionView: DiffableCollectionView = {
+        let view = DiffableCollectionView<HomeSection, HomeItem>(layout: createLayout())
         view.register(cellClass: FeaturedMediaCell.self)
         view.register(cellClass: MediaListCell.self)
         view.delegate = self

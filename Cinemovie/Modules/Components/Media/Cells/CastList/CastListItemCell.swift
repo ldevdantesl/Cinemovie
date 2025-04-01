@@ -9,8 +9,15 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-struct CastListItemCellViewModel: Hashable {
+final class CastListItemCellViewModel: CellViewModelBaseClass {
     let cast: Cast?
+    let didTapCast: ((Cast) -> Void)?
+
+    init(cast: Cast?, didTapCast: ((Cast) -> Void)?) {
+        self.cast = cast
+        self.didTapCast = didTapCast
+        super.init(cellIdentifier: "CastListItemCell")
+    }
 }
 
 final class CastListItemCell: UICollectionViewCell, ReusableCell {
@@ -34,6 +41,8 @@ final class CastListItemCell: UICollectionViewCell, ReusableCell {
     }
     
     // MARK: - PROPERTIES
+    private var viewModel: CastListItemCellViewModel?
+    
     private lazy var loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
         indicator.hidesWhenStopped = true
@@ -45,6 +54,8 @@ final class CastListItemCell: UICollectionViewCell, ReusableCell {
         let imageView = UIImageView()
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.isUserInteractionEnabled = true
+        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didSelectCast)))
         return imageView
     }()
     
@@ -93,6 +104,7 @@ final class CastListItemCell: UICollectionViewCell, ReusableCell {
     
     // MARK: - PUBLIC METHOD
     public func configure(viewModel: CastListItemCellViewModel) {
+        self.viewModel = viewModel
         guard let cast = viewModel.cast else { return }
         
         self.nameLabel.text = cast.name
@@ -106,6 +118,7 @@ final class CastListItemCell: UICollectionViewCell, ReusableCell {
             self.avatarImageView.backgroundColor = CMColor.cmSecondaryBackground
             return
         }
+        
         self.loadingIndicator.startAnimating()
         self.avatarImageView.contentMode = .scaleAspectFill
         self.avatarImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
@@ -145,5 +158,12 @@ final class CastListItemCell: UICollectionViewCell, ReusableCell {
             $0.width.lessThanOrEqualTo(Constants.imageSize)
             $0.bottom.equalToSuperview()
         }
+    }
+    
+    // MARK: - OBJC FUNC
+    @objc private func didSelectCast() {
+        print("Tapped select Cast")
+        guard let viewModel = viewModel, let cast = viewModel.cast else { return }
+        viewModel.didTapCast?(cast)
     }
 }
