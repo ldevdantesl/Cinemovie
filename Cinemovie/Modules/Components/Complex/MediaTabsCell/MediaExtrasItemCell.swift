@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-final class MediaExtrasItemCell: UICollectionViewCell, ReusableCell {
+final class MediaExtrasItemCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let topBarHeight = 5.0

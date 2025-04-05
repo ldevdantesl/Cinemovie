@@ -32,7 +32,7 @@ final class MovieDetailsSubDetailsCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class MovieDetailsSubDetailsCell: UICollectionViewCell, ReusableCell {
+final class MovieDetailsSubDetailsCell: ReusableCellBaseClass {
 
     // MARK: - CONSTANTS
     fileprivate enum Constants {

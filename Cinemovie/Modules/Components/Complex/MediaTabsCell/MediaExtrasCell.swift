@@ -26,15 +26,17 @@ final class MediaExtrasCellViewModel: CellViewModelBaseClass {
 }
 
 
-final class MediaExtrasCell: UICollectionViewCell, ReusableCell {
+final class MediaExtrasCell: ReusableCellBaseClass {
     private enum TabNames: String, CaseIterable {
         case similar = "Similar"
+        
     }
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let itemSpacing = 30.0
         static let spacing = 10.0
+        static let tabsHeight = 50.0
     }
     
     // MARK: - PROPERTIES
@@ -62,19 +64,19 @@ final class MediaExtrasCell: UICollectionViewCell, ReusableCell {
     private lazy var contentCollectionView: UICollectionView = {
         let layout = UICollectionViewCompositionalLayout { sectionIndex, environment in
             let itemSize = NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1.0),
-                heightDimension: .estimated(405)
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .fractionalHeight(1)
             )
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
             let groupSize = NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1.0),
-                heightDimension: .estimated(405)
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .fractionalHeight(1)
             )
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 
             let section = NSCollectionLayoutSection(group: group)
-            section.interGroupSpacing = 10
+            section.interGroupSpacing = Constants.spacing
             return section
         }
         
@@ -100,7 +102,8 @@ final class MediaExtrasCell: UICollectionViewCell, ReusableCell {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: MediaExtrasCellViewModel) {
         self.viewModel = viewModel
-        let similarVM = SimilarTabContentCellViewModel(media: viewModel.similar)
+        let similarMedia = Array(viewModel.similar.prefix(9))
+        let similarVM = SimilarTabContentCellViewModel(media: similarMedia)
         self.items = [similarVM]
         self.tabItems = [0 : similarVM]
         contentCollectionView.reloadData()
@@ -111,12 +114,14 @@ final class MediaExtrasCell: UICollectionViewCell, ReusableCell {
         addSubview(tabsCollectionView)
         tabsCollectionView.snp.makeConstraints {
             $0.top.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(Constants.tabsHeight)
         }
         
         addSubview(contentCollectionView)
         contentCollectionView.snp.makeConstraints {
-            $0.top.equalTo(tabsCollectionView.snp.bottom)
-            $0.horizontalEdges.bottom.equalToSuperview()
+            $0.top.equalTo(tabsCollectionView.snp.bottom).offset(Constants.spacing)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview()
         }
     }
 }

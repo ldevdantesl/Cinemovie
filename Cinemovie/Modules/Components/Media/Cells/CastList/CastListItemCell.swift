@@ -20,7 +20,7 @@ final class CastListItemCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class CastListItemCell: UICollectionViewCell, ReusableCell {
+final class CastListItemCell: ReusableCellBaseClass {
 
     // MARK: - CONSTANTS
     fileprivate enum Paddings {

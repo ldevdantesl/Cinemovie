@@ -22,7 +22,7 @@ final class FeaturedMediaCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class FeaturedMediaCell: UICollectionViewCell, ReusableCell {
+final class FeaturedMediaCell: ReusableCellBaseClass {
     typealias ViewModel = FeaturedMediaCellViewModel
     
     // MARK: - CONSTANTS

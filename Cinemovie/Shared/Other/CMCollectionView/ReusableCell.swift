@@ -7,12 +7,11 @@
 
 import UIKit
 
-protocol ReusableCell {
-    static var identifier: String { get }
+open class ReusableCellBaseClass: UICollectionViewCell {
+    static var identifier: String {
+        return String(describing: self)
+    }
+   
+    
 }
 
-extension ReusableCell {
-    static var identifier: String {
-        return String(describing: Self.self)
-    }
-}

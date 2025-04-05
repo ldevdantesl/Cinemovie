@@ -17,25 +17,16 @@ final class SimilarTabContentCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class SimilarTabContentCell: UICollectionViewCell, ReusableCell {
+final class SimilarTabContentCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants { }
-    
-    private enum Sections {
-        case main
-    }
     
     // MARK: - PROPERTIES
     private var viewModel: SimilarTabContentCellViewModel?
     
     // MARK: - VIEW PROPERTIES
     private lazy var gridCollectionView: DiffableCollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .vertical
-        layout.minimumInteritemSpacing = 10
-        layout.itemSize = CGSize(width: 120, height: 180)
-        
-        let view = DiffableCollectionView<Sections, MediaPosterImageCellViewModel>(layout: layout)
+        let view = DiffableCollectionView<Int, MediaPosterImageCellViewModel>(layout: createLayout())
         view.backgroundColor = CMColor.cmAccent
         view.register(cellClass: MediaPosterImageCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -58,9 +49,9 @@ final class SimilarTabContentCell: UICollectionViewCell, ReusableCell {
     public func configure(viewModel: SimilarTabContentCellViewModel) {
         self.viewModel = viewModel
         gridCollectionView.applySnapshot(
-            sections: [.main],
+            sections: [0],
             itemsBySection: [
-                .main : viewModel.media.map { MediaPosterImageCellViewModel(media: $0) }
+                0 : viewModel.media.map { MediaPosterImageCellViewModel(media: $0) }
             ]
         )
     }
@@ -75,10 +66,11 @@ final class SimilarTabContentCell: UICollectionViewCell, ReusableCell {
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
         return UICollectionViewCompositionalLayout { sectionIndex, env in
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1/3), heightDimension: .absolute(100)))
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(100)), subitem: item, count: 3)
+            let itemWidth = (UIConstants.screenWidth / 3) - 40
+            let itemHeight = itemWidth * 1.6
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .absolute(itemWidth), heightDimension: .absolute(itemHeight)))
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(itemHeight)), subitem: item, count: 3)
             group.interItemSpacing = .fixed(10)
-            
             let vgroup = NSCollectionLayoutGroup.vertical(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1)), subitem: group, count: 3)
             vgroup.interItemSpacing = .fixed(10)
             return NSCollectionLayoutSection(group: vgroup)

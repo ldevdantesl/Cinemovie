@@ -20,7 +20,7 @@ final class CastListCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class CastListCell: UICollectionViewCell, ReusableCell {
+final class CastListCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let spacing: CGFloat = 5

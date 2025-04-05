@@ -16,7 +16,7 @@ final class WatchlistButtonCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class WatchlistButtonCell: UICollectionViewCell, ReusableCell {
+final class WatchlistButtonCell: ReusableCellBaseClass {
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {

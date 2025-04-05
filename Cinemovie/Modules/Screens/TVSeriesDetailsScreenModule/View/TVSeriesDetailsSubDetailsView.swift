@@ -54,7 +54,7 @@ final class TVSeriesDetailsSubDetailsViewModel: CellViewModelBaseClass {
     }
 }
 
-final class TVSeriesDetailsSubDetailsView: UICollectionViewCell, ReusableCell {
+final class TVSeriesDetailsSubDetailsView: ReusableCellBaseClass {
 
     // MARK: - CONSTANTS
     fileprivate enum Constants {
