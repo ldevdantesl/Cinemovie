@@ -35,8 +35,11 @@ final class MediaExtrasCellViewModel: CellViewModelBaseClass {
 
 final class MediaExtrasCell: ReusableCellBaseClass {
     private enum TabNames: String, CaseIterable {
+        case seasons = "Seasons"
+        case collection = "Collection"
         case similar = "Similar"
         case trailers = "Trailers"
+        case reviews = "Reviews"
     }
     
     // MARK: - CONSTANTS
@@ -63,7 +66,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         view.backgroundColor = CMColor.cmBackground
         view.delegate = self
         view.dataSource = self
-        view.register(MediaExtrasItemCell.self, forCellWithReuseIdentifier: MediaExtrasItemCell.identifier)
+        view.register(MediaExtrasTabItemCell.self, forCellWithReuseIdentifier: MediaExtrasTabItemCell.identifier)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -221,7 +224,7 @@ extension MediaExtrasCell: UICollectionViewDataSource, UICollectionViewDelegate 
             return cell
         } else {
             let tab = TabNames.allCases[indexPath.row]
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MediaExtrasItemCell.identifier, for: indexPath) as? MediaExtrasItemCell else { return UICollectionViewCell() }
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MediaExtrasTabItemCell.identifier, for: indexPath) as? MediaExtrasTabItemCell else { return UICollectionViewCell() }
             cell.configure(text: tab.rawValue, isSelected: indexPath.row == selectedTab)
             return cell
         }
