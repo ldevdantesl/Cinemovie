@@ -12,6 +12,7 @@ protocol MovieDetailsScreenRouterProtocol {
     func goBack()
     func navigateToPersonDetails(creditID: String)
     func navigateToAnotherMovie(movie: Movie)
+    func navigateToSeries(series: TVSeries)
     func presentShareView(movie: MovieDetails)
     func showActorPopUp(actor: Cast)
     func showTooltipView(sendedBy view: UIView, message: String)
@@ -23,6 +24,11 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
     
     init(tmdbService: TMDBService?) {
         self.tmdbService = tmdbService
+    }
+    
+    func navigateToSeries(series: TVSeries) {
+        let seriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, tmdbService: tmdbService)
+        viewController?.navigationController?.pushViewController(seriesDetails, animated: true)
     }
     
     func navigateToAnotherMovie(movie: Movie) {

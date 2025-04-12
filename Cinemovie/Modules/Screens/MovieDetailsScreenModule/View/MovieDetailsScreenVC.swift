@@ -35,7 +35,7 @@ final class MovieDetailsScreenVC: UIViewController {
         static let cellDefaultHeight = 120.0
     }
     
-    private enum MovieDetailsSection: CaseIterable, Hashable {
+    fileprivate enum Sections: CaseIterable, Hashable {
         case backdropImage
         case titleAndTagline
         case subDetails
@@ -47,7 +47,7 @@ final class MovieDetailsScreenVC: UIViewController {
         case mediaExtras
     }
     
-    private enum MovieDetailsItems: Hashable {
+    fileprivate enum Items: Hashable {
         case backdropImage(BackdropImageCellViewModel)
         case titleAndTagline(TitleAndTaglineCellViewModel)
         case subDetails(MovieDetailsSubDetailsCellViewModel)
@@ -77,7 +77,7 @@ final class MovieDetailsScreenVC: UIViewController {
     }()
     
     private lazy var collectionView: DiffableCollectionView = {
-        let cv = DiffableCollectionView<MovieDetailsSection, MovieDetailsItems>(layout: createLayout())
+        let cv = DiffableCollectionView<Sections, Items>(layout: createLayout())
         cv.backgroundColor = CMColor.cmBackground
         cv.register(cellClass: MovieDetailsSubDetailsCell.self)
         cv.register(cellClass: WatchlistButtonCell.self)
@@ -133,25 +133,24 @@ final class MovieDetailsScreenVC: UIViewController {
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
         return UICollectionViewCompositionalLayout { sectionIndex, env in
-            let section = MovieDetailsSection.allCases[sectionIndex]
+            let section = Sections.allCases[sectionIndex]
             let heightDimension: NSCollectionLayoutDimension
-            var itemHeightDimension: NSCollectionLayoutDimension = .fractionalHeight(1)
             var isBackdropImageSection: Bool = false
             
             switch section {
-            case .mediaExtras: itemHeightDimension = .estimated(500); heightDimension = itemHeightDimension
+            case .mediaExtras: heightDimension = .estimated(100)
             case .backdropImage: heightDimension = .absolute(BackdropImageCellViewModel.cellHeight); isBackdropImageSection = true
-            case .titleAndTagline: heightDimension = .estimated(TitleAndTaglineCellViewModel.estimatedCellHeight); itemHeightDimension = .estimated(50)
+            case .titleAndTagline: heightDimension = .estimated(TitleAndTaglineCellViewModel.estimatedCellHeight)
             case .subDetails: heightDimension = .absolute(MovieDetailsSubDetailsCellViewModel.cellHeight)
             case .watchlistButton: heightDimension = .absolute(WatchlistButtonCellViewModel.absoluteCellHeight)
-            case .overview: heightDimension = .estimated(OverviewCellViewModel.estimatedCellHeight); itemHeightDimension = .estimated(OverviewCellViewModel.estimatedCellHeight)
+            case .overview: heightDimension = .estimated(OverviewCellViewModel.estimatedCellHeight)
             case .cast: heightDimension = .absolute(CastListCellViewModel.cellHeight)
             case .production: heightDimension = .absolute(ProductionInfoCellViewModel.cellHeight)
             case .rateAndShare: heightDimension = .absolute(RateAndShareCellViewModel.cellHeight)
             }
             
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: itemHeightDimension))
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: heightDimension), subitems: [item])
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: heightDimension))
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: item.layoutSize, subitems: [item])
             let layoutSection = NSCollectionLayoutSection(group: group)
             layoutSection.contentInsets = !isBackdropImageSection ? NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 0, trailing: 10) : .zero
             return layoutSection
@@ -252,7 +251,11 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         let castVM = CastListCellViewModel(cast: cast, didSelectCast: presenter?.didSelectActor)
         let prodVM = ProductionInfoCellViewModel(companies: details.productionCompanies, countries: details.productionCountries)
         let rateVM = RateAndShareCellViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton)
-        let extrasVM = MediaExtrasCellViewModel(seasons: [], belongsToCollection: details.belongsToCollection, similar: similar, videos: videos, reviews: reviews)
+        let extrasVM = MediaExtrasCellViewModel(
+            seasons: [], belongsToCollection: details.belongsToCollection,
+            similar: similar, videos: videos, reviews: reviews,
+            didTapMedia: presenter?.didTapMedia
+        )
         
         self.collectionView.applySnapshot(
             sections: [.backdropImage, .titleAndTagline, .subDetails, .watchlistButton, .overview, .cast, .production, .rateAndShare, .mediaExtras],

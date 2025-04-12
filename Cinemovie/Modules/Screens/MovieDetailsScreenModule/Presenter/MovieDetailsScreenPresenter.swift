@@ -10,7 +10,7 @@ import UIKit
 protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
 
-    func didTapAnotherMovie(movie: Movie)
+    func didTapMedia(media: Media)
     func didTapIMDBImage()
     func didTapShareButton()
     func didTapRateButton()
@@ -84,8 +84,12 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         view?.didRecieveError(error)
     }
     
-    func didTapAnotherMovie(movie: Movie) {
-        router.navigateToAnotherMovie(movie: movie)
+    func didTapMedia(media: Media) {
+        switch media {
+        case let movie as Movie: router.navigateToAnotherMovie(movie: movie)
+        case let series as TVSeries: router.navigateToSeries(series: series)
+        default: break
+        }
     }
     
     func didTapIMDBImage() {

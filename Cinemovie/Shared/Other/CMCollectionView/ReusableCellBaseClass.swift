@@ -11,7 +11,5 @@ open class ReusableCellBaseClass: UICollectionViewCell {
     static var identifier: String {
         return String(describing: self)
     }
-   
-    
 }
 
