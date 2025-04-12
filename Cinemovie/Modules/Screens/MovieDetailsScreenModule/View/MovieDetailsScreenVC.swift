@@ -20,7 +20,7 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
         details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
         similar: [Movie], reviews: [Review],
-        reviewCount: Int?
+        reviewCount: Int?, belongsToCollectionDetails: BelongsToCollectionDetails?
     )
 }
 
@@ -231,7 +231,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
         similar: [Movie], reviews: [Review],
-        reviewCount: Int?
+        reviewCount: Int?, belongsToCollectionDetails: BelongsToCollectionDetails?
     ) {
         self.downloadingView.hide()
         let backdropVM = BackdropImageCellViewModel(
@@ -252,7 +252,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         let prodVM = ProductionInfoCellViewModel(companies: details.productionCompanies, countries: details.productionCountries)
         let rateVM = RateAndShareCellViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton)
         let extrasVM = MediaExtrasCellViewModel(
-            seasons: [], belongsToCollection: details.belongsToCollection,
+            seasons: [], collectionDetails: belongsToCollectionDetails,
             similar: similar, videos: videos, reviews: reviews,
             didTapMedia: presenter?.didTapMedia
         )

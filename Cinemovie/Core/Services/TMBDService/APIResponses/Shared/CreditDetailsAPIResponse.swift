@@ -25,19 +25,14 @@ struct CreditDetailsAPIResponse: APIResponse {
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(String.self, forKey: .id)
-        creditType = try container.decode(String.self, forKey: .creditType)
-        department = try container.decode(String.self, forKey: .department)
-        job = try container.decode(String.self, forKey: .job)
-        mediaType = try container.decode(String.self, forKey: .mediaType)
-        person = try container.decode(Person.self, forKey: .person)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.creditType = try container.decode(String.self, forKey: .creditType)
+        self.department = try container.decode(String.self, forKey: .department)
+        self.job = try container.decode(String.self, forKey: .job)
+        self.mediaType = try container.decode(String.self, forKey: .mediaType)
+        self.person = try container.decode(Person.self, forKey: .person)
         
         let mediaDecoder = try container.superDecoder(forKey: .media)
-     
-        switch mediaType {
-        case "movie": media = try Movie(from: mediaDecoder)
-        case "tv": media = try TVSeries(from: mediaDecoder)
-        default: throw DecodingError.dataCorruptedError(forKey: .mediaType, in: container, debugDescription: "Unsupported media type: \(mediaType)")
-        }
+        self.media = try AnyMedia(from: mediaDecoder).value
     }
 }

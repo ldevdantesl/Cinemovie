@@ -66,6 +66,11 @@ struct TMDBEndpoints {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)/tv_credits", queryParams: queryParams)
     }
     
+    // MARK: - OTHER
+    static func getBelongsToCollectionDetailsEndpoint(collectionID: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/collection/\(collectionID)", queryParams: queryParams)
+    }
+    
     // MARK: - PRESET LIST OF MOVIES
     static func getNowPlayingMoviesEndpoint(queryParams: [String : String]? = nil) -> Endpoint {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/now_playing", queryParams: queryParams)

@@ -35,6 +35,7 @@ final class SimilarTabContentCell: ReusableCellBaseClass {
     private lazy var gridCollectionView: DiffableCollectionView = {
         let view = DiffableCollectionView<Int, MediaPosterImageCellViewModel>(layout: createLayout())
         view.isScrollEnabled = false
+        view.backgroundColor = CMColor.cmBackground
         view.register(cellClass: MediaPosterImageCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view

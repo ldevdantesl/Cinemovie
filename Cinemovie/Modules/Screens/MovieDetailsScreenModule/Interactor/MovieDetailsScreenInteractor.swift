@@ -11,6 +11,7 @@ protocol MovieDetailsScreenInteractorProtocol: AnyObject {
     func getMovieSimilars(movieID: Int)
     func getMovieVideos(movieID: Int)
     func getMovieReviews(movieID: Int)
+    func getBelongsToCollectionDetails(collectionID: Int)
 }
 
 final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
@@ -66,6 +67,16 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didGetMovieReviews(success.results, reviewCount: success.totalResults)
+            case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription)
+            }
+        }
+    }
+    
+    func getBelongsToCollectionDetails(collectionID: Int) {
+        tmdbService?.getBelongsToCollectionDetails(collectionID: collectionID) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let details): presenter?.didGetMovieBelongsToCollectionDetails(details)
             case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription)
             }
         }

@@ -93,6 +93,13 @@ final class TMBDServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
+    // MARK: - OTHER
+    func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getBelongsToCollectionDetailsEndpoint(collectionID: collectionID, queryParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
     // MARK: - PRESET MOVIE LIST IMPLEMENTATIONS
     func getPopularMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru", "page" : "1"]

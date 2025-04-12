@@ -27,6 +27,9 @@ protocol TMDBService: AnyObject {
     func getPersonMovieCredits(personID: Int, completion: @escaping (Result<PersonMovieCreditAPIResponse, NetworkError>) -> Void)
     func getPersonTVShowCredits(personID: Int, completion: @escaping (Result<PersonTVShowCreditAPIResponse, NetworkError>) -> Void)
     
+    // MARK: - OTHER
+    func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void)
+    
     // MARK: - LIST OF PRESET MOVIES
     func getUpcomingMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
     func getPopularMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)

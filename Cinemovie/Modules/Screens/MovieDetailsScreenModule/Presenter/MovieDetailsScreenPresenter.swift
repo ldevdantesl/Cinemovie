@@ -10,6 +10,7 @@ import UIKit
 protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
 
+    // MARK: - USER INITIATED
     func didTapMedia(media: Media)
     func didTapIMDBImage()
     func didTapShareButton()
@@ -18,12 +19,16 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didSelectActor(_ actor: Cast)
     func didTapToSubDetails(sendedBy view: UIView, message: String)
     
-    func didGetMovieDetails(_ details: MovieDetails)
+    // MARK: - ERROR
     func didRecieveError(_ error: String)
+    
+    // MARK: - PROGRAMMATIC
+    func didGetMovieDetails(_ details: MovieDetails)
     func didGetMovieCast(cast: [Cast], crew: [Cast])
     func didGetMovieSimilars(queryMovies: [Movie])
     func didGetMovieVideos(videos: [Video])
     func didGetMovieReviews(_ reviews: [Review], reviewCount: Int)
+    func didGetMovieBelongsToCollectionDetails(_ details: BelongsToCollectionDetails)
 }
 
 final class MovieDetailsScreenPresenter {
@@ -42,6 +47,7 @@ final class MovieDetailsScreenPresenter {
     private var movieSimilars: [Movie] = []
     private var movieReviews: [Review] = []
     private var movieReviewCount: Int?
+    private var belongsToCollectionDetails: BelongsToCollectionDetails?
 
     init(movieID: Int, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
         self.movieID = movieID
@@ -51,6 +57,7 @@ final class MovieDetailsScreenPresenter {
 }
 
 extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
+    // MARK: - LIFECYCLE
     func viewDidLoad() {
         print("MovieID: ", movieID)
         dispatchGroup.enter()
@@ -75,15 +82,17 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
                 details: details, videos: movieVideos,
                 cast: movieCast, crew: movieCrew,
                 similar: movieSimilars, reviews: movieReviews,
-                reviewCount: movieReviewCount
+                reviewCount: movieReviewCount, belongsToCollectionDetails: belongsToCollectionDetails
             )
         }
     }
 
+    // MARK: - ERROR
     func didRecieveError(_ error: String) {
         view?.didRecieveError(error)
     }
     
+    // MARK: - USER INITIATED
     func didTapMedia(media: Media) {
         switch media {
         case let movie as Movie: router.navigateToAnotherMovie(movie: movie)
@@ -110,6 +119,15 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         router.showActorPopUp(actor: actor)
     }
     
+    func didTapBackButton() {
+        router.goBack()
+    }
+    
+    func didTapToSubDetails(sendedBy view: UIView, message: String) {
+        router.showTooltipView(sendedBy: view, message: message)
+    }
+    
+    // MARK: - PROGRAMMATIC
     func didGetMovieReviews(_ reviews: [Review], reviewCount: Int) {
         movieReviews = reviews
         movieReviewCount = reviewCount
@@ -123,6 +141,10 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     
     func didGetMovieDetails(_ details: MovieDetails) {
         movieDetails = details
+        guard let belongsToCollection = details.belongsToCollection else { dispatchGroup.leave(); return }
+        
+        dispatchGroup.enter()
+        interactor.getBelongsToCollectionDetails(collectionID: belongsToCollection.id)
         dispatchGroup.leave()
     }
     
@@ -137,11 +159,8 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         dispatchGroup.leave()
     }
     
-    func didTapBackButton() {
-        router.goBack()
-    }
-    
-    func didTapToSubDetails(sendedBy view: UIView, message: String) {
-        router.showTooltipView(sendedBy: view, message: message)
+    func didGetMovieBelongsToCollectionDetails(_ details: BelongsToCollectionDetails) {
+        self.belongsToCollectionDetails = details
+        dispatchGroup.leave()
     }
 }
