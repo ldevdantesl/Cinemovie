@@ -162,7 +162,9 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         self.viewModel = viewModel
         
         if let collectionDetails = viewModel.collectionDetails, collectionDetails.backdropPath != nil {
-            let belongsVM = BelongsToCollectionContentCellViewModel(collectionDetails: collectionDetails)
+            let belongsVM = BelongsToCollectionContentCellViewModel(
+                collectionDetails: collectionDetails, onHeightChangedRequest: onHeightChangedRequest, onItemTapped: viewModel.didTapMedia
+            )
             self.items[.collection] = belongsVM
         }
         
@@ -248,6 +250,10 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         invalidateIntrinsicContentSize()
         setNeedsLayout()
         layoutIfNeeded()
+    }
+    
+    private func onHeightChangedRequest() {
+        self.invalidateIntrinsicContentSize()
     }
 }
 

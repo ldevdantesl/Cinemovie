@@ -11,12 +11,21 @@ import SDWebImage
 
 final class BelongsToCollectionContentCellViewModel: CellViewModelBaseClass {
     let collectionDetails: BelongsToCollectionDetails
-    let cellHeight: CGFloat
+    private(set) var cellHeight: CGFloat
+    let onHeightChangedRequest: (() -> Void)?
+    let onItemTapped: ((Media) -> Void)?
     
-    init(collectionDetails: BelongsToCollectionDetails) {
+    init(collectionDetails: BelongsToCollectionDetails, onHeightChangedRequest: (() -> Void)?, onItemTapped: ((Media) -> Void)?) {
         self.collectionDetails = collectionDetails
         self.cellHeight = 200
+        self.onHeightChangedRequest = onHeightChangedRequest
+        self.onItemTapped = onItemTapped
         super.init(cellIdentifier: "BelongsToCollectionContentCell")
+    }
+    
+    public func changeCellSize(to newSize: CGFloat) {
+        self.cellHeight = newSize
+        self.onHeightChangedRequest?()
     }
 }
 
@@ -29,11 +38,14 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
         static let fakePosterBorderWidth = 0.5
         static let maximumAlphaComponent = 0.8
         static let maximumTotalParts = 4
+        static let itemSpacing = 10.0
     }
     
     // MARK: - PROPERTIES
     private var viewModel: BelongsToCollectionContentCellViewModel?
     private var fakePosters: [UIView] = []
+    private var items: [MediaPosterImageCellViewModel] = []
+    private var showingItems: Bool = false
     
     // MARK: - VIEW PROPERTIES
     private let loadingIndicator: UIActivityIndicatorView = {
@@ -43,15 +55,15 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
         indicator.translatesAutoresizingMaskIntoConstraints = false
         return indicator
     }()
-    
-    private let collectionImageView: UIImageView = {
+    private lazy var collectionImageView: UIImageView = {
         let view = UIImageView()
         view.clipsToBounds = true
         view.contentMode = .scaleAspectFill
+        view.isUserInteractionEnabled = true
+        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapCollection)))
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
     private let collectionNameLabel: UILabel = {
         let label = UILabel()
         label.font = CMFont.font(size: .caption, fontName: .avenirMediumItalic)
@@ -61,7 +73,6 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
     private let collectionOverviewLabel: UILabel = {
         let label = UILabel()
         label.font = CMFont.font(size: .tiny, fontName: .avenirUltraLight)
@@ -72,9 +83,8 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
     private lazy var collectionLabelsStack: UIStackView = {
-        let vstack = UIStackView(arrangedSubviews: [collectionNameLabel])
+        let vstack = UIStackView()
         vstack.axis = .vertical
         vstack.spacing = 0
         vstack.backgroundColor = CMColor.cmSecondaryBackground.withAlphaComponent(0.9)
@@ -83,6 +93,16 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
         vstack.isLayoutMarginsRelativeArrangement = true
         vstack.layoutMargins = .init(top: 5, left: 10, bottom: 5, right: 10)
         return vstack
+    }()
+    
+    private lazy var partsCollectionView: UICollectionView = {
+        let view = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
+        view.backgroundColor = CMColor.cmBackground
+        view.isScrollEnabled = false
+        view.delegate = self
+        view.dataSource = self
+        view.register(cellClass: MediaPosterImageCell.self)
+        return view
     }()
     
     // MARK: - LIFECYCLE
@@ -106,10 +126,6 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
     override func prepareForReuse() {
         super.prepareForReuse()
         collectionLabelsStack.arrangedSubviews.forEach { collectionLabelsStack.removeArrangedSubview($0); $0.removeFromSuperview() }
-        collectionNameLabel.text = nil
-        collectionImageView.image = nil
-        collectionOverviewLabel.text = nil
-        
         fakePosters.forEach { $0.removeFromSuperview() }
         fakePosters.removeAll()
     }
@@ -117,7 +133,12 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: BelongsToCollectionContentCellViewModel) {
         self.viewModel = viewModel
+        self.items = viewModel.collectionDetails.parts.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.onItemTapped) }
+        
+        guard !showingItems else { return }
+        
         self.collectionNameLabel.text = viewModel.collectionDetails.name
+        self.collectionLabelsStack.addArrangedSubview(collectionNameLabel)
         
         if let overview = viewModel.collectionDetails.overview, !overview.isEmpty {
             self.collectionOverviewLabel.text = overview
@@ -184,5 +205,67 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
         }
         
         self.bringSubviewToFront(collectionImageView)
+    }
+    
+    private func createLayout() -> UICollectionViewCompositionalLayout {
+        UICollectionViewCompositionalLayout { section, environment in
+            let itemWidth = environment.container.contentSize.width / 3
+            let itemHeight = itemWidth * 1.5
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .absolute(itemWidth), heightDimension: .absolute(itemHeight)))
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(itemHeight)), subitem: item, count: 3)
+            group.interItemSpacing = .fixed(Constants.itemSpacing)
+            let section = NSCollectionLayoutSection(group: group)
+            section.interGroupSpacing = Constants.itemSpacing
+            return section
+        }
+    }
+    
+    // MARK: - OBJC FUNC
+    @objc private func didTapCollection() {
+        let rows = ceil(Double(items.count) / 3.0)
+        let itemWidth = bounds.width / 3
+        let itemHeight = itemWidth * 1.5
+        let totalHeight = rows * (itemHeight + Constants.itemSpacing)
+        
+        partsCollectionView.alpha = 0
+        partsCollectionView.transform = CGAffineTransform(translationX: 0, y: -bounds.height)
+        
+        addSubview(partsCollectionView)
+        partsCollectionView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        showingItems = true
+        
+        UIView.animate(withDuration: 0.4, delay: 0, options: [.curveEaseInOut]) { [weak self] in
+            guard let self = self else { return }
+            
+            self.collectionImageView.alpha = 0
+            self.collectionImageView.transform = CGAffineTransform(translationX: 0, y: self.bounds.height / 2)
+            
+            self.partsCollectionView.alpha = 1
+            self.partsCollectionView.transform = .identity
+            
+        } completion: { [weak self] _ in
+            guard let self = self else { return }
+            self.collectionImageView.removeFromSuperview()
+            self.viewModel?.changeCellSize(to: totalHeight)
+        }
+    }
+}
+
+extension BelongsToCollectionContentCell: UICollectionViewDelegate, UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return items.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: MediaPosterImageCell.identifier, for: indexPath
+        ) as? MediaPosterImageCell else { return UICollectionViewCell() }
+        
+        let itemVM = items[indexPath.row]
+        cell.configure(with: itemVM)
+        return cell
     }
 }

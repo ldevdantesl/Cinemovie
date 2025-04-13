@@ -15,6 +15,7 @@ public struct CMColor {
     static let cmPrimary: UIColor = .cmPrimary
     static let cmSecondary: UIColor = .cmSecondary
     static let cmAccent: UIColor = .cmAccent
+    static let cmSystem: UIColor = .cmSystem
     
     static let cmLabel: UIColor = .cmLabel
     static let cmSublabel: UIColor = .cmSecondaryLabel

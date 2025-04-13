@@ -62,10 +62,6 @@ final class DiffableCollectionView<Section: Hashable, Item: Hashable>: UICollect
         return diffableDataSource.snapshot()
     }
     
-    public func register<Cell: ReusableCellBaseClass>(cellClass: Cell.Type) {
-        self.register(cellClass, forCellWithReuseIdentifier: cellClass.identifier)
-    }
-    
     public func registerSupplementaryHeaderItem<Cell: ReusableCellBaseClass>(cellClass: Cell.Type) {
         self.register(cellClass.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: cellClass.identifier)
     }

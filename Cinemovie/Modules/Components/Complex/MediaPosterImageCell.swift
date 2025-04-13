@@ -24,6 +24,8 @@ final class MediaPosterImageCell: ReusableCellBaseClass {
     fileprivate enum Constants {
         static let cornerRadius = 10.0
         static let borderWidth = 0.2
+        static let imageNotFoundName = "questionmark"
+        static let imageNotFoundPointSize = 20.0
     }
     
     // MARK: - PROPERTIES
@@ -70,7 +72,13 @@ final class MediaPosterImageCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNCTIONS
     public func configure(with viewModel: MediaPosterImageCellViewModel) {
         self.viewModel = viewModel
-        guard let url = URLHelper.getImageURL(with: viewModel.media.posterPath, size: .w1280) else { return }
+        guard let url = URLHelper.getImageURL(with: viewModel.media.posterPath, size: .w1280) else {
+            posterImageView.image = UIImage(systemName: Constants.imageNotFoundName)
+            posterImageView.preferredSymbolConfiguration = .init(pointSize: Constants.imageNotFoundPointSize, weight: .bold)
+            posterImageView.tintColor = CMColor.cmAccent
+            posterImageView.contentMode = .center
+            return
+        }
         self.loadingIndicator.startAnimating()
         self.posterImageView.sd_setImage(with: url) { [weak self] _, _, _, _ in
             guard let self = self else { return }
