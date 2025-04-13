@@ -161,7 +161,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
     public func configure(viewModel: MediaExtrasCellViewModel) {
         self.viewModel = viewModel
         
-        if let collectionDetails = viewModel.collectionDetails {
+        if let collectionDetails = viewModel.collectionDetails, collectionDetails.backdropPath != nil {
             let belongsVM = BelongsToCollectionContentCellViewModel(collectionDetails: collectionDetails)
             self.items[.collection] = belongsVM
         }

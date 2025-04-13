@@ -34,7 +34,7 @@ final class TMBDServiceImpl: TMDBService {
     }
     
     func getMovieVideos(movieID: Int, completion: @escaping (Result<MediaVideosAPIResponse, NetworkError>) -> Void) {
-        let queryParams = ["language" : "en-US"]
+        let queryParams = ["language" : "ru"]
         let endpoint = TMDBEndpoints.getMovieVideosEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }

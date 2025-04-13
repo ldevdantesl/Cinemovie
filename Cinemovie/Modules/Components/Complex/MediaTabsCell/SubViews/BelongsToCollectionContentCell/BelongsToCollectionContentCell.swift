@@ -12,12 +12,10 @@ import SDWebImage
 final class BelongsToCollectionContentCellViewModel: CellViewModelBaseClass {
     let collectionDetails: BelongsToCollectionDetails
     let cellHeight: CGFloat
-    let isBackdropDriven: Bool
     
     init(collectionDetails: BelongsToCollectionDetails) {
         self.collectionDetails = collectionDetails
-        self.cellHeight = collectionDetails.backdropPath != nil ? 200 : 450
-        self.isBackdropDriven = collectionDetails.backdropPath != nil ? true : false
+        self.cellHeight = 200
         super.init(cellIdentifier: "BelongsToCollectionContentCell")
     }
 }
@@ -28,10 +26,14 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
         static let imageHorizontalEdgePaddings = 10.0
         static let imageCornerRadius = 15.0
         static let fakePosterOffsets = 5.0
+        static let fakePosterBorderWidth = 0.5
+        static let maximumAlphaComponent = 0.8
+        static let maximumTotalParts = 4
     }
     
     // MARK: - PROPERTIES
     private var viewModel: BelongsToCollectionContentCellViewModel?
+    private var fakePosters: [UIView] = []
     
     // MARK: - VIEW PROPERTIES
     private let loadingIndicator: UIActivityIndicatorView = {
@@ -50,22 +52,37 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
         return view
     }()
     
-    private let fakePoster1: UIImageView = {
-        let view = UIImageView()
-        view.clipsToBounds = true
-        view.alpha = 0.4
-        view.contentMode = .scaleAspectFill
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
+    private let collectionNameLabel: UILabel = {
+        let label = UILabel()
+        label.font = CMFont.font(size: .caption, fontName: .avenirMediumItalic)
+        label.numberOfLines = 1
+        label.textColor = CMColor.cmLabel
+        label.lineBreakMode = .byTruncatingTail
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
-
-    private let fakePoster2: UIImageView = {
-        let view = UIImageView()
-        view.clipsToBounds = true
-        view.alpha = 0.2
-        view.contentMode = .scaleAspectFill
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
+    
+    private let collectionOverviewLabel: UILabel = {
+        let label = UILabel()
+        label.font = CMFont.font(size: .tiny, fontName: .avenirUltraLight)
+        label.numberOfLines = 2
+        label.textColor = CMColor.cmSecondary
+        label.lineBreakMode = .byTruncatingTail
+        label.textAlignment = .left
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var collectionLabelsStack: UIStackView = {
+        let vstack = UIStackView(arrangedSubviews: [collectionNameLabel])
+        vstack.axis = .vertical
+        vstack.spacing = 0
+        vstack.backgroundColor = CMColor.cmSecondaryBackground.withAlphaComponent(0.9)
+        vstack.distribution = .fillEqually
+        vstack.alignment = .leading
+        vstack.isLayoutMarginsRelativeArrangement = true
+        vstack.layoutMargins = .init(top: 5, left: 10, bottom: 5, right: 10)
+        return vstack
     }()
     
     // MARK: - LIFECYCLE
@@ -84,40 +101,46 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
         self.collectionImageView.layer.cornerRadius = Constants.imageCornerRadius
         self.collectionImageView.layer.borderWidth = 0.7
         self.collectionImageView.layer.borderColor = CMColor.cmLabel.withAlphaComponent(0.8).cgColor
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        collectionLabelsStack.arrangedSubviews.forEach { collectionLabelsStack.removeArrangedSubview($0); $0.removeFromSuperview() }
+        collectionNameLabel.text = nil
+        collectionImageView.image = nil
+        collectionOverviewLabel.text = nil
         
-        self.fakePoster1.layer.cornerRadius = Constants.imageCornerRadius
-        self.fakePoster1.layer.borderWidth = 0.5
-        self.fakePoster1.layer.borderColor = CMColor.cmLabel.withAlphaComponent(0.7).cgColor
-        
-        self.fakePoster2.layer.cornerRadius = Constants.imageCornerRadius
-        self.fakePoster2.layer.borderWidth = 0.5
-        self.fakePoster2.layer.borderColor = CMColor.cmLabel.withAlphaComponent(0.7).cgColor
+        fakePosters.forEach { $0.removeFromSuperview() }
+        fakePosters.removeAll()
     }
     
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: BelongsToCollectionContentCellViewModel) {
         self.viewModel = viewModel
+        self.collectionNameLabel.text = viewModel.collectionDetails.name
         
-        let imageURL = URLHelper.getImageURL(
-            with: viewModel.isBackdropDriven ?
-            viewModel.collectionDetails.backdropPath :
-            viewModel.collectionDetails.posterPath, size: .original
-        )
+        if let overview = viewModel.collectionDetails.overview, !overview.isEmpty {
+            self.collectionOverviewLabel.text = overview
+            collectionLabelsStack.addArrangedSubview(collectionOverviewLabel)
+        }
+        
+        let imageURL = URLHelper.getImageURL(with: viewModel.collectionDetails.backdropPath, size: .original)
         guard let imageURL = imageURL else { return }
     
         loadingIndicator.startAnimating()
         self.collectionImageView.sd_setImage(with: imageURL) { [weak self] image, _, _, _ in
             guard let self = self else { return }
             loadingIndicator.stopAnimating()
-            self.fakePoster1.image = image
-            self.fakePoster2.image = image
         }
         
+        let totalParts = min(Constants.maximumTotalParts, viewModel.collectionDetails.parts.count)
         self.collectionImageView.snp.remakeConstraints {
             $0.verticalEdges.equalToSuperview()
-            $0.leading.equalToSuperview().inset(viewModel.isBackdropDriven ? 0 : Constants.imageHorizontalEdgePaddings)
-            $0.trailing.equalToSuperview().inset(viewModel.isBackdropDriven ? (Constants.fakePosterOffsets * 2) : Constants.imageHorizontalEdgePaddings)
+            $0.leading.equalToSuperview()
+            $0.trailing.equalToSuperview().inset(Constants.fakePosterOffsets * Double(totalParts + 1))
         }
+        
+        createFakePosters(total: totalParts)
         
         self.layoutIfNeeded()
     }
@@ -129,24 +152,35 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
             $0.center.equalToSuperview()
         }
         
+        collectionImageView.addSubview(collectionLabelsStack)
+        collectionLabelsStack.snp.makeConstraints {
+            $0.horizontalEdges.bottom.equalToSuperview()
+        }
+        
         addSubview(collectionImageView)
         collectionImageView.snp.makeConstraints {
             $0.verticalEdges.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
         }
-        
-        addSubview(fakePoster1)
-        fakePoster1.snp.makeConstraints {
-            $0.top.bottom.equalTo(collectionImageView)
-            $0.leading.equalTo(collectionImageView).offset(Constants.fakePosterOffsets)
-            $0.trailing.equalTo(collectionImageView).offset(Constants.fakePosterOffsets)
-        }
+    }
     
-        addSubview(fakePoster2)
-        fakePoster2.snp.makeConstraints {
-            $0.top.bottom.equalTo(fakePoster1)
-            $0.leading.equalTo(fakePoster1).offset(Constants.fakePosterOffsets)
-            $0.trailing.equalTo(fakePoster1).offset(Constants.fakePosterOffsets)
+    private func createFakePosters(total: Int) {
+        for i in 1...total {
+            let newAlphaComponent: Double = Constants.maximumAlphaComponent - (0.2 * Double(i))
+            print("New Alpha: ", newAlphaComponent)
+            let fakePoster = UIView()
+            fakePoster.backgroundColor = CMColor.cmBackground
+            fakePoster.layer.cornerRadius = Constants.imageCornerRadius
+            fakePoster.layer.borderWidth = Constants.fakePosterBorderWidth
+            fakePoster.layer.borderColor = CMColor.cmLabel.withAlphaComponent(newAlphaComponent).cgColor
+
+            addSubview(fakePoster)
+            fakePoster.snp.makeConstraints {
+                $0.verticalEdges.equalToSuperview()
+                $0.leading.equalToSuperview()
+                $0.trailing.equalToSuperview().inset(Constants.fakePosterOffsets * Double(i))
+            }
+            fakePosters.append(fakePoster)
         }
         
         self.bringSubviewToFront(collectionImageView)
