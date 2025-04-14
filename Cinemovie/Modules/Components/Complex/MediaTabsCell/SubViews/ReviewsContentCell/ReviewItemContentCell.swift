@@ -52,7 +52,7 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
     
     // MARK: - VIEW PROPERTIES
     private let loadingIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .large)
+        let indicator = UIActivityIndicatorView(style: .medium)
         indicator.color = .white
         indicator.hidesWhenStopped = true
         indicator.translatesAutoresizingMaskIntoConstraints = false
@@ -102,9 +102,19 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
         return label
     }()
     
+    private let noRatingLabel: UILabel = {
+        let label = UILabel()
+        label.text = "No Rating Left"
+        label.font = CMFont.font(size: .body, fontName: .avenirDemiBold)
+        label.textColor = CMColor.cmSecondary
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = true
+        return label
+    }()
+    
     private lazy var expandButton: CMCircularButton = {
         let button = CMCircularButton()
-        button.isHidden = true
+        button.isHidden = false
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -122,19 +132,24 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        reviewAuthorImageView.layer.cornerRadius = reviewAuthorImageView.frame.width / 2
-        reviewAuthorImageView.layer.borderWidth = Constants.authorImageBorderWidth
-        reviewAuthorImageView.layer.borderColor = CMColor.cmLabel.cgColor
+        self.reviewAuthorImageView.layoutIfNeeded()
+        self.reviewAuthorImageView.layer.cornerRadius = self.reviewAuthorImageView.frame.width / 2
+        self.reviewAuthorImageView.layer.borderWidth = Constants.authorImageBorderWidth
+        self.reviewAuthorImageView.layer.borderColor = CMColor.cmLabel.cgColor
         self.contentView.layer.cornerRadius = Constants.viewCornerRadius
     }
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        self.reviewAuthorImageView.image = nil
         self.reviewDateLabel.text = nil
         self.reviewContentLabel.text = nil
+        self.reviewAuthorImageView.image = nil
         self.reviewAuthorNameLabel.text = nil
+        self.expandButton.isHidden = true
         self.reviewStarRatingView.configure(rating: 0)
+        self.reviewStarRatingView.isHidden = false
+        self.noRatingLabel.isHidden = true
+        self.noRatingLabel.snp.removeConstraints()
     }
     
     // MARK: - PUBLIC FUNC
@@ -144,18 +159,30 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
         self.reviewAuthorNameLabel.text = viewModel.review.authorDetails.username
         self.reviewDateLabel.text = CMDateFormatter.formatToNormalDateUsingISO8601(dateString: viewModel.review.createdAt)
         self.reviewContentLabel.text = viewModel.review.content
-        self.reviewStarRatingView.configure(rating: viewModel.review.authorDetails.rating ?? 0)
+        if let rating = viewModel.review.authorDetails.rating, rating != 0 {
+            self.reviewStarRatingView.configure(rating: rating)
+        } else {
+            self.noRatingLabel.isHidden = false
+            self.reviewStarRatingView.isHidden = true
+        }
         
         // MARK: - EXPAND BUTTON
-        let fittingHeight = calculateHeight(width: contentView.bounds.width)
-        guard fittingHeight >= Constants.defaultHeight else { self.invalidateIntrinsicContentSize(); return }
-        expandButton.isHidden = false
-        let expandVM = CMCircularButtonViewModel(
-            systemName: Constants.expandButtonSystemName,
-            backColor: .cmSecondary, foreColor: .cmAccent,
-            didTapAction: didTapAction
-        )
-        self.expandButton.configure(viewModel: expandVM)
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            let lineCount = self.reviewContentLabel.calculateLineCount(using: self.reviewContentLabel.font)
+            let needsExpansion = lineCount > 2
+            self.expandButton.isHidden = !needsExpansion
+            
+            if needsExpansion {
+                let expandVM = CMCircularButtonViewModel(
+                    systemName: Constants.expandButtonSystemName,
+                    backColor: .cmSecondary,
+                    foreColor: .cmAccent,
+                    didTapAction: self.didTapAction
+                )
+                self.expandButton.configure(viewModel: expandVM)
+            }
+        }
         
         // MARK: - IMAGE SETTING
         guard let imageURL = URLHelper.getImageURL(with: viewModel.review.authorDetails.avatarPath, size: .w342) else {
@@ -168,8 +195,9 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
         }
         
         loadingIndicator.startAnimating()
-        self.reviewAuthorImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
+        self.reviewAuthorImageView.sd_setImage(with: imageURL) { [weak self] image, _, _, _ in
             guard let self = self else { return }
+            self.reviewAuthorImageView.image = image
             self.loadingIndicator.stopAnimating()
         }
         
@@ -203,6 +231,12 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
         
         contentView.addSubview(reviewStarRatingView)
         reviewStarRatingView.snp.makeConstraints {
+            $0.top.equalTo(reviewAuthorImageView.snp.bottom).offset(Constants.spacing)
+            $0.leading.equalToSuperview().offset(Constants.hSpacing)
+        }
+        
+        contentView.addSubview(noRatingLabel)
+        noRatingLabel.snp.makeConstraints {
             $0.top.equalTo(reviewAuthorImageView.snp.bottom).offset(Constants.spacing)
             $0.leading.equalToSuperview().offset(Constants.hSpacing)
         }

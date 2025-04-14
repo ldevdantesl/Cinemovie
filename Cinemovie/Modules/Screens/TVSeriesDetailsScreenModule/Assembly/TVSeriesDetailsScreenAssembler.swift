@@ -13,7 +13,7 @@ final class TVSeriesDetailsScreenAssembler {
         let router = TVSeriesDetailsScreenRouter(tmdbService: tmdbService)
         let presenter = TVSeriesDetailsScreenPresenter(seriesID: seriesID, interactor: interactor, router: router)
         let viewController = TVSeriesDetailsScreenVC()
-        presenter.view  = viewController
+        presenter.view = viewController
         viewController.presenter = presenter
         interactor.presenter = presenter
         router.viewController = viewController

@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 
 final class TVSeriesDetailsSubDetailsViewModel: CellViewModelBaseClass {
-    let firstAirDate: String
+    let firstAirDate: String?
     let status: TVSeriesStatus
     let numberOfSeasons: Int
     let numberOfEpisodes: Int
@@ -20,7 +20,7 @@ final class TVSeriesDetailsSubDetailsViewModel: CellViewModelBaseClass {
     let cellHeight = 25.0
     
     init(
-        firstAirDate: String, numberOfSeasons: Int,
+        firstAirDate: String?, numberOfSeasons: Int,
         numberOfEpisodes: Int, status: TVSeriesStatus,
         nextEpisodeToAir: String?, didTapView: ((UIView, String) -> Void)? = nil
     ) {
@@ -36,7 +36,7 @@ final class TVSeriesDetailsSubDetailsViewModel: CellViewModelBaseClass {
     }
     
     init(
-        firstAirDate: String, numberOfSeasons: Int,
+        firstAirDate: String?, numberOfSeasons: Int,
         numberOfEpisodes: Int, homepage: String?,
         status: TVSeriesStatus, nextEpisodeToAir: String?,
         didTapView: ((UIView, String) -> Void)? = nil,
@@ -159,7 +159,11 @@ final class TVSeriesDetailsSubDetailsView: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: TVSeriesDetailsSubDetailsViewModel) {
         self.viewModel = viewModel
-        self.airDateLabel.text = CMDateFormatter.formatToYearOnly(dateString: viewModel.firstAirDate)
+        if let firstAirDate = viewModel.firstAirDate {
+            self.airDateLabel.text = CMDateFormatter.formatToYearOnly(dateString: firstAirDate)
+        } else {
+            self.airDateLabel.text = "Unknown"
+        }
         self.statusImageView.image = UIImage(named: "TVSeriesStatus_\(viewModel.status.rawValue)")
         self.statusImageView.accessibilityIdentifier = "TVSeriesStatus_\(viewModel.status.rawValue)"
         self.seriesDurationLabel.text = "\(viewModel.numberOfSeasons) Seasons"

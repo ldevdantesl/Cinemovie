@@ -9,10 +9,13 @@ import UIKit
 import SnapKit
 
 protocol MovieDetailsScreenRouterProtocol {
+    // MARK: - NAVIGATION
     func goBack()
     func navigateToPersonDetails(creditID: String)
     func navigateToAnotherMovie(movie: Movie)
     func navigateToSeries(series: TVSeries)
+    
+    // MARK: - PRESENT
     func presentShareView(movie: MovieDetails)
     func showActorPopUp(actor: Cast)
     func showTooltipView(sendedBy view: UIView, message: String)

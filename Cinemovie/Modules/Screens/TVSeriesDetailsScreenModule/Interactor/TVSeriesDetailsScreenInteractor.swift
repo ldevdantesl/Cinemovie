@@ -11,6 +11,9 @@ protocol TVSeriesDetailsScreenInteractorProtocol: AnyObject {
     func getTVSeriesDetails(seriesID: Int)
     func getTVSeriesCast(seriesID: Int)
     func getTVSeriesVideos(seriesID: Int)
+    func getTVSeriesReviews(seriesID: Int)
+    func getTVSeriesRecommendations(seriesID: Int)
+    func getTVSeriesSimilar(seriesID: Int)
 }
 
 final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProtocol {
@@ -27,6 +30,36 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
             switch result {
             case .success(let success): self.presenter?.didGetTVSeriesDetails(success)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func getTVSeriesReviews(seriesID: Int) {
+        tmdbService?.getTVSeriesReviews(seriesID: seriesID) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): presenter?.didGetTVSeriesReviews(success.results)
+            case .failure(let failure): presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func getTVSeriesSimilar(seriesID: Int) {
+        tmdbService?.getTVSeriesSimilars(seriesID: seriesID) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): presenter?.didGetTVSeriesSimilar(success.results)
+            case .failure(let failure): presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func getTVSeriesRecommendations(seriesID: Int) {
+        tmdbService?.getTVSeriesRecommendations(seriesID: seriesID) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): presenter?.didGetTVSeriesRecommends(success.results)
+            case .failure(let failure): presenter?.didRecieveError(failure)
             }
         }
     }

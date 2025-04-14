@@ -49,6 +49,18 @@ struct TMDBEndpoints {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)/videos", queryParams: queryParams)
     }
     
+    static func getTVSeriesReviewsEndpoint(seriesID: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)/reviews", queryParams: queryParams)
+    }
+    
+    static func getTVSeriesSimilarsEndpoint(seriesID: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)/similar", queryParams: queryParams)
+    }
+    
+    static func getTVSeriesRecommendsEndpoint(seriesID: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)/recommendations", queryParams: queryParams)
+    }
+    
     // MARK: - PERSON
     static func getPersonIDEndpoint(creditID: String) -> Endpoint {
         return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/credit/\(creditID)")

@@ -12,6 +12,8 @@ final class CMStarRatingView: UIView {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let totalStars = 5
+        static let starSize = 20.0
+        static let spacing = 5.0
     }
     
     // MARK: - PROPERTIES
@@ -45,7 +47,7 @@ final class CMStarRatingView: UIView {
         starImageViews.forEach { star in
             star.snp.makeConstraints {
                 $0.top.bottom.equalToSuperview()
-                $0.width.height.equalTo(20)
+                $0.size.equalTo(Constants.starSize)
             }
         }
         
@@ -56,7 +58,7 @@ final class CMStarRatingView: UIView {
                 }
             } else {
                 star.snp.makeConstraints {
-                    $0.leading.equalTo(starImageViews[index - 1].snp.trailing).offset(5)
+                    $0.leading.equalTo(starImageViews[index - 1].snp.trailing).offset(Constants.spacing)
                 }
             }
         }
@@ -71,7 +73,7 @@ final class CMStarRatingView: UIView {
             } else if rating >= starValue - 0.5 {
                 imageView.image = UIImage(named: ImageNames.halfStar.rawValue)
             } else {
-                break
+                imageView.image = nil
             }
         }
     }

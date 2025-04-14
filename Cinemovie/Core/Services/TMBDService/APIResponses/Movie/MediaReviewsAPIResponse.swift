@@ -7,8 +7,7 @@
 
 import Foundation
 
-// MARK: - MovieReviewsAPIResponse
-struct MovieReviewsAPIResponse: APIResponse {
+struct MediaReviewsAPIResponse: APIResponse {
     let id, page: Int
     let results: [Review]
     let totalPages, totalResults: Int

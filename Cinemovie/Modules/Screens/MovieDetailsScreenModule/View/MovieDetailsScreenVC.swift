@@ -12,7 +12,6 @@ import SDWebImage
 protocol MovieDetailsScreenViewProtocol: AnyObject {
     var activeTooltipView: CMTooltipView? { get set }
     var activeTooltipWorkItem: DispatchWorkItem? { get set }
-    
     var activePopUpView: MediaDetailsActorPopupView? { get set }
 
     func didRecieveError(_ errorStr: String)
@@ -25,15 +24,6 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
 }
 
 final class MovieDetailsScreenVC: UIViewController {
-    
-    // MARK: - CONSTANTS
-    fileprivate enum Constants {
-        static let collectionViewSpacing = 10.0
-        static let aniDuration = 1.0
-        static let hSpacing = 20.0
-        static let biggerHSpacing = 30.0
-        static let cellDefaultHeight = 120.0
-    }
     
     // MARK: - OTHER
     fileprivate enum Sections: CaseIterable, Hashable {
@@ -240,7 +230,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             isBackButtonHidden: isFirstScreen, didTapBackButtonAction: presenter?.didTapBackButton
         )
         
-        let titleVM = TitleAndTaglineCellViewModel(movieName: details.title, movieTagline: details.tagline)
+        let titleVM = TitleAndTaglineCellViewModel(mediaName: details.title, mediaTagline: details.tagline)
         let subDetailsVM = MovieDetailsSubDetailsCellViewModel(
             year: details.releaseDate, released: CMDateFormatter.isDatePassed(details.releaseDate),
             duration: RuntimeHelper.runtime(details.runtime), imdbPath: details.imdbID,

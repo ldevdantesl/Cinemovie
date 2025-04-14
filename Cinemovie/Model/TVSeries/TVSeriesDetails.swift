@@ -12,7 +12,7 @@ struct TVSeriesDetails: APIResponse {
     let backdropPath: String?
     let createdBy: [CreatedBy]
     let episodeRunTime: [Int]
-    let firstAirDate: String
+    let firstAirDate: String?
     let genres: [Genre]
     let homepage: String?
     let id: Int
@@ -33,7 +33,8 @@ struct TVSeriesDetails: APIResponse {
     let seasons: [Season]
     let spokenLanguages: [SpokenLanguage]
     let status: TVSeriesStatus?
-    let tagline, type: String
+    let tagline: String?
+    let type: String
     let voteAverage: Double?
     let voteCount: Int?
     

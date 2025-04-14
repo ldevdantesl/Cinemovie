@@ -8,9 +8,11 @@
 import UIKit
 
 protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
+    // MARK: - LIFECYCLE
     func viewDidLoad()
     
-    func didTapAnotherTVSeries(series: TVSeries)
+    // MARK: - USER INITIATED
+    func didTapMedia(media: Media)
     func didTapShareButton()
     func didTapRateButton()
     func didTapBackButton()
@@ -18,10 +20,13 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
     func didTapTooltipView(sendedBy view: UIView, withMessage text: String)
     func didTapHomepage(homepage: String)
     
+    // MARK: - PROGRAMMATIC
     func didGetTVSeriesDetails(_ details: TVSeriesDetails)
     func didGetTVSeriesCast(_ cast: [Cast])
     func didGetTVSeriesVideos(_ videos: [Video])
-    
+    func didGetTVSeriesReviews(_ reviews: [Review])
+    func didGetTVSeriesRecommends(_ series: [TVSeries])
+    func didGetTVSeriesSimilar(_ series: [TVSeries])
     func didRecieveError(_ error: Error)
 }
 
@@ -35,6 +40,9 @@ final class TVSeriesDetailsScreenPresenter {
     private var seriesDetails: TVSeriesDetails?
     private var seriesCast: [Cast] = []
     private var seriesVideos: [Video] = []
+    private var seriesRecommends: [TVSeries] = []
+    private var seriesSimilars: [TVSeries] = []
+    private var seriesReviews: [Review] = []
 
     init(seriesID: Int, interactor: TVSeriesDetailsScreenInteractorProtocol, router: TVSeriesDetailsScreenRouterProtocol) {
         self.seriesID = seriesID
@@ -44,41 +52,41 @@ final class TVSeriesDetailsScreenPresenter {
 }
 
 extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol {
+    // MARK: - LIFECYCLE
     func viewDidLoad() {
+        print("SeriesID: ", seriesID)
         downloadGroup.enter()
         interactor.getTVSeriesDetails(seriesID: seriesID)
         
         downloadGroup.enter()
         interactor.getTVSeriesCast(seriesID: seriesID)
         
+        downloadGroup.enter()
+        interactor.getTVSeriesReviews(seriesID: seriesID)
+        
+        downloadGroup.enter()
+        interactor.getTVSeriesSimilar(seriesID: seriesID)
+        
+        downloadGroup.enter()
+        interactor.getTVSeriesRecommendations(seriesID: seriesID)
+        
         downloadGroup.notify(queue: .main) { [weak self] in
-            guard let self = self else { return }
-            guard let details = seriesDetails else { return }
-            view?.didGetAllTVSeriesData(details, cast: seriesCast, videos: seriesVideos)
+            guard let self = self, let details = self.seriesDetails else { return }
+            self.view?.didGetAllTVSeriesData(
+                details, cast: seriesCast,
+                videos: seriesVideos, reviews: seriesReviews,
+                recommends: seriesRecommends, similars: seriesSimilars
+            )
         }
     }
     
-    func didGetTVSeriesCast(_ cast: [Cast]) {
-        self.seriesCast = cast
-        downloadGroup.leave()
-    }
-    
-    func didGetTVSeriesVideos(_ videos: [Video]) {
-        self.seriesVideos = videos
-        downloadGroup.leave()
-    }
-    
-    func didGetTVSeriesDetails(_ details: TVSeriesDetails) {
-        self.seriesDetails = details
-        downloadGroup.leave()
-    }
-    
-    func didRecieveError(_ error: any Error) {
-        view?.didRecieveError(error.localizedDescription)
-    }
-    
-    func didTapAnotherTVSeries(series: TVSeries) {
-        router.navigateToAnotherTVSeries(series: series)
+    // MARK: - USER INITIATED
+    func didTapMedia(media: Media) {
+        switch media {
+        case let movie as Movie: router.navigateToMovie(movie: movie)
+        case let series as TVSeries: router.navigateToAnotherTVSeries(series: series)
+        default: break
+        }
     }
     
     func didTapRateButton() {
@@ -104,5 +112,40 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
     
     func didTapHomepage(homepage: String) {
         router.openHomepage(homepage: homepage)
+    }
+    
+    // MARK: - PROGRAMMATIC
+    func didGetTVSeriesCast(_ cast: [Cast]) {
+        self.seriesCast = cast
+        downloadGroup.leave()
+    }
+    
+    func didGetTVSeriesVideos(_ videos: [Video]) {
+        self.seriesVideos = videos
+        downloadGroup.leave()
+    }
+    
+    func didGetTVSeriesDetails(_ details: TVSeriesDetails) {
+        self.seriesDetails = details
+        downloadGroup.leave()
+    }
+    
+    func didGetTVSeriesReviews(_ reviews: [Review]) {
+        self.seriesReviews = reviews
+        downloadGroup.leave()
+    }
+    
+    func didGetTVSeriesSimilar(_ series: [TVSeries]) {
+        self.seriesSimilars = series
+        downloadGroup.leave()
+    }
+    
+    func didGetTVSeriesRecommends(_ series: [TVSeries]) {
+        self.seriesRecommends = series
+        downloadGroup.leave()
+    }
+    
+    func didRecieveError(_ error: any Error) {
+        view?.didRecieveError(error.localizedDescription)
     }
 }

@@ -9,13 +9,13 @@ import UIKit
 import SnapKit
 
 final class TitleAndTaglineCellViewModel: CellViewModelBaseClass {
-    let movieName: String
-    let movieTagline: String
+    let mediaName: String
+    let mediaTagline: String?
     static let estimatedCellHeight: CGFloat = 70.0
     
-    init(movieName: String, movieTagline: String) {
-        self.movieName = movieName
-        self.movieTagline = CMTextFormatter.formatToCleanString(movieTagline)
+    init(mediaName: String, mediaTagline: String?) {
+        self.mediaName = mediaName
+        self.mediaTagline = CMTextFormatter.formatToCleanString(mediaTagline)
         super.init(cellIdentifier: "TitleAndTaglineCell")
     }
 }
@@ -94,10 +94,10 @@ final class TitleAndTaglineCell: ReusableCellBaseClass {
     
     // MARK: - PUBLIC FUNC
     public func configure(with viewModel: ViewModel) {
-        movieNameLabel.text = viewModel.movieName
-        guard !viewModel.movieTagline.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        movieNameLabel.text = viewModel.mediaName
+        guard let tagline = viewModel.mediaTagline, !tagline.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         vStack.removeArrangedSubview(movieTaglineLabel)
-        movieTaglineLabel.text = viewModel.movieTagline
+        movieTaglineLabel.text = tagline
         vStack.addArrangedSubview(movieTaglineLabel)
     }
     

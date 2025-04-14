@@ -8,7 +8,8 @@
 import UIKit
 
 public struct CMTextFormatter {
-    static func formatToCleanString(_ text: String) -> String {
+    static func formatToCleanString(_ text: String?) -> String {
+        guard let text = text else { return "" }
         return text.replacingOccurrences(of: "«", with: "").replacingOccurrences(of: "»", with: "")
     }
     

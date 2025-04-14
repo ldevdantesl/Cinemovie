@@ -7,14 +7,19 @@
 
 import UIKit
 protocol TVSeriesDetailsScreenRouterProtocol {
+    // MARK: - NAVIGATION
     func goBack()
-    
-    func openHomepage(homepage: String)
-    func showTooltipView(sendedBy view: UIView, message: String)
     func navigateToPersonDetails(creditID: String)
     func navigateToAnotherTVSeries(series: TVSeries)
+    func navigateToMovie(movie: Movie)
+    
+    // MARK: - PRESENT
+    func showTooltipView(sendedBy view: UIView, message: String)
     func presentShareView(details: TVSeriesDetails)
     func showActorPopUp(actor: Cast)
+    
+    // MARK: - ROUTE
+    func openHomepage(homepage: String)
 }
 
 final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
@@ -25,11 +30,27 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
         self.tmdbService = tmdbService
     }
     
+    // MARK: - NAVIGATION
+    func goBack() {
+        viewController?.navigationController?.popViewController(animated: true)
+    }
+    
     func navigateToAnotherTVSeries(series: TVSeries) {
         let newSeriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(newSeriesDetails, animated: true)
     }
     
+    func navigateToPersonDetails(creditID: String) {
+        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, tmdbService: tmdbService)
+        viewController?.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func navigateToMovie(movie: Movie) {
+        let movieDetailsVC = MovieDetailsScreenAssembler.assemble(movieID: movie.id, tmdbService: tmdbService)
+        viewController?.navigationController?.pushViewController(movieDetailsVC, animated: true)
+    }
+    
+    // MARK: - PRESENT
     func showActorPopUp(actor: Cast) {
         guard let vcView = viewController?.view else { return }
         let vm = MediaDetailsActorPopupViewModel(actor: actor, didTapActorDetails: self.navigateToPersonDetails, didTapClose: self.hideActorPopUp)
@@ -38,23 +59,14 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
         viewController?.activeActorPopUpView = popupView
     }
     
-    func navigateToPersonDetails(creditID: String) {
-        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, tmdbService: tmdbService)
-        viewController?.navigationController?.pushViewController(vc, animated: true)
-    }
-    
     func presentShareView(details: TVSeriesDetails) {
         let title = details.name
         let tagline = details.tagline
         let overview = details.overview
-        let activityText = "\(title)\n\(tagline)\n\(overview)"
+        let activityText = "\(title)\n\(tagline ?? "")\n\(overview)"
         
         let activityViewController = UIActivityViewController(activityItems: [activityText], applicationActivities: nil)
         viewController?.present(activityViewController, animated: true)
-    }
-    
-    func goBack() {
-        viewController?.navigationController?.popViewController(animated: true)
     }
     
     func showTooltipView(sendedBy view: UIView, message: String) {
@@ -91,6 +103,7 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
         DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: workItem)
     }
     
+    // MARK: - ROUTE
     func openHomepage(homepage: String) {
         guard let url = URLHelper.stringToURL(urlString: homepage) else { return }
         AppOpener.openURL(url)

@@ -14,12 +14,15 @@ protocol TMDBService: AnyObject {
     func getMovieSimilars(movieID: Int, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
     func getMovieRecommendations(movieID: Int, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
     func getMovieVideos(movieID: Int, completion: @escaping (Result<MediaVideosAPIResponse, NetworkError>) -> Void)
-    func getMovieReviews(movieID: Int, completion: @escaping (Result<MovieReviewsAPIResponse, NetworkError>) -> Void)
+    func getMovieReviews(movieID: Int, completion: @escaping (Result<MediaReviewsAPIResponse, NetworkError>) -> Void)
     
     // MARK: - TV SERIES
     func getTVSeriesDetails(seriesID: Int, completion: @escaping (Result<TVSeriesDetails, NetworkError>) -> Void)
     func getTVSeriesCast(seriesID: Int, completion: @escaping (Result<MediaCastAPIResponse, NetworkError>) -> Void)
     func getTVSeriesVideos(seriesID: Int, completion: @escaping (Result<MediaVideosAPIResponse, NetworkError>) -> Void)
+    func getTVSeriesSimilars(seriesID: Int, completion: @escaping(Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
+    func getTVSeriesRecommendations(seriesID: Int, completion: @escaping(Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
+    func getTVSeriesReviews(seriesID: Int, completion: @escaping (Result<MediaReviewsAPIResponse, NetworkError>) -> Void)
     
     // MARK: - PERSON
     func getPersonID(creditID: String, completion: @escaping (Result<CreditDetailsAPIResponse, NetworkError>) -> Void)

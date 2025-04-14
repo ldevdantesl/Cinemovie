@@ -45,7 +45,7 @@ final class TMBDServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func getMovieReviews(movieID: Int, completion: @escaping (Result<MovieReviewsAPIResponse, NetworkError>) -> Void) {
+    func getMovieReviews(movieID: Int, completion: @escaping (Result<MediaReviewsAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "en-US"]
         let endpoint = TMDBEndpoints.getMovieReviewsEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
@@ -67,6 +67,24 @@ final class TMBDServiceImpl: TMDBService {
     func getTVSeriesVideos(seriesID: Int, completion: @escaping (Result<MediaVideosAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
         let endpoint = TMDBEndpoints.getTVSeriesVideosEndpoint(seriesID: seriesID, queryParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    func getTVSeriesReviews(seriesID: Int, completion: @escaping (Result<MediaReviewsAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "en-US"]
+        let endpoint = TMDBEndpoints.getTVSeriesReviewsEndpoint(seriesID: seriesID, queryParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    func getTVSeriesSimilars(seriesID: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getTVSeriesSimilarsEndpoint(seriesID: seriesID, queryParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    func getTVSeriesRecommendations(seriesID: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getTVSeriesRecommendsEndpoint(seriesID: seriesID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
