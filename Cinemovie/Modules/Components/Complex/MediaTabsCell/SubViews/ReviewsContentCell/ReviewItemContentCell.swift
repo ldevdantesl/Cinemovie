@@ -1,0 +1,255 @@
+//
+//  ReviewItemContentCell.swift
+//  Cinemovie
+//
+//  Created by Buzurg Rakhimzoda on 13.04.2025.
+//
+
+import UIKit
+import SnapKit
+
+final class ReviewItemContentCellViewModel: CellViewModelBaseClass {
+    let review: Review
+    fileprivate var isExpanded: Bool = false
+    private(set) var cellHeight = ReviewsContentCellViewModel.defaultITemHeight
+    private let onHeightChangeRequest: (() -> Void)?
+    
+    init(review: Review, onHeightChangeRequest: (() -> Void)?) {
+        self.review = review
+        self.onHeightChangeRequest = onHeightChangeRequest
+        super.init(cellIdentifier: "ReviewItemContentCell")
+    }
+    
+    fileprivate func changeCellHeight(to height: CGFloat) {
+        self.cellHeight = height
+        self.onHeightChangeRequest?()
+    }
+}
+
+final class ReviewItemContentCell: ReusableCellBaseClass {
+    // MARK: - CONSTANTS
+    fileprivate enum Constants {
+        static let authorImageBorderWidth = 0.5
+        static let authorDefaultImage = "person"
+        static let authorImageSize = 20.0
+        static let authorImageDefaultPointSize = 10.0
+        
+        static let viewCornerRadius = 15.0
+        
+        static let spacing = 5.0
+        static let hSpacing = 10.0
+        static let vSpacing = 10.0
+        
+        static let expandButtonSystemName = "chevron.down"
+        static let collapseButtonSystemName = "chevron.up"
+        static let expandButtonSize = 30
+        
+        static let defaultHeight = 120.0
+    }
+    
+    // MARK: - PROPERTIES
+    private var viewModel: ReviewItemContentCellViewModel?
+    
+    // MARK: - VIEW PROPERTIES
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .white
+        indicator.hidesWhenStopped = true
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
+    }()
+    
+    private let reviewAuthorImageView: UIImageView = {
+        let view = UIImageView()
+        view.contentMode = .scaleAspectFill
+        view.clipsToBounds = true
+        view.backgroundColor = CMColor.cmSecondaryBackground
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let reviewAuthorNameLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = CMColor.cmLabel
+        label.font = CMFont.font(size: .body, fontName: .avenirDemiBoldItalic)
+        label.numberOfLines = 1
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let reviewDateLabel: UILabel = {
+        let label = UILabel()
+        label.font = CMFont.font(size: .footnote, fontName: .avenirUltraLight)
+        label.textColor = CMColor.cmSecondary
+        label.numberOfLines = 1
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let reviewStarRatingView: CMStarRatingView = {
+        let view = CMStarRatingView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let reviewContentLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = CMColor.cmLabel
+        label.numberOfLines = 0
+        label.textAlignment = .left
+        label.font = CMFont.font(size: .caption, fontName: .avenirRegular)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var expandButton: CMCircularButton = {
+        let button = CMCircularButton()
+        button.isHidden = true
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    // MARK: - LIFECYCLE
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        reviewAuthorImageView.layer.cornerRadius = reviewAuthorImageView.frame.width / 2
+        reviewAuthorImageView.layer.borderWidth = Constants.authorImageBorderWidth
+        reviewAuthorImageView.layer.borderColor = CMColor.cmLabel.cgColor
+        self.contentView.layer.cornerRadius = Constants.viewCornerRadius
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        self.reviewAuthorImageView.image = nil
+        self.reviewDateLabel.text = nil
+        self.reviewContentLabel.text = nil
+        self.reviewAuthorNameLabel.text = nil
+        self.reviewStarRatingView.configure(rating: 0)
+    }
+    
+    // MARK: - PUBLIC FUNC
+    public func configure(viewModel: ReviewItemContentCellViewModel) {
+        // MARK: - SETTING
+        self.viewModel = viewModel
+        self.reviewAuthorNameLabel.text = viewModel.review.authorDetails.username
+        self.reviewDateLabel.text = CMDateFormatter.formatToNormalDateUsingISO8601(dateString: viewModel.review.createdAt)
+        self.reviewContentLabel.text = viewModel.review.content
+        self.reviewStarRatingView.configure(rating: viewModel.review.authorDetails.rating ?? 0)
+        
+        // MARK: - EXPAND BUTTON
+        let fittingHeight = calculateHeight(width: contentView.bounds.width)
+        guard fittingHeight >= Constants.defaultHeight else { self.invalidateIntrinsicContentSize(); return }
+        expandButton.isHidden = false
+        let expandVM = CMCircularButtonViewModel(
+            systemName: Constants.expandButtonSystemName,
+            backColor: .cmSecondary, foreColor: .cmAccent,
+            didTapAction: didTapAction
+        )
+        self.expandButton.configure(viewModel: expandVM)
+        
+        // MARK: - IMAGE SETTING
+        guard let imageURL = URLHelper.getImageURL(with: viewModel.review.authorDetails.avatarPath, size: .w342) else {
+            self.reviewAuthorImageView.contentMode = .center
+            self.reviewAuthorImageView.image = UIImage(systemName: Constants.authorDefaultImage)
+            self.reviewAuthorImageView.preferredSymbolConfiguration = .init(pointSize: Constants.authorImageDefaultPointSize, weight: .bold)
+            self.invalidateIntrinsicContentSize()
+            self.layoutIfNeeded()
+            return
+        }
+        
+        loadingIndicator.startAnimating()
+        self.reviewAuthorImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
+            guard let self = self else { return }
+            self.loadingIndicator.stopAnimating()
+        }
+        
+        self.invalidateIntrinsicContentSize()
+        self.layoutIfNeeded()
+    }
+    
+    // MARK: - PRIVATE FUNC
+    private func setupUI() {
+        contentView.backgroundColor = CMColor.cmSecondaryBackground
+        
+        reviewAuthorImageView.addSubview(loadingIndicator)
+        loadingIndicator.snp.makeConstraints {
+            $0.center.equalToSuperview()
+        }
+        
+        contentView.addSubview(reviewAuthorImageView)
+        reviewAuthorImageView.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(Constants.vSpacing)
+            $0.leading.equalToSuperview().offset(Constants.hSpacing)
+            $0.size.equalTo(Constants.authorImageSize)
+        }
+        
+        contentView.addSubview(reviewAuthorNameLabel)
+        reviewAuthorNameLabel.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(Constants.vSpacing)
+            $0.leading.equalTo(reviewAuthorImageView.snp.trailing).offset(Constants.spacing)
+            $0.trailing.equalToSuperview().inset(Constants.hSpacing)
+            $0.bottom.equalTo(reviewAuthorImageView.snp.bottom)
+        }
+        
+        contentView.addSubview(reviewStarRatingView)
+        reviewStarRatingView.snp.makeConstraints {
+            $0.top.equalTo(reviewAuthorImageView.snp.bottom).offset(Constants.spacing)
+            $0.leading.equalToSuperview().offset(Constants.hSpacing)
+        }
+        
+        contentView.addSubview(reviewDateLabel)
+        reviewDateLabel.snp.makeConstraints {
+            $0.top.equalTo(reviewStarRatingView.snp.top)
+            $0.leading.equalTo(reviewStarRatingView.snp.trailing)
+            $0.trailing.equalToSuperview().inset(Constants.hSpacing)
+        }
+        
+        contentView.addSubview(reviewContentLabel)
+        reviewContentLabel.snp.makeConstraints {
+            $0.top.equalTo(reviewStarRatingView.snp.bottom).offset(Constants.spacing)
+            $0.leading.equalToSuperview().inset(Constants.hSpacing)
+            $0.trailing.equalToSuperview().inset(Constants.hSpacing)
+            $0.bottom.equalToSuperview().inset(Constants.vSpacing).priority(.required)
+        }
+        
+        contentView.addSubview(expandButton)
+        expandButton.snp.makeConstraints {
+            $0.bottom.equalToSuperview().inset(Constants.vSpacing)
+            $0.trailing.equalToSuperview().inset(Constants.hSpacing)
+            $0.size.equalTo(Constants.expandButtonSize)
+        }
+    }
+    
+    private func didTapAction() {
+        guard let viewModel = viewModel else { return }
+        viewModel.isExpanded.toggle()
+        let newHeight = calculateHeight(width: contentView.bounds.width)
+        viewModel.changeCellHeight(to: newHeight)
+        self.invalidateIntrinsicContentSize()
+        let vm = CMCircularButtonViewModel(
+            systemName: viewModel.isExpanded ? Constants.collapseButtonSystemName : Constants.expandButtonSystemName,
+            backColor: .cmSecondary, foreColor: .cmAccent, didTapAction: didTapAction
+        )
+        expandButton.configure(viewModel: vm)
+    }
+    
+    private func calculateHeight(width: CGFloat) -> CGFloat {
+        guard let viewModel = viewModel else { return Constants.defaultHeight }
+        let targetSize = CGSize(width: width, height: viewModel.isExpanded ? UIView.layoutFittingCompressedSize.height : Constants.defaultHeight)
+        return contentView.systemLayoutSizeFitting(
+            targetSize,
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: viewModel.isExpanded ? .fittingSizeLevel : .required
+        ).height
+    }
+}

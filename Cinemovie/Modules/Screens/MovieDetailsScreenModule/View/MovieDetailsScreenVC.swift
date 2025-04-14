@@ -20,7 +20,7 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
         details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
         similar: [Movie], reviews: [Review],
-        reviewCount: Int?, belongsToCollectionDetails: BelongsToCollectionDetails?
+        belongsToCollectionDetails: BelongsToCollectionDetails?
     )
 }
 
@@ -35,6 +35,7 @@ final class MovieDetailsScreenVC: UIViewController {
         static let cellDefaultHeight = 120.0
     }
     
+    // MARK: - OTHER
     fileprivate enum Sections: CaseIterable, Hashable {
         case backdropImage
         case titleAndTagline
@@ -231,7 +232,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
         similar: [Movie], reviews: [Review],
-        reviewCount: Int?, belongsToCollectionDetails: BelongsToCollectionDetails?
+        belongsToCollectionDetails: BelongsToCollectionDetails?
     ) {
         self.downloadingView.hide()
         let backdropVM = BackdropImageCellViewModel(

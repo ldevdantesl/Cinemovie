@@ -22,6 +22,7 @@ final class HomeScreenVC: UIViewController {
         static let headerViewHeight = 70.0
     }
     
+    // MARK: - OTHER
     enum HomeSection: Int, CaseIterable {
         case featured
         case popularList

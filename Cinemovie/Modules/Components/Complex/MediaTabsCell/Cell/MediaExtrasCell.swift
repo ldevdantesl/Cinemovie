@@ -105,9 +105,10 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         view.delegate = self
         view.dataSource = self
         view.backgroundColor = CMColor.cmBackground
-        view.register(SimilarTabContentCell.self, forCellWithReuseIdentifier: SimilarTabContentCell.identifier)
-        view.register(TrailersTabContentCell.self, forCellWithReuseIdentifier: TrailersTabContentCell.identifier)
-        view.register(BelongsToCollectionContentCell.self, forCellWithReuseIdentifier: BelongsToCollectionContentCell.identifier)
+        view.register(cellClass: SimilarTabContentCell.self)
+        view.register(cellClass: TrailersTabContentCell.self)
+        view.register(cellClass: BelongsToCollectionContentCell.self)
+        view.register(cellClass: ReviewsContentCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -143,6 +144,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         case let vm as SimilarTabContentCellViewModel: contentHeight = vm.cellHeight
         case let vm as TrailersTabContentCellViewModel: contentHeight = vm.cellHeight
         case let vm as BelongsToCollectionContentCellViewModel: contentHeight = vm.cellHeight
+        case let vm as ReviewsContentCellViewModel: contentHeight = vm.cellHeight
         default: contentHeight = 210
         }
 
@@ -176,6 +178,11 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         if !trailersMedia.isEmpty {
             let trailersVM = TrailersTabContentCellViewModel(trailers: trailersMedia)
             self.items[.trailers] = trailersVM
+        }
+        
+        if !viewModel.reviews.isEmpty {
+            let reviewsVM = ReviewsContentCellViewModel(reviews: viewModel.reviews, onHeightChangedRequest: onHeightChangedRequest)
+            self.items[.reviews] = reviewsVM
         }
         self.layoutIfNeeded()
         
@@ -217,6 +224,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
             case let vm as SimilarTabContentCellViewModel: height = vm.cellHeight
             case let vm as TrailersTabContentCellViewModel: height = vm.cellHeight
             case let vm as BelongsToCollectionContentCellViewModel: height = vm.cellHeight
+            case let vm as ReviewsContentCellViewModel: height = vm.cellHeight
             default: height = 200
             }
             
@@ -278,6 +286,7 @@ extension MediaExtrasCell: UICollectionViewDataSource, UICollectionViewDelegate 
             case let vm as SimilarTabContentCellViewModel: (cell as? SimilarTabContentCell)?.configure(viewModel: vm)
             case let vm as TrailersTabContentCellViewModel: (cell as? TrailersTabContentCell)?.configure(viewModel: vm)
             case let vm as BelongsToCollectionContentCellViewModel: (cell as? BelongsToCollectionContentCell)?.configure(viewModel: vm)
+            case let vm as ReviewsContentCellViewModel: (cell as? ReviewsContentCell)?.configure(viewModel: vm)
             default: break
             }
             

@@ -27,7 +27,7 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didGetMovieCast(cast: [Cast], crew: [Cast])
     func didGetMovieSimilars(queryMovies: [Movie])
     func didGetMovieVideos(videos: [Video])
-    func didGetMovieReviews(_ reviews: [Review], reviewCount: Int)
+    func didGetMovieReviews(_ reviews: [Review])
     func didGetMovieBelongsToCollectionDetails(_ details: BelongsToCollectionDetails)
 }
 
@@ -46,7 +46,6 @@ final class MovieDetailsScreenPresenter {
     private var movieCrew: [Cast] = []
     private var movieSimilars: [Movie] = []
     private var movieReviews: [Review] = []
-    private var movieReviewCount: Int?
     private var belongsToCollectionDetails: BelongsToCollectionDetails?
 
     init(movieID: Int, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
@@ -82,7 +81,7 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
                 details: details, videos: movieVideos,
                 cast: movieCast, crew: movieCrew,
                 similar: movieSimilars, reviews: movieReviews,
-                reviewCount: movieReviewCount, belongsToCollectionDetails: belongsToCollectionDetails
+                belongsToCollectionDetails: belongsToCollectionDetails
             )
         }
     }
@@ -128,9 +127,8 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     }
     
     // MARK: - PROGRAMMATIC
-    func didGetMovieReviews(_ reviews: [Review], reviewCount: Int) {
+    func didGetMovieReviews(_ reviews: [Review]) {
         movieReviews = reviews
-        movieReviewCount = reviewCount
         dispatchGroup.leave()
     }
     

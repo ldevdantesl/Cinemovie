@@ -66,7 +66,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
         tmdbService?.getMovieReviews(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): presenter?.didGetMovieReviews(success.results, reviewCount: success.totalResults)
+            case .success(let success): presenter?.didGetMovieReviews(success.results)
             case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription)
             }
         }
