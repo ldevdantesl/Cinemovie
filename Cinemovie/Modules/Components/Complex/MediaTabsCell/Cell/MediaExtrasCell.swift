@@ -15,8 +15,7 @@ final class MediaExtrasCellViewModel: CellViewModelBaseClass {
     let recommended: [Media]
     let videos: [Video]
     let reviews: [Review]
-    
-    var didTapMedia: ((Media) -> Void)?
+    let didTapMedia: ((Media) -> Void)?
     
     init(
         seasons: [Season], collectionDetails: BelongsToCollectionDetails?,
@@ -44,10 +43,12 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         case recommendations
         case trailers
         case reviews
+        case network
         case none
         
         var title: String {
             switch self {
+            case .network: "Network"
             case .seasons: "Seasons"
             case .collection: "Collection"
             case .similar: "Similar"
