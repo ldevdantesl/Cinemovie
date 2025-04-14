@@ -1,22 +1,23 @@
 //
-//  SimilarTabContentView.swift
+//  RecommendsContentCell.swift
 //  Cinemovie
 //
-//  Created by Buzurg Rakhimzoda on 28.03.2025.
+//  Created by Buzurg Rakhimzoda on 14.04.2025.
 //
 
 import UIKit
 import SnapKit
+import SDWebImage
 
-final class SimilarTabContentCellViewModel: CellViewModelBaseClass {
-    let media: [Media]
+final class RecommendsContentCellViewModel: CellViewModelBaseClass {
+    let recommendedMedia: [Media]
     let didTapAnyMedia: ((Media) -> Void)?
-    private(set) var cellHeight: CGFloat = 1
+    private(set) var cellHeight: CGFloat = 100
     
-    init(media: [Media], didTapAnyMedia: ((Media) -> Void)?) {
-        self.media = media
+    init(recommendedMedia: [Media], didTapAnyMedia: ((Media) -> Void)?) {
+        self.recommendedMedia = recommendedMedia
         self.didTapAnyMedia = didTapAnyMedia
-        super.init(cellIdentifier: "SimilarTabContentCell")
+        super.init(cellIdentifier: "RecommendsContentCell")
     }
     
     func setCellHeight(to height: CGFloat) {
@@ -24,8 +25,7 @@ final class SimilarTabContentCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class SimilarTabContentCell: ReusableCellBaseClass {
-    
+final class RecommendsContentCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let itemWidth = (UIConstants.screenWidth / 3) - 40
@@ -33,7 +33,7 @@ final class SimilarTabContentCell: ReusableCellBaseClass {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: SimilarTabContentCellViewModel?
+    private var viewModel: RecommendsContentCellViewModel?
     
     // MARK: - VIEW PROPERTIES
     private lazy var gridCollectionView: DiffableCollectionView = {
@@ -58,12 +58,12 @@ final class SimilarTabContentCell: ReusableCellBaseClass {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: SimilarTabContentCellViewModel) {
+    public func configure(viewModel: RecommendsContentCellViewModel) {
         self.viewModel = viewModel
         gridCollectionView.applySnapshot(
             sections: [0],
             itemsBySection: [
-                0 : viewModel.media.map { MediaPosterImageCellViewModel(media: $0) }
+                0 : viewModel.recommendedMedia.map { MediaPosterImageCellViewModel(media: $0) }
             ]
         )
         viewModel.setCellHeight(to: (Constants.itemHeight * 3) + 20)
@@ -94,7 +94,7 @@ final class SimilarTabContentCell: ReusableCellBaseClass {
     private func configureDataSource() {
         gridCollectionView.configureDataSource { [weak self] collectionView, indexPath, itemIdentifier in
             guard let self = self else { return UICollectionViewCell() }
-            guard let media = self.viewModel?.media[safe: indexPath.item] else { return UICollectionViewCell() }
+            guard let media = self.viewModel?.recommendedMedia[safe: indexPath.item] else { return UICollectionViewCell() }
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MediaPosterImageCell.identifier, for: indexPath) as? MediaPosterImageCell
             let vm = MediaPosterImageCellViewModel(media: media, didTapMedia: viewModel?.didTapAnyMedia)
             cell?.configure(with: vm)

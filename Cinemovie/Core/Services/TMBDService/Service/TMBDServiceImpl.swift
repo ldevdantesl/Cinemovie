@@ -33,6 +33,12 @@ final class TMBDServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
+    func getMovieSimilars(movieID: Int, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getMovieSimilarsEndpoint(movieID: movieID, queryParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
     func getMovieVideos(movieID: Int, completion: @escaping (Result<MediaVideosAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
         let endpoint = TMDBEndpoints.getMovieVideosEndpoint(movieID: movieID, queryParams: queryParams)
@@ -40,7 +46,7 @@ final class TMBDServiceImpl: TMDBService {
     }
     
     func getMovieReviews(movieID: Int, completion: @escaping (Result<MovieReviewsAPIResponse, NetworkError>) -> Void) {
-        let queryParams = ["page" : "1"]
+        let queryParams = ["language" : "ru"]
         let endpoint = TMDBEndpoints.getMovieReviewsEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }

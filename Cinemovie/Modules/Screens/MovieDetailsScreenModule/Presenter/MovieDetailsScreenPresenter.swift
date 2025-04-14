@@ -26,6 +26,7 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didGetMovieDetails(_ details: MovieDetails)
     func didGetMovieCast(cast: [Cast], crew: [Cast])
     func didGetMovieSimilars(queryMovies: [Movie])
+    func didGetMovieRecommendations(queryMovies: [Movie])
     func didGetMovieVideos(videos: [Video])
     func didGetMovieReviews(_ reviews: [Review])
     func didGetMovieBelongsToCollectionDetails(_ details: BelongsToCollectionDetails)
@@ -46,6 +47,7 @@ final class MovieDetailsScreenPresenter {
     private var movieCrew: [Cast] = []
     private var movieSimilars: [Movie] = []
     private var movieReviews: [Review] = []
+    private var movieRecommends: [Movie] = []
     private var belongsToCollectionDetails: BelongsToCollectionDetails?
 
     init(movieID: Int, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
@@ -69,19 +71,21 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         interactor.getMovieSimilars(movieID: movieID)
         
         dispatchGroup.enter()
+        interactor.getMovieRecommendations(movieID: movieID)
+        
+        dispatchGroup.enter()
         interactor.getMovieVideos(movieID: movieID)
         
         dispatchGroup.enter()
         interactor.getMovieReviews(movieID: movieID)
         
         dispatchGroup.notify(queue: .main) { [weak self] in
-            guard let self = self else { return }
-            guard let details = self.movieDetails else { return }
+            guard let self = self, let details = self.movieDetails else { return }
             self.view?.didDownloadAllData(
                 details: details, videos: movieVideos,
                 cast: movieCast, crew: movieCrew,
-                similar: movieSimilars, reviews: movieReviews,
-                belongsToCollectionDetails: belongsToCollectionDetails
+                similar: movieSimilars, recommended: movieRecommends,
+                reviews: movieReviews, belongsToCollectionDetails: belongsToCollectionDetails
             )
         }
     }
@@ -154,6 +158,11 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     
     func didGetMovieSimilars(queryMovies: [Movie]) {
         movieSimilars = queryMovies
+        dispatchGroup.leave()
+    }
+    
+    func didGetMovieRecommendations(queryMovies: [Movie]) {
+        self.movieRecommends = queryMovies
         dispatchGroup.leave()
     }
     

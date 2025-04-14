@@ -12,6 +12,7 @@ final class MediaExtrasCellViewModel: CellViewModelBaseClass {
     let seasons: [Season]
     let collectionDetails: BelongsToCollectionDetails?
     let similar: [Media]
+    let recommended: [Media]
     let videos: [Video]
     let reviews: [Review]
     
@@ -19,12 +20,13 @@ final class MediaExtrasCellViewModel: CellViewModelBaseClass {
     
     init(
         seasons: [Season], collectionDetails: BelongsToCollectionDetails?,
-        similar: [Media], videos: [Video], reviews: [Review],
+        similar: [Media], recommended: [Media], videos: [Video], reviews: [Review],
         didTapMedia: ((Media) -> Void)?
     ) {
         self.seasons = seasons
         self.collectionDetails = collectionDetails
         self.similar = similar
+        self.recommended = recommended
         self.videos = videos
         self.reviews = reviews
         self.didTapMedia = didTapMedia
@@ -39,6 +41,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         case seasons
         case collection
         case similar
+        case recommendations
         case trailers
         case reviews
         case none
@@ -48,6 +51,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
             case .seasons: "Seasons"
             case .collection: "Collection"
             case .similar: "Similar"
+            case .recommendations: "Recommends"
             case .trailers: "Trailers"
             case .reviews: "Reviews"
             case .none: ""
@@ -83,6 +87,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         
         let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
         view.backgroundColor = CMColor.cmBackground
+        view.showsHorizontalScrollIndicator = false
         view.delegate = self
         view.dataSource = self
         view.register(MediaExtrasTabItemCell.self, forCellWithReuseIdentifier: MediaExtrasTabItemCell.identifier)
@@ -109,6 +114,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         view.register(cellClass: TrailersTabContentCell.self)
         view.register(cellClass: BelongsToCollectionContentCell.self)
         view.register(cellClass: ReviewsContentCell.self)
+        view.register(cellClass: RecommendsContentCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -142,6 +148,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         let contentHeight: CGFloat
         switch contentVM {
         case let vm as SimilarTabContentCellViewModel: contentHeight = vm.cellHeight
+        case let vm as RecommendsContentCellViewModel: contentHeight = vm.cellHeight
         case let vm as TrailersTabContentCellViewModel: contentHeight = vm.cellHeight
         case let vm as BelongsToCollectionContentCellViewModel: contentHeight = vm.cellHeight
         case let vm as ReviewsContentCellViewModel: contentHeight = vm.cellHeight
@@ -170,9 +177,17 @@ final class MediaExtrasCell: ReusableCellBaseClass {
             self.items[.collection] = belongsVM
         }
         
-        let similarMedia = Array(viewModel.similar.prefix(9))
-        let similarVM = SimilarTabContentCellViewModel(media: similarMedia, didTapAnyMedia: viewModel.didTapMedia)
-        self.items[.similar] = similarVM
+        if !viewModel.similar.isEmpty {
+            let similarMedia = Array(viewModel.similar.prefix(9))
+            let similarVM = SimilarTabContentCellViewModel(media: similarMedia, didTapAnyMedia: viewModel.didTapMedia)
+            self.items[.similar] = similarVM
+        }
+        
+        if !viewModel.recommended.isEmpty {
+            let recommendedMedia = Array(viewModel.recommended.prefix(9))
+            let recommendedVM = RecommendsContentCellViewModel(recommendedMedia: recommendedMedia, didTapAnyMedia: viewModel.didTapMedia)
+            self.items[.recommendations] = recommendedVM
+        }
         
         let trailersMedia = viewModel.videos.filter { $0.type == .trailer }
         if !trailersMedia.isEmpty {
@@ -225,6 +240,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
             case let vm as TrailersTabContentCellViewModel: height = vm.cellHeight
             case let vm as BelongsToCollectionContentCellViewModel: height = vm.cellHeight
             case let vm as ReviewsContentCellViewModel: height = vm.cellHeight
+            case let vm as RecommendsContentCellViewModel: height = vm.cellHeight
             default: height = 200
             }
             
@@ -277,25 +293,26 @@ extension MediaExtrasCell: UICollectionViewDataSource, UICollectionViewDelegate 
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if collectionView == contentCollectionView {
-            let tab = visibleTabs[indexPath.row]
-            guard let viewModel = items[tab] else { return UICollectionViewCell() }
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.cellIdentifier, for: indexPath)
-            
-            switch viewModel {
-            case let vm as SimilarTabContentCellViewModel: (cell as? SimilarTabContentCell)?.configure(viewModel: vm)
-            case let vm as TrailersTabContentCellViewModel: (cell as? TrailersTabContentCell)?.configure(viewModel: vm)
-            case let vm as BelongsToCollectionContentCellViewModel: (cell as? BelongsToCollectionContentCell)?.configure(viewModel: vm)
-            case let vm as ReviewsContentCellViewModel: (cell as? ReviewsContentCell)?.configure(viewModel: vm)
-            default: break
-            }
-            
-            return cell
-        } else {
+        guard collectionView == contentCollectionView else {
             let tab = visibleTabs[indexPath.row]
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MediaExtrasTabItemCell.identifier, for: indexPath) as? MediaExtrasTabItemCell else { return UICollectionViewCell() }
             cell.configure(text: tab.title, isSelected: tab == selectedTab)
             return cell
         }
+        
+        let tab = visibleTabs[indexPath.row]
+        guard let viewModel = items[tab] else { return UICollectionViewCell() }
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.cellIdentifier, for: indexPath)
+        
+        switch viewModel {
+        case let vm as SimilarTabContentCellViewModel: (cell as? SimilarTabContentCell)?.configure(viewModel: vm)
+        case let vm as TrailersTabContentCellViewModel: (cell as? TrailersTabContentCell)?.configure(viewModel: vm)
+        case let vm as BelongsToCollectionContentCellViewModel: (cell as? BelongsToCollectionContentCell)?.configure(viewModel: vm)
+        case let vm as ReviewsContentCellViewModel: (cell as? ReviewsContentCell)?.configure(viewModel: vm)
+        case let vm as RecommendsContentCellViewModel: (cell as? RecommendsContentCell)?.configure(viewModel: vm)
+        default: break
+        }
+        
+        return cell
     }
 }

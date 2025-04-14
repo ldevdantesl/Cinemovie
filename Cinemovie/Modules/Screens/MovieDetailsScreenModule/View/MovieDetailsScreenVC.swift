@@ -19,7 +19,7 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
     func didDownloadAllData(
         details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
-        similar: [Movie], reviews: [Review],
+        similar: [Movie], recommended: [Movie], reviews: [Review],
         belongsToCollectionDetails: BelongsToCollectionDetails?
     )
 }
@@ -231,7 +231,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
     func didDownloadAllData(
         details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
-        similar: [Movie], reviews: [Review],
+        similar: [Movie], recommended: [Movie], reviews: [Review],
         belongsToCollectionDetails: BelongsToCollectionDetails?
     ) {
         self.downloadingView.hide()
@@ -254,8 +254,8 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         let rateVM = RateAndShareCellViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton)
         let extrasVM = MediaExtrasCellViewModel(
             seasons: [], collectionDetails: belongsToCollectionDetails,
-            similar: similar, videos: videos, reviews: reviews,
-            didTapMedia: presenter?.didTapMedia
+            similar: similar, recommended: recommended, videos: videos,
+            reviews: reviews, didTapMedia: presenter?.didTapMedia
         )
         
         self.collectionView.applySnapshot(

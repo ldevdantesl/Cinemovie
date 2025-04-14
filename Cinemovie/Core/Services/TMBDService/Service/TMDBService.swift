@@ -11,6 +11,7 @@ protocol TMDBService: AnyObject {
     // MARK: - MOVIES
     func getMovieDetails(movieID: Int, completion: @escaping (Result<MovieDetails, NetworkError>) -> Void)
     func getMovieCast(movieID: Int, completion: @escaping (Result<MediaCastAPIResponse, NetworkError>) -> Void)
+    func getMovieSimilars(movieID: Int, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
     func getMovieRecommendations(movieID: Int, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
     func getMovieVideos(movieID: Int, completion: @escaping (Result<MediaVideosAPIResponse, NetworkError>) -> Void)
     func getMovieReviews(movieID: Int, completion: @escaping (Result<MovieReviewsAPIResponse, NetworkError>) -> Void)
