@@ -17,7 +17,7 @@ final class RecommendsContentCellViewModel: CellViewModelBaseClass {
     init(recommendedMedia: [Media], didTapAnyMedia: ((Media) -> Void)?) {
         self.recommendedMedia = recommendedMedia
         self.didTapAnyMedia = didTapAnyMedia
-        super.init(cellIdentifier: "RecommendsContentCell")
+        super.init(cellIdentifier: "RecommendsTabContentCell")
     }
     
     func setCellHeight(to height: CGFloat) {
@@ -25,7 +25,7 @@ final class RecommendsContentCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class RecommendsContentCell: ReusableCellBaseClass {
+final class RecommendsTabContentCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let itemWidth = (UIConstants.screenWidth / 3) - 40

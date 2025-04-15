@@ -58,6 +58,7 @@ final class MovieDetailsScreenVC: UIViewController {
     
     // MARK: - PROPERTIES
     private var viewModels: [CellViewModelBaseClass] = []
+    private var visibleSections: [Sections] = []
     private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
     
     // MARK: - VIEW PROPERTIES
@@ -123,8 +124,12 @@ final class MovieDetailsScreenVC: UIViewController {
     }
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
-        return UICollectionViewCompositionalLayout { sectionIndex, env in
-            let section = Sections.allCases[sectionIndex]
+        return UICollectionViewCompositionalLayout { [weak self] sectionIndex, env in
+            guard let self = self else {
+                let group = NSCollectionLayoutGroup(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1)))
+                return NSCollectionLayoutSection(group: group)
+            }
+            let section = self.visibleSections[sectionIndex]
             let heightDimension: NSCollectionLayoutDimension
             var isBackdropImageSection: Bool = false
             
@@ -237,30 +242,42 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             didTapIMDB: presenter?.didTapIMDBImage, didTapSubDetails: presenter?.didTapToSubDetails
         )
         
-        let overviewVM = OverviewCellViewModel(overviewText: details.overview)
+        var sectionsAndTheirItems: [(sections: (Sections), items: [Items])] = [
+            (Sections.backdropImage, [.backdropImage(backdropVM)]),
+            (Sections.titleAndTagline, [.titleAndTagline(titleVM)]),
+            (Sections.subDetails, [.subDetails(subDetailsVM)]),
+            (Sections.watchlistButton, [.watchListButton])
+        ]
         
-        let castVM = CastListCellViewModel(cast: cast, didSelectCast: presenter?.didSelectActor)
+        if !details.overview.isEmpty {
+            let overviewVM = OverviewCellViewModel(overviewText: details.overview)
+            sectionsAndTheirItems.append((Sections.overview, [.overview(overviewVM)]))
+        }
+        
+        if !cast.isEmpty || !crew.isEmpty {
+            let castVM = CastListCellViewModel(cast: !cast.isEmpty ? cast : crew, didSelectCast: presenter?.didSelectActor)
+            sectionsAndTheirItems.append((Sections.cast, [.cast(castVM)]))
+        }
+        
         let prodVM = ProductionInfoCellViewModel(companies: details.productionCompanies, countries: details.productionCountries)
+        sectionsAndTheirItems.append((Sections.production, [.production(prodVM)]))
+        
         let rateVM = RateAndShareCellViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton)
+        sectionsAndTheirItems.append((Sections.rateAndShare, [.rateAndShare(rateVM)]))
+        
         let extrasVM = MediaExtrasCellViewModel(
             seasons: [], collectionDetails: belongsToCollectionDetails,
             similar: similar, recommended: recommended, videos: videos,
             reviews: reviews, didTapMedia: presenter?.didTapMedia
         )
         
+        sectionsAndTheirItems.append((Sections.mediaExtras, [.mediaExtras(extrasVM)]))
+        
+        self.visibleSections = sectionsAndTheirItems.map { $0.sections }
+        
         self.collectionView.applySnapshot(
-            sections: [.backdropImage, .titleAndTagline, .subDetails, .watchlistButton, .overview, .cast, .production, .rateAndShare, .mediaExtras],
-            itemsBySection: [
-                .backdropImage : [.backdropImage(backdropVM)],
-                .titleAndTagline : [.titleAndTagline(titleVM)],
-                .subDetails: [.subDetails(subDetailsVM)],
-                .watchlistButton: [.watchListButton],
-                .overview : [.overview(overviewVM)],
-                .cast : [.cast(castVM)],
-                .production : [.production(prodVM)],
-                .rateAndShare : [.rateAndShare(rateVM)],
-                .mediaExtras : [.mediaExtras(extrasVM)]
-            ]
+            sections: visibleSections,
+            itemsBySection: Dictionary(uniqueKeysWithValues: sectionsAndTheirItems)
         )
     }
 }

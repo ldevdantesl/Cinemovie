@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-final class ReviewsContentCellViewModel: CellViewModelBaseClass {
+final class ReviewsTabContentCellViewModel: CellViewModelBaseClass {
     let reviews: [Review]
     private(set) var cellHeight = 100.0
     private let onHeightChangedRequest: (() -> Void)?
@@ -19,7 +19,7 @@ final class ReviewsContentCellViewModel: CellViewModelBaseClass {
     init(reviews: [Review], onHeightChangedRequest: (() -> Void)?) {
         self.reviews = reviews
         self.onHeightChangedRequest = onHeightChangedRequest
-        super.init(cellIdentifier: "ReviewsContentCell")
+        super.init(cellIdentifier: "ReviewsTabContentCell")
     }
     
     fileprivate func changeCellHeight(to height: CGFloat) {
@@ -28,16 +28,16 @@ final class ReviewsContentCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class ReviewsContentCell: ReusableCellBaseClass {
+final class ReviewsTabContentCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let itemEstimatedHeight = 100.0
         static let itemSpacing = 10.0
-        static let defaultItemHeight = ReviewsContentCellViewModel.defaultITemHeight
+        static let defaultItemHeight = ReviewsTabContentCellViewModel.defaultITemHeight
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: ReviewsContentCellViewModel?
+    private var viewModel: ReviewsTabContentCellViewModel?
     private var items: [ReviewItemContentCellViewModel] = []
 
     // MARK: - VIEW PROPERTIES
@@ -68,7 +68,7 @@ final class ReviewsContentCell: ReusableCellBaseClass {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: ReviewsContentCellViewModel) {
+    public func configure(viewModel: ReviewsTabContentCellViewModel) {
         self.viewModel = viewModel
         self.items = viewModel.reviews.map { ReviewItemContentCellViewModel(review: $0, onHeightChangeRequest: onHeightChangeRequest) }
         
@@ -102,7 +102,7 @@ final class ReviewsContentCell: ReusableCellBaseClass {
     }
 }
 
-extension ReviewsContentCell: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+extension ReviewsTabContentCell: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return items.count
     }

@@ -22,7 +22,7 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
     
     // MARK: - PROGRAMMATIC
     func didGetTVSeriesDetails(_ details: TVSeriesDetails)
-    func didGetTVSeriesCast(_ cast: [Cast])
+    func didGetTVSeriesCast(_ cast: [Cast], crew: [Cast])
     func didGetTVSeriesVideos(_ videos: [Video])
     func didGetTVSeriesReviews(_ reviews: [Review])
     func didGetTVSeriesRecommends(_ series: [TVSeries])
@@ -39,6 +39,7 @@ final class TVSeriesDetailsScreenPresenter {
     private var seriesID: Int
     private var seriesDetails: TVSeriesDetails?
     private var seriesCast: [Cast] = []
+    private var seriesCrew: [Cast] = []
     private var seriesVideos: [Video] = []
     private var seriesRecommends: [TVSeries] = []
     private var seriesSimilars: [TVSeries] = []
@@ -73,7 +74,7 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self, let details = self.seriesDetails else { return }
             self.view?.didGetAllTVSeriesData(
-                details, cast: seriesCast,
+                details, cast: seriesCast, crew: seriesCrew,
                 videos: seriesVideos, reviews: seriesReviews,
                 recommends: seriesRecommends, similars: seriesSimilars
             )
@@ -115,8 +116,9 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
     }
     
     // MARK: - PROGRAMMATIC
-    func didGetTVSeriesCast(_ cast: [Cast]) {
+    func didGetTVSeriesCast(_ cast: [Cast], crew: [Cast]) {
         self.seriesCast = cast
+        self.seriesCrew = crew
         downloadGroup.leave()
     }
     

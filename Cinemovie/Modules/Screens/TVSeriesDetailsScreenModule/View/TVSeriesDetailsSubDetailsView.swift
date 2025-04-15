@@ -70,7 +70,7 @@ final class TVSeriesDetailsSubDetailsView: ReusableCellBaseClass {
         let stackView = UIStackView(arrangedSubviews: [
             airDateLabel, statusImageView,
             seriesDurationLabel, hdStatusImageView,
-             mediaTypeImageView, UIView(), homepageImageView
+            mediaTypeImageView, UIView(), homepageImageView
         ])
         stackView.axis = .horizontal
         stackView.alignment = .center

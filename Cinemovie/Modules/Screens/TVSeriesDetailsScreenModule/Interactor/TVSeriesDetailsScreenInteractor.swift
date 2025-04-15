@@ -68,7 +68,7 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
         tmdbService?.getTVSeriesCast(seriesID: seriesID) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): self.presenter?.didGetTVSeriesCast(success.cast)
+            case .success(let success): self.presenter?.didGetTVSeriesCast(success.cast, crew: success.crew)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }

@@ -11,7 +11,7 @@ import SnapKit
 final class ReviewItemContentCellViewModel: CellViewModelBaseClass {
     let review: Review
     fileprivate var isExpanded: Bool = false
-    private(set) var cellHeight = ReviewsContentCellViewModel.defaultITemHeight
+    private(set) var cellHeight = ReviewsTabContentCellViewModel.defaultITemHeight
     private let onHeightChangeRequest: (() -> Void)?
     
     init(review: Review, onHeightChangeRequest: (() -> Void)?) {

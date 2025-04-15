@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-final class BelongsToCollectionContentCellViewModel: CellViewModelBaseClass {
+final class BelongsToCollectionTabContentCellViewModel: CellViewModelBaseClass {
     let collectionDetails: BelongsToCollectionDetails
     private(set) var cellHeight: CGFloat
     let onHeightChangedRequest: (() -> Void)?
@@ -20,7 +20,7 @@ final class BelongsToCollectionContentCellViewModel: CellViewModelBaseClass {
         self.cellHeight = 200
         self.onHeightChangedRequest = onHeightChangedRequest
         self.onItemTapped = onItemTapped
-        super.init(cellIdentifier: "BelongsToCollectionContentCell")
+        super.init(cellIdentifier: "BelongsToCollectionTabContentCell")
     }
     
     public func changeCellSize(to newSize: CGFloat) {
@@ -29,7 +29,7 @@ final class BelongsToCollectionContentCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class BelongsToCollectionContentCell: ReusableCellBaseClass {
+final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let imageHorizontalEdgePaddings = 10.0
@@ -42,7 +42,7 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: BelongsToCollectionContentCellViewModel?
+    private var viewModel: BelongsToCollectionTabContentCellViewModel?
     private var fakePosters: [UIView] = []
     private var items: [MediaPosterImageCellViewModel] = []
     private var showingItems: Bool = false
@@ -131,7 +131,7 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: BelongsToCollectionContentCellViewModel) {
+    public func configure(viewModel: BelongsToCollectionTabContentCellViewModel) {
         self.viewModel = viewModel
         self.items = viewModel.collectionDetails.parts.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.onItemTapped) }
         
@@ -254,7 +254,7 @@ final class BelongsToCollectionContentCell: ReusableCellBaseClass {
     }
 }
 
-extension BelongsToCollectionContentCell: UICollectionViewDelegate, UICollectionViewDataSource {
+extension BelongsToCollectionTabContentCell: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return items.count
     }

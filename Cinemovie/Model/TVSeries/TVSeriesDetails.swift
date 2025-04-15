@@ -68,12 +68,3 @@ struct TVSeriesDetails: APIResponse {
         case voteCount = "vote_count"
     }
 }
-
-enum TVSeriesStatus: String, Codable {
-    case returningSeries = "Returning Series"
-    case ended = "Ended"
-    case canceled = "Canceled"
-    case inProduction = "In Production"
-    case planned = "Planned"
-    case pilot = "Pilot"
-}

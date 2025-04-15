@@ -113,9 +113,9 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         view.backgroundColor = CMColor.cmBackground
         view.register(cellClass: SimilarTabContentCell.self)
         view.register(cellClass: TrailersTabContentCell.self)
-        view.register(cellClass: BelongsToCollectionContentCell.self)
-        view.register(cellClass: ReviewsContentCell.self)
-        view.register(cellClass: RecommendsContentCell.self)
+        view.register(cellClass: BelongsToCollectionTabContentCell.self)
+        view.register(cellClass: ReviewsTabContentCell.self)
+        view.register(cellClass: RecommendsTabContentCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -151,8 +151,8 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         case let vm as SimilarTabContentCellViewModel: contentHeight = vm.cellHeight
         case let vm as RecommendsContentCellViewModel: contentHeight = vm.cellHeight
         case let vm as TrailersTabContentCellViewModel: contentHeight = vm.cellHeight
-        case let vm as BelongsToCollectionContentCellViewModel: contentHeight = vm.cellHeight
-        case let vm as ReviewsContentCellViewModel: contentHeight = vm.cellHeight
+        case let vm as BelongsToCollectionTabContentCellViewModel: contentHeight = vm.cellHeight
+        case let vm as ReviewsTabContentCellViewModel: contentHeight = vm.cellHeight
         default: contentHeight = 210
         }
 
@@ -172,7 +172,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         self.viewModel = viewModel
         
         if let collectionDetails = viewModel.collectionDetails, collectionDetails.backdropPath != nil {
-            let belongsVM = BelongsToCollectionContentCellViewModel(
+            let belongsVM = BelongsToCollectionTabContentCellViewModel(
                 collectionDetails: collectionDetails, onHeightChangedRequest: onHeightChangedRequest, onItemTapped: viewModel.didTapMedia
             )
             self.items[.collection] = belongsVM
@@ -197,7 +197,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         }
         
         if !viewModel.reviews.isEmpty {
-            let reviewsVM = ReviewsContentCellViewModel(reviews: viewModel.reviews, onHeightChangedRequest: onHeightChangedRequest)
+            let reviewsVM = ReviewsTabContentCellViewModel(reviews: viewModel.reviews, onHeightChangedRequest: onHeightChangedRequest)
             self.items[.reviews] = reviewsVM
         }
         self.layoutIfNeeded()
@@ -239,8 +239,8 @@ final class MediaExtrasCell: ReusableCellBaseClass {
             switch viewModel {
             case let vm as SimilarTabContentCellViewModel: height = vm.cellHeight
             case let vm as TrailersTabContentCellViewModel: height = vm.cellHeight
-            case let vm as BelongsToCollectionContentCellViewModel: height = vm.cellHeight
-            case let vm as ReviewsContentCellViewModel: height = vm.cellHeight
+            case let vm as BelongsToCollectionTabContentCellViewModel: height = vm.cellHeight
+            case let vm as ReviewsTabContentCellViewModel: height = vm.cellHeight
             case let vm as RecommendsContentCellViewModel: height = vm.cellHeight
             default: height = 200
             }
@@ -308,9 +308,9 @@ extension MediaExtrasCell: UICollectionViewDataSource, UICollectionViewDelegate 
         switch viewModel {
         case let vm as SimilarTabContentCellViewModel: (cell as? SimilarTabContentCell)?.configure(viewModel: vm)
         case let vm as TrailersTabContentCellViewModel: (cell as? TrailersTabContentCell)?.configure(viewModel: vm)
-        case let vm as BelongsToCollectionContentCellViewModel: (cell as? BelongsToCollectionContentCell)?.configure(viewModel: vm)
-        case let vm as ReviewsContentCellViewModel: (cell as? ReviewsContentCell)?.configure(viewModel: vm)
-        case let vm as RecommendsContentCellViewModel: (cell as? RecommendsContentCell)?.configure(viewModel: vm)
+        case let vm as BelongsToCollectionTabContentCellViewModel: (cell as? BelongsToCollectionTabContentCell)?.configure(viewModel: vm)
+        case let vm as ReviewsTabContentCellViewModel: (cell as? ReviewsTabContentCell)?.configure(viewModel: vm)
+        case let vm as RecommendsContentCellViewModel: (cell as? RecommendsTabContentCell)?.configure(viewModel: vm)
         default: break
         }
         

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Season: Codable, Hashable {
+struct Season: Codable, Hashable{
     let airDate: String?
     let episodeCount, id: Int
     let name, overview: String
