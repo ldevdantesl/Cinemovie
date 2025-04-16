@@ -16,9 +16,11 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
     func didTapShareButton()
     func didTapRateButton()
     func didTapBackButton()
-    func didSelectActor(_ actor: Cast)
     func didTapTooltipView(sendedBy view: UIView, withMessage text: String)
     func didTapHomepage(homepage: String)
+    
+    func didSelectActor(_ actor: Cast)
+    func didSelectSeason(_ season: TVSeason)
     
     // MARK: - PROGRAMMATIC
     func didGetTVSeriesDetails(_ details: TVSeriesDetails)
@@ -27,6 +29,9 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
     func didGetTVSeriesReviews(_ reviews: [Review])
     func didGetTVSeriesRecommends(_ series: [TVSeries])
     func didGetTVSeriesSimilar(_ series: [TVSeries])
+    func didGetTVSeasonDetails(_ details: TVSeasonDetails)
+    
+    // MARK: - ERROR HANDLING
     func didRecieveError(_ error: Error)
 }
 
@@ -99,10 +104,6 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
         router.presentShareView(details: details)
     }
     
-    func didSelectActor(_ actor: Cast) {
-        router.showActorPopUp(actor: actor)
-    }
-    
     func didTapBackButton() {
         router.goBack()
     }
@@ -113,6 +114,15 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
     
     func didTapHomepage(homepage: String) {
         router.openHomepage(homepage: homepage)
+    }
+    
+    func didSelectActor(_ actor: Cast) {
+        router.showActorPopUp(actor: actor)
+    }
+    
+    func didSelectSeason(_ season: TVSeason) {
+        print("TVSeriesID: \(seriesID), TVSeason Number: \(season.seasonNumber)")
+        interactor.getTVSeasonDetails(seriesID: seriesID, seasonNumber: season.seasonNumber)
     }
     
     // MARK: - PROGRAMMATIC
@@ -147,6 +157,11 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
         downloadGroup.leave()
     }
     
+    func didGetTVSeasonDetails(_ details: TVSeasonDetails) {
+        router.showSeasonPopUp(seasonDetails: details)
+    }
+    
+    // MARK: - ERROR HANDLING
     func didRecieveError(_ error: any Error) {
         view?.didRecieveError(error.localizedDescription)
     }

@@ -24,6 +24,9 @@ protocol TMDBService: AnyObject {
     func getTVSeriesRecommendations(seriesID: Int, completion: @escaping(Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
     func getTVSeriesReviews(seriesID: Int, completion: @escaping (Result<MediaReviewsAPIResponse, NetworkError>) -> Void)
     
+    // MARK: - TV SEASON
+    func getTVSeasonDetails(seriesID: Int, seasonNumber: Int, completion: @escaping (Result<TVSeasonDetails, NetworkError>) -> Void)
+    
     // MARK: - PERSON
     func getPersonID(creditID: String, completion: @escaping (Result<CreditDetailsAPIResponse, NetworkError>) -> Void)
     func getPersonDetails(personID: Int, completion: @escaping (Result<PersonDetails, NetworkError>) -> Void)

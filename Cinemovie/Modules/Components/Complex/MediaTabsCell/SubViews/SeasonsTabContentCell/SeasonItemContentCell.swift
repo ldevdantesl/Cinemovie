@@ -10,10 +10,12 @@ import SnapKit
 import SDWebImage
 
 final class SeasonItemContentCellViewModel: CellViewModelBaseClass {
-    let season: Season
+    let season: TVSeason
+    let didTapSeason: ((TVSeason) -> Void)?
     
-    init(season: Season) {
+    init(season: TVSeason, didTapSeason: ((TVSeason) -> Void)?) {
         self.season = season
+        self.didTapSeason = didTapSeason
         super.init(cellIdentifier: "SeasonItemContentCell")
     }
 }
@@ -21,6 +23,7 @@ final class SeasonItemContentCellViewModel: CellViewModelBaseClass {
 final class SeasonItemContentCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
+        static let loadingIndicatorSize = 10.0
         static let imagePointSize = 15.0
         static let defaultPosterImageName = "questionmark"
         static let imageCornerRadius = 5.0
@@ -90,6 +93,15 @@ final class SeasonItemContentCell: ReusableCellBaseClass {
         return stack
     }()
     
+    private lazy var tapContainer: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.isUserInteractionEnabled = true
+        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapSeason)))
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     // MARK: - LIFECYCLE
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -134,6 +146,12 @@ final class SeasonItemContentCell: ReusableCellBaseClass {
     private func setupUI() {
         contentView.backgroundColor = CMColor.cmSecondaryBackground
         
+        posterImageView.addSubview(loadingIndicator)
+        loadingIndicator.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.size.equalTo(Constants.loadingIndicatorSize)
+        }
+        
         addSubview(posterImageView)
         posterImageView.snp.makeConstraints {
             $0.verticalEdges.equalToSuperview().inset(Constants.vSpacing)
@@ -148,5 +166,16 @@ final class SeasonItemContentCell: ReusableCellBaseClass {
             $0.trailing.equalToSuperview().inset(Constants.hSpacing)
             $0.bottom.equalToSuperview().inset(Constants.vSpacing)
         }
+        
+        addSubview(tapContainer)
+        tapContainer.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+    }
+    
+    // MARK: - OBJC FUNC
+    @objc private func didTapSeason() {
+        guard let viewModel = viewModel else { return }
+        viewModel.didTapSeason?(viewModel.season)
     }
 }

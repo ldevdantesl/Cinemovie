@@ -17,6 +17,7 @@ protocol TVSeriesDetailsScreenRouterProtocol {
     func showTooltipView(sendedBy view: UIView, message: String)
     func presentShareView(details: TVSeriesDetails)
     func showActorPopUp(actor: Cast)
+    func showSeasonPopUp(seasonDetails: TVSeasonDetails)
     
     // MARK: - ROUTE
     func openHomepage(homepage: String)
@@ -53,10 +54,20 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     // MARK: - PRESENT
     func showActorPopUp(actor: Cast) {
         guard let vcView = viewController?.view else { return }
-        let vm = ActorPopupViewModel(actor: actor, didTapActorDetails: self.navigateToPersonDetails, didTapClose: self.hideActorPopUp)
+        let vm = ActorPopupViewModel(actor: actor, didTapActorDetails: self.navigateToPersonDetails, didTapClose: self.hidePopUpView)
         let popupView = ActorPopupView(viewModel: vm)
         popupView.show(in: vcView)
         viewController?.activePopUpView = popupView
+    }
+    
+    func showSeasonPopUp(seasonDetails: TVSeasonDetails) {
+        DispatchQueue.main.async {
+            guard let vcView = self.viewController?.view else { return }
+            let vm = SeasonsPopUpViewModel(seasonDetails: seasonDetails, didTapClose: self.hidePopUpView)
+            let popupView = SeasonsPopUpView(viewModel: vm)
+            popupView.show(in: vcView)
+            self.viewController?.activePopUpView = popupView
+        }
     }
     
     func presentShareView(details: TVSeriesDetails) {
@@ -110,7 +121,7 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     }
     
     // MARK: - PRIVATE FUNC
-    private func hideActorPopUp() {
+    private func hidePopUpView() {
         self.viewController?.activePopUpView = nil
     }
 }

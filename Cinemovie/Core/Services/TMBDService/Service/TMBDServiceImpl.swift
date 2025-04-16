@@ -88,6 +88,13 @@ final class TMBDServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
+    // MARK: - TV SEASON
+    func getTVSeasonDetails(seriesID: Int, seasonNumber: Int, completion: @escaping (Result<TVSeasonDetails, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getTVSeasonDetailsEndpoint(seriesID: seriesID, seasonNumber: seasonNumber, queryParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
     // MARK: - PERSON
     func getPersonID(creditID: String, completion: @escaping (Result<CreditDetailsAPIResponse, NetworkError>) -> Void) {
         let endpoint = TMDBEndpoints.getPersonIDEndpoint(creditID: creditID)

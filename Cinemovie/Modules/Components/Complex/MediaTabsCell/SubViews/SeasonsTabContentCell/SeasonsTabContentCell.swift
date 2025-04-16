@@ -10,13 +10,15 @@ import SnapKit
 import SDWebImage
 
 final class SeasonsTabContentCellViewModel: CellViewModelBaseClass {
-    let seasons: [Season]
+    let seasons: [TVSeason]
+    let onSeasonTap: ((TVSeason) -> Void)?
     let onHeightChangedRequest: (() -> Void)?
     private(set) var cellHeight: CGFloat = 100
     
-    init(seasons: [Season], onHeightChangedRequest: (() -> Void)?) {
+    init(seasons: [TVSeason], onHeightChangedRequest: (() -> Void)?, onSeasonTap: ((TVSeason) -> Void)?) {
         self.seasons = seasons
         self.onHeightChangedRequest = onHeightChangedRequest
+        self.onSeasonTap = onSeasonTap
         super.init(cellIdentifier: "SeasonsTabContentCell")
     }
     
@@ -67,7 +69,7 @@ final class SeasonsTabContentCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: SeasonsTabContentCellViewModel) {
         self.viewModel = viewModel
-        self.items = viewModel.seasons.map { SeasonItemContentCellViewModel(season: $0) }
+        self.items = viewModel.seasons.map { SeasonItemContentCellViewModel(season: $0, didTapSeason: viewModel.onSeasonTap) }
         self.seasonsCollectionView.reloadData()
         viewModel.changeCellHeight(to: calculateCellHeight(totalItems: items.count))
     }

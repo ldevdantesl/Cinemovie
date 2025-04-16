@@ -14,10 +14,10 @@ struct Cast: APIResponse, Hashable {
     let creditID: String
     let adult: Bool
     let gender: Int
-    let knownForDepartment: String
+    let knownForDepartment: String?
     let name: String
     let originalName: String
-    let popularity: Double
+    let popularity: Double?
     let profilePath: String?
     let character: String?
     let order: Int?

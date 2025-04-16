@@ -61,6 +61,11 @@ struct TMDBEndpoints {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)/recommendations", queryParams: queryParams)
     }
     
+    // MARK: - TV SEASON
+    static func getTVSeasonDetailsEndpoint(seriesID: Int, seasonNumber: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)/season/\(seasonNumber)", queryParams: queryParams)
+    }
+    
     // MARK: - PERSON
     static func getPersonIDEndpoint(creditID: String) -> Endpoint {
         return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/credit/\(creditID)")

@@ -32,6 +32,10 @@ open class PopUPView: UIView {
         setupUI()
     }
     
+    deinit {
+        print("Pop Up deinited")
+    }
+    
     @available(*, unavailable)
     required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

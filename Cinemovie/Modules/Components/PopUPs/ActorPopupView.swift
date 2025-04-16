@@ -160,10 +160,6 @@ final class ActorPopupView: PopUPView {
         self.containerView.layer.cornerRadius = Constants.containerCornerRadius
     }
     
-    deinit {
-        print("Actor popup removed")
-    }
-    
     // MARK: - PRIVATE FUNC
     private func setupUI() {
         addSubview(containerView)

@@ -266,8 +266,8 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         sectionsAndTheirItems.append((Sections.rateAndShare, [.rateAndShare(rateVM)]))
         
         let extrasVM = MediaExtrasCellViewModel(
-            seasons: [], collectionDetails: belongsToCollectionDetails,
-            similar: similar, recommended: recommended, videos: videos,
+            collectionDetails: belongsToCollectionDetails, similar: similar,
+            recommended: recommended, videos: videos,
             reviews: reviews, didTapMedia: presenter?.didTapMedia
         )
         

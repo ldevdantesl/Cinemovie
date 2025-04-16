@@ -9,26 +9,44 @@ import UIKit
 import SnapKit
 
 final class MediaExtrasCellViewModel: CellViewModelBaseClass {
-    let seasons: [Season]
+    let seasons: [TVSeason]
     let collectionDetails: BelongsToCollectionDetails?
     let similar: [Media]
     let recommended: [Media]
     let videos: [Video]
     let reviews: [Review]
     let didTapMedia: ((Media) -> Void)?
+    let didTapSeason: ((TVSeason) -> Void)?
     
     init(
-        seasons: [Season], collectionDetails: BelongsToCollectionDetails?,
-        similar: [Media], recommended: [Media], videos: [Video], reviews: [Review],
+        collectionDetails: BelongsToCollectionDetails?, similar: [Media],
+        recommended: [Media], videos: [Video], reviews: [Review],
         didTapMedia: ((Media) -> Void)?
     ) {
-        self.seasons = seasons
+        self.seasons = []
         self.collectionDetails = collectionDetails
         self.similar = similar
         self.recommended = recommended
         self.videos = videos
         self.reviews = reviews
         self.didTapMedia = didTapMedia
+        self.didTapSeason = nil
+        super.init(cellIdentifier: "MediaExtrasCell")
+    }
+    
+    init(
+        seasons: [TVSeason], similar: [Media],
+        recommended: [Media], videos: [Video], reviews: [Review],
+        didTapMedia: ((Media) -> Void)?, didTapSeason: ((TVSeason) -> Void)?
+    ) {
+        self.seasons = seasons
+        self.collectionDetails = nil
+        self.similar = similar
+        self.recommended = recommended
+        self.videos = videos
+        self.reviews = reviews
+        self.didTapMedia = didTapMedia
+        self.didTapSeason = didTapSeason
         super.init(cellIdentifier: "MediaExtrasCell")
     }
 }
@@ -175,7 +193,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         self.viewModel = viewModel
         
         if !viewModel.seasons.isEmpty {
-            let seasonsVM = SeasonsTabContentCellViewModel(seasons: viewModel.seasons, onHeightChangedRequest: onHeightChangedRequest)
+            let seasonsVM = SeasonsTabContentCellViewModel(seasons: viewModel.seasons, onHeightChangedRequest: onHeightChangedRequest, onSeasonTap: viewModel.didTapSeason)
             self.items[.seasons] = seasonsVM
         }
         
