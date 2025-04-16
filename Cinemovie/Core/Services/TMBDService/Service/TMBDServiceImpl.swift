@@ -152,25 +152,25 @@ final class TMBDServiceImpl: TMDBService {
     // MARK: - PRESET TV SERIES LIST IMPLEMENTATIONS
     func getPopularTVSeries(completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
-        let endpoint = TMDBEndpoints.getPopularTVSeriesEndpoint(queryParams: queryParams)
+        let endpoint = TMDBEndpoints.getPopularTVSeriesEndpoint(extraParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
     func getTopRatedTVSeries(completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
-        let endpoint = TMDBEndpoints.getTopRatedTVSeriesEndpoint(queryParams: queryParams)
+        let endpoint = TMDBEndpoints.getTopRatedTVSeriesEndpoint(extraParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
     func getAiringTodayTVSeries(completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
-        let endpoint = TMDBEndpoints.getAiringTodayTVSeriesEndpoint(queryParams: queryParams)
+        let endpoint = TMDBEndpoints.getAiringTodayTVSeriesEndpoint(extraParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
     func getOnTheAirTVSeries(completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
-        let endpoint = TMDBEndpoints.getOnTheAirTVSeriesEndpoint(queryParams: queryParams)
+        let endpoint = TMDBEndpoints.getOnTheAirTVSeriesEndpoint(extraParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     

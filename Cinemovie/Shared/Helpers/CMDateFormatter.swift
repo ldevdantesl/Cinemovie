@@ -62,4 +62,10 @@ public struct CMDateFormatter {
         
         return date < Date()
     }
+    
+    static func currentDateString() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        return dateFormatter.string(from: Date())
+    }
 }

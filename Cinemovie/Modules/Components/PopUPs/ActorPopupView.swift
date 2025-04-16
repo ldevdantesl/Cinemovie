@@ -9,13 +9,13 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-struct MediaDetailsActorPopupViewModel: PopUPViewModel {
+struct ActorPopupViewModel: PopUPViewModel {
     let actor: Cast
     let didTapActorDetails: ((String) -> Void)?
     let didTapClose: (() -> Void)?
 }
 
-final class MediaDetailsActorPopupView: PopUPView {
+final class ActorPopupView: PopUPView {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let buttonImageName = "person"
@@ -36,7 +36,7 @@ final class MediaDetailsActorPopupView: PopUPView {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: MediaDetailsActorPopupViewModel
+    private var viewModel: ActorPopupViewModel
     
     // MARK: - VIEW PROPERTIES
     private let loadingIndicator: UIActivityIndicatorView = {
@@ -130,7 +130,7 @@ final class MediaDetailsActorPopupView: PopUPView {
     }()
     
     // MARK: - LIFECYCLE
-    init(viewModel: MediaDetailsActorPopupViewModel) {
+    init(viewModel: ActorPopupViewModel) {
         self.viewModel = viewModel
         super.init(viewModel: viewModel)
         setupUI()

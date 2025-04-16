@@ -12,7 +12,7 @@ import SDWebImage
 protocol TVSeriesDetailsScreenViewProtocol: AnyObject {
     var activeTooltipView: CMTooltipView? { get set }
     var activeTooltipWorkItem: DispatchWorkItem? { get set }
-    var activeActorPopUpView: MediaDetailsActorPopupView? { get set }
+    var activePopUpView: PopUPView? { get set }
     
     func didRecieveError(_ errorStr: String)
     func didGetAllTVSeriesData(
@@ -53,7 +53,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
     var presenter: TVSeriesDetailsScreenPresenterProtocol?
     var activeTooltipView: CMTooltipView?
     var activeTooltipWorkItem: DispatchWorkItem?
-    var activeActorPopUpView: MediaDetailsActorPopupView?
+    var activePopUpView: PopUPView?
     
     // MARK: - PROPERTIES
     private var viewModels: [CellViewModelBaseClass] = []

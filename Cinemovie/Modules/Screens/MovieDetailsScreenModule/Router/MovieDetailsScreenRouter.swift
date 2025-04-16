@@ -41,8 +41,8 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
     
     func showActorPopUp(actor: Cast) {
         guard let vcView = viewController?.view else { return }
-        let vm = MediaDetailsActorPopupViewModel(actor: actor, didTapActorDetails: self.navigateToPersonDetails, didTapClose: self.hideActorPopUp)
-        let popupView = MediaDetailsActorPopupView(viewModel: vm)
+        let vm = ActorPopupViewModel(actor: actor, didTapActorDetails: self.navigateToPersonDetails, didTapClose: self.hideActorPopUp)
+        let popupView = ActorPopupView(viewModel: vm)
         popupView.show(in: vcView)
         self.viewController?.activePopUpView = popupView
     }

@@ -53,10 +53,10 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     // MARK: - PRESENT
     func showActorPopUp(actor: Cast) {
         guard let vcView = viewController?.view else { return }
-        let vm = MediaDetailsActorPopupViewModel(actor: actor, didTapActorDetails: self.navigateToPersonDetails, didTapClose: self.hideActorPopUp)
-        let popupView = MediaDetailsActorPopupView(viewModel: vm)
+        let vm = ActorPopupViewModel(actor: actor, didTapActorDetails: self.navigateToPersonDetails, didTapClose: self.hideActorPopUp)
+        let popupView = ActorPopupView(viewModel: vm)
         popupView.show(in: vcView)
-        viewController?.activeActorPopUpView = popupView
+        viewController?.activePopUpView = popupView
     }
     
     func presentShareView(details: TVSeriesDetails) {
@@ -111,6 +111,6 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     
     // MARK: - PRIVATE FUNC
     private func hideActorPopUp() {
-        self.viewController?.activeActorPopUpView = nil
+        self.viewController?.activePopUpView = nil
     }
 }

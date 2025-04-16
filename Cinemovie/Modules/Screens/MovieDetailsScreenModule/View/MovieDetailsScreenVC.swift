@@ -12,7 +12,7 @@ import SDWebImage
 protocol MovieDetailsScreenViewProtocol: AnyObject {
     var activeTooltipView: CMTooltipView? { get set }
     var activeTooltipWorkItem: DispatchWorkItem? { get set }
-    var activePopUpView: MediaDetailsActorPopupView? { get set }
+    var activePopUpView: ActorPopupView? { get set }
 
     func didRecieveError(_ errorStr: String)
     func didDownloadAllData(
@@ -54,7 +54,7 @@ final class MovieDetailsScreenVC: UIViewController {
     var presenter: MovieDetailsScreenPresenterProtocol?
     var activeTooltipView: CMTooltipView?
     var activeTooltipWorkItem: DispatchWorkItem?
-    var activePopUpView: MediaDetailsActorPopupView?
+    var activePopUpView: ActorPopupView?
     
     // MARK: - PROPERTIES
     private var viewModels: [CellViewModelBaseClass] = []

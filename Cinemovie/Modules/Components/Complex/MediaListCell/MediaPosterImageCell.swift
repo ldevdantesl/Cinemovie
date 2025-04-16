@@ -69,6 +69,12 @@ final class MediaPosterImageCell: ReusableCellBaseClass {
         self.posterImageView.layer.borderWidth = Constants.borderWidth
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        self.posterImageView.contentMode = .scaleAspectFill
+        self.posterImageView.image = nil
+    }
+    
     // MARK: - PUBLIC FUNCTIONS
     public func configure(with viewModel: MediaPosterImageCellViewModel) {
         self.viewModel = viewModel
