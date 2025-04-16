@@ -105,37 +105,46 @@ struct TMDBEndpoints {
     }
     
     // MARK: - PRESET LIST OF TV SERIES
-    static func getPopularTVSeriesEndpoint(extraParams: [String : String]) -> Endpoint {
+    static func getPopularTVSeriesEndpoint(extraParams: [String : String]?) -> Endpoint {
         var queryParams = [
             "sort_by": "popularity.desc",
-            "without_genres": "10764,10763,10767"
+            "without_genres": "10764,10763,10767",
+            "with_watch_providers": "8|9|119|337|350|15",
+            "watch_region" : "US",
+            "include_null_watch_providers": "false"
         ]
         
-        extraParams.forEach { queryParams[$0] = $1 }
+        extraParams?.forEach { queryParams[$0] = $1 }
         return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/discover/tv", queryParams: queryParams)
     }
 
-    static func getTopRatedTVSeriesEndpoint(extraParams: [String : String]) -> Endpoint {
+    static func getTopRatedTVSeriesEndpoint(extraParams: [String : String]?) -> Endpoint {
         return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/top_rated", queryParams: extraParams)
     }
 
-    static func getOnTheAirTVSeriesEndpoint(extraParams: [String : String]) -> Endpoint {
+    static func getOnTheAirTVSeriesEndpoint(extraParams: [String : String]?) -> Endpoint {
         var queryParams = [
             "sort_by": "first_air_date.desc",
             "air_date.lte": CMDateFormatter.currentDateString(),
-            "without_genres": "10764,10763,10767"
+            "without_genres": "10764,10763,10767",
+            "with_watch_providers": "8|9|119|337|350|15",
+            "watch_region": "US",
+            "include_null_watch_providers": "false"
         ]
-        extraParams.forEach { queryParams[$0] = $1 }
+        extraParams?.forEach { queryParams[$0] = $1 }
         return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/discover/tv", queryParams: queryParams)
     }
 
-    static func getAiringTodayTVSeriesEndpoint(extraParams: [String : String]) -> Endpoint {
+    static func getAiringTodayTVSeriesEndpoint(extraParams: [String : String]?) -> Endpoint {
         var queryParams = [
             "first_air_date.gte": CMDateFormatter.currentDateString(),
             "first_air_date.lte": CMDateFormatter.currentDateString(),
-            "without_genres": "10764,10763,10767"
+            "without_genres": "10764,10763,10767",
+            "with_watch_providers": "8|9|119|337|350|15",
+            "watch_region": "US",
+            "include_null_watch_providers": "false"
         ]
-        extraParams.forEach { queryParams[$0] = $1 }
+        extraParams?.forEach { queryParams[$0] = $1 }
         return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/discover/tv", queryParams: queryParams)
     }
 }

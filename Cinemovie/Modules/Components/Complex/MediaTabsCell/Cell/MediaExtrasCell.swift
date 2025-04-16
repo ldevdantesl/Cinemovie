@@ -77,6 +77,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
     private var visibleTabs: [Tabs] {
         return Tabs.allCases.filter { items[$0] != nil }
     }
+    private var heightChangeWorkItem: DispatchWorkItem?
     
     // MARK: - VIEW PROPERTIES
     private lazy var tabsCollectionView: UICollectionView = {
@@ -210,8 +211,11 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         self.layoutIfNeeded()
         
         guard let firstTab = items.keys.first else { return }
-        selectedTab = firstTab
-        self.switchTabs(to: firstTab, animated: false)
+        
+        DispatchQueue.main.async {
+            self.selectedTab = firstTab
+            self.switchTabs(to: firstTab, animated: false)
+        }
     }
     
     // MARK: - PRIVATE FUNC
@@ -286,9 +290,15 @@ final class MediaExtrasCell: ReusableCellBaseClass {
     }
     
     private func onHeightChangedRequest() {
-        DispatchQueue.main.async {
+        heightChangeWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
             self.invalidateIntrinsicContentSize()
+            self.superview?.setNeedsLayout()
+            self.superview?.layoutIfNeeded()
         }
+        heightChangeWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05, execute: workItem)
     }
 }
 
