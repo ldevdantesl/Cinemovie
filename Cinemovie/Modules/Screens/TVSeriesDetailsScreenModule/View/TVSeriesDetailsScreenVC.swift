@@ -266,7 +266,7 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
         sectionsAndTheirItems.append((Sections.rateAndShare, [.rateAndShare(rateVM)]))
         
         let extrasVM = MediaExtrasCellViewModel(
-            seasons: [], collectionDetails: nil,
+            seasons: details.seasons, collectionDetails: nil,
             similar: similars, recommended: recommends, videos: videos,
             reviews: reviews, didTapMedia: presenter?.didTapMedia
         )

@@ -19,9 +19,9 @@ struct TVSeriesDetails: APIResponse {
     let inProduction: Bool?
     let languages: [String]
     let lastAirDate: String?
-    let lastEpisodeToAir: EpisodeToAir?
+    let lastEpisodeToAir: Episode?
     let name: String
-    let nextEpisodeToAir: EpisodeToAir?
+    let nextEpisodeToAir: Episode?
     let networks: [TVSeriesNetwork]
     let numberOfEpisodes, numberOfSeasons: Int?
     let originCountry: [String]

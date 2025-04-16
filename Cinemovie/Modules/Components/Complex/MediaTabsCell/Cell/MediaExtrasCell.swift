@@ -116,6 +116,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         view.register(cellClass: BelongsToCollectionTabContentCell.self)
         view.register(cellClass: ReviewsTabContentCell.self)
         view.register(cellClass: RecommendsTabContentCell.self)
+        view.register(cellClass: SeasonsTabContentCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -153,6 +154,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         case let vm as TrailersTabContentCellViewModel: contentHeight = vm.cellHeight
         case let vm as BelongsToCollectionTabContentCellViewModel: contentHeight = vm.cellHeight
         case let vm as ReviewsTabContentCellViewModel: contentHeight = vm.cellHeight
+        case let vm as SeasonsTabContentCellViewModel: contentHeight = vm.cellHeight
         default: contentHeight = 210
         }
 
@@ -170,6 +172,11 @@ final class MediaExtrasCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: MediaExtrasCellViewModel) {
         self.viewModel = viewModel
+        
+        if !viewModel.seasons.isEmpty {
+            let seasonsVM = SeasonsTabContentCellViewModel(seasons: viewModel.seasons, onHeightChangedRequest: onHeightChangedRequest)
+            self.items[.seasons] = seasonsVM
+        }
         
         if let collectionDetails = viewModel.collectionDetails, collectionDetails.backdropPath != nil {
             let belongsVM = BelongsToCollectionTabContentCellViewModel(
@@ -242,6 +249,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
             case let vm as BelongsToCollectionTabContentCellViewModel: height = vm.cellHeight
             case let vm as ReviewsTabContentCellViewModel: height = vm.cellHeight
             case let vm as RecommendsContentCellViewModel: height = vm.cellHeight
+            case let vm as SeasonsTabContentCellViewModel: height = vm.cellHeight
             default: height = 200
             }
             
@@ -278,7 +286,9 @@ final class MediaExtrasCell: ReusableCellBaseClass {
     }
     
     private func onHeightChangedRequest() {
-        self.invalidateIntrinsicContentSize()
+        DispatchQueue.main.async {
+            self.invalidateIntrinsicContentSize()
+        }
     }
 }
 
@@ -311,6 +321,7 @@ extension MediaExtrasCell: UICollectionViewDataSource, UICollectionViewDelegate 
         case let vm as BelongsToCollectionTabContentCellViewModel: (cell as? BelongsToCollectionTabContentCell)?.configure(viewModel: vm)
         case let vm as ReviewsTabContentCellViewModel: (cell as? ReviewsTabContentCell)?.configure(viewModel: vm)
         case let vm as RecommendsContentCellViewModel: (cell as? RecommendsTabContentCell)?.configure(viewModel: vm)
+        case let vm as SeasonsTabContentCellViewModel: (cell as? SeasonsTabContentCell)?.configure(viewModel: vm)
         default: break
         }
         

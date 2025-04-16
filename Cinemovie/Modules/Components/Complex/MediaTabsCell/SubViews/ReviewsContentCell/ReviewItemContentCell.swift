@@ -149,7 +149,6 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
         self.reviewStarRatingView.configure(rating: 0)
         self.reviewStarRatingView.isHidden = false
         self.noRatingLabel.isHidden = true
-        self.noRatingLabel.snp.removeConstraints()
     }
     
     // MARK: - PUBLIC FUNC
@@ -197,7 +196,6 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
         loadingIndicator.startAnimating()
         self.reviewAuthorImageView.sd_setImage(with: imageURL) { [weak self] image, _, _, _ in
             guard let self = self else { return }
-            self.reviewAuthorImageView.image = image
             self.loadingIndicator.stopAnimating()
         }
         

@@ -8,12 +8,14 @@
 import Foundation
 
 struct Season: Codable, Hashable{
-    let airDate: String?
-    let episodeCount, id: Int
-    let name, overview: String
-    let posterPath: String?
+    let id: Int
     let seasonNumber: Int
-    let voteAverage: Double
+    let airDate: String?
+    let episodeCount: Int
+    let name: String
+    let overview: String?
+    let posterPath: String?
+    let voteAverage: Double?
     
     enum CodingKeys: String, CodingKey {
         case airDate = "air_date"

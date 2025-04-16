@@ -9,13 +9,13 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-struct MediaDetailsActorPopupViewModel {
+struct MediaDetailsActorPopupViewModel: PopUPViewModel {
     let actor: Cast
     let didTapActorDetails: ((String) -> Void)?
     let didTapClose: (() -> Void)?
 }
 
-final class MediaDetailsActorPopupView: UIView {
+final class MediaDetailsActorPopupView: PopUPView {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let buttonImageName = "person"
@@ -39,15 +39,6 @@ final class MediaDetailsActorPopupView: UIView {
     private var viewModel: MediaDetailsActorPopupViewModel
     
     // MARK: - VIEW PROPERTIES
-    private lazy var blurView: UIVisualEffectView = {
-        let blur = UIBlurEffect(style: .systemUltraThinMaterialDark)
-        let view = UIVisualEffectView(effect: blur)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.isUserInteractionEnabled = true
-        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapClose)))
-        return view
-    }()
-    
     private let loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
         indicator.color = CMColor.cmLabel
@@ -141,7 +132,7 @@ final class MediaDetailsActorPopupView: UIView {
     // MARK: - LIFECYCLE
     init(viewModel: MediaDetailsActorPopupViewModel) {
         self.viewModel = viewModel
-        super.init(frame: .zero)
+        super.init(viewModel: viewModel)
         setupUI()
         
         guard let url = URLHelper.getImageURL(with: viewModel.actor.profilePath, size: .w342) else {
@@ -173,50 +164,8 @@ final class MediaDetailsActorPopupView: UIView {
         print("Actor popup removed")
     }
     
-    // MARK: - PUBLIC FUNC
-    public func show(in parentView: UIView) {
-        parentView.addSubview(self)
-        
-        self.translatesAutoresizingMaskIntoConstraints = false
-        
-        parentView.addSubview(self)
-        self.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-        
-        self.alpha = 0
-        self.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
-
-        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseOut) { [weak self] in
-            guard let self = self else { return }
-            self.alpha = 1
-            self.transform = .identity
-        }
-    }
-    
-    public func dismiss() {
-        UIView.animate(
-            withDuration: 0.5, delay: 0,
-            usingSpringWithDamping: 0.7, initialSpringVelocity: 1,
-            options: .curveEaseOut
-        ) { [weak self] in
-            guard let self = self else { return }
-            self.alpha = 0
-            self.transform = CGAffineTransform(scaleX: 0.8, y: 0.8).concatenating(CGAffineTransform(translationX: 0, y: 30))
-        } completion: { [weak self] _ in
-            guard let self = self else { return }
-            self.removeFromSuperview()
-            self.viewModel.didTapClose?()
-        }
-    }
-    
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        addSubview(blurView)
-        blurView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-        
         addSubview(containerView)
         containerView.snp.makeConstraints {
             $0.center.equalToSuperview()
@@ -255,10 +204,5 @@ final class MediaDetailsActorPopupView: UIView {
             $0.horizontalEdges.equalToSuperview().inset(Constants.biggerSpacing)
             $0.height.equalTo(Constants.buttonHeight)
         }
-    }
-    
-    // MARK: - OBJC FUNC
-    @objc private func didTapClose() {
-        dismiss()
     }
 }
