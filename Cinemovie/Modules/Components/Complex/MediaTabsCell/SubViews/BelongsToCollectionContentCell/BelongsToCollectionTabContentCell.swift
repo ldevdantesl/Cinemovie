@@ -11,21 +11,17 @@ import SDWebImage
 
 final class BelongsToCollectionTabContentCellViewModel: CellViewModelBaseClass {
     let collectionDetails: BelongsToCollectionDetails
-    private(set) var cellHeight: CGFloat
-    private let onHeightChangedRequest: (() -> Void)?
     let onItemTapped: ((Media) -> Void)?
+    private(set) var cellHeight: CGFloat = 200
     
-    init(collectionDetails: BelongsToCollectionDetails, onItemTapped: ((Media) -> Void)?,  onHeightChangedRequest: (() -> Void)?) {
+    init(collectionDetails: BelongsToCollectionDetails, onItemTapped: ((Media) -> Void)?) {
         self.collectionDetails = collectionDetails
-        self.cellHeight = 200
-        self.onHeightChangedRequest = onHeightChangedRequest
         self.onItemTapped = onItemTapped
         super.init(cellIdentifier: "BelongsToCollectionTabContentCell")
     }
     
     fileprivate func changeCellSize(to newSize: CGFloat) {
         self.cellHeight = newSize
-        self.onHeightChangedRequest?()
     }
 }
 

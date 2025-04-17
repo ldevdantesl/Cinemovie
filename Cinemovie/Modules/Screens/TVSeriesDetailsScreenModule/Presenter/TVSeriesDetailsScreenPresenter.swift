@@ -121,7 +121,6 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
     }
     
     func didSelectSeason(_ season: TVSeason) {
-        print("TVSeriesID: \(seriesID), TVSeason Number: \(season.seasonNumber)")
         interactor.getTVSeasonDetails(seriesID: seriesID, seasonNumber: season.seasonNumber)
     }
     

@@ -10,8 +10,9 @@ import SnapKit
 
 struct SeasonsPopUpViewModel: PopUPViewModel {
     let seasonDetails: TVSeasonDetails
-    static let defaultItemHeight = 120.0
     let didTapClose: (() -> Void)?
+    
+    static let defaultItemHeight = 120.0
 }
 
 final class SeasonsPopUpView: PopUPView {
@@ -61,7 +62,6 @@ final class SeasonsPopUpView: PopUPView {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         layout.minimumInteritemSpacing = Constants.itemSpacing
-        layout.itemSize = CGSize(width: Constants.itemWidth, height: Constants.itemHeight)
         
         let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
         view.backgroundColor = .clear
@@ -134,10 +134,6 @@ final class SeasonsPopUpView: PopUPView {
             $0.leading.trailing.equalToSuperview().inset(Constants.vSpacing)
             $0.bottom.equalToSuperview()
         }
-    }
-    
-    private func onHeightChangedRequest() {
-        self.episodesCollectionView.collectionViewLayout.invalidateLayout()
     }
 }
 

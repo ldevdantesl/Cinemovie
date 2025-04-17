@@ -14,6 +14,9 @@ protocol TVSeriesDetailsScreenViewProtocol: AnyObject {
     var activeTooltipWorkItem: DispatchWorkItem? { get set }
     var activePopUpView: PopUPView? { get set }
     
+    func showDownloadingView()
+    func hideDownloadingView()
+    
     func didRecieveError(_ errorStr: String)
     func didGetAllTVSeriesData(
         _ details: TVSeriesDetails, cast: [Cast],
@@ -61,7 +64,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
     private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
     
     // MARK: - VIEW PROPERTIES
-    private let downloadingView: CMSplashView = {
+    private let downloadView: CMSplashView = {
         let view = CMSplashView(frame: .zero, showsLoadingLabel: true)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -98,7 +101,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        downloadingView.animateLogo()
+        self.showDownloadingView()
     }
     
     deinit {
@@ -109,8 +112,8 @@ final class TVSeriesDetailsScreenVC: UIViewController {
     // MARK: - PRIVATE FUNC
     private func setupUI() {
         view.backgroundColor = CMColor.cmBackground
-        view.addSubview(downloadingView)
-        downloadingView.snp.makeConstraints {
+        view.addSubview(downloadView)
+        downloadView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         
@@ -119,7 +122,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
             $0.edges.equalToSuperview()
         }
         
-        view.bringSubviewToFront(downloadingView)
+        view.bringSubviewToFront(downloadView)
     }
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
@@ -204,6 +207,21 @@ final class TVSeriesDetailsScreenVC: UIViewController {
 }
 
 extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
+    
+    // MARK: - DOWNLOAD VIEW
+    func showDownloadingView() {
+        DispatchQueue.main.async {
+            self.downloadView.show()
+        }
+    }
+    
+    func hideDownloadingView() {
+        DispatchQueue.main.async {
+            self.downloadView.hide()
+        }
+    }
+    
+    // MARK: - ERROR HANDLING
     func didRecieveError(_ errorStr: String) {
         let alert = UIAlertController(
             title: "Oops..",
@@ -222,12 +240,13 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
         }
     }
     
+    // MARK: - DATA RECIEVING
     func didGetAllTVSeriesData(
         _ details: TVSeriesDetails, cast: [Cast],
         crew: [Cast], videos: [Video], reviews: [Review],
         recommends: [TVSeries], similars: [TVSeries]
     ) {
-        self.downloadingView.hide()
+        self.downloadView.hide()
         
         let backdropVM = BackdropImageCellViewModel(
             imagePath: details.backdropPath, size: .w1280,

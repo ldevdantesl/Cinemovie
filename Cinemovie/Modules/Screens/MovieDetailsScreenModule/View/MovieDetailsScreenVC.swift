@@ -99,7 +99,7 @@ final class MovieDetailsScreenVC: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        downloadingView.animateLogo()
+        downloadingView.show()
     }
     
     deinit {

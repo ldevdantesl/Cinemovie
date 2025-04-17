@@ -12,19 +12,16 @@ import SDWebImage
 final class SeasonsTabContentCellViewModel: CellViewModelBaseClass {
     let seasons: [TVSeason]
     let onSeasonTap: ((TVSeason) -> Void)?
-    private let onHeightChangedRequest: (() -> Void)?
     private(set) var cellHeight: CGFloat = 100
     
-    init(seasons: [TVSeason], onSeasonTap: ((TVSeason) -> Void)?, onHeightChangedRequest: (() -> Void)?) {
+    init(seasons: [TVSeason], onSeasonTap: ((TVSeason) -> Void)?) {
         self.seasons = seasons
-        self.onHeightChangedRequest = onHeightChangedRequest
         self.onSeasonTap = onSeasonTap
         super.init(cellIdentifier: "SeasonsTabContentCell")
     }
     
     fileprivate func changeCellHeight(to height: CGFloat) {
         self.cellHeight = height
-        self.onHeightChangedRequest?()
     }
 }
 
@@ -71,7 +68,14 @@ final class SeasonsTabContentCell: ReusableCellBaseClass {
         self.viewModel = viewModel
         self.items = viewModel.seasons.map { SeasonItemContentCellViewModel(season: $0, didTapSeason: viewModel.onSeasonTap) }
         self.seasonsCollectionView.reloadData()
-        viewModel.changeCellHeight(to: calculateCellHeight(totalItems: items.count))
+        
+        seasonsCollectionView.performBatchUpdates(nil) { [weak self] _ in
+            guard let self = self else { return }
+            self.seasonsCollectionView.layoutIfNeeded()
+            let height = self.seasonsCollectionView.contentSize.height
+            viewModel.changeCellHeight(to: height)
+            self.invalidateIntrinsicContentSize()
+        }
     }
     
     // MARK: - PRIVATE FUNC
@@ -80,10 +84,6 @@ final class SeasonsTabContentCell: ReusableCellBaseClass {
         seasonsCollectionView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-    }
-    
-    private func calculateCellHeight(totalItems: Int) -> CGFloat {
-        return Double(totalItems) * (Constants.itemHeight + Constants.itemSpacing)
     }
 }
 

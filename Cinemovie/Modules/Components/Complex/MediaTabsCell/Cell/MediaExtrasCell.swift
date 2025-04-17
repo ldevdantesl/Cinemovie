@@ -156,6 +156,9 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         tabsCollectionView.layoutIfNeeded()
         contentCollectionView.layoutIfNeeded()
         dividerView.layer.cornerRadius = Constants.dividerCornerRadius
+        
+        print("Media Extras height: ", self.frame.height)
+        print("ContentCollection height: ", self.contentCollectionView.frame.height)
     }
     
     override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
@@ -176,16 +179,10 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         case let vm as SeasonsTabContentCellViewModel: contentHeight = vm.cellHeight
         default: contentHeight = 210
         }
-
+        
         let totalHeight = Constants.tabsHeight + Constants.spacing + contentHeight + Constants.spacing
         layoutAttributes.frame.size.height = totalHeight
         return layoutAttributes
-    }
-    
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        self.viewModel = nil
-        self.items.removeAll()
     }
     
     // MARK: - PUBLIC FUNC
@@ -193,36 +190,24 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         self.viewModel = viewModel
         
         if !viewModel.seasons.isEmpty {
-            let seasonsVM = SeasonsTabContentCellViewModel(seasons: viewModel.seasons, onSeasonTap: viewModel.didTapSeason) { [weak self] in
-                guard let self = self else { return }
-                self.onHeightChangedRequest()
-            }
+            let seasonsVM = SeasonsTabContentCellViewModel(seasons: viewModel.seasons, onSeasonTap: viewModel.didTapSeason)
             self.items[.seasons] = seasonsVM
         }
         
         if let collectionDetails = viewModel.collectionDetails, collectionDetails.backdropPath != nil {
-            let belongsVM = BelongsToCollectionTabContentCellViewModel(collectionDetails: collectionDetails, onItemTapped: viewModel.didTapMedia) { [weak self] in
-                guard let self = self else { return }
-                self.onHeightChangedRequest()
-            }
+            let belongsVM = BelongsToCollectionTabContentCellViewModel(collectionDetails: collectionDetails, onItemTapped: viewModel.didTapMedia)
             self.items[.collection] = belongsVM
         }
         
         if !viewModel.similar.isEmpty {
             let similarMedia = Array(viewModel.similar.prefix(9))
-            let similarVM = SimilarTabContentCellViewModel(media: similarMedia, didTapAnyMedia: viewModel.didTapMedia) { [weak self] in
-                guard let self = self else { return }
-                self.onHeightChangedRequest()
-            }
+            let similarVM = SimilarTabContentCellViewModel(media: similarMedia, didTapAnyMedia: viewModel.didTapMedia)
             self.items[.similar] = similarVM
         }
         
         if !viewModel.recommended.isEmpty {
             let recommendedMedia = Array(viewModel.recommended.prefix(9))
-            let recommendedVM = RecommendsContentCellViewModel(recommendedMedia: recommendedMedia, didTapAnyMedia: viewModel.didTapMedia) { [weak self] in
-                guard let self = self else { return }
-                self.onHeightChangedRequest()
-            }
+            let recommendedVM = RecommendsContentCellViewModel(recommendedMedia: recommendedMedia, didTapAnyMedia: viewModel.didTapMedia)
             self.items[.recommendations] = recommendedVM
         }
         
@@ -242,10 +227,12 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         self.layoutIfNeeded()
         
         guard let firstTab = items.keys.first else { return }
-        
         DispatchQueue.main.async {
             self.selectedTab = firstTab
             self.switchTabs(to: firstTab, animated: false)
+            self.contentCollectionView.reloadData()
+            self.contentCollectionView.performBatchUpdates(nil)
+            self.onHeightChangedRequest()
         }
     }
     
@@ -300,6 +287,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
                 guard page < visibleTabs.count, let tab = visibleTabs[safe: page], tab != self.selectedTab else { return }
                 self.selectedTab = tab
                 self.tabsCollectionView.reloadData()
+                self.contentCollectionView.invalidateIntrinsicContentSize()
                 self.invalidateIntrinsicContentSize()
             }
             return section
@@ -313,11 +301,6 @@ final class MediaExtrasCell: ReusableCellBaseClass {
 
         guard let index = visibleTabs.firstIndex(of: tab) else { return }
         contentCollectionView.scrollToItem(at: IndexPath(item: index, section: 0), at: .centeredHorizontally, animated: animated)
-
-        contentCollectionView.collectionViewLayout.invalidateLayout()
-        invalidateIntrinsicContentSize()
-        setNeedsLayout()
-        layoutIfNeeded()
     }
     
     private func onHeightChangedRequest() {
@@ -325,8 +308,6 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         let workItem = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
             self.invalidateIntrinsicContentSize()
-            self.superview?.setNeedsLayout()
-            self.superview?.layoutIfNeeded()
         }
         heightChangeWorkItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05, execute: workItem)

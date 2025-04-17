@@ -20,7 +20,7 @@ final class EpisodeItemPopUpCellViewModel: CellViewModelBaseClass {
         super.init(cellIdentifier: "EpisodeItemPopUpCell")
     }
     
-    func changeCellHeightTo(_ height: CGFloat) {
+    fileprivate func changeCellHeightTo(_ height: CGFloat) {
         self.cellHeight = height
         self.onHeightChangedRequest?()
     }

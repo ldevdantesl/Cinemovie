@@ -25,7 +25,7 @@ final class SplashScreenVC: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        splashView.animateLogo()
+        splashView.show()
     }
     
     private func setup() {

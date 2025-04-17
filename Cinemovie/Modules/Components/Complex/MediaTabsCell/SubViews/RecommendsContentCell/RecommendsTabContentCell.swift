@@ -12,19 +12,16 @@ import SDWebImage
 final class RecommendsContentCellViewModel: CellViewModelBaseClass {
     let recommendedMedia: [Media]
     let didTapAnyMedia: ((Media) -> Void)?
-    private let onHeightChangedRequest: (() -> Void)?
     private(set) var cellHeight: CGFloat = 100
     
-    init(recommendedMedia: [Media], didTapAnyMedia: ((Media) -> Void)?, onHeightChangedRequest: (() -> Void)?) {
+    init(recommendedMedia: [Media], didTapAnyMedia: ((Media) -> Void)?) {
         self.recommendedMedia = recommendedMedia
         self.didTapAnyMedia = didTapAnyMedia
-        self.onHeightChangedRequest = onHeightChangedRequest
         super.init(cellIdentifier: "RecommendsTabContentCell")
     }
     
     fileprivate func setCellHeight(to height: CGFloat) {
         self.cellHeight = height
-        self.onHeightChangedRequest?()
     }
 }
 
@@ -69,7 +66,13 @@ final class RecommendsTabContentCell: ReusableCellBaseClass {
                 0 : viewModel.recommendedMedia.map { MediaPosterImageCellViewModel(media: $0) }
             ]
         )
-        viewModel.setCellHeight(to: (Constants.itemHeight * 3) + 20)
+        
+        gridCollectionView.performBatchUpdates(nil) { [weak self] _ in
+            guard let self else { return }
+            let height = self.gridCollectionView.contentSize.height
+            viewModel.setCellHeight(to: height)
+            self.invalidateIntrinsicContentSize()
+        }
     }
     
     // MARK: - PRIVATE FUNC

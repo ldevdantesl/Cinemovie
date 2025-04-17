@@ -11,19 +11,16 @@ import SnapKit
 final class SimilarTabContentCellViewModel: CellViewModelBaseClass {
     let media: [Media]
     let didTapAnyMedia: ((Media) -> Void)?
-    private let onHeightChangedRequest: (() -> Void)?
     private(set) var cellHeight: CGFloat = 1
     
-    init(media: [Media], didTapAnyMedia: ((Media) -> Void)?, onHeightChangedRequest: (() -> Void)?) {
+    init(media: [Media], didTapAnyMedia: ((Media) -> Void)?) {
         self.media = media
         self.didTapAnyMedia = didTapAnyMedia
-        self.onHeightChangedRequest = onHeightChangedRequest
         super.init(cellIdentifier: "SimilarTabContentCell")
     }
     
     fileprivate func setCellHeight(to height: CGFloat) {
         self.cellHeight = height
-        self.onHeightChangedRequest?()
     }
 }
 
@@ -60,16 +57,28 @@ final class SimilarTabContentCell: ReusableCellBaseClass {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        gridCollectionView.layoutIfNeeded()
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: SimilarTabContentCellViewModel) {
         self.viewModel = viewModel
+        
         gridCollectionView.applySnapshot(
             sections: [0],
             itemsBySection: [
                 0 : viewModel.media.map { MediaPosterImageCellViewModel(media: $0) }
             ]
         )
-        viewModel.setCellHeight(to: (Constants.itemHeight * 3) + 20)
+        
+        gridCollectionView.performBatchUpdates(nil) { [weak self] _ in
+            guard let self else { return }
+            let height = self.gridCollectionView.contentSize.height
+            viewModel.setCellHeight(to: height)
+            self.invalidateIntrinsicContentSize()
+        }
     }
     
     // MARK: - PRIVATE FUNC

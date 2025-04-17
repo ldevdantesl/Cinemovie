@@ -10,12 +10,15 @@ import SnapKit
 
 final class TrailersTabContentCellViewModel: CellViewModelBaseClass {
     let trailers: [Video]
-    let cellHeight: CGFloat
+    private(set) var cellHeight: CGFloat = 0
     
     init(trailers: [Video]) {
         self.trailers = trailers
-        self.cellHeight = CGFloat(trailers.count * 240)
         super.init(cellIdentifier: "TrailersTabContentCell")
+    }
+    
+    fileprivate func changeCellHeightTo(_ height: CGFloat) {
+        self.cellHeight = height
     }
 }
 
@@ -56,6 +59,13 @@ final class TrailersTabContentCell: ReusableCellBaseClass {
     public func configure(viewModel: TrailersTabContentCellViewModel) {
         self.viewModel = viewModel
         trailersCollectionView.reloadData()
+        
+        trailersCollectionView.performBatchUpdates(nil) { [weak self] _ in
+            guard let self else { return }
+            let height = self.trailersCollectionView.contentSize.height
+            viewModel.changeCellHeightTo(height)
+            self.invalidateIntrinsicContentSize()
+        }
     }
     
     // MARK: - PRIVATE FUNC

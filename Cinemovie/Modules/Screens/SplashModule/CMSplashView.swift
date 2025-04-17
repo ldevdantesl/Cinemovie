@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 
 final class CMSplashView: UIView {
-
+    
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let appLogoSize: CGFloat = 150
@@ -17,6 +17,7 @@ final class CMSplashView: UIView {
         static let aniDuration: TimeInterval = 1.2
     }
     
+    // MARK: - VIEW PROPERTIES
     private let appLogo: UIImageView = {
         let image = UIImageView()
         image.image = UIImage(named: ImageNames.logoTransparent.rawValue)
@@ -48,8 +49,8 @@ final class CMSplashView: UIView {
     }
     
     // MARK: - PUBLIC FUNC
-    public func animateLogo() {
-        DispatchQueue.main.async {       
+    public func show() {
+        DispatchQueue.main.async {
             UIView.animate(withDuration: Constants.aniDuration, delay: 0, options: [.autoreverse, .repeat, .curveEaseInOut]) { [weak self] in
                 guard let self = self else { return }
                 self.appLogo.transform = CGAffineTransform(translationX: 0, y: Constants.appLogoTranslationY)
