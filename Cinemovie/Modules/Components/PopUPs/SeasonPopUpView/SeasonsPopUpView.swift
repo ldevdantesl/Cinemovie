@@ -10,6 +10,7 @@ import SnapKit
 
 struct SeasonsPopUpViewModel: PopUPViewModel {
     let seasonDetails: TVSeasonDetails
+    static let defaultItemHeight = 120.0
     let didTapClose: (() -> Void)?
 }
 
@@ -20,7 +21,7 @@ final class SeasonsPopUpView: PopUPView {
         
         static let itemSpacing = 10.0
         static let itemWidth = UIConstants.screenWidth - 40
-        static let itemHeight = 120.0
+        static let itemHeight = SeasonsPopUpViewModel.defaultItemHeight
 
         static let vSpacing = 20.0
         static let spacing = 10.0
@@ -36,7 +37,7 @@ final class SeasonsPopUpView: PopUPView {
     
     // MARK: - PROPERTIES
     private let viewModel: SeasonsPopUpViewModel
-    private let items: [EpisodeItemPopUpCellViewModel]
+    private var items: [EpisodeItemPopUpCellViewModel] = []
     
     // MARK: - VIEW PROPERTIES
     private let loadingIndicator: UIActivityIndicatorView = {
@@ -75,8 +76,13 @@ final class SeasonsPopUpView: PopUPView {
     // MARK: - LIFECYCLE
     init(viewModel: SeasonsPopUpViewModel) {
         self.viewModel = viewModel
-        self.items = viewModel.seasonDetails.episodes.map { EpisodeItemPopUpCellViewModel(episode: $0) }
         super.init(viewModel: viewModel)
+        self.items = viewModel.seasonDetails.episodes.map {
+            EpisodeItemPopUpCellViewModel(episode: $0) { [weak self] in
+                guard let self = self else { return }
+                self.episodesCollectionView.collectionViewLayout.invalidateLayout()
+            }
+        }
         setupUI()
         episodesCollectionView.reloadData()
         
@@ -129,9 +135,13 @@ final class SeasonsPopUpView: PopUPView {
             $0.bottom.equalToSuperview()
         }
     }
+    
+    private func onHeightChangedRequest() {
+        self.episodesCollectionView.collectionViewLayout.invalidateLayout()
+    }
 }
 
-extension SeasonsPopUpView: UICollectionViewDataSource, UICollectionViewDelegate {
+extension SeasonsPopUpView: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return items.count
     }
@@ -144,5 +154,10 @@ extension SeasonsPopUpView: UICollectionViewDataSource, UICollectionViewDelegate
         let itemVM = items[indexPath.row]
         cell.configure(viewModel: itemVM)
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let cellVM = items[indexPath.row]
+        return CGSize(width: UIConstants.screenWidth - 40, height: cellVM.cellHeight)
     }
 }

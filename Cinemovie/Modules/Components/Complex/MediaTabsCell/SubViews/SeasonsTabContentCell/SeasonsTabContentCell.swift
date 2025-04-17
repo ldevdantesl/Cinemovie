@@ -12,10 +12,10 @@ import SDWebImage
 final class SeasonsTabContentCellViewModel: CellViewModelBaseClass {
     let seasons: [TVSeason]
     let onSeasonTap: ((TVSeason) -> Void)?
-    let onHeightChangedRequest: (() -> Void)?
+    private let onHeightChangedRequest: (() -> Void)?
     private(set) var cellHeight: CGFloat = 100
     
-    init(seasons: [TVSeason], onHeightChangedRequest: (() -> Void)?, onSeasonTap: ((TVSeason) -> Void)?) {
+    init(seasons: [TVSeason], onSeasonTap: ((TVSeason) -> Void)?, onHeightChangedRequest: (() -> Void)?) {
         self.seasons = seasons
         self.onHeightChangedRequest = onHeightChangedRequest
         self.onSeasonTap = onSeasonTap

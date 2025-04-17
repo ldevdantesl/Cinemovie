@@ -193,26 +193,36 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         self.viewModel = viewModel
         
         if !viewModel.seasons.isEmpty {
-            let seasonsVM = SeasonsTabContentCellViewModel(seasons: viewModel.seasons, onHeightChangedRequest: onHeightChangedRequest, onSeasonTap: viewModel.didTapSeason)
+            let seasonsVM = SeasonsTabContentCellViewModel(seasons: viewModel.seasons, onSeasonTap: viewModel.didTapSeason) { [weak self] in
+                guard let self = self else { return }
+                self.onHeightChangedRequest()
+            }
             self.items[.seasons] = seasonsVM
         }
         
         if let collectionDetails = viewModel.collectionDetails, collectionDetails.backdropPath != nil {
-            let belongsVM = BelongsToCollectionTabContentCellViewModel(
-                collectionDetails: collectionDetails, onHeightChangedRequest: onHeightChangedRequest, onItemTapped: viewModel.didTapMedia
-            )
+            let belongsVM = BelongsToCollectionTabContentCellViewModel(collectionDetails: collectionDetails, onItemTapped: viewModel.didTapMedia) { [weak self] in
+                guard let self = self else { return }
+                self.onHeightChangedRequest()
+            }
             self.items[.collection] = belongsVM
         }
         
         if !viewModel.similar.isEmpty {
             let similarMedia = Array(viewModel.similar.prefix(9))
-            let similarVM = SimilarTabContentCellViewModel(media: similarMedia, didTapAnyMedia: viewModel.didTapMedia)
+            let similarVM = SimilarTabContentCellViewModel(media: similarMedia, didTapAnyMedia: viewModel.didTapMedia) { [weak self] in
+                guard let self = self else { return }
+                self.onHeightChangedRequest()
+            }
             self.items[.similar] = similarVM
         }
         
         if !viewModel.recommended.isEmpty {
             let recommendedMedia = Array(viewModel.recommended.prefix(9))
-            let recommendedVM = RecommendsContentCellViewModel(recommendedMedia: recommendedMedia, didTapAnyMedia: viewModel.didTapMedia)
+            let recommendedVM = RecommendsContentCellViewModel(recommendedMedia: recommendedMedia, didTapAnyMedia: viewModel.didTapMedia) { [weak self] in
+                guard let self = self else { return }
+                self.onHeightChangedRequest()
+            }
             self.items[.recommendations] = recommendedVM
         }
         
@@ -223,7 +233,10 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         }
         
         if !viewModel.reviews.isEmpty {
-            let reviewsVM = ReviewsTabContentCellViewModel(reviews: viewModel.reviews, onHeightChangedRequest: onHeightChangedRequest)
+            let reviewsVM = ReviewsTabContentCellViewModel(reviews: viewModel.reviews) { [weak self] in
+                guard let self = self else { return }
+                self.onHeightChangedRequest()
+            }
             self.items[.reviews] = reviewsVM
         }
         self.layoutIfNeeded()

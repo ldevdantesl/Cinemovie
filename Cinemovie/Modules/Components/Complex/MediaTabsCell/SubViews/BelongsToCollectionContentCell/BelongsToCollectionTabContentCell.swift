@@ -12,10 +12,10 @@ import SDWebImage
 final class BelongsToCollectionTabContentCellViewModel: CellViewModelBaseClass {
     let collectionDetails: BelongsToCollectionDetails
     private(set) var cellHeight: CGFloat
-    let onHeightChangedRequest: (() -> Void)?
+    private let onHeightChangedRequest: (() -> Void)?
     let onItemTapped: ((Media) -> Void)?
     
-    init(collectionDetails: BelongsToCollectionDetails, onHeightChangedRequest: (() -> Void)?, onItemTapped: ((Media) -> Void)?) {
+    init(collectionDetails: BelongsToCollectionDetails, onItemTapped: ((Media) -> Void)?,  onHeightChangedRequest: (() -> Void)?) {
         self.collectionDetails = collectionDetails
         self.cellHeight = 200
         self.onHeightChangedRequest = onHeightChangedRequest
@@ -23,7 +23,7 @@ final class BelongsToCollectionTabContentCellViewModel: CellViewModelBaseClass {
         super.init(cellIdentifier: "BelongsToCollectionTabContentCell")
     }
     
-    public func changeCellSize(to newSize: CGFloat) {
+    fileprivate func changeCellSize(to newSize: CGFloat) {
         self.cellHeight = newSize
         self.onHeightChangedRequest?()
     }
@@ -188,7 +188,6 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
     private func createFakePosters(total: Int) {
         for i in 1...total {
             let newAlphaComponent: Double = Constants.maximumAlphaComponent - (0.2 * Double(i))
-            print("New Alpha: ", newAlphaComponent)
             let fakePoster = UIView()
             fakePoster.backgroundColor = CMColor.cmBackground
             fakePoster.layer.cornerRadius = Constants.imageCornerRadius

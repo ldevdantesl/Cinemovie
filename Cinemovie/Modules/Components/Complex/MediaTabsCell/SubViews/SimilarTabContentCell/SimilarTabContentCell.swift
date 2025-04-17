@@ -11,16 +11,19 @@ import SnapKit
 final class SimilarTabContentCellViewModel: CellViewModelBaseClass {
     let media: [Media]
     let didTapAnyMedia: ((Media) -> Void)?
+    private let onHeightChangedRequest: (() -> Void)?
     private(set) var cellHeight: CGFloat = 1
     
-    init(media: [Media], didTapAnyMedia: ((Media) -> Void)?) {
+    init(media: [Media], didTapAnyMedia: ((Media) -> Void)?, onHeightChangedRequest: (() -> Void)?) {
         self.media = media
         self.didTapAnyMedia = didTapAnyMedia
+        self.onHeightChangedRequest = onHeightChangedRequest
         super.init(cellIdentifier: "SimilarTabContentCell")
     }
     
-    func setCellHeight(to height: CGFloat) {
+    fileprivate func setCellHeight(to height: CGFloat) {
         self.cellHeight = height
+        self.onHeightChangedRequest?()
     }
 }
 
