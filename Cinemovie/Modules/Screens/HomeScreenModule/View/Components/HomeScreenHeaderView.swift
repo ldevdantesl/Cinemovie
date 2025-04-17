@@ -11,20 +11,14 @@ import UIKit
 struct HomeScreenHeaderViewModel {
     let headerTitle: String
     let didTapSearchButton: (() -> Void)?
-    let didTapMovieButton: (() -> Void)?
+    let didTapMoviesButton: (() -> Void)?
     let didTapTVSeriesButton: (() -> Void)?
-    
-    init(headerTitle: String, didTapSearchButton: (() -> Void)? = nil, didTapMovieButton: (() -> Void)? = nil, didTapTVSeriesButton: (() -> Void)? = nil) {
-        self.headerTitle = headerTitle
-        self.didTapSearchButton = didTapSearchButton
-        self.didTapTVSeriesButton = didTapTVSeriesButton
-        self.didTapMovieButton = didTapMovieButton
-    }
 }
 
 final class HomeScreenHeaderView: UIView {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
+        static let aniDuration = 0.25
         static let spacing = 5.0
         static let biggerSpacing = 10.0
         static let searchButtonSystemName = "magnifyingglass"
@@ -35,6 +29,7 @@ final class HomeScreenHeaderView: UIView {
     
     // MARK: - PROPERTIES
     private var viewModel: HomeScreenHeaderViewModel
+    private var isShowingMovie: Bool = true
     
     // MARK: - VIEW PROPERTIES
     private lazy var headerLabel: UILabel = {
@@ -116,27 +111,41 @@ final class HomeScreenHeaderView: UIView {
             $0.edges.equalToSuperview()
         }
         
+        addSubview(mediaButton)
+        mediaButton.snp.makeConstraints {
+            $0.leading.equalToSuperview().offset(Constants.biggerSpacing)
+            $0.bottom.equalToSuperview().inset(Constants.biggerSpacing)
+        }
+        
         addSubview(headerLabel)
         headerLabel.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.leading.equalToSuperview()
+            $0.bottom.equalTo(mediaButton.snp.top).offset(-Constants.spacing)
+            $0.leading.equalToSuperview().offset(Constants.biggerSpacing)
         }
         
         addSubview(searchButtonImageView)
         searchButtonImageView.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.trailing.equalToSuperview()
+            $0.bottom.equalTo(mediaButton.snp.top).offset(-Constants.spacing)
+            $0.trailing.equalToSuperview().inset(Constants.biggerSpacing)
             $0.size.equalTo(Constants.searchButtonSize)
-        }
-        
-        addSubview(mediaButton)
-        mediaButton.snp.makeConstraints {
-            $0.top.equalTo(headerLabel.snp.bottom).offset(Constants.spacing)
-            $0.leading.equalToSuperview()
         }
     }
     
     private func didTapMediaButton() {
-    
+        let vm = CMButtonViewModel(
+            text: isShowingMovie ? "TVSeries" : "Movies", foreColor: .cmLabel,
+            font: CMFont.font(size: .footnote, fontName: .avenirBold), image: nil,
+            backColor: CMColor.cmBackground, cornerRadius: Constants.buttonsCornerRadius,
+            borderColor: CMColor.cmLabel, borderWidth: Constants.buttonsBorderWidth,
+            didTapAction: didTapMediaButton
+        )
+        UIView.transition(with: mediaButton, duration: Constants.aniDuration, options: [.transitionCrossDissolve]) { [weak self] in
+            guard let self = self else { return }
+            self.mediaButton.configure(viewModel: vm)
+        } completion: { [weak self] _ in
+            guard let self = self else { return }
+            self.isShowingMovie ? self.viewModel.didTapMoviesButton?() : self.viewModel.didTapTVSeriesButton?()
+            self.isShowingMovie.toggle()
+        }
     }
 }

@@ -19,7 +19,7 @@ final class HomeScreenVC: UIViewController {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let featuredMovieHeight = UIConstants.screenHeight * 0.55
-        static let headerViewHeight = 70.0
+        static let headerViewHeight = 75.0 + UIConstants.topInset
     }
     
     // MARK: - OTHER
@@ -89,7 +89,8 @@ final class HomeScreenVC: UIViewController {
     }()
     
     private lazy var headerView: HomeScreenHeaderView = {
-        let view = HomeScreenHeaderView(viewModel: .init(headerTitle: "Discover", didTapMovieButton: switchToMovies, didTapTVSeriesButton: switchToTVShows))
+        let vm = HomeScreenHeaderViewModel(headerTitle: "Discover", didTapSearchButton: nil, didTapMoviesButton: switchToTVShows, didTapTVSeriesButton:switchToMovies)
+        let view = HomeScreenHeaderView(viewModel: vm)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -109,11 +110,6 @@ final class HomeScreenVC: UIViewController {
         tabBarController?.tabBar.isTranslucent = false
     }
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        headerViewHeightConstraint?.update(offset: Constants.headerViewHeight + view.safeAreaInsets.top + 5)
-    }
-    
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
         view.addSubview(collectionView)
@@ -127,7 +123,7 @@ final class HomeScreenVC: UIViewController {
         headerView.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
-            headerViewHeightConstraint = $0.height.equalTo(Constants.headerViewHeight).constraint
+            $0.height.equalTo(Constants.headerViewHeight)
         }
     }
     
@@ -168,7 +164,7 @@ final class HomeScreenVC: UIViewController {
             subitems: [item]
         )
         let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: Constants.headerViewHeight + 10, leading: 10, bottom: 10, trailing: 10)
+        section.contentInsets = NSDirectionalEdgeInsets(top: Constants.headerViewHeight - UIConstants.topInset, leading: 10, bottom: 10, trailing: 10)
         return section
     }
     
