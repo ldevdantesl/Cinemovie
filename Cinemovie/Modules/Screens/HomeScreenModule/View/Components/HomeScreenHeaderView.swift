@@ -31,8 +31,6 @@ final class HomeScreenHeaderView: UIView {
         static let searchButtonSize = 25.0
         static let buttonsCornerRadius = 15.0
         static let buttonsBorderWidth = 1.0
-        static let xbuttonSize = 30.0
-        static let xButtonName = "xmark"
     }
     
     // MARK: - PROPERTIES
@@ -65,73 +63,17 @@ final class HomeScreenHeaderView: UIView {
         return view
     }()
     
-    private lazy var tvSeriesButton: CMButton = {
-        let vm = CMButtonViewModel(
-            text: "TV Series", foreColor: .cmLabel,
-            font: CMFont.font(size: .footnote, fontName: .avenirBold), image: nil,
-            backColor: CMColor.cmBackground, cornerRadius: Constants.buttonsCornerRadius,
-            borderColor: CMColor.cmLabel, borderWidth: Constants.buttonsBorderWidth,
-            didTapAction: didTapTVSeriesButton
-        )
-        let button = CMButton(viewModel: vm)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
-    private lazy var moviesButton: CMButton = {
+    private lazy var mediaButton: CMButton = {
         let vm = CMButtonViewModel(
             text: "Movies", foreColor: .cmLabel,
             font: CMFont.font(size: .footnote, fontName: .avenirBold), image: nil,
             backColor: CMColor.cmBackground, cornerRadius: Constants.buttonsCornerRadius,
             borderColor: CMColor.cmLabel, borderWidth: Constants.buttonsBorderWidth,
-            didTapAction: didTapMovieButton
+            didTapAction: didTapMediaButton
         )
         let button = CMButton(viewModel: vm)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
-    }()
-    
-    private lazy var xmarkButton: CMCircularButton = {
-        let vm = CMCircularButtonViewModel(systemName: Constants.xButtonName, backColor: CMColor.cmSecondaryBackground, foreColor: .cmLabel, didTapAction: didTapXButton)
-        let button = CMCircularButton(viewModel: vm)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
-    private lazy var headerStack: UIStackView = {
-        let spacer = UIView()
-        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        
-        let stack = UIStackView(arrangedSubviews: [headerLabel, spacer, searchButtonImageView])
-        stack.axis = .horizontal
-        stack.spacing = Constants.biggerSpacing
-        stack.alignment = .center
-        stack.distribution = .fill
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        return stack
-    }()
-    
-    private lazy var buttonsStack: UIStackView = {
-        let stack = UIStackView(arrangedSubviews: [tvSeriesButton, moviesButton, UIView()])
-        stack.axis = .horizontal
-        stack.spacing = Constants.biggerSpacing
-        stack.alignment = .leading
-        stack.distribution = .fill
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        return stack
-    }()
-    
-    private lazy var vStack: UIStackView = {
-        let vStack = UIStackView(arrangedSubviews: [headerStack, buttonsStack])
-        vStack.axis = .vertical
-        vStack.distribution = .equalSpacing
-        vStack.spacing = Constants.spacing
-        vStack.alignment = .fill
-        vStack.isLayoutMarginsRelativeArrangement = true
-        vStack.layoutMargins = UIEdgeInsets(top: Constants.biggerSpacing, left: Constants.biggerSpacing, bottom: Constants.biggerSpacing, right: Constants.biggerSpacing)
-        vStack.translatesAutoresizingMaskIntoConstraints = false
-        return vStack
     }()
     
     // MARK: - LIFECYCLE
@@ -174,63 +116,27 @@ final class HomeScreenHeaderView: UIView {
             $0.edges.equalToSuperview()
         }
         
-        addSubview(vStack)
-        vStack.snp.makeConstraints {
-            $0.top.lessThanOrEqualToSuperview()
-            $0.horizontalEdges.equalToSuperview()
-            $0.bottom.lessThanOrEqualToSuperview()
+        addSubview(headerLabel)
+        headerLabel.snp.makeConstraints {
+            $0.top.equalToSuperview()
+            $0.leading.equalToSuperview()
         }
         
+        addSubview(searchButtonImageView)
         searchButtonImageView.snp.makeConstraints {
+            $0.top.equalToSuperview()
+            $0.trailing.equalToSuperview()
             $0.size.equalTo(Constants.searchButtonSize)
         }
         
-        xmarkButton.snp.makeConstraints {
-            $0.size.equalTo(Constants.xbuttonSize)
+        addSubview(mediaButton)
+        mediaButton.snp.makeConstraints {
+            $0.top.equalTo(headerLabel.snp.bottom).offset(Constants.spacing)
+            $0.leading.equalToSuperview()
         }
-        
-        tvSeriesButton.setContentHuggingPriority(.required, for: .horizontal)
-        moviesButton.setContentHuggingPriority(.required, for: .horizontal)
     }
     
-    private func didTapTVSeriesButton() {
-        UIView.transition(with: buttonsStack, duration: 0.3, options: .transitionCrossDissolve) { [weak self] in
-            guard let self = self else { return }
-            
-            self.buttonsStack.arrangedSubviews.forEach {
-                self.buttonsStack.removeArrangedSubview($0)
-                $0.removeFromSuperview()
-            }
-            
-            [xmarkButton, tvSeriesButton, UIView()].forEach { self.buttonsStack.addArrangedSubview($0) }
-        }
-        viewModel.didTapTVSeriesButton?()
-    }
+    private func didTapMediaButton() {
     
-    private func didTapMovieButton() {
-        UIView.transition(with: buttonsStack, duration: 0.3, options: .transitionCrossDissolve) { [weak self] in
-            guard let self = self else { return }
-            
-            self.buttonsStack.arrangedSubviews.forEach {
-                self.buttonsStack.removeArrangedSubview($0)
-                $0.removeFromSuperview()
-            }
-            
-            [xmarkButton, moviesButton, UIView()].forEach { self.buttonsStack.addArrangedSubview($0) }
-        }
-        viewModel.didTapMovieButton?()
-    }
-    
-    private func didTapXButton() {
-        UIView.transition(with: buttonsStack, duration: 0.3, options: .transitionCrossDissolve) { [weak self] in
-            guard let self = self else { return }
-            
-            self.buttonsStack.arrangedSubviews.forEach {
-                self.buttonsStack.removeArrangedSubview($0)
-                $0.removeFromSuperview()
-            }
-            
-            [tvSeriesButton, moviesButton, UIView()].forEach { self.buttonsStack.addArrangedSubview($0) }
-        }
     }
 }
