@@ -11,8 +11,7 @@ import UIKit
 struct HomeScreenHeaderViewModel {
     let headerTitle: String
     let didTapSearchButton: (() -> Void)?
-    let didTapMoviesButton: (() -> Void)?
-    let didTapTVSeriesButton: (() -> Void)?
+    let didTapMediaButton: (_ mediaType: MediaTypes) -> Void
 }
 
 final class HomeScreenHeaderView: UIView {
@@ -132,20 +131,25 @@ final class HomeScreenHeaderView: UIView {
     }
     
     private func didTapMediaButton() {
+        isShowingMovie.toggle()
+        let newType: MediaTypes = isShowingMovie ? .movie : .tvShow
+
         let vm = CMButtonViewModel(
-            text: isShowingMovie ? "TVSeries" : "Movies", foreColor: .cmLabel,
-            font: CMFont.font(size: .footnote, fontName: .avenirBold), image: nil,
-            backColor: CMColor.cmBackground, cornerRadius: Constants.buttonsCornerRadius,
-            borderColor: CMColor.cmLabel, borderWidth: Constants.buttonsBorderWidth,
+            text: newType == .movie ? "Movies" : "TVSeries",
+            foreColor: .cmLabel,
+            font: CMFont.font(size: .footnote, fontName: .avenirBold),
+            image: nil,
+            backColor: CMColor.cmBackground,
+            cornerRadius: Constants.buttonsCornerRadius,
+            borderColor: CMColor.cmLabel,
+            borderWidth: Constants.buttonsBorderWidth,
             didTapAction: didTapMediaButton
         )
+
         UIView.transition(with: mediaButton, duration: Constants.aniDuration, options: [.transitionCrossDissolve]) { [weak self] in
-            guard let self = self else { return }
-            self.mediaButton.configure(viewModel: vm)
-        } completion: { [weak self] _ in
-            guard let self = self else { return }
-            self.isShowingMovie ? self.viewModel.didTapMoviesButton?() : self.viewModel.didTapTVSeriesButton?()
-            self.isShowingMovie.toggle()
+            self?.mediaButton.configure(viewModel: vm)
         }
+
+        viewModel.didTapMediaButton(newType)
     }
 }

@@ -9,8 +9,7 @@ import SnapKit
 import UIKit
 
 protocol HomeScreenViewProtocol: AnyObject {
-    func didRecieveAllMovies(popularMovies: [Movie], upcomingMovies: [Movie], topRatedMovies: [Movie], nowPlayingMovies: [Movie], allMovies: [Movie])
-    //func didRecieveAllTVSeries(popularTVSeries: [TVSeries], topRatedTVSeries: [TVSeries], onTheAirTVSeries: [TVSeries], airingTodayTVSeries: [TVSeries], allTVSeries: [TVSeries])
+    func didRecieveAllData(movieLists: [(listType: MovieListType, movies: [Movie])])
     func didRecieveError(_ errorStr: String)
 }
 
@@ -22,47 +21,14 @@ final class HomeScreenVC: UIViewController {
         static let headerViewHeight = 75.0 + UIConstants.topInset
     }
     
-    // MARK: - OTHER
-    private enum Section: Int, CaseIterable {
+    // MARK: - SECTION
+    private enum Section: Hashable {
         case featured
-        case popularMoviesList
-        case upcomingMoviesList
-        case topRatedMoviesList
-        case nowPlayingMoviesList
-        case popularTVSeriesList
-        case airingTodayTVSeriesList
-        case topRatedTVSeriesList
-        case onTheAirTVSeriesList
-        
-        var title: String {
-            switch self {
-            case .popularMoviesList: "Popular Movies"
-            case .upcomingMoviesList: "Upcoming Movies"
-            case .topRatedMoviesList: "Top Rated Movies"
-            case .nowPlayingMoviesList: "Now Playing Movies"
-            case .popularTVSeriesList: "Popular TV Series"
-            case .airingTodayTVSeriesList: "Airing Today Series"
-            case .topRatedTVSeriesList: "Top Rated Series"
-            case .onTheAirTVSeriesList: "On the Air Series"
-            default: ""
-            }
-        }
-        
-        var subtitle: String? {
-            switch self {
-            case .popularMoviesList: "Popular Movies in your area"
-            case .upcomingMoviesList: "Movies coming soon"
-            case .topRatedMoviesList: "Worldwide top rated movies"
-            case .nowPlayingMoviesList: "Now playing movies"
-            case .popularTVSeriesList: "Popular Series in your area"
-            case .airingTodayTVSeriesList: "Series coming today"
-            case .topRatedTVSeriesList: "Worldwide top rated Series"
-            case .onTheAirTVSeriesList: "Series currently broadcasting new episodes"
-            default: nil
-            }
-        }
+        case movieList(MovieListType)
+        case seriesList(TVSeriesListType)
     }
 
+    // MARK: - ITEM
     private enum Item: Hashable {
         case featured(FeaturedMediaCellViewModel)
         case mediaListCell(MediaListCellViewModel)
@@ -72,14 +38,13 @@ final class HomeScreenVC: UIViewController {
     var presenter: HomeScreenPresenterProtocol?
     
     // MARK: - PROPERTIES
-    private var viewModels: [CellViewModelBaseClass] = []
     private var headerViewHeightConstraint: Constraint?
     private var isBlurToHeaderVisible: Bool = false
     private var visibleItems: [Section] = []
     
     // MARK: - VIEW PROPERTIES
     private lazy var collectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<Section, Item>(layout: createLayout())
+        let view = DiffableCollectionView<HomeScreenVC.Section, HomeScreenVC.Item>(layout: createLayout())
         view.register(cellClass: FeaturedMediaCell.self)
         view.register(cellClass: MediaListCell.self)
         view.delegate = self
@@ -89,7 +54,7 @@ final class HomeScreenVC: UIViewController {
     }()
     
     private lazy var headerView: HomeScreenHeaderView = {
-        let vm = HomeScreenHeaderViewModel(headerTitle: "Discover", didTapSearchButton: nil, didTapMoviesButton: switchToTVShows, didTapTVSeriesButton:switchToMovies)
+        let vm = HomeScreenHeaderViewModel(headerTitle: "Discover", didTapSearchButton: nil, didTapMediaButton: self.switchTo)
         let view = HomeScreenHeaderView(viewModel: vm)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -152,7 +117,8 @@ final class HomeScreenVC: UIViewController {
             
             switch section {
             case .featured: return self.sectionForFeatured()
-            default: return self.sectionForMovieLists()
+            case .movieList: return self.sectionForMediaLists()
+            case .seriesList: return self.sectionForMediaLists()
             }
         }
     }
@@ -168,7 +134,7 @@ final class HomeScreenVC: UIViewController {
         return section
     }
     
-    private func sectionForMovieLists() -> NSCollectionLayoutSection {
+    private func sectionForMediaLists() -> NSCollectionLayoutSection {
         let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(MediaListCellViewModel.cellHeight)))
         let group = NSCollectionLayoutGroup.vertical(layoutSize: item.layoutSize, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
@@ -176,106 +142,62 @@ final class HomeScreenVC: UIViewController {
         return section
     }
     
-    private func switchToTVShows() {
+    private func switchTo(_ mediaType: MediaTypes) {
         guard let presenter = presenter else { return }
-        var sectionsAndTheirItems: [(section: Section, items: [Item])] = []
         
-        if !presenter.allTVSeries.isEmpty {
-            let featuredVM = FeaturedMediaCellViewModel(media: presenter.allTVSeries, didTapMedia: self.presenter?.didTapMedia)
-            sectionsAndTheirItems.append((Section.featured, [.featured(featuredVM)]))
-        }
+        var sectionsAndItems: [(section: Section, items: [Item])] = []
         
-        if !presenter.popularTVSeries.isEmpty {
-            let popularListVM = MediaListCellViewModel(
-                mediaItems: presenter.popularTVSeries, listName: Section.popularTVSeriesList.title,
-                listSubtitle: Section.popularTVSeriesList.subtitle, didTapMediaItem: presenter.didTapMedia
+        switch mediaType {
+        case .movie:
+            let featuredVM = FeaturedMediaCellViewModel(media: presenter.movieLists.flatMap { $0.movies } )
+            sectionsAndItems.append((Section.featured, [.featured(featuredVM)]))
+            
+            let movieSections = generateListSections(
+                from: presenter.movieLists.map { ($0.listType, $0.movies) },
+                sectionBuilder: { .movieList($0) }
             )
-            sectionsAndTheirItems.append((Section.popularTVSeriesList, [.mediaListCell(popularListVM)]))
-        }
-        
-        if !presenter.airingTodayTVSeries.isEmpty {
-            let airingTodayListVM = MediaListCellViewModel(
-                mediaItems: presenter.airingTodayTVSeries, listName: Section.airingTodayTVSeriesList.title,
-                listSubtitle: Section.airingTodayTVSeriesList.subtitle, didTapMediaItem: presenter.didTapMedia
+            sectionsAndItems.append(contentsOf: movieSections)
+            
+        case .tvShow:
+            let featuredVM = FeaturedMediaCellViewModel(media: presenter.seriesLists.flatMap { $0.series } )
+            sectionsAndItems.append((Section.featured, [.featured(featuredVM)]))
+            let seriesSections = generateListSections(
+                from: presenter.seriesLists.map { ($0.listType, $0.series) },
+                sectionBuilder: { .seriesList($0) }
             )
-            sectionsAndTheirItems.append((Section.airingTodayTVSeriesList, [.mediaListCell(airingTodayListVM)]))
+            sectionsAndItems.append(contentsOf: seriesSections)
         }
         
-        if !presenter.topRatedTVSeries.isEmpty {
-            let topListVM = MediaListCellViewModel(
-                mediaItems: presenter.topRatedTVSeries, listName: Section.topRatedTVSeriesList.title,
-                listSubtitle: Section.topRatedTVSeriesList.subtitle, didTapMediaItem: presenter.didTapMedia
-            )
-            sectionsAndTheirItems.append((Section.topRatedTVSeriesList, [.mediaListCell(topListVM)]))
-        }
-        
-        if !presenter.onTheAirTVSeries.isEmpty {
-            let onTheAirListVM = MediaListCellViewModel(
-                mediaItems: presenter.onTheAirTVSeries, listName: Section.onTheAirTVSeriesList.title,
-                listSubtitle: Section.onTheAirTVSeriesList.subtitle, didTapMediaItem: presenter.didTapMedia
-            )
-            sectionsAndTheirItems.append((Section.onTheAirTVSeriesList, [.mediaListCell(onTheAirListVM)]))
-        }
-        
-        self.visibleItems = sectionsAndTheirItems.map { $0.section }
+        visibleItems = sectionsAndItems.map(\.section)
         
         DispatchQueue.main.async {
             self.collectionView.applySnapshot(
                 sections: self.visibleItems,
-                itemsBySection: Dictionary(uniqueKeysWithValues: sectionsAndTheirItems)
+                itemsBySection: Dictionary(uniqueKeysWithValues: sectionsAndItems)
             )
         }
     }
     
-    private func switchToMovies() {
-        guard let presenter = presenter else { return }
-        var sectionsAndTheirItems: [(section: Section, items: [Item])] = []
-        
-        if !presenter.allMovies.isEmpty {
-            let featuredVM = FeaturedMediaCellViewModel(media: presenter.allMovies, didTapMedia: presenter.didTapMedia)
-            sectionsAndTheirItems.append((Section.featured, [.featured(featuredVM)]))
-        }
-        
-        if !presenter.popularMovies.isEmpty {
-            let popularListVM = MediaListCellViewModel(
-                mediaItems: presenter.popularMovies, listName: Section.popularMoviesList.title,
-                listSubtitle: Section.popularMoviesList.subtitle, didTapMediaItem: presenter.didTapMedia
+    private func generateListSections<T: MediaListType, M: Media>(
+        from lists: [(listType: T, media: [M])],
+        sectionBuilder: (T) -> Section
+    ) -> [(section: Section, items: [Item])] {
+        var result: [(section: Section, items: [Item])] = []
+
+        for (listType, media) in lists {
+            if media.isEmpty { continue }
+
+            let vm = MediaListCellViewModel(
+                mediaItems: media,
+                listName: listType.title,
+                listSubtitle: listType.subtitle,
+                didTapMediaItem: presenter?.didTapMedia
             )
-            sectionsAndTheirItems.append((Section.popularMoviesList, [.mediaListCell(popularListVM)]))
+
+            result.append((sectionBuilder(listType), [.mediaListCell(vm)]))
         }
-        
-        if !presenter.upcomingMovies.isEmpty {
-            let upcomingListVM = MediaListCellViewModel(
-                mediaItems: presenter.upcomingMovies, listName: Section.upcomingMoviesList.title,
-                listSubtitle: Section.upcomingMoviesList.subtitle, didTapMediaItem: presenter.didTapMedia
-            )
-            sectionsAndTheirItems.append((Section.upcomingMoviesList, [.mediaListCell(upcomingListVM)]))
-        }
-        
-        if !presenter.topRatedMovies.isEmpty {
-            let topListVM = MediaListCellViewModel(
-                mediaItems: presenter.topRatedMovies, listName: Section.topRatedMoviesList.title,
-                listSubtitle: Section.topRatedTVSeriesList.subtitle, didTapMediaItem: presenter.didTapMedia
-            )
-            sectionsAndTheirItems.append((Section.topRatedTVSeriesList, [.mediaListCell(topListVM)]))
-        }
-        
-        if !presenter.nowPlayingMovies.isEmpty {
-            let nowListVM = MediaListCellViewModel(
-                mediaItems: presenter.nowPlayingMovies, listName: Section.nowPlayingMoviesList.title,
-                listSubtitle: Section.nowPlayingMoviesList.subtitle, didTapMediaItem: presenter.didTapMedia
-            )
-            sectionsAndTheirItems.append((Section.nowPlayingMoviesList, [.mediaListCell(nowListVM)]))
-        }
-        
-        self.visibleItems = sectionsAndTheirItems.map { $0.section }
-        
-        DispatchQueue.main.async {
-            self.collectionView.applySnapshot(
-                sections: self.visibleItems,
-                itemsBySection: Dictionary(uniqueKeysWithValues: sectionsAndTheirItems)
-            )
-        }
+
+        return result
     }
 }
 
@@ -296,50 +218,25 @@ extension HomeScreenVC: UICollectionViewDelegate {
 }
 
 extension HomeScreenVC: HomeScreenViewProtocol {
-    func didRecieveAllMovies(popularMovies: [Movie], upcomingMovies: [Movie], topRatedMovies: [Movie], nowPlayingMovies: [Movie], allMovies: [Movie]) {
-        var sectionsAndTheirItems: [(section: Section, items: [Item])] = []
-        if !allMovies.isEmpty {
-            let featuredVM = FeaturedMediaCellViewModel(media: allMovies, didTapMedia: self.presenter?.didTapMedia)
-            sectionsAndTheirItems.append((Section.featured, [.featured(featuredVM)]))
-        }
+    func didRecieveAllData(movieLists: [(listType: MovieListType, movies: [Movie])]) {
+        var sectionsAndItems: [(section: Section, items: [Item])] = []
+
+        let allMovies = movieLists.flatMap { $0.movies }
+        let featuredVM = FeaturedMediaCellViewModel(media: allMovies, didTapMedia: self.presenter?.didTapMedia)
+        sectionsAndItems.append((Section.featured, [.featured(featuredVM)]))
         
-        if !popularMovies.isEmpty {
-            let popularListVM = MediaListCellViewModel(
-                mediaItems: popularMovies, listName: Section.popularMoviesList.title,
-                listSubtitle: Section.popularMoviesList.subtitle, didTapMediaItem: self.presenter?.didTapMedia
-            )
-            sectionsAndTheirItems.append((Section.popularMoviesList, [.mediaListCell(popularListVM)]))
-        }
+        let movieSections = generateListSections(
+            from: movieLists.map { ($0.listType, $0.movies) },
+            sectionBuilder: { .movieList($0) }
+        )
         
-        if !upcomingMovies.isEmpty {
-            let upcomingListVM = MediaListCellViewModel(
-                mediaItems: upcomingMovies, listName: Section.upcomingMoviesList.title,
-                listSubtitle: Section.upcomingMoviesList.subtitle, didTapMediaItem: self.presenter?.didTapMedia
-            )
-            sectionsAndTheirItems.append((Section.upcomingMoviesList, [.mediaListCell(upcomingListVM)]))
-        }
+        sectionsAndItems.append(contentsOf: movieSections)
         
-        if !topRatedMovies.isEmpty {
-            let topListVM = MediaListCellViewModel(
-                mediaItems: topRatedMovies, listName: Section.topRatedMoviesList.title,
-                listSubtitle: Section.topRatedTVSeriesList.subtitle, didTapMediaItem: self.presenter?.didTapMedia
-            )
-            sectionsAndTheirItems.append((Section.topRatedTVSeriesList, [.mediaListCell(topListVM)]))
-        }
-        
-        if !nowPlayingMovies.isEmpty {
-            let nowListVM = MediaListCellViewModel(
-                mediaItems: nowPlayingMovies, listName: Section.nowPlayingMoviesList.title,
-                listSubtitle: Section.nowPlayingMoviesList.subtitle, didTapMediaItem: self.presenter?.didTapMedia
-            )
-            sectionsAndTheirItems.append((Section.nowPlayingMoviesList, [.mediaListCell(nowListVM)]))
-        }
-        
-        self.visibleItems = sectionsAndTheirItems.map { $0.section }
+        visibleItems = sectionsAndItems.map(\.section)
         DispatchQueue.main.async {
             self.collectionView.applySnapshot(
                 sections: self.visibleItems,
-                itemsBySection: Dictionary(uniqueKeysWithValues: sectionsAndTheirItems)
+                itemsBySection: Dictionary(uniqueKeysWithValues: sectionsAndItems)
             )
         }
     }

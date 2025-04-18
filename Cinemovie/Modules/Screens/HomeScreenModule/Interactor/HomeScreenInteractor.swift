@@ -9,16 +9,10 @@ import UIKit
 
 protocol HomeScreenInteractorProtocol: AnyObject {
     // MARK: - MOVIES
-    func downloadPopularMovies()
-    func downloadUpcomingMovies()
-    func downloadTopRatedMovies()
-    func downloadNowPlayingMovies()
+    func downloadMovieList(listType: MovieListType)
     
     // MARK: - TV SERIES
-    func downloadPopularTVSeries()
-    func downloadAiringTodayTVSeries()
-    func downloadTopRatedTVSeries()
-    func downloadOnTheAirTVSeries()
+    func downloadTVSeriesList(listType: TVSeriesListType)
 }
 
 final class HomeScreenInteractor: HomeScreenInteractorProtocol {
@@ -30,82 +24,22 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
     }
     
     // MARK: - MOVIES
-    func downloadPopularMovies() {
-        tmdbService?.getPopularMovies { [weak self] result in
+    func downloadMovieList(listType: MovieListType) {
+        tmdbService?.getMovieList(listType: listType) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): self.presenter?.didDownloadPopularMovies(queryMovies: success.movies)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
-            }
-        }
-    }
-    
-    func downloadUpcomingMovies() {
-        tmdbService?.getUpcomingMovies { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didDownloadUpcomingMovies(queryMovies: success.movies)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
-            }
-        }
-    }
-    
-    func downloadTopRatedMovies() {
-        tmdbService?.getTopRatedMovies { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didDownloadTopRatedMovies(queryMovies: success.movies)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
-            }
-        }
-    }
-    
-    func downloadNowPlayingMovies() {
-        tmdbService?.getNowPlayingMovies { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didDownloadNowPlayingMovies(queryMovies: success.movies)
+            case .success(let success): self.presenter?.didDownloadMovieList(listType: listType, queryMovies: success.movies)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }
     }
     
     // MARK: - TV SERIES
-    func downloadPopularTVSeries() {
-        tmdbService?.getPopularTVSeries { [weak self] result in
+    func downloadTVSeriesList(listType: TVSeriesListType) {
+        tmdbService?.getTVSeriesList(listType: listType) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): self.presenter?.didDownloadPopularTVSeries(querySeries: success.results)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
-            }
-        }
-    }
-    
-    func downloadTopRatedTVSeries() {
-        tmdbService?.getTopRatedTVSeries { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didDownloadTopRatedTVSeries(querySeries: success.results)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
-            }
-        }
-    }
-    
-    func downloadAiringTodayTVSeries() {
-        tmdbService?.getAiringTodayTVSeries { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didDownloadAiringTodayTVSeries(querySeries: success.results)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
-            }
-        }
-    }
-    
-    func downloadOnTheAirTVSeries() {
-        tmdbService?.getOnTheAirTVSeries { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didDownloadOnTheAirTVSeries(querySeries: success.results)
+            case .success(let success): self.presenter?.didDownloadSeriesList(listType: listType, querySeries: success.results)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }

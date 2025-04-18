@@ -156,9 +156,6 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         tabsCollectionView.layoutIfNeeded()
         contentCollectionView.layoutIfNeeded()
         dividerView.layer.cornerRadius = Constants.dividerCornerRadius
-        
-        print("Media Extras height: ", self.frame.height)
-        print("ContentCollection height: ", self.contentCollectionView.frame.height)
     }
     
     override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {

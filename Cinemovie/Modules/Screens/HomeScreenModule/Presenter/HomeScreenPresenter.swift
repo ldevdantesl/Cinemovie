@@ -13,29 +13,14 @@ protocol HomeScreenPresenterProtocol: AnyObject {
     func didTapMedia(_ media: Media)
     
     // MARK: - MOVIES
-    func didDownloadPopularMovies(queryMovies: [Movie])
-    func didDownloadUpcomingMovies(queryMovies: [Movie])
-    func didDownloadTopRatedMovies(queryMovies: [Movie])
-    func didDownloadNowPlayingMovies(queryMovies: [Movie])
+    func didDownloadMovieList(listType: MovieListType, queryMovies: [Movie])
     
     // MARK: - TV SERIES
-    func didDownloadPopularTVSeries(querySeries: [TVSeries])
-    func didDownloadAiringTodayTVSeries(querySeries: [TVSeries])
-    func didDownloadTopRatedTVSeries(querySeries: [TVSeries])
-    func didDownloadOnTheAirTVSeries(querySeries: [TVSeries])
+    func didDownloadSeriesList(listType: TVSeriesListType, querySeries: [TVSeries])
     
     // MARK: - PROPERTIES
-    var popularMovies: [Movie] { get }
-    var upcomingMovies: [Movie] { get }
-    var topRatedMovies: [Movie] { get }
-    var nowPlayingMovies: [Movie] { get }
-    var allMovies: [Movie] { get }
-    
-    var popularTVSeries: [TVSeries] { get }
-    var onTheAirTVSeries: [TVSeries] { get }
-    var topRatedTVSeries: [TVSeries] { get }
-    var airingTodayTVSeries: [TVSeries] { get }
-    var allTVSeries: [TVSeries] { get }
+    var movieLists: [(listType: MovieListType, movies: [Movie])] { get set }
+    var seriesLists: [(listType: TVSeriesListType, series: [TVSeries])] { get set }
     
     // MARK: - ERROR
     func didRecieveError(_ error: Error)
@@ -49,59 +34,57 @@ final class HomeScreenPresenter {
     private var downloadGroup = DispatchGroup()
     
     // MARK: - MOVIES
-    public var popularMovies: [Movie] = []
-    public var upcomingMovies: [Movie] = []
-    public var topRatedMovies: [Movie] = []
-    public var nowPlayingMovies: [Movie] = []
-    public var allMovies: [Movie] = []
-    
-    // MARK: - TVSeries
-    public var popularTVSeries: [TVSeries] = []
-    public var onTheAirTVSeries: [TVSeries] = []
-    public var topRatedTVSeries: [TVSeries] = []
-    public var airingTodayTVSeries: [TVSeries] = []
-    public var allTVSeries: [TVSeries] = []
+    public var movieLists: [(listType: MovieListType, movies: [Movie])] = []
+    public var seriesLists: [(listType: TVSeriesListType, series: [TVSeries])] = []
     
     init(interactor: HomeScreenInteractorProtocol, router: HomeScreenRouterProtocol) {
         self.interactor = interactor
         self.router = router
+    }
+    
+    // MARK: - PRIVATE FUNC
+    private func downloadMovieList(listType: MovieListType) {
+        downloadGroup.enter()
+        interactor.downloadMovieList(listType: listType)
+    }
+    
+    private func downloadSeriesList(listType: TVSeriesListType) {
+        downloadGroup.enter()
+        interactor.downloadTVSeriesList(listType: listType)
+    }
+    
+    private func storeMovieList(_ listType: MovieListType, _ movies: [Movie]) {
+        movieLists.append((listType, movies))
+        downloadGroup.leave()
+    }
+    
+    private func storeSeriesList(_ listType: TVSeriesListType, _ series: [TVSeries]) {
+        seriesLists.append((listType, series))
+        downloadGroup.leave()
     }
 }
 
 extension HomeScreenPresenter: HomeScreenPresenterProtocol {
     // MARK: - STARTING
     func viewDidLoaded() {
-        downloadGroup.enter()
-        interactor.downloadPopularMovies()
+        let movieListToDownload: [MovieListType] = [
+            .popular, .upcoming, .topRated, .nowPlaying,
+            .animation, .action, .comedy, .drama,
+            .fantasy, .horror, .history, .documentary,
+        ]
         
-        downloadGroup.enter()
-        interactor.downloadUpcomingMovies()
+        let seriesListToDownload: [TVSeriesListType] = [
+            .popular, .airingToday, .topRated, .onTheAir,
+            .actionAdventure, .animation, .comedy, .drama,
+            .sciFiFantasy, .crime, .documentary, .kids
+        ]
         
-        downloadGroup.enter()
-        interactor.downloadTopRatedMovies()
-        
-        downloadGroup.enter()
-        interactor.downloadNowPlayingMovies()
-        
-        downloadGroup.enter()
-        interactor.downloadPopularTVSeries()
-        
-        downloadGroup.enter()
-        interactor.downloadTopRatedTVSeries()
-        
-        downloadGroup.enter()
-        interactor.downloadAiringTodayTVSeries()
-        
-        downloadGroup.enter()
-        interactor.downloadOnTheAirTVSeries()
+        movieListToDownload.forEach { downloadMovieList(listType: $0) }
+        seriesListToDownload.forEach { downloadSeriesList(listType: $0) }
         
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
-            self.view?.didRecieveAllMovies(
-                popularMovies: popularMovies, upcomingMovies: upcomingMovies,
-                topRatedMovies: topRatedMovies, nowPlayingMovies: nowPlayingMovies,
-                allMovies: allMovies
-            )
+            self.view?.didRecieveAllData(movieLists: movieLists)
         }
     }
     
@@ -114,53 +97,12 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
     }
 
     // MARK: - MOVIES
-    func didDownloadPopularMovies(queryMovies: [Movie]) {
-        self.popularMovies = queryMovies
-        allMovies.append(contentsOf: queryMovies)
-        downloadGroup.leave()
+    func didDownloadMovieList(listType: MovieListType, queryMovies: [Movie]) {
+        storeMovieList(listType, queryMovies)
     }
     
-    func didDownloadUpcomingMovies(queryMovies: [Movie]) {
-        self.upcomingMovies = queryMovies
-        allMovies.append(contentsOf: queryMovies)
-        downloadGroup.leave()
-    }
-    
-    func didDownloadTopRatedMovies(queryMovies: [Movie]) {
-        self.topRatedMovies = queryMovies
-        allMovies.append(contentsOf: queryMovies)
-        downloadGroup.leave()
-    }
-    
-    func didDownloadNowPlayingMovies(queryMovies: [Movie]) {
-        self.nowPlayingMovies = queryMovies
-        allMovies.append(contentsOf: queryMovies)
-        downloadGroup.leave()
-    }
-    
-    // MARK: - TV SERIES
-    func didDownloadPopularTVSeries(querySeries: [TVSeries]) {
-        self.popularTVSeries = querySeries
-        allTVSeries.append(contentsOf: querySeries)
-        downloadGroup.leave()
-    }
-    
-    func didDownloadTopRatedTVSeries(querySeries: [TVSeries]) {
-        self.topRatedTVSeries = querySeries
-        allTVSeries.append(contentsOf: querySeries)
-        downloadGroup.leave()
-    }
-    
-    func didDownloadAiringTodayTVSeries(querySeries: [TVSeries]) {
-        self.airingTodayTVSeries = querySeries
-        allTVSeries.append(contentsOf: querySeries)
-        downloadGroup.leave()
-    }
-    
-    func didDownloadOnTheAirTVSeries(querySeries: [TVSeries]) {
-        self.onTheAirTVSeries = querySeries
-        allTVSeries.append(contentsOf: querySeries)
-        downloadGroup.leave()
+    func didDownloadSeriesList(listType: TVSeriesListType, querySeries: [TVSeries]) {
+        storeSeriesList(listType, querySeries)
     }
     
     // MARK: - ERROR

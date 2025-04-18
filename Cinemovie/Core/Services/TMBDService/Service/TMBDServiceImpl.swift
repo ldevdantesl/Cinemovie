@@ -8,8 +8,10 @@
 import UIKit
 
 final class TMBDServiceImpl: TMDBService {
+    // MARK: - PROPERTIES
     weak var networkService: NetworkService?
     
+    // MARK: - INIT
     init(networkService: NetworkService? = nil) {
         self.networkService = networkService
     }
@@ -132,52 +134,16 @@ final class TMBDServiceImpl: TMDBService {
     }
     
     // MARK: - PRESET MOVIE LIST IMPLEMENTATIONS
-    func getPopularMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
-        let queryParams = ["language" : "ru", "page" : "1"]
-        let endpoint = TMDBEndpoints.getPopularMoviesEndpoint(queryParams: queryParams)
-        handleRequest(endpoint: endpoint, completion: completion)
-    }
-    
-    func getUpcomingMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
-        let queryParams = ["language" : "ru", "page" : "1"]
-        let endpoint = TMDBEndpoints.getUpcomingMoviesEndpoint(queryParams: queryParams)
-        handleRequest(endpoint: endpoint, completion: completion)
-    }
-    
-    func getTopRatedMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
-        let queryParams = ["language" : "ru", "page" : "1"]
-        let endpoint = TMDBEndpoints.getTopRatedMoviesEndpoint(queryParams: queryParams)
-        handleRequest(endpoint: endpoint, completion: completion)
-    }
-    
-    func getNowPlayingMovies(completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
-        let queryParams = ["language" : "ru", "page" : "1"]
-        let endpoint = TMDBEndpoints.getNowPlayingMoviesEndpoint(queryParams: queryParams)
+    func getMovieList(listType: MovieListType, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
+        let extraParams = ["language": "ru"]
+        let endpoint = TMDBEndpoints.createMovieListEndpoint(listType: listType, extraParams: extraParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
     // MARK: - PRESET TV SERIES LIST IMPLEMENTATIONS
-    func getPopularTVSeries(completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
-        let queryParams = ["language" : "ru"]
-        let endpoint = TMDBEndpoints.getPopularTVSeriesEndpoint(extraParams: queryParams)
-        handleRequest(endpoint: endpoint, completion: completion)
-    }
-    
-    func getTopRatedTVSeries(completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
-        let queryParams = ["language" : "ru"]
-        let endpoint = TMDBEndpoints.getTopRatedTVSeriesEndpoint(extraParams: queryParams)
-        handleRequest(endpoint: endpoint, completion: completion)
-    }
-    
-    func getAiringTodayTVSeries(completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
-        let queryParams = ["language" : "ru"]
-        let endpoint = TMDBEndpoints.getAiringTodayTVSeriesEndpoint(extraParams: queryParams)
-        handleRequest(endpoint: endpoint, completion: completion)
-    }
-    
-    func getOnTheAirTVSeries(completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
-        let queryParams = ["language" : "ru"]
-        let endpoint = TMDBEndpoints.getOnTheAirTVSeriesEndpoint(extraParams: queryParams)
+    func getTVSeriesList(listType: TVSeriesListType, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
+        let extraParams = ["language": "ru"]
+        let endpoint = TMDBEndpoints.createTVSeriesListEndpoint(listType: listType, extraParams: extraParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
