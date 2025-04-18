@@ -30,10 +30,10 @@ final class HomeScreenPresenter {
     weak var view: HomeScreenViewProtocol?
     var router: HomeScreenRouterProtocol
     var interactor: HomeScreenInteractorProtocol
-
+    
+    // MARK: - PROPERTIES
     private var downloadGroup = DispatchGroup()
     
-    // MARK: - MOVIES
     public var movieLists: [(listType: MovieListType, movies: [Movie])] = []
     public var seriesLists: [(listType: TVSeriesListType, series: [TVSeries])] = []
     
