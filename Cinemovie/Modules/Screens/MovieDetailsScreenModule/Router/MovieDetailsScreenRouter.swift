@@ -29,6 +29,7 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
         self.tmdbService = tmdbService
     }
     
+    // MARK: - NAVIGATE
     func navigateToSeries(series: TVSeries) {
         let seriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(seriesDetails, animated: true)
@@ -39,17 +40,18 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
         viewController?.navigationController?.pushViewController(newMovieDetails, animated: true)
     }
     
+    func navigateToPersonDetails(creditID: String) {
+        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, tmdbService: tmdbService)
+        viewController?.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    // MARK: - PRESENT
     func showActorPopUp(actor: Cast) {
         guard let vcView = viewController?.view else { return }
         let vm = ActorPopupViewModel(actor: actor, didTapActorDetails: self.navigateToPersonDetails, didTapClose: self.hideActorPopUp)
         let popupView = ActorPopupView(viewModel: vm)
         popupView.show(in: vcView)
         self.viewController?.activePopUpView = popupView
-    }
-    
-    func navigateToPersonDetails(creditID: String) {
-        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, tmdbService: tmdbService)
-        viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
     func presentShareView(movie: MovieDetails) {

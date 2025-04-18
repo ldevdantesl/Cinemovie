@@ -15,6 +15,6 @@ final class DIContainer {
     init() {
         self.networkService = NetworkServiceImpl()
         self.authService = AuthServiceImpl(networkService: networkService)
-        self.tmdbService = TMBDServiceImpl(networkService: networkService)
+        self.tmdbService = TMDBServiceImpl(networkService: networkService)
     }
 }

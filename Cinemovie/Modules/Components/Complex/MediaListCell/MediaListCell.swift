@@ -13,7 +13,6 @@ final class MediaListCellViewModel: CellViewModelBaseClass {
     let listSubtitle: String?
     let mediaItems: [Media]
     let didTapMediaItem: ((Media) -> Void)?
-    static let cellHeight: CGFloat = 230
     
     init(mediaItems: [Media], listName: String, listSubtitle: String? = nil, didTapMediaItem: ((Media) -> Void)? = nil) {
         self.mediaItems = mediaItems
@@ -29,16 +28,13 @@ final class MediaListCell: ReusableCellBaseClass {
     fileprivate enum Constants {
         static let spacing = 5.0
         static let biggerSpacing = 10.0
-        static let itemWidth = 120
-        static let itemHeight = 180
-    }
-    
-    private enum MediaListSection: Hashable {
-        case main
+        static let itemWidth = 120.0
+        static let itemHeight = 180.0
     }
     
     // MARK: - PROPERTIES
     private var viewModel: MediaListCellViewModel?
+    private var items: [MediaPosterImageCellViewModel] = []
     
     // MARK: - VIEW PROPERTIES
     private let titleLabel: UILabel = {
@@ -57,15 +53,17 @@ final class MediaListCell: ReusableCellBaseClass {
         return label
     }()
     
-    private lazy var collectionView: DiffableCollectionView = {
+    private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumInteritemSpacing = 10
         layout.itemSize = CGSize(width: Constants.itemWidth, height: Constants.itemHeight)
         
-        let view = DiffableCollectionView<MediaListSection, MediaPosterImageCellViewModel>(layout: layout)
+        let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
         view.showsHorizontalScrollIndicator = false
         view.backgroundColor = CMColor.cmBackground
+        view.delegate = self
+        view.dataSource = self
         view.register(cellClass: MediaPosterImageCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -75,7 +73,6 @@ final class MediaListCell: ReusableCellBaseClass {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
-        configureDataSource()
     }
     
     @available(*, unavailable)
@@ -83,16 +80,22 @@ final class MediaListCell: ReusableCellBaseClass {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        let fittingHeight = titleLabel.intrinsicContentSize.height + subtitleLabel.intrinsicContentSize.height +
+        Constants.biggerSpacing + Constants.spacing + Constants.itemHeight
+        layoutAttributes.frame.size.height = fittingHeight
+        return layoutAttributes
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: MediaListCellViewModel) {
         self.viewModel = viewModel
         self.titleLabel.text = viewModel.listName
         self.subtitleLabel.text = viewModel.listSubtitle
+        self.items = viewModel.mediaItems.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.didTapMediaItem) }
         
-        collectionView.applySnapshot(
-            sections: [.main],
-            itemsBySection: [.main : viewModel.mediaItems.map { .init(media: $0, didTapMedia: viewModel.didTapMediaItem) }]
-        )
+        self.collectionView.reloadData()
     }
     
     // MARK: - PRIVATE FUNC
@@ -113,15 +116,23 @@ final class MediaListCell: ReusableCellBaseClass {
         collectionView.snp.makeConstraints {
             $0.top.equalTo(subtitleLabel.snp.bottom).offset(Constants.biggerSpacing)
             $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(Constants.itemHeight)
+            $0.bottom.equalToSuperview()
         }
     }
+}
+
+extension MediaListCell: UICollectionViewDataSource, UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return items.count
+    }
     
-    private func configureDataSource() {
-        collectionView.configureDataSource { collectionView, indexPath, viewModel in
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.cellIdentifier, for: indexPath) as? MediaPosterImageCell
-            cell?.configure(with: viewModel)
-            return cell
-        }
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: MediaPosterImageCell.identifier, for: indexPath
+        ) as? MediaPosterImageCell else { return UICollectionViewCell() }
+        
+        let itemVM = items[indexPath.row]
+        cell.configure(with: itemVM)
+        return cell
     }
 }

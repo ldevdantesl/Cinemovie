@@ -36,6 +36,10 @@ struct TMDBEndpoints {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/\(movieID)/videos", queryParams: queryParams)
     }
     
+    static func getTrendingMoviesEndpoint(for timeWindow: TrendingTimeWindow, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/trending/movie/\(timeWindow.rawValue)", queryParams: queryParams)
+    }
+    
     // MARK: - TV SERIES
     static func getTVSeriesDetailsEndpoint(seriesID: Int, queryParams: [String : String]? = nil) -> Endpoint {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)", queryParams: queryParams)
@@ -59,6 +63,10 @@ struct TMDBEndpoints {
     
     static func getTVSeriesRecommendsEndpoint(seriesID: Int, queryParams: [String : String]? = nil) -> Endpoint {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)/recommendations", queryParams: queryParams)
+    }
+    
+    static func getTrendingTVSeriesEndpoint(for timeWindow: TrendingTimeWindow, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/trending/tv/\(timeWindow.rawValue)", queryParams: queryParams)
     }
     
     // MARK: - TV SEASON
@@ -85,6 +93,10 @@ struct TMDBEndpoints {
     
     static func getPersonTVShowCredits(personID: Int, queryParams: [String : String]? = nil) -> Endpoint {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)/tv_credits", queryParams: queryParams)
+    }
+    
+    static func getTrendingPeopleEndpoint(for timeWindow: TrendingTimeWindow, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/trending/person/\(timeWindow.rawValue)", queryParams: queryParams)
     }
     
     // MARK: - OTHER

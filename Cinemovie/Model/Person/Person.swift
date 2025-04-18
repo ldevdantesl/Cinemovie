@@ -9,11 +9,13 @@ import Foundation
 
 struct Person: APIResponse {
     let id: Int
-    let name, originalName, mediaType: String
+    let name: String
+    let originalName: String
+    let mediaType: String?
     let adult: Bool
     let popularity: Double
     let gender: Int
-    let knownForDepartment: String
+    let knownForDepartment: String?
     let profilePath: String?
     
     enum CodingKeys: String, CodingKey {

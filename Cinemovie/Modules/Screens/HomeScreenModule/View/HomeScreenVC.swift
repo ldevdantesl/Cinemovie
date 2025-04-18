@@ -9,7 +9,7 @@ import SnapKit
 import UIKit
 
 protocol HomeScreenViewProtocol: AnyObject {
-    func didRecieveAllData(movieLists: [(listType: MovieListType, movies: [Movie])])
+    func didRecieveAllData(movieLists: [(listType: MovieListType, movies: [Movie])], trendingPeople: [Person])
     func didRecieveError(_ errorStr: String)
 }
 
@@ -26,12 +26,14 @@ final class HomeScreenVC: UIViewController {
         case featured
         case movieList(MovieListType)
         case seriesList(TVSeriesListType)
+        case trendingPeople
     }
 
     // MARK: - ITEM
     private enum Item: Hashable {
         case featured(FeaturedMediaCellViewModel)
         case mediaListCell(MediaListCellViewModel)
+        case trendingPeopleCell(TrendingPeopleCellViewModel)
     }
     
     // MARK: - VIPER
@@ -47,6 +49,7 @@ final class HomeScreenVC: UIViewController {
         let view = DiffableCollectionView<HomeScreenVC.Section, HomeScreenVC.Item>(layout: createLayout())
         view.register(cellClass: FeaturedMediaCell.self)
         view.register(cellClass: MediaListCell.self)
+        view.register(cellClass: TrendingPeopleCell.self)
         view.delegate = self
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
@@ -104,6 +107,11 @@ final class HomeScreenVC: UIViewController {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? MediaListCell
                 cell?.configure(viewModel: vm)
                 return cell
+                
+            case .trendingPeopleCell(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? TrendingPeopleCell
+                cell?.configure(viewModel: vm)
+                return cell
             }
         }
     }
@@ -119,6 +127,7 @@ final class HomeScreenVC: UIViewController {
             case .featured: return self.sectionForFeatured()
             case .movieList: return self.sectionForMediaLists()
             case .seriesList: return self.sectionForMediaLists()
+            case .trendingPeople: return self.sectionForTrendingPeople()
             }
         }
     }
@@ -135,7 +144,15 @@ final class HomeScreenVC: UIViewController {
     }
     
     private func sectionForMediaLists() -> NSCollectionLayoutSection {
-        let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(MediaListCellViewModel.cellHeight)))
+        let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(100)))
+        let group = NSCollectionLayoutGroup.vertical(layoutSize: item.layoutSize, subitems: [item])
+        let section = NSCollectionLayoutSection(group: group)
+        section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+        return section
+    }
+    
+    private func sectionForTrendingPeople() -> NSCollectionLayoutSection {
+        let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(100)))
         let group = NSCollectionLayoutGroup.vertical(layoutSize: item.layoutSize, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
         section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
@@ -167,6 +184,9 @@ final class HomeScreenVC: UIViewController {
             )
             sectionsAndItems.append(contentsOf: seriesSections)
         }
+        
+        let trendingPeopleVM = TrendingPeopleCellViewModel(people: presenter.trendingPeople, didTapPerson: presenter.didTapPerson)
+        sectionsAndItems.append((Section.trendingPeople, [.trendingPeopleCell(trendingPeopleVM)]))
         
         visibleItems = sectionsAndItems.map(\.section)
         
@@ -218,7 +238,7 @@ extension HomeScreenVC: UICollectionViewDelegate {
 }
 
 extension HomeScreenVC: HomeScreenViewProtocol {
-    func didRecieveAllData(movieLists: [(listType: MovieListType, movies: [Movie])]) {
+    func didRecieveAllData(movieLists: [(listType: MovieListType, movies: [Movie])], trendingPeople: [Person]) {
         var sectionsAndItems: [(section: Section, items: [Item])] = []
 
         let allMovies = movieLists.flatMap { $0.movies }
@@ -231,6 +251,9 @@ extension HomeScreenVC: HomeScreenViewProtocol {
         )
         
         sectionsAndItems.append(contentsOf: movieSections)
+        
+        let trendingPeopleVM = TrendingPeopleCellViewModel(people: trendingPeople, didTapPerson: self.presenter?.didTapPerson)
+        sectionsAndItems.append((Section.trendingPeople, [.trendingPeopleCell(trendingPeopleVM)]))
         
         visibleItems = sectionsAndItems.map(\.section)
         DispatchQueue.main.async {

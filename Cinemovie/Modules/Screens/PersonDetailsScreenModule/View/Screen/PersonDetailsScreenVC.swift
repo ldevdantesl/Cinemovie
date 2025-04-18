@@ -31,6 +31,7 @@ final class PersonDetailsScreenVC: UIViewController {
     // MARK: - PROPERTIES
     private var viewModels: [PersonDetailsCellViewModel] = []
     private var cachedCollectionViewCellSize: [IndexPath : CGSize] = [:]
+    private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
     
     // MARK: - VIEW PROPERTIES
     private let downloadingView: CMSplashView = {
@@ -72,6 +73,10 @@ final class PersonDetailsScreenVC: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         downloadingView.show()
+    }
+    
+    deinit {
+        print("Person Details Screen deinit")
     }
     
     // MARK: - PRIVATE FUNC
@@ -167,8 +172,8 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
         }
         
         viewModels.append(PersonDetailsHeaderViewModel(
-            imagePath: details.profilePath, didTapAvaImage: nil,
-            didTapBackButton: presenter?.didTapBackButton
+            imagePath: details.profilePath, isBackButtonHidden: self.isFirstScreen,
+            didTapAvaImage: nil, didTapBackButton: presenter?.didTapBackButton
         ))
      
         viewModels.append(PersonDetailsInfoViewModel(

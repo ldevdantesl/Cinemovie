@@ -36,10 +36,13 @@ protocol TMDBService: AnyObject {
     
     // MARK: - OTHER
     func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void)
+    func getTrendingPeople(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<TrendingPeopleAPIResponse, NetworkError>) -> Void)
     
     // MARK: - LIST OF PRESET MOVIES
     func getMovieList(listType: MovieListType, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
+    func getTrendingMoviesList(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
     
     // MARK: - LIST OF PRESET TV SERIES
     func getTVSeriesList(listType: TVSeriesListType, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
+    func getTrendingTVSeriesList(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
 }

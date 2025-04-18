@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class TMBDServiceImpl: TMDBService {
+final class TMDBServiceImpl: TMDBService {
     // MARK: - PROPERTIES
     weak var networkService: NetworkService?
     
@@ -126,6 +126,12 @@ final class TMBDServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
+    func getTrendingPeople(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<TrendingPeopleAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getTrendingPeopleEndpoint(for: timeWindow, queryParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
     // MARK: - OTHER
     func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
@@ -140,10 +146,22 @@ final class TMBDServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
+    func getTrendingMoviesList(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getTrendingMoviesEndpoint(for: timeWindow, queryParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
     // MARK: - PRESET TV SERIES LIST IMPLEMENTATIONS
     func getTVSeriesList(listType: TVSeriesListType, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
         let extraParams = ["language": "ru"]
         let endpoint = TMDBEndpoints.createTVSeriesListEndpoint(listType: listType, extraParams: extraParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    func getTrendingTVSeriesList(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getTrendingTVSeriesEndpoint(for: timeWindow, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     

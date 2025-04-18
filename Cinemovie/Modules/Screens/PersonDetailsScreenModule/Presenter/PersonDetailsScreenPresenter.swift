@@ -10,16 +10,19 @@ import UIKit
 protocol PersonDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
     
+    // MARK: - USER INITIATED
     func didTapBackButton()
     func didTapLogoImage(sourceID: String, sourceType: ExternalSource.SourceTypes)
     func didTapMovie(movie: Movie)
     func didTapTVSeries(series: TVSeries)
     
+    // MARK: - PROGRAMMATIC
     func didGetPersonID(_ id: Int)
     func didGetPersonDetails(_ details: PersonDetails)
     func didGetPersonExternalSources(_ sources: ExternalSource)
     func didGetPersonMovies(_ movies: [Movie])
     func didGetPersonTVShows(_ tvShows: [TVSeries])
+    // MARK: - ERROR HANDLING
     func didRecieveError(_ error: Error)
 }
 
@@ -28,41 +31,81 @@ final class PersonDetailsScreenPresenter {
     var router: PersonDetailsScreenRouterProtocol
     var interactor: PersonDetailsScreenInteractorProtocol
     
+    private let downloadGroup = DispatchGroup()
+    private let creditID: String?
     private var personID: Int?
+    
     private var personDetails: PersonDetails?
     private var personExternalSources: ExternalSource?
     private var personMovies: [Movie] = []
     private var personTVShows: [TVSeries] = []
-    private let downloadGroup = DispatchGroup()
 
-    init(interactor: PersonDetailsScreenInteractorProtocol, router: PersonDetailsScreenRouterProtocol) {
+    init(creditID: String, interactor: PersonDetailsScreenInteractorProtocol, router: PersonDetailsScreenRouterProtocol) {
+        self.creditID = creditID
+        self.personID = nil
+        self.interactor = interactor
+        self.router = router
+    }
+    
+    init(personID: Int, interactor: PersonDetailsScreenInteractorProtocol, router: PersonDetailsScreenRouterProtocol) {
+        print("PersonID: ", personID)
+        self.creditID = nil
+        self.personID = personID
         self.interactor = interactor
         self.router = router
     }
 }
 
 extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
+    func viewDidLoad() {
+        defer {
+            downloadGroup.notify(queue: .main) { [weak self] in
+                guard let self = self else { return }
+                guard let personDetails = personDetails else { self.view?.didRecieveError("Something went wrong with person details"); return }
+                guard let personExternalSources = personExternalSources else { self.view?.didRecieveError("Something went wrong with external sources"); return }
+                self.view?.didGetAllPersonData(personDetails, sources: personExternalSources, movies: personMovies, tvShows: personTVShows)
+            }
+        }
+        
+        guard let personID = personID else {
+            let creditID = self.creditID ?? ""
+            downloadGroup.enter()
+            interactor.getPersonID(creditID: creditID)
+            return
+        }
+        
+        downloadGroup.enter()
+        self.interactor.getPersonDetails(personID: personID)
+        
+        downloadGroup.enter()
+        self.interactor.getPersonExternalSources(personID: personID)
+        
+        downloadGroup.enter()
+        self.interactor.getPersonMovies(personID: personID)
+        
+        downloadGroup.enter()
+        self.interactor.getPersonTVShows(personID: personID)
+    }
+    
+    // MARK: - USER INITIATED
+    func didTapBackButton() {
+        router.goBack()
+    }
+    
+    func didTapLogoImage(sourceID: String, sourceType: ExternalSource.SourceTypes) {
+        router.openSource(sourceID: sourceID, sourceType: sourceType)
+    }
+    
     func didTapTVSeries(series: TVSeries) {
         print("SeriesID", series.id )
         router.navigateToSeries(seriesID: series.id)
     }
     
-    func viewDidLoad() {
-        downloadGroup.enter()
-        interactor.getPersonID()
-        
-        downloadGroup.notify(queue: .main) { [weak self] in
-            guard let self = self else { return }
-            guard let personDetails = personDetails else { self.view?.didRecieveError("Something went wrong with person details"); return }
-            guard let personExternalSources = personExternalSources else { self.view?.didRecieveError("Something went wrong with external sources"); return }
-            self.view?.didGetAllPersonData(personDetails, sources: personExternalSources, movies: personMovies, tvShows: personTVShows)
-        }
+    func didTapMovie(movie: Movie) {
+        router.navigateToMovie(movieID: movie.id)
     }
     
-    func didRecieveError(_ error: any Error) {
-        view?.didRecieveError(error.localizedDescription)
-    }
-    
+    // MARK: - PROGRAMMATIC
     func didGetPersonID(_ id: Int) {
         print("PersonID: \(id)")
         self.personID = id
@@ -92,14 +135,6 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
         downloadGroup.leave()
     }
     
-    func didTapBackButton() {
-        router.goBack()
-    }
-    
-    func didTapLogoImage(sourceID: String, sourceType: ExternalSource.SourceTypes) {
-        router.openSource(sourceID: sourceID, sourceType: sourceType)
-    }
-    
     func didGetPersonMovies(_ movies: [Movie]) {
         self.personMovies = movies
         downloadGroup.leave()
@@ -110,7 +145,8 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
         downloadGroup.leave()
     }
     
-    func didTapMovie(movie: Movie) {
-        router.navigateToMovie(movieID: movie.id)
+    // MARK: - ERROR HANDLING
+    func didRecieveError(_ error: any Error) {
+        view?.didRecieveError(error.localizedDescription)
     }
 }

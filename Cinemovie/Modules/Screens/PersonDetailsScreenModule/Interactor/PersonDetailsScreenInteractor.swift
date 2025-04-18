@@ -8,7 +8,7 @@
 import UIKit
 
 protocol PersonDetailsScreenInteractorProtocol: AnyObject {
-    func getPersonID()
+    func getPersonID(creditID: String)
     func getPersonDetails(personID: Int)
     func getPersonExternalSources(personID: Int)
     func getPersonMovies(personID: Int)
@@ -18,14 +18,12 @@ protocol PersonDetailsScreenInteractorProtocol: AnyObject {
 final class PersonDetailsScreenInteractor: PersonDetailsScreenInteractorProtocol {
     weak var presenter: PersonDetailsScreenPresenterProtocol?
     weak var tmdbService: TMDBService?
-    private let creditID: String
     
-    init(creditID: String, tmdbService: TMDBService?) {
-        self.creditID = creditID
+    init(tmdbService: TMDBService?) {
         self.tmdbService = tmdbService
     }
     
-    func getPersonID() {
+    func getPersonID(creditID: String) {
         tmdbService?.getPersonID(creditID: creditID) { [weak self] result in
             guard let self = self else { return }
             switch result {
