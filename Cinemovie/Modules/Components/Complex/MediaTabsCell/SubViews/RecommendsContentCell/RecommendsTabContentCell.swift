@@ -34,11 +34,13 @@ final class RecommendsTabContentCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: RecommendsContentCellViewModel?
+    private var items: [MediaPosterImageCellViewModel] = []
     
     // MARK: - VIEW PROPERTIES
-    private lazy var gridCollectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<Int, MediaPosterImageCellViewModel>(layout: createLayout())
+    private lazy var gridCollectionView: UICollectionView = {
+        let view = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         view.isScrollEnabled = false
+        view.dataSource = self
         view.backgroundColor = CMColor.cmBackground
         view.register(cellClass: MediaPosterImageCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -49,7 +51,6 @@ final class RecommendsTabContentCell: ReusableCellBaseClass {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
-        configureDataSource()
     }
     
     @available(*, unavailable)
@@ -60,13 +61,8 @@ final class RecommendsTabContentCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: RecommendsContentCellViewModel) {
         self.viewModel = viewModel
-        gridCollectionView.applySnapshot(
-            sections: [0],
-            itemsBySection: [
-                0 : viewModel.recommendedMedia.map { MediaPosterImageCellViewModel(media: $0) }
-            ]
-        )
-        
+        self.items = viewModel.recommendedMedia.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.didTapAnyMedia) }
+        self.gridCollectionView.reloadData()
         gridCollectionView.performBatchUpdates(nil) { [weak self] _ in
             guard let self else { return }
             let height = self.gridCollectionView.contentSize.height
@@ -96,15 +92,19 @@ final class RecommendsTabContentCell: ReusableCellBaseClass {
             return NSCollectionLayoutSection(group: vgroup)
         }
     }
+}
+
+extension RecommendsTabContentCell: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return items.count
+    }
     
-    private func configureDataSource() {
-        gridCollectionView.configureDataSource { [weak self] collectionView, indexPath, itemIdentifier in
-            guard let self = self else { return UICollectionViewCell() }
-            guard let media = self.viewModel?.recommendedMedia[safe: indexPath.item] else { return UICollectionViewCell() }
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MediaPosterImageCell.identifier, for: indexPath) as? MediaPosterImageCell
-            let vm = MediaPosterImageCellViewModel(media: media, didTapMedia: viewModel?.didTapAnyMedia)
-            cell?.configure(with: vm)
-            return cell
-        }
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: MediaPosterImageCell.identifier, for: indexPath
+        ) as? MediaPosterImageCell else { return UICollectionViewCell() }
+        let vm = items[indexPath.row]
+        cell.configure(with: vm)
+        return cell
     }
 }

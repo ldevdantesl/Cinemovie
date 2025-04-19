@@ -29,13 +29,10 @@ final class CastListCell: ReusableCellBaseClass {
         static let itemWidth = 80.0
         static let itemHeight = 105.0
     }
-    
-    enum CastListSection: Hashable {
-        case main
-    }
 
     // MARK: - PROPERTIES
     private var viewModel: CastListCellViewModel?
+    private var items: [CastListItemCellViewModel] = []
     
     // MARK: - VIEW PROPERTIES
     private let castLabel: UILabel = {
@@ -47,14 +44,15 @@ final class CastListCell: ReusableCellBaseClass {
         return label
     }()
     
-    private lazy var collectionView: DiffableCollectionView = {
+    private lazy var collectionView: TopBlurredCollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = Constants.hSpacing
         layout.itemSize = CGSize(width: Constants.itemWidth, height: Constants.itemHeight)
         
-        let cv = DiffableCollectionView<CastListSection, CastListItemCellViewModel>(layout: layout)
+        let cv = TopBlurredCollectionView(layout: layout, showsBlur: true)
         cv.showsHorizontalScrollIndicator = false
+        cv.dataSource = self
         cv.backgroundColor = CMColor.cmBackground
         cv.register(cellClass: CastListItemCell.self)
         cv.translatesAutoresizingMaskIntoConstraints = false
@@ -65,7 +63,6 @@ final class CastListCell: ReusableCellBaseClass {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
-        configureDataSource()
     }
     
     @available(*, unavailable)
@@ -76,10 +73,7 @@ final class CastListCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNCTIONS
     public func configure(viewModel: CastListCellViewModel) {
         self.viewModel = viewModel
-        self.collectionView.applySnapshot(
-            sections: [.main],
-            itemsBySection: [.main: viewModel.cast.map { CastListItemCellViewModel(cast: $0, didTapCast: viewModel.didSelectCast) }]
-        )
+        self.items = viewModel.cast.map { CastListItemCellViewModel(cast: $0, didTapCast: viewModel.didSelectCast) }
     }
     
     // MARK: - PRIVATE FUNCTIONS
@@ -98,12 +92,20 @@ final class CastListCell: ReusableCellBaseClass {
             $0.bottom.equalToSuperview()
         }
     }
+}
+
+extension CastListCell: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return items.count
+    }
     
-    private func configureDataSource() {
-        collectionView.configureDataSource { collectionView, indexPath, viewModel in
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CastListItemCell.identifier, for: indexPath) as? CastListItemCell
-            cell?.configure(viewModel: viewModel)
-            return cell
-        }
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: CastListItemCell.identifier, for: indexPath
+        ) as? CastListItemCell else { return UICollectionViewCell() }
+        
+        let itemVM = items[indexPath.row]
+        cell.configure(viewModel: itemVM)
+        return cell
     }
 }

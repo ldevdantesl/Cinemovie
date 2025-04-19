@@ -24,19 +24,16 @@ final class HomeScreenRouter: HomeScreenRouterProtocol {
     
     func navigateToMovieDetails(movieID: Int) {
         let movieDetails = MovieDetailsScreenAssembler.assemble(movieID: movieID, tmdbService: tmdbService)
-        movieDetails.modalPresentationStyle = .pageSheet
-        viewController?.present(UINavigationController(rootViewController: movieDetails), animated: true)
+        viewController?.navigationController?.pushViewController(movieDetails, animated: true)
     }
     
     func navigateToTVSeriesDetails(seriesID: Int) {
         let seriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: seriesID, tmdbService: tmdbService)
-        seriesDetails.modalPresentationStyle = .overCurrentContext
-        viewController?.present(UINavigationController(rootViewController: seriesDetails), animated: true)
+        viewController?.navigationController?.pushViewController(seriesDetails, animated: true)
     }
     
     func navigateToPersonDetails(personID: Int) {
-        guard let vc = self.viewController else { return }
         let newVC = PersonDetailsScreenAssembler.assemble(personID: personID, tmdbService: tmdbService)
-        vc.present(newVC, animated: true)
+        viewController?.navigationController?.pushViewController(newVC, animated: true)
     }
 }

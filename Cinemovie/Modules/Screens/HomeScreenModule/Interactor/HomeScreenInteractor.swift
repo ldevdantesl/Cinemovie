@@ -15,8 +15,6 @@ protocol HomeScreenInteractorProtocol: AnyObject {
     func downloadTVSeriesList(listType: TVSeriesListType)
     
     // MARK: - TRENDING
-    func downloadTrendingMovies(timeWindow: TrendingTimeWindow)
-    func downloadTrendingTVSeries(timeWindow: TrendingTimeWindow)
     func downloadTrendingPeople(timeWindow: TrendingTimeWindow)
 }
 
@@ -51,31 +49,11 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
     }
     
     // MARK: - TRENDING
-    func downloadTrendingMovies(timeWindow: TrendingTimeWindow) {
-        tmdbService?.getTrendingMoviesList(for: timeWindow) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didDownloadTrendingMovies(success.movies)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
-            }
-        }
-    }
-    
     func downloadTrendingPeople(timeWindow: TrendingTimeWindow) {
         tmdbService?.getTrendingPeople(for: timeWindow) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didDownloadTrendingPeople(success.results)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
-            }
-        }
-    }
-    
-    func downloadTrendingTVSeries(timeWindow: TrendingTimeWindow) {
-        tmdbService?.getTrendingTVSeriesList(for: timeWindow) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didDownloadTrendingSeries(success.results)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }

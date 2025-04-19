@@ -88,6 +88,7 @@ final class MediaPosterImageCell: ReusableCellBaseClass {
         self.loadingIndicator.startAnimating()
         self.posterImageView.sd_setImage(with: url) { [weak self] _, _, _, _ in
             guard let self = self else { return }
+            self.posterImageView.layoutIfNeeded()
             self.loadingIndicator.stopAnimating()
         }
     }

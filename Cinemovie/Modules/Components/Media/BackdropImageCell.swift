@@ -13,7 +13,7 @@ final class BackdropImageCellViewModel: CellViewModelBaseClass {
     let imageURL: URL?
     let didTapBackButtonAction: (() -> Void)?
     let isBackButtonHidden: Bool
-    static let cellHeight = UIConstants.screenWidth * 0.55
+    static let cellHeight = UIConstants.screenWidth * 0.60
     
     init(imagePath: String?, size: ImageSizes, isBackButtonHidden: Bool, didTapBackButtonAction: (() -> Void)? = nil) {
         self.imageURL = URLHelper.getImageURL(with: imagePath, size: size)
@@ -113,7 +113,8 @@ final class BackdropImageCell: ReusableCellBaseClass {
         
         contentView.addSubview(backButton)
         backButton.snp.makeConstraints {
-            $0.top.leading.equalToSuperview().offset(Constants.backButtonSpacing)
+            $0.top.equalTo(safeAreaLayoutGuide.snp.top)
+            $0.leading.equalToSuperview().offset(Constants.backButtonSpacing)
             $0.size.equalTo(Constants.backButtonSize)
         }
     }

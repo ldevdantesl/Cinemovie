@@ -34,11 +34,13 @@ final class SimilarTabContentCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: SimilarTabContentCellViewModel?
+    private var items: [MediaPosterImageCellViewModel] = []
     
     // MARK: - VIEW PROPERTIES
-    private lazy var gridCollectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<Int, MediaPosterImageCellViewModel>(layout: createLayout())
+    private lazy var gridCollectionView: UICollectionView = {
+        let view = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         view.isScrollEnabled = false
+        view.dataSource = self
         view.backgroundColor = CMColor.cmBackground
         view.register(cellClass: MediaPosterImageCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -49,7 +51,6 @@ final class SimilarTabContentCell: ReusableCellBaseClass {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
-        configureDataSource()
     }
     
     @available(*, unavailable)
@@ -62,23 +63,18 @@ final class SimilarTabContentCell: ReusableCellBaseClass {
         gridCollectionView.layoutIfNeeded()
     }
     
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        let height = self.gridCollectionView.contentSize.height
+        layoutAttributes.frame.size.height = height
+        return layoutAttributes
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: SimilarTabContentCellViewModel) {
         self.viewModel = viewModel
-        
-        gridCollectionView.applySnapshot(
-            sections: [0],
-            itemsBySection: [
-                0 : viewModel.media.map { MediaPosterImageCellViewModel(media: $0) }
-            ]
-        )
-        
-        gridCollectionView.performBatchUpdates(nil) { [weak self] _ in
-            guard let self else { return }
-            let height = self.gridCollectionView.contentSize.height
-            viewModel.setCellHeight(to: height)
-            self.invalidateIntrinsicContentSize()
-        }
+        self.items = viewModel.media.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.didTapAnyMedia) }
+        self.gridCollectionView.reloadData()
     }
     
     // MARK: - PRIVATE FUNC
@@ -102,15 +98,20 @@ final class SimilarTabContentCell: ReusableCellBaseClass {
             return NSCollectionLayoutSection(group: vgroup)
         }
     }
-    
-    private func configureDataSource() {
-        gridCollectionView.configureDataSource { [weak self] collectionView, indexPath, itemIdentifier in
-            guard let self = self else { return UICollectionViewCell() }
-            guard let media = self.viewModel?.media[safe: indexPath.item] else { return UICollectionViewCell() }
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MediaPosterImageCell.identifier, for: indexPath) as? MediaPosterImageCell
-            let vm = MediaPosterImageCellViewModel(media: media, didTapMedia: viewModel?.didTapAnyMedia)
-            cell?.configure(with: vm)
-            return cell
-        }
+}
+
+extension SimilarTabContentCell: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return items.count
     }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: MediaPosterImageCell.identifier, for: indexPath
+        ) as? MediaPosterImageCell else { return UICollectionViewCell() }
+        let itemVM = items[indexPath.row]
+        cell.configure(with: itemVM)
+        return cell
+    }
+    
 }

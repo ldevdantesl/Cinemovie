@@ -69,7 +69,7 @@ final class MovieDetailsScreenVC: UIViewController {
     }()
     
     private lazy var collectionView: DiffableCollectionView = {
-        let cv = DiffableCollectionView<Sections, Items>(layout: createLayout())
+        let cv = DiffableCollectionView<Sections, Items>(layout: createLayout(), showsTopBlur: true)
         cv.backgroundColor = CMColor.cmBackground
         cv.register(cellClass: MovieDetailsSubDetailsCell.self)
         cv.register(cellClass: WatchlistButtonCell.self)
@@ -84,6 +84,15 @@ final class MovieDetailsScreenVC: UIViewController {
         return cv
     }()
     
+    private lazy var lastContentOffsetY: CGFloat = 0
+    
+    private let blurView: UIVisualEffectView = {
+        let view = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
+        view.alpha = 0
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     // MARK: - LIFECYCLE
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -94,7 +103,7 @@ final class MovieDetailsScreenVC: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.navigationBar.isHidden = true
+        navigationController?.navigationBar.alpha = 0
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -110,17 +119,21 @@ final class MovieDetailsScreenVC: UIViewController {
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
         view.backgroundColor = CMColor.cmBackground
-        view.addSubview(downloadingView)
-        downloadingView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-        
         view.addSubview(collectionView)
         collectionView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         
-        view.bringSubviewToFront(downloadingView)
+        view.addSubview(downloadingView)
+        downloadingView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        view.addSubview(blurView)
+        blurView.snp.makeConstraints {
+            $0.top.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(UIConstants.topInset)
+        }
     }
     
     private func createLayout() -> UICollectionViewCompositionalLayout {

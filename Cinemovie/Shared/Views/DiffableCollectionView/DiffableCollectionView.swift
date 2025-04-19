@@ -6,8 +6,9 @@
 //
 
 import UIKit
+import SnapKit
 
-final class DiffableCollectionView<Section: Hashable, Item: Hashable>: UICollectionView, UICollectionViewDelegate {
+final class DiffableCollectionView<Section: Hashable, Item: Hashable>: TopBlurredCollectionView {
     // MARK: - TYPEALIASES
     typealias DataSource = UICollectionViewDiffableDataSource<Section, Item>
     
@@ -16,8 +17,8 @@ final class DiffableCollectionView<Section: Hashable, Item: Hashable>: UICollect
     private var didSelectHandler: ((IndexPath) -> Void)?
     
     // MARK: - LIFECYCLE
-    init(layout: UICollectionViewLayout) {
-        super.init(frame: .zero, collectionViewLayout: layout)
+    init(layout: UICollectionViewLayout, showsTopBlur: Bool) {
+        super.init(layout: layout, showsBlur: showsTopBlur)
     }
     
     @available(*, unavailable)

@@ -19,6 +19,7 @@ final class HomeScreenVC: UIViewController {
     fileprivate enum Constants {
         static let featuredMovieHeight = UIConstants.screenHeight * 0.55
         static let headerViewHeight = 75.0 + UIConstants.topInset
+        static let trendingPeopleIndexSection = 5
     }
     
     // MARK: - SECTION
@@ -46,7 +47,7 @@ final class HomeScreenVC: UIViewController {
     
     // MARK: - VIEW PROPERTIES
     private lazy var collectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<HomeScreenVC.Section, HomeScreenVC.Item>(layout: createLayout())
+        let view = DiffableCollectionView<HomeScreenVC.Section, HomeScreenVC.Item>(layout: createLayout(), showsTopBlur: false)
         view.register(cellClass: FeaturedMediaCell.self)
         view.register(cellClass: MediaListCell.self)
         view.register(cellClass: TrendingPeopleCell.self)
@@ -73,7 +74,7 @@ final class HomeScreenVC: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: true)
+        navigationController?.navigationBar.isHidden = true
         tabBarController?.tabBar.barTintColor = CMColor.cmBackground
         tabBarController?.tabBar.isTranslucent = false
     }
@@ -139,7 +140,7 @@ final class HomeScreenVC: UIViewController {
             subitems: [item]
         )
         let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: Constants.headerViewHeight - UIConstants.topInset, leading: 10, bottom: 10, trailing: 10)
+        section.contentInsets = NSDirectionalEdgeInsets(top: Constants.headerViewHeight, leading: 10, bottom: 10, trailing: 10)
         return section
     }
     
@@ -166,7 +167,7 @@ final class HomeScreenVC: UIViewController {
         
         switch mediaType {
         case .movie:
-            let featuredVM = FeaturedMediaCellViewModel(media: presenter.movieLists.flatMap { $0.movies } )
+            let featuredVM = FeaturedMediaCellViewModel(media: presenter.movieLists.flatMap { $0.movies }, didTapMedia: presenter.didTapMedia)
             sectionsAndItems.append((Section.featured, [.featured(featuredVM)]))
             
             let movieSections = generateListSections(
@@ -176,7 +177,7 @@ final class HomeScreenVC: UIViewController {
             sectionsAndItems.append(contentsOf: movieSections)
             
         case .tvShow:
-            let featuredVM = FeaturedMediaCellViewModel(media: presenter.seriesLists.flatMap { $0.series } )
+            let featuredVM = FeaturedMediaCellViewModel(media: presenter.seriesLists.flatMap { $0.series }, didTapMedia: presenter.didTapMedia)
             sectionsAndItems.append((Section.featured, [.featured(featuredVM)]))
             let seriesSections = generateListSections(
                 from: presenter.seriesLists.map { ($0.listType, $0.series) },
@@ -186,7 +187,7 @@ final class HomeScreenVC: UIViewController {
         }
         
         let trendingPeopleVM = TrendingPeopleCellViewModel(people: presenter.trendingPeople, didTapPerson: presenter.didTapPerson)
-        sectionsAndItems.append((Section.trendingPeople, [.trendingPeopleCell(trendingPeopleVM)]))
+        sectionsAndItems.insert((Section.trendingPeople, [.trendingPeopleCell(trendingPeopleVM)]), at: Constants.trendingPeopleIndexSection)
         
         visibleItems = sectionsAndItems.map(\.section)
         
@@ -253,7 +254,7 @@ extension HomeScreenVC: HomeScreenViewProtocol {
         sectionsAndItems.append(contentsOf: movieSections)
         
         let trendingPeopleVM = TrendingPeopleCellViewModel(people: trendingPeople, didTapPerson: self.presenter?.didTapPerson)
-        sectionsAndItems.append((Section.trendingPeople, [.trendingPeopleCell(trendingPeopleVM)]))
+        sectionsAndItems.insert((Section.trendingPeople, [.trendingPeopleCell(trendingPeopleVM)]), at: Constants.trendingPeopleIndexSection)
         
         visibleItems = sectionsAndItems.map(\.section)
         DispatchQueue.main.async {

@@ -71,7 +71,8 @@ final class TVSeriesDetailsScreenVC: UIViewController {
     }()
     
     private lazy var collectionView: DiffableCollectionView = {
-        let cv = DiffableCollectionView<Sections, Items>(layout: createLayout())
+        let cv = DiffableCollectionView<Sections, Items>(layout: createLayout(), showsTopBlur: true)
+        cv.contentInsetAdjustmentBehavior = .never
         cv.backgroundColor = CMColor.cmBackground
         cv.register(cellClass: WatchlistButtonCell.self)
         cv.register(cellClass: OverviewCell.self)

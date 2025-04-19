@@ -93,9 +93,12 @@ final class SeasonsPopUpView: PopUPView {
             return
         }
         
+        print("ImageURL: \(imageURL)")
+        
         self.loadingIndicator.startAnimating()
         posterImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
             guard let self = self else { return }
+            self.posterImageView.layoutIfNeeded()
             self.loadingIndicator.stopAnimating()
         }
     }

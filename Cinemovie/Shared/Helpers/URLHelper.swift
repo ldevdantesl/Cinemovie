@@ -56,7 +56,7 @@ public struct URLHelper {
     
     static func getImageURL(with path: String?, size: ImageSizes) -> URL? {
         guard let path = path, !path.isEmpty else { return nil }
-        let finalPath = "\(CONSTANTS.imageBaseURLString)/\(size.rawValue)/\(path)"
+        let finalPath = "\(CONSTANTS.imageBaseURLString)/\(size.rawValue)\(path)"
         return URL(string: finalPath)
     }
     

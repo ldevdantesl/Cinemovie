@@ -9,12 +9,11 @@ import Foundation
 import UIKit
 
 final class HomeCoordinator: Coordinator {
-    var navigationController: UINavigationController
+    let navigationController: UINavigationController = UINavigationController()
     
     weak var tmdbService: TMDBService?
     
     init(tmdbService: TMDBService?) {
-        self.navigationController = UINavigationController()
         self.tmdbService = tmdbService
     }
     
@@ -25,6 +24,6 @@ final class HomeCoordinator: Coordinator {
             image: UIImage(systemName: "mail.stack"),
             tag: 0
         )
-        navigationController.viewControllers = [homeModule]
+        self.navigationController.viewControllers = [homeModule]
     }
 }
