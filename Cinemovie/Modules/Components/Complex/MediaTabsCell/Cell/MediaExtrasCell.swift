@@ -53,6 +53,9 @@ final class MediaExtrasCellViewModel: CellViewModelBaseClass {
 
 
 final class MediaExtrasCell: ReusableCellBaseClass {
+    // MARK: - TYPEALIAS
+    typealias Cells = CellViewModelBaseClass & CellWithHeightProtocol
+    
     // MARK: - OTHER
     private enum Tabs: CaseIterable {
         case seasons
@@ -91,7 +94,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: MediaExtrasCellViewModel?
-    private var items: [Tabs : CellViewModelBaseClass] = [:]
+    private var items: [Tabs : Cells] = [:]
     private var selectedTab: Tabs = .none
     private var visibleTabs: [Tabs] {
         return Tabs.allCases.filter { items[$0] != nil }
@@ -161,24 +164,14 @@ final class MediaExtrasCell: ReusableCellBaseClass {
     
     override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
         layoutIfNeeded()
+        contentCollectionView.layoutIfNeeded()
         
         guard let contentVM = items[selectedTab] else {
             layoutAttributes.frame.size.height = Constants.tabsHeight + Constants.spacing + Constants.defaultCellHeight
             return layoutAttributes
         }
         
-        let contentHeight: CGFloat
-        switch contentVM {
-        case let vm as SimilarTabContentCellViewModel: contentHeight = vm.cellHeight
-        case let vm as RecommendsContentCellViewModel: contentHeight = vm.cellHeight
-        case let vm as TrailersTabContentCellViewModel: contentHeight = vm.cellHeight
-        case let vm as BelongsToCollectionTabContentCellViewModel: contentHeight = vm.cellHeight
-        case let vm as ReviewsTabContentCellViewModel: contentHeight = vm.cellHeight
-        case let vm as SeasonsTabContentCellViewModel: contentHeight = vm.cellHeight
-        default: contentHeight = Constants.defaultCellHeight
-        }
-        
-        let totalHeight = Constants.tabsHeight + Constants.spacing + contentHeight + Constants.spacing
+        let totalHeight = Constants.tabsHeight + Constants.spacing + contentVM.cellHeight + Constants.spacing
         layoutAttributes.frame.size.height = totalHeight
         return layoutAttributes
     }
@@ -193,7 +186,10 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         }
         
         if let collectionDetails = viewModel.collectionDetails, collectionDetails.backdropPath != nil {
-            let belongsVM = BelongsToCollectionTabContentCellViewModel(collectionDetails: collectionDetails, onItemTapped: viewModel.didTapMedia)
+            let belongsVM = BelongsToCollectionTabContentCellViewModel(collectionDetails: collectionDetails, onItemTapped: viewModel.didTapMedia) { [weak self] in
+                guard let self = self else { return }
+                self.onHeightChangedRequest()
+            }
             self.items[.collection] = belongsVM
         }
         
@@ -260,20 +256,9 @@ final class MediaExtrasCell: ReusableCellBaseClass {
     private func createContentCollectionLayout() -> UICollectionViewCompositionalLayout {
         UICollectionViewCompositionalLayout { [weak self] sectionIndex, environment in
             guard let self = self else { return nil }
-            
-            let viewModel = self.items[selectedTab]
-            let height: CGFloat
-            switch viewModel {
-            case let vm as SimilarTabContentCellViewModel: height = vm.cellHeight
-            case let vm as TrailersTabContentCellViewModel: height = vm.cellHeight
-            case let vm as BelongsToCollectionTabContentCellViewModel: height = vm.cellHeight
-            case let vm as ReviewsTabContentCellViewModel: height = vm.cellHeight
-            case let vm as RecommendsContentCellViewModel: height = vm.cellHeight
-            case let vm as SeasonsTabContentCellViewModel: height = vm.cellHeight
-            default: height = Constants.defaultCellHeight
-            }
-            
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(height)))
+            let vm = self.items[selectedTab]
+            let cellHeight = vm?.cellHeight
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(cellHeight ?? Constants.defaultCellHeight)))
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: item.layoutSize, subitems: [item])
             let section = NSCollectionLayoutSection(group: group)
 
@@ -302,7 +287,9 @@ final class MediaExtrasCell: ReusableCellBaseClass {
     }
     
     private func onHeightChangedRequest() {
+        self.contentCollectionView.invalidateIntrinsicContentSize()
         self.invalidateIntrinsicContentSize()
+        self.layoutIfNeeded()
     }
 }
 

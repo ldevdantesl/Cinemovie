@@ -11,7 +11,6 @@ import SnapKit
 final class RateAndShareCellViewModel: CellViewModelBaseClass {
     let didTapShareButton: (() -> Void)?
     let didTapRateButton: (() -> Void)?
-    static let cellHeight = 25.0
     
     init(didTapShareButton: (() -> Void)?, didTapRateButton: (() -> Void)?) {
         self.didTapShareButton = didTapShareButton
@@ -27,6 +26,7 @@ final class RateAndShareCell: ReusableCellBaseClass {
     fileprivate enum Constants {
         static let rateimageSize = 25.0
         static let shareImageSize = 20.0
+        static let cellHeight = 25.0
     }
     
     // MARK: - PROPERTIES
@@ -62,6 +62,12 @@ final class RateAndShareCell: ReusableCellBaseClass {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        layoutAttributes.frame.size.height = Constants.cellHeight
+        return layoutAttributes
     }
     
     // MARK: - PUBLIC FUNC

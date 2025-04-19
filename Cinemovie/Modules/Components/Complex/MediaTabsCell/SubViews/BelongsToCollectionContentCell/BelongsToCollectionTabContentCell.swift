@@ -9,18 +9,20 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-final class BelongsToCollectionTabContentCellViewModel: CellViewModelBaseClass {
+final class BelongsToCollectionTabContentCellViewModel: CellViewModelBaseClass, CellWithHeightProtocol{
     let collectionDetails: BelongsToCollectionDetails
     let onItemTapped: ((Media) -> Void)?
-    private(set) var cellHeight: CGFloat = 100.0
+    let onHeightChangedRequest: (() -> Void)?
+    var cellHeight: CGFloat = 100.0
     
-    init(collectionDetails: BelongsToCollectionDetails, onItemTapped: ((Media) -> Void)?) {
+    init(collectionDetails: BelongsToCollectionDetails, onItemTapped: ((Media) -> Void)?, onHeightChangedRequest: (() -> Void)?) {
         self.collectionDetails = collectionDetails
         self.onItemTapped = onItemTapped
+        self.onHeightChangedRequest = onHeightChangedRequest
         super.init(cellIdentifier: "BelongsToCollectionTabContentCell")
     }
     
-    fileprivate func setCellHeight(to height: CGFloat) {
+    func setCellHeight(to height: CGFloat) {
         self.cellHeight = height
     }
 }
@@ -35,6 +37,7 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
         static let maximumAlphaComponent = 0.8
         static let maximumTotalParts = 4
         static let itemSpacing = 10.0
+        static let defaultCellHeight: CGFloat = 200.0
     }
     
     // MARK: - PROPERTIES
@@ -128,8 +131,11 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
     
     override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
         layoutIfNeeded()
-        let height = showingItems ? partsCollectionView.contentSize.height : collectionImageView.intrinsicContentSize.height
+        partsCollectionView.layoutIfNeeded()
+        
+        let height = showingItems ? partsCollectionView.contentSize.height : Constants.defaultCellHeight
         layoutAttributes.frame.size.height = height
+        print("Belongs To Collection Height: \(height)")
         self.viewModel?.setCellHeight(to: height)
         return layoutAttributes
     }
@@ -166,6 +172,7 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
         }
         
         createFakePosters(total: totalParts)
+        self.invalidateIntrinsicContentSize()
         self.layoutIfNeeded()
     }
     
@@ -247,7 +254,8 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
             guard let self = self else { return }
             self.collectionImageView.removeFromSuperview()
             self.layoutIfNeeded()
-            self.superview?.invalidateIntrinsicContentSize()
+            self.invalidateIntrinsicContentSize()
+            self.viewModel?.onHeightChangedRequest?()
         }
     }
 }

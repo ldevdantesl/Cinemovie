@@ -7,7 +7,7 @@
 
 import UIKit
 
-open class CellViewModelBaseClass: Hashable {
+open class CellViewModelBaseClass: Hashable{
     let id: UUID = UUID()
     let cellIdentifier: String
     

@@ -8,16 +8,16 @@
 import UIKit
 import SnapKit
 
-final class TrailersTabContentCellViewModel: CellViewModelBaseClass {
+final class TrailersTabContentCellViewModel: CellViewModelBaseClass, CellWithHeightProtocol {
     let trailers: [Video]
-    private(set) var cellHeight: CGFloat = 100.0
+    var cellHeight: CGFloat = 100.0
     
     init(trailers: [Video]) {
         self.trailers = trailers
         super.init(cellIdentifier: "TrailersTabContentCell")
     }
     
-    fileprivate func setCellHeight(to height: CGFloat) {
+    func setCellHeight(to height: CGFloat) {
         self.cellHeight = height
     }
 }

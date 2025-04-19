@@ -13,9 +13,8 @@ final class BackdropImageCellViewModel: CellViewModelBaseClass {
     let imageURL: URL?
     let didTapBackButtonAction: (() -> Void)?
     let isBackButtonHidden: Bool
-    static let cellHeight = UIConstants.screenWidth * 0.60
     
-    init(imagePath: String?, size: ImageSizes, isBackButtonHidden: Bool, didTapBackButtonAction: (() -> Void)? = nil) {
+    init(imagePath: String?, size: ImageSizes, isBackButtonHidden: Bool, didTapBackButtonAction: (() -> Void)?) {
         self.imageURL = URLHelper.getImageURL(with: imagePath, size: size)
         self.didTapBackButtonAction = didTapBackButtonAction
         self.isBackButtonHidden = isBackButtonHidden
@@ -36,10 +35,12 @@ final class BackdropImageCell: ReusableCellBaseClass {
         static let indicatorSize: CGFloat = 30
         static let backdropImageSize: CGFloat = 40
         static let imageNotFoundName = "questionmark.circle"
+        static let cellHeight = UIConstants.screenWidth * 0.65
     }
     
     // MARK: - PROPERTIES
     private var viewModel: ViewModel?
+    private var imageTopConstraint: Constraint?
     
     // MARK: - VIEW PROPERTIES
     private let loadingIndicator: UIActivityIndicatorView = {
@@ -78,6 +79,12 @@ final class BackdropImageCell: ReusableCellBaseClass {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        layoutAttributes.frame.size.height = Constants.cellHeight
+        return layoutAttributes
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(with viewModel: ViewModel) {
         self.viewModel = viewModel
@@ -98,6 +105,19 @@ final class BackdropImageCell: ReusableCellBaseClass {
         }
     }
     
+    public func scaleImage(to offsetY: CGFloat) {
+        let clampedOffset = abs(offsetY)
+        let scale = 1 + (clampedOffset / 300)
+
+        backdropImageView.transform = CGAffineTransform(scaleX: scale, y: scale)
+        imageTopConstraint?.update(offset: offsetY)
+    }
+
+    public func resetScale() {
+        backdropImageView.transform = .identity
+        imageTopConstraint?.update(offset: 0)
+    }
+    
     // MARK: - PRIVATE FUNC
     private func setupUI() {
         backdropImageView.addSubview(loadingIndicator)
@@ -108,7 +128,8 @@ final class BackdropImageCell: ReusableCellBaseClass {
         
         contentView.addSubview(backdropImageView)
         backdropImageView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            imageTopConstraint = $0.top.greaterThanOrEqualToSuperview().constraint
+            $0.horizontalEdges.bottom.equalToSuperview()
         }
         
         contentView.addSubview(backButton)

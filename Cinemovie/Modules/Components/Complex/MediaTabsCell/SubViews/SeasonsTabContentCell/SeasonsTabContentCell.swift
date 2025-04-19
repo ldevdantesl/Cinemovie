@@ -9,10 +9,10 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-final class SeasonsTabContentCellViewModel: CellViewModelBaseClass {
+final class SeasonsTabContentCellViewModel: CellViewModelBaseClass, CellWithHeightProtocol {
     let seasons: [TVSeason]
     let onSeasonTap: ((TVSeason) -> Void)?
-    private(set) var cellHeight: CGFloat = 100
+    var cellHeight: CGFloat = 100
     
     init(seasons: [TVSeason], onSeasonTap: ((TVSeason) -> Void)?) {
         self.seasons = seasons
@@ -20,7 +20,7 @@ final class SeasonsTabContentCellViewModel: CellViewModelBaseClass {
         super.init(cellIdentifier: "SeasonsTabContentCell")
     }
     
-    fileprivate func setCellHeight(to height: CGFloat) {
+    func setCellHeight(to height: CGFloat) {
         self.cellHeight = height
     }
 }

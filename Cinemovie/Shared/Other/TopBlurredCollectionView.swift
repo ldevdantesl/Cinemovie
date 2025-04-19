@@ -12,10 +12,9 @@ class TopBlurredCollectionView: UICollectionView, UICollectionViewDelegate {
     private var blurView: UIVisualEffectView?
     private var showsBlur: Bool
 
-    init(layout: UICollectionViewLayout, showsBlur: Bool = false) {
+    init(layout: UICollectionViewLayout, showsBlur: Bool = true) {
         self.showsBlur = showsBlur
         super.init(frame: .zero, collectionViewLayout: layout)
-        self.delegate = self
         self.contentInsetAdjustmentBehavior = .never
     }
 
@@ -41,7 +40,7 @@ class TopBlurredCollectionView: UICollectionView, UICollectionViewDelegate {
         self.blurView = blur
     }
 
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    func showBlur(_ scrollView: UIScrollView) {
         guard showsBlur, let blurView else { return }
         let offsetY = scrollView.contentOffset.y
         let clamped = min(max(offsetY, 0), 200)

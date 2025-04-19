@@ -28,6 +28,7 @@ final class TitleAndTaglineCell: ReusableCellBaseClass {
         static let cinemovieLogoSize: CGFloat = 25
         static let spacer: CGFloat = 5
         static let biggerSpacing: CGFloat = 10
+        static let selfCornerRadius = 15.0
     }
     
     // MARK: - PROPERTIES
@@ -74,9 +75,9 @@ final class TitleAndTaglineCell: ReusableCellBaseClass {
     }()
     
     private lazy var vStack: UIStackView = {
-        let stack = UIStackView(arrangedSubviews: [movieNameLabel])
+        let stack = UIStackView(arrangedSubviews: [hStack, movieNameLabel])
         stack.axis = .vertical
-        stack.spacing = Constants.spacer
+        stack.spacing = 2
         stack.alignment = .leading
         return stack
     }()
@@ -92,6 +93,20 @@ final class TitleAndTaglineCell: ReusableCellBaseClass {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        let height = systemLayoutSizeFitting(
+            CGSize(width: UIConstants.screenWidth - 20, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel).height
+        layoutAttributes.frame.size.height = height
+        return layoutAttributes
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        self.contentView.layer.cornerRadius = Constants.selfCornerRadius
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(with viewModel: ViewModel) {
         movieNameLabel.text = viewModel.mediaName
@@ -103,21 +118,16 @@ final class TitleAndTaglineCell: ReusableCellBaseClass {
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        cinemovieLogoImageView.snp.makeConstraints {
-            $0.size.equalTo(Constants.cinemovieLogoSize)
-        }
-        
-        addSubview(hStack)
-        hStack.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview()
-        }
-        
+        contentView.backgroundColor = CMColor.cmBackground
         addSubview(vStack)
         vStack.snp.makeConstraints {
-            $0.top.equalTo(hStack.snp.bottom).offset(Constants.spacer)
-            $0.horizontalEdges.equalToSuperview()
+            $0.top.equalToSuperview().offset(Constants.biggerSpacing)
+            $0.horizontalEdges.equalToSuperview().inset(Constants.biggerSpacing)
             $0.bottom.equalToSuperview()
+        }
+        
+        cinemovieLogoImageView.snp.makeConstraints {
+            $0.size.equalTo(Constants.cinemovieLogoSize)
         }
     }
 }

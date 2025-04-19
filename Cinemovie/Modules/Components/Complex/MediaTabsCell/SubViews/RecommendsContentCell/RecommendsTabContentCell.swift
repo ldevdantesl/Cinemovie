@@ -9,10 +9,10 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-final class RecommendsContentCellViewModel: CellViewModelBaseClass {
+final class RecommendsContentCellViewModel: CellViewModelBaseClass, CellWithHeightProtocol {
     let recommendedMedia: [Media]
     let didTapAnyMedia: ((Media) -> Void)?
-    private(set) var cellHeight: CGFloat = 100
+    var cellHeight: CGFloat = 100
     
     init(recommendedMedia: [Media], didTapAnyMedia: ((Media) -> Void)?) {
         self.recommendedMedia = recommendedMedia
@@ -20,7 +20,7 @@ final class RecommendsContentCellViewModel: CellViewModelBaseClass {
         super.init(cellIdentifier: "RecommendsTabContentCell")
     }
     
-    fileprivate func setCellHeight(to height: CGFloat) {
+    func setCellHeight(to height: CGFloat) {
         self.cellHeight = height
     }
 }

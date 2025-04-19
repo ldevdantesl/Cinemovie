@@ -10,8 +10,7 @@ import UIKit
 
 final class OverviewCellViewModel: CellViewModelBaseClass {
     let overviewText: String?
-    static let estimatedCellHeight = 200.0
-    
+
     init(overviewText: String?) {
         self.overviewText = overviewText
         super.init(cellIdentifier: "OverviewCell")
@@ -46,6 +45,15 @@ final class OverviewCell: ReusableCellBaseClass {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        let height = systemLayoutSizeFitting(
+            CGSize(width: UIConstants.screenWidth - 20, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel).height
+        layoutAttributes.frame.size.height = height
+        return layoutAttributes
     }
     
     // MARK: - PUBLIC FUNC

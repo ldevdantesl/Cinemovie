@@ -40,12 +40,12 @@ final class PersonDetailsScreenVC: UIViewController {
         return splash
     }()
     
-    private lazy var collectionView: UICollectionView = {
+    private lazy var collectionView: TopBlurredCollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         layout.minimumLineSpacing = Constants.collectionViewSpacing
         
-        let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        let cv = TopBlurredCollectionView(layout: layout, showsBlur: true)
         cv.backgroundColor = CMColor.cmBackground
         cv.register(PersonDetailsMediaView.self, forCellWithReuseIdentifier: PersonDetailsMediaView.identifier)
         cv.register(PersonDetailsBiographyView.self, forCellWithReuseIdentifier: PersonDetailsBiographyView.identifier)
@@ -53,7 +53,6 @@ final class PersonDetailsScreenVC: UIViewController {
         cv.register(PersonDetailsInfoView.self, forCellWithReuseIdentifier: PersonDetailsInfoView.identifier)
         cv.register(PersonDetailsHeaderView.self, forCellWithReuseIdentifier: PersonDetailsHeaderView.identifier)
         cv.dataSource = self
-        cv.delegate = self
         cv.translatesAutoresizingMaskIntoConstraints = false
         return cv
     }()

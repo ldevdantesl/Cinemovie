@@ -11,7 +11,6 @@ import SnapKit
 final class ProductionInfoCellViewModel: CellViewModelBaseClass {
     let companies: [ProductionCompany]
     let countries: [ProductionCountry]
-    static let cellHeight = 50.0
     
     init(companies: [ProductionCompany], countries: [ProductionCountry]) {
         self.companies = companies
@@ -27,6 +26,7 @@ final class ProductionInfoCell: ReusableCellBaseClass {
     fileprivate enum Constants {
         static let spacer = 5.0
         static let biggerSpacer = 10.0
+        static let cellHeight = 50.0
     }
     
     // MARK: - PROPERTIES
@@ -77,6 +77,12 @@ final class ProductionInfoCell: ReusableCellBaseClass {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        layoutAttributes.frame.size.height = Constants.cellHeight
+        return layoutAttributes
     }
     
     // MARK: - PUBLIC FUNC

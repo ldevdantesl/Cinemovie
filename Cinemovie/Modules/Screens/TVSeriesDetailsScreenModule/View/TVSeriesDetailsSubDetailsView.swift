@@ -17,7 +17,6 @@ final class TVSeriesDetailsSubDetailsViewModel: CellViewModelBaseClass {
     let homepage: String?
     let didTapView: ((UIView, String) -> Void)?
     let didTapHomepage: ((String) -> Void)?
-    let cellHeight = 25.0
     
     init(
         firstAirDate: String?, numberOfSeasons: Int,
@@ -60,6 +59,7 @@ final class TVSeriesDetailsSubDetailsView: ReusableCellBaseClass {
     fileprivate enum Constants {
         static let hStackSpacing = 10.0
         static let imageSizes: CGFloat = 20
+        static let cellHeight = 25.0
     }
     
     // MARK: - PROPERTIES
@@ -154,6 +154,12 @@ final class TVSeriesDetailsSubDetailsView: ReusableCellBaseClass {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        layoutAttributes.frame.size.height = Constants.cellHeight
+        return layoutAttributes
     }
     
     // MARK: - PUBLIC FUNC

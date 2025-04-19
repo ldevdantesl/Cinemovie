@@ -9,11 +9,7 @@ import UIKit
 import SnapKit
 
 final class WatchlistButtonCellViewModel: CellViewModelBaseClass {
-    static let absoluteCellHeight = 40.0
-    
-    init() {
-        super.init(cellIdentifier: "WatchlistButtonCell")
-    }
+    init() { super.init(cellIdentifier: "WatchlistButtonCell") }
 }
 
 final class WatchlistButtonCell: ReusableCellBaseClass {
@@ -23,6 +19,7 @@ final class WatchlistButtonCell: ReusableCellBaseClass {
         static let imageName: String = "plus"
         static let buttonCornerRadius: CGFloat = 15
         static let buttonName = "Watchlist"
+        static let absoluteCellHeight = 40.0
     }
     
     // MARK: - PROPERTIES
@@ -47,6 +44,12 @@ final class WatchlistButtonCell: ReusableCellBaseClass {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        layoutAttributes.frame.size.height = Constants.absoluteCellHeight
+        return layoutAttributes
     }
     
     // MARK: - PRIVATE FUNC

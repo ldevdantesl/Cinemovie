@@ -15,7 +15,6 @@ final class MovieDetailsSubDetailsCellViewModel: CellViewModelBaseClass {
     let imdbPath: String?
     let didTapIMDB: (() -> Void)?
     let didTapSubDetails: ((UIView, String) -> Void)?
-    static let cellHeight = 25.0
     
     init(
         year: String, released: Bool, duration: String,
@@ -38,6 +37,7 @@ final class MovieDetailsSubDetailsCell: ReusableCellBaseClass {
     fileprivate enum Constants {
         static let imageSizes: CGFloat = 20
         static let imdbImageSize: CGFloat = 25
+        static let cellHeight = 25.0
     }
     
     // MARK: - PROPERTIES
@@ -133,6 +133,12 @@ final class MovieDetailsSubDetailsCell: ReusableCellBaseClass {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        layoutAttributes.frame.size.height = Constants.cellHeight
+        return layoutAttributes
     }
     
     // MARK: - PUBLIC FUNC

@@ -62,6 +62,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
     private var viewModels: [CellViewModelBaseClass] = []
     private var visibleSections: [Sections] = []
     private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
+    private var backdropCell: BackdropImageCell?
     
     // MARK: - VIEW PROPERTIES
     private let downloadView: CMSplashView = {
@@ -74,6 +75,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
         let cv = DiffableCollectionView<Sections, Items>(layout: createLayout(), showsTopBlur: true)
         cv.contentInsetAdjustmentBehavior = .never
         cv.backgroundColor = CMColor.cmBackground
+        cv.layer.zPosition = 0
         cv.register(cellClass: WatchlistButtonCell.self)
         cv.register(cellClass: OverviewCell.self)
         cv.register(cellClass: RateAndShareCell.self)
@@ -83,6 +85,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
         cv.register(cellClass: CastListCell.self)
         cv.register(cellClass: MediaExtrasCell.self)
         cv.register(cellClass: TVSeriesDetailsSubDetailsView.self)
+        cv.delegate = self
         cv.translatesAutoresizingMaskIntoConstraints = false
         return cv
     }()
@@ -133,25 +136,17 @@ final class TVSeriesDetailsScreenVC: UIViewController {
                 return NSCollectionLayoutSection(group: group)
             }
             let section = self.visibleSections[sectionIndex]
-            let heightDimension: NSCollectionLayoutDimension
-            var isBackdropImageSection: Bool = false
-            
+            let edgeInsets: NSDirectionalEdgeInsets
             switch section {
-            case .mediaExtras: heightDimension = .estimated(100)
-            case .backdropImage: heightDimension = .absolute(BackdropImageCellViewModel.cellHeight); isBackdropImageSection = true
-            case .titleAndTagline: heightDimension = .estimated(TitleAndTaglineCellViewModel.estimatedCellHeight)
-            case .subDetails: heightDimension = .absolute(MovieDetailsSubDetailsCellViewModel.cellHeight)
-            case .watchlistButton: heightDimension = .absolute(WatchlistButtonCellViewModel.absoluteCellHeight)
-            case .overview: heightDimension = .estimated(OverviewCellViewModel.estimatedCellHeight)
-            case .cast: heightDimension = .absolute(CastListCellViewModel.cellHeight)
-            case .production: heightDimension = .absolute(ProductionInfoCellViewModel.cellHeight)
-            case .rateAndShare: heightDimension = .absolute(RateAndShareCellViewModel.cellHeight)
+            case .backdropImage: edgeInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: -10, trailing: 0)
+            case .titleAndTagline: edgeInsets =  NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0)
+            default: edgeInsets = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 10, trailing: 10)
             }
             
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: heightDimension))
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(100)))
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: item.layoutSize, subitems: [item])
             let layoutSection = NSCollectionLayoutSection(group: group)
-            layoutSection.contentInsets = !isBackdropImageSection ? NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 0, trailing: 10) : .zero
+            layoutSection.contentInsets = edgeInsets
             return layoutSection
         }
     }
@@ -166,7 +161,9 @@ final class TVSeriesDetailsScreenVC: UIViewController {
                 
             case .backdropImage(let vm):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? BackdropImageCell
+                cell?.layer.zPosition = -1
                 cell?.configure(with: vm)
+                self.backdropCell = cell
                 return cell
                 
             case .subDetails(let vm):
@@ -203,6 +200,19 @@ final class TVSeriesDetailsScreenVC: UIViewController {
                 cell?.configure(with: vm)
                 return cell
             }
+        }
+    }
+}
+
+extension TVSeriesDetailsScreenVC: UICollectionViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        collectionView.showBlur(scrollView)
+        
+        let offsetY = scrollView.contentOffset.y
+        if offsetY <= 0 {
+            backdropCell?.scaleImage(to: offsetY)
+        } else if offsetY == 0 {
+            backdropCell?.resetScale()
         }
     }
 }

@@ -125,7 +125,7 @@ final class SeasonsPopUpView: PopUPView {
         
         addSubview(posterImageView)
         posterImageView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(Constants.vSpacing)
+            $0.top.equalTo(safeAreaLayoutGuide.snp.top).offset(Constants.vSpacing)
             $0.centerX.equalToSuperview()
             $0.height.equalTo(Constants.posterHeight)
             $0.width.equalTo(Constants.posterWidth)

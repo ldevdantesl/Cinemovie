@@ -9,11 +9,10 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-final class ReviewsTabContentCellViewModel: CellViewModelBaseClass {
+final class ReviewsTabContentCellViewModel: CellViewModelBaseClass, CellWithHeightProtocol {
     let reviews: [Review]
-    private(set) var cellHeight = 100.0
     let onHeightChangedRequest: (() -> Void)?
-    
+    var cellHeight: CGFloat = 100.0
     static let defaultITemHeight: CGFloat = 120.0
     
     init(reviews: [Review], onHeightChangedRequest: (() -> Void)?) {
@@ -22,7 +21,7 @@ final class ReviewsTabContentCellViewModel: CellViewModelBaseClass {
         super.init(cellIdentifier: "ReviewsTabContentCell")
     }
     
-    fileprivate func changeCellHeight(to height: CGFloat) {
+    func setCellHeight(to height: CGFloat) {
         self.cellHeight = height
     }
 }
@@ -71,7 +70,7 @@ final class ReviewsTabContentCell: ReusableCellBaseClass {
         layoutIfNeeded()
         let height = reviewsCollectionView.contentSize.height
         attributes.frame.size.height = height
-        viewModel?.changeCellHeight(to: height)
+        viewModel?.setCellHeight(to: height)
         return attributes
     }
     
@@ -102,7 +101,7 @@ final class ReviewsTabContentCell: ReusableCellBaseClass {
     }
     
     private func onHeightChangeRequest() {
-        viewModel?.changeCellHeight(to: calculatedCollectionViewHeight())
+        viewModel?.setCellHeight(to: calculatedCollectionViewHeight())
         viewModel?.onHeightChangedRequest?()
         reviewsCollectionView.performBatchUpdates(nil) { [weak self] _ in
             guard let self = self else { return }
