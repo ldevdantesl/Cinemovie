@@ -12,7 +12,7 @@ import SDWebImage
 final class BelongsToCollectionTabContentCellViewModel: CellViewModelBaseClass {
     let collectionDetails: BelongsToCollectionDetails
     let onItemTapped: ((Media) -> Void)?
-    private(set) var cellHeight: CGFloat = 200
+    private(set) var cellHeight: CGFloat = 100.0
     
     init(collectionDetails: BelongsToCollectionDetails, onItemTapped: ((Media) -> Void)?) {
         self.collectionDetails = collectionDetails
@@ -20,8 +20,8 @@ final class BelongsToCollectionTabContentCellViewModel: CellViewModelBaseClass {
         super.init(cellIdentifier: "BelongsToCollectionTabContentCell")
     }
     
-    fileprivate func changeCellSize(to newSize: CGFloat) {
-        self.cellHeight = newSize
+    fileprivate func setCellHeight(to height: CGFloat) {
+        self.cellHeight = height
     }
 }
 
@@ -126,6 +126,14 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
         fakePosters.removeAll()
     }
     
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        let height = showingItems ? partsCollectionView.contentSize.height : collectionImageView.intrinsicContentSize.height
+        layoutAttributes.frame.size.height = height
+        self.viewModel?.setCellHeight(to: height)
+        return layoutAttributes
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: BelongsToCollectionTabContentCellViewModel) {
         self.viewModel = viewModel
@@ -158,7 +166,6 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
         }
         
         createFakePosters(total: totalParts)
-        
         self.layoutIfNeeded()
     }
     
@@ -216,12 +223,7 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
     }
     
     // MARK: - OBJC FUNC
-    @objc private func didTapCollection() {
-        let rows = ceil(Double(items.count) / 3.0)
-        let itemWidth = bounds.width / 3
-        let itemHeight = itemWidth * 1.5
-        let totalHeight = rows * (itemHeight + Constants.itemSpacing)
-        
+    @objc private func didTapCollection() {        
         partsCollectionView.alpha = 0
         partsCollectionView.transform = CGAffineTransform(translationX: 0, y: -bounds.height)
         
@@ -244,7 +246,8 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
         } completion: { [weak self] _ in
             guard let self = self else { return }
             self.collectionImageView.removeFromSuperview()
-            self.viewModel?.changeCellSize(to: totalHeight)
+            self.layoutIfNeeded()
+            self.superview?.invalidateIntrinsicContentSize()
         }
     }
 }

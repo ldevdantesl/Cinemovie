@@ -10,9 +10,9 @@ import SnapKit
 
 final class ReviewItemContentCellViewModel: CellViewModelBaseClass {
     let review: Review
+    let onHeightChangeRequest: (() -> Void)?
     fileprivate var isExpanded: Bool = false
     private(set) var cellHeight = ReviewsTabContentCellViewModel.defaultITemHeight
-    private let onHeightChangeRequest: (() -> Void)?
     
     init(review: Review, onHeightChangeRequest: (() -> Void)?) {
         self.review = review
@@ -22,7 +22,6 @@ final class ReviewItemContentCellViewModel: CellViewModelBaseClass {
     
     fileprivate func changeCellHeight(to height: CGFloat) {
         self.cellHeight = height
-        self.onHeightChangeRequest?()
     }
 }
 
@@ -139,6 +138,19 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
         self.contentView.layer.cornerRadius = Constants.viewCornerRadius
     }
     
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        let isExpanded = viewModel?.isExpanded ?? false
+        let height = contentView.systemLayoutSizeFitting(
+            CGSize(width: layoutAttributes.frame.width, height: isExpanded ? UIView.layoutFittingCompressedSize.height : Constants.defaultHeight),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: isExpanded ? .fittingSizeLevel : .required
+        ).height
+        viewModel?.changeCellHeight(to: height)
+        layoutAttributes.frame.size.height = height
+        return layoutAttributes
+    }
+    
     override func prepareForReuse() {
         super.prepareForReuse()
         self.reviewDateLabel.text = nil
@@ -166,8 +178,7 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
         }
         
         // MARK: - EXPAND BUTTON
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
+        DispatchQueue.main.async {
             let lineCount = self.reviewContentLabel.calculateLineCount(using: self.reviewContentLabel.font)
             let needsExpansion = lineCount > 2
             self.expandButton.isHidden = !needsExpansion
@@ -199,7 +210,6 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
             self.loadingIndicator.stopAnimating()
         }
         
-        self.invalidateIntrinsicContentSize()
         self.layoutIfNeeded()
     }
     
@@ -265,23 +275,12 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
     private func didTapAction() {
         guard let viewModel = viewModel else { return }
         viewModel.isExpanded.toggle()
-        let newHeight = calculateHeight(width: contentView.bounds.width)
-        viewModel.changeCellHeight(to: newHeight)
         self.invalidateIntrinsicContentSize()
         let vm = CMCircularButtonViewModel(
             systemName: viewModel.isExpanded ? Constants.collapseButtonSystemName : Constants.expandButtonSystemName,
             backColor: .cmSecondary, foreColor: .cmAccent, didTapAction: didTapAction
         )
         expandButton.configure(viewModel: vm)
-    }
-    
-    private func calculateHeight(width: CGFloat) -> CGFloat {
-        guard let viewModel = viewModel else { return Constants.defaultHeight }
-        let targetSize = CGSize(width: width, height: viewModel.isExpanded ? UIView.layoutFittingCompressedSize.height : Constants.defaultHeight)
-        return contentView.systemLayoutSizeFitting(
-            targetSize,
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: viewModel.isExpanded ? .fittingSizeLevel : .required
-        ).height
+        viewModel.onHeightChangeRequest?()
     }
 }

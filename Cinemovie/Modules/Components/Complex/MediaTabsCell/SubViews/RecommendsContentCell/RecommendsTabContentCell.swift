@@ -58,17 +58,20 @@ final class RecommendsTabContentCell: ReusableCellBaseClass {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        let height = gridCollectionView.contentSize.height
+        layoutAttributes.frame.size.height = height
+        self.viewModel?.setCellHeight(to: height)
+        return layoutAttributes
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: RecommendsContentCellViewModel) {
         self.viewModel = viewModel
         self.items = viewModel.recommendedMedia.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.didTapAnyMedia) }
         self.gridCollectionView.reloadData()
-        gridCollectionView.performBatchUpdates(nil) { [weak self] _ in
-            guard let self else { return }
-            let height = self.gridCollectionView.contentSize.height
-            viewModel.setCellHeight(to: height)
-            self.invalidateIntrinsicContentSize()
-        }
+        self.layoutIfNeeded()
     }
     
     // MARK: - PRIVATE FUNC

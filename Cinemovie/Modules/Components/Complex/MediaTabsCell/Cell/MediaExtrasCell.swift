@@ -86,6 +86,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         static let tabsHeight = 50.0
         static let dividerHeight = 2.0
         static let dividerCornerRadius = 5.0
+        static let defaultCellHeight = 120.0
     }
     
     // MARK: - PROPERTIES
@@ -162,7 +163,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         layoutIfNeeded()
         
         guard let contentVM = items[selectedTab] else {
-            layoutAttributes.frame.size.height = Constants.tabsHeight + Constants.spacing + 210
+            layoutAttributes.frame.size.height = Constants.tabsHeight + Constants.spacing + Constants.defaultCellHeight
             return layoutAttributes
         }
         
@@ -174,7 +175,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         case let vm as BelongsToCollectionTabContentCellViewModel: contentHeight = vm.cellHeight
         case let vm as ReviewsTabContentCellViewModel: contentHeight = vm.cellHeight
         case let vm as SeasonsTabContentCellViewModel: contentHeight = vm.cellHeight
-        default: contentHeight = 210
+        default: contentHeight = Constants.defaultCellHeight
         }
         
         let totalHeight = Constants.tabsHeight + Constants.spacing + contentHeight + Constants.spacing
@@ -269,7 +270,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
             case let vm as ReviewsTabContentCellViewModel: height = vm.cellHeight
             case let vm as RecommendsContentCellViewModel: height = vm.cellHeight
             case let vm as SeasonsTabContentCellViewModel: height = vm.cellHeight
-            default: height = 200
+            default: height = Constants.defaultCellHeight
             }
             
             let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(height)))
@@ -301,13 +302,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
     }
     
     private func onHeightChangedRequest() {
-        heightChangeWorkItem?.cancel()
-        let workItem = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
-            self.invalidateIntrinsicContentSize()
-        }
-        heightChangeWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05, execute: workItem)
+        self.invalidateIntrinsicContentSize()
     }
 }
 

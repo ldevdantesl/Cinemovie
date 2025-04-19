@@ -67,6 +67,7 @@ final class SimilarTabContentCell: ReusableCellBaseClass {
         layoutIfNeeded()
         let height = self.gridCollectionView.contentSize.height
         layoutAttributes.frame.size.height = height
+        self.viewModel?.setCellHeight(to: height)
         return layoutAttributes
     }
     
@@ -75,6 +76,7 @@ final class SimilarTabContentCell: ReusableCellBaseClass {
         self.viewModel = viewModel
         self.items = viewModel.media.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.didTapAnyMedia) }
         self.gridCollectionView.reloadData()
+        self.layoutIfNeeded()
     }
     
     // MARK: - PRIVATE FUNC

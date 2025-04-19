@@ -12,7 +12,7 @@ import SDWebImage
 final class ReviewsTabContentCellViewModel: CellViewModelBaseClass {
     let reviews: [Review]
     private(set) var cellHeight = 100.0
-    private let onHeightChangedRequest: (() -> Void)?
+    let onHeightChangedRequest: (() -> Void)?
     
     static let defaultITemHeight: CGFloat = 120.0
     
@@ -24,7 +24,6 @@ final class ReviewsTabContentCellViewModel: CellViewModelBaseClass {
     
     fileprivate func changeCellHeight(to height: CGFloat) {
         self.cellHeight = height
-        self.onHeightChangedRequest?()
     }
 }
 
@@ -67,17 +66,25 @@ final class ReviewsTabContentCell: ReusableCellBaseClass {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        let attributes = super.preferredLayoutAttributesFitting(layoutAttributes)
+        layoutIfNeeded()
+        let height = reviewsCollectionView.contentSize.height
+        attributes.frame.size.height = height
+        viewModel?.changeCellHeight(to: height)
+        return attributes
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: ReviewsTabContentCellViewModel) {
         self.viewModel = viewModel
-        self.items = viewModel.reviews.map { ReviewItemContentCellViewModel(review: $0, onHeightChangeRequest: onHeightChangeRequest) }
-        
-        DispatchQueue.main.async {
-            self.reviewsCollectionView.reloadData()
-            self.reviewsCollectionView.layoutIfNeeded()
-            
-            viewModel.changeCellHeight(to: self.calculatedCollectionViewHeight())
+        self.items = viewModel.reviews.map {
+            ReviewItemContentCellViewModel(review: $0) { [weak self] in
+                guard let self = self else { return }
+                self.onHeightChangeRequest()
+            }
         }
+        self.reviewsCollectionView.reloadData()
     }
     
     // MARK: - PRIVATE FUNC
@@ -96,7 +103,9 @@ final class ReviewsTabContentCell: ReusableCellBaseClass {
     
     private func onHeightChangeRequest() {
         viewModel?.changeCellHeight(to: calculatedCollectionViewHeight())
-        reviewsCollectionView.performBatchUpdates {
+        viewModel?.onHeightChangedRequest?()
+        reviewsCollectionView.performBatchUpdates(nil) { [weak self] _ in
+            guard let self = self else { return }
             self.reviewsCollectionView.collectionViewLayout.invalidateLayout()
         }
     }

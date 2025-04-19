@@ -20,7 +20,7 @@ final class SeasonsTabContentCellViewModel: CellViewModelBaseClass {
         super.init(cellIdentifier: "SeasonsTabContentCell")
     }
     
-    fileprivate func changeCellHeight(to height: CGFloat) {
+    fileprivate func setCellHeight(to height: CGFloat) {
         self.cellHeight = height
     }
 }
@@ -63,19 +63,20 @@ final class SeasonsTabContentCell: ReusableCellBaseClass {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        let height = seasonsCollectionView.contentSize.height
+        layoutAttributes.frame.size.height = height
+        self.viewModel?.setCellHeight(to: height)
+        return layoutAttributes
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: SeasonsTabContentCellViewModel) {
         self.viewModel = viewModel
         self.items = viewModel.seasons.map { SeasonItemContentCellViewModel(season: $0, didTapSeason: viewModel.onSeasonTap) }
         self.seasonsCollectionView.reloadData()
-        
-        seasonsCollectionView.performBatchUpdates(nil) { [weak self] _ in
-            guard let self = self else { return }
-            self.seasonsCollectionView.layoutIfNeeded()
-            let height = self.seasonsCollectionView.contentSize.height
-            viewModel.changeCellHeight(to: height)
-            self.invalidateIntrinsicContentSize()
-        }
+        self.layoutIfNeeded()
     }
     
     // MARK: - PRIVATE FUNC
