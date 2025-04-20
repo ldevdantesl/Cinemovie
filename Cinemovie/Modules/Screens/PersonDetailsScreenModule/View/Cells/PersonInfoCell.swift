@@ -216,6 +216,7 @@ final class PersonInfoCell: ReusableCellBaseClass {
         guard let imageURL = URLHelper.getImageURL(with: viewModel.personDetails.profilePath, size: .w500) else {
             personAvaImageView.image = UIImage(systemName: Constants.defaultImageName)
             personAvaImageView.preferredSymbolConfiguration = .init(pointSize: Constants.defaultImagePointSize, weight: .bold)
+            personAvaImageView.contentMode = .center
             return
         }
         

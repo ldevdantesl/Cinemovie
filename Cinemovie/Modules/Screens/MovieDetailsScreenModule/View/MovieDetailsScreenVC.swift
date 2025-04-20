@@ -59,7 +59,6 @@ final class MovieDetailsScreenVC: UIViewController {
     // MARK: - PROPERTIES
     private var viewModels: [CellViewModelBaseClass] = []
     private var visibleSections: [Sections] = []
-    private var backdropCell: BackdropImageCell?
     private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
     
     // MARK: - VIEW PROPERTIES
@@ -158,7 +157,6 @@ final class MovieDetailsScreenVC: UIViewController {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? BackdropImageCell
                 cell?.layer.zPosition = -1
                 cell?.configure(with: vm)
-                self.backdropCell = cell
                 return cell
                 
             case .subDetails(let vm):
@@ -203,12 +201,9 @@ final class MovieDetailsScreenVC: UIViewController {
 extension MovieDetailsScreenVC: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         collectionView.showBlur(scrollView)
+        guard let cell = collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? BackdropImageCell else { return }
         let offsetY = scrollView.contentOffset.y
-        if offsetY <= 0 {
-            backdropCell?.scaleImage(to: offsetY)
-        } else if offsetY == 0 {
-            backdropCell?.resetScale()
-        }
+        offsetY <= 0 ? cell.scaleImage(to: offsetY) : cell.resetScale()
     }
 }
 

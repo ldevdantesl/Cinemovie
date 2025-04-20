@@ -7,12 +7,13 @@
 
 import UIKit
 import SnapKit
+import SDWebImage
 
 protocol PersonDetailsScreenViewProtocol: AnyObject {
     func didRecieveError(_ errorStr: String)
     func didGetAllPersonData(
         _ details: PersonDetails, sources: ExternalSource,
-        movies: [Movie], tvShows: [TVSeries]
+        movies: [Movie], tvSeries: [TVSeries]
     )
 }
 
@@ -35,9 +36,8 @@ final class PersonDetailsScreenVC: UIViewController {
     
     fileprivate enum Items: Hashable {
         case headerVM(PersonInfoCellViewModel)
-        case overviewVM
-        case moviesVM
-        case tvSeriesVM
+        case overviewVM(OverviewCellViewModel)
+        case mediaListVM(MediaListCellViewModel)
     }
     
     // MARK: - VIPER
@@ -59,6 +59,9 @@ final class PersonDetailsScreenVC: UIViewController {
         let cv = DiffableCollectionView<Sections, Items>(layout: createLayout(), showsTopBlur: true)
         cv.layer.zPosition = 0
         cv.register(cellClass: PersonInfoCell.self)
+        cv.register(cellClass: MediaListCell.self)
+        cv.register(cellClass: OverviewCell.self)
+        cv.delegate = self
         cv.backgroundColor = CMColor.cmBackground
         cv.translatesAutoresizingMaskIntoConstraints = false
         return cv
@@ -84,6 +87,7 @@ final class PersonDetailsScreenVC: UIViewController {
     
     deinit {
         print("Person Details Screen deinit")
+        SDImageCache.shared.clearMemory()
     }
     
     // MARK: - PRIVATE FUNC
@@ -130,7 +134,14 @@ final class PersonDetailsScreenVC: UIViewController {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PersonInfoCell.identifier, for: indexPath) as? PersonInfoCell
                 cell?.configure(viewModel: vm)
                 return cell
-            default: return UICollectionViewCell()
+            case .overviewVM(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: OverviewCell.identifier, for: indexPath) as? OverviewCell
+                cell?.configure(with: vm)
+                return cell
+            case .mediaListVM(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MediaListCell.identifier, for: indexPath) as? MediaListCell
+                cell?.configure(viewModel: vm)
+                return cell
             }
         }
     }
@@ -163,16 +174,39 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
     
     func didGetAllPersonData(
         _ details: PersonDetails, sources: ExternalSource,
-        movies: [Movie], tvShows: [TVSeries]
+        movies: [Movie], tvSeries: [TVSeries]
     ) {
         self.downloadingView.hide()
+        var sectionsAndTheirItems: [(section: Sections, items: [Items])] = []
+        
         let infoVM = PersonInfoCellViewModel(
             personDetails: details, externalSource: sources,
             didTapBackButton: presenter?.didTapBackButton, didTapSource: presenter?.didTapLogoImage
         )
-        self.visibleSections.append(.header)
+        sectionsAndTheirItems.append((Sections.header, [.headerVM(infoVM)]))
+        let overviewVM = OverviewCellViewModel(overviewText: details.biography)
+        sectionsAndTheirItems.append((Sections.overview, [.overviewVM(overviewVM)]))
+        
+        if !movies.isEmpty {
+            let moviesVM = MediaListCellViewModel(
+                mediaItems: movies, listName: "Movies",
+                listSubtitle: "Movies in which \(details.name) has played", didTapMediaItem: presenter?.didTapMedia
+            )
+            sectionsAndTheirItems.append((Sections.movies, [.mediaListVM(moviesVM)]))
+        }
+        
+        if !tvSeries.isEmpty {
+            let seriesVM = MediaListCellViewModel(
+                mediaItems: tvSeries, listName: "TV Series",
+                listSubtitle: "TV Series in which \(details.name) has played", didTapMediaItem: presenter?.didTapMedia
+            )
+            sectionsAndTheirItems.append((Sections.tvSeries, [.mediaListVM(seriesVM)]))
+        }
+        
+        self.visibleSections = sectionsAndTheirItems.map { $0.section }
         collectionView.applySnapshot(
             sections: self.visibleSections,
-            itemsBySection: [.header: [.headerVM(infoVM)]])
+            itemsBySection: Dictionary(uniqueKeysWithValues: sectionsAndTheirItems)
+        )
     }
 }

@@ -50,9 +50,7 @@ final class BackdropImageCell: ReusableCellBaseClass {
     
     private let backdropImageView: UIImageView = {
         let view = UIImageView()
-        view.contentMode = .center
-        view.preferredSymbolConfiguration = .init(pointSize: Constants.backdropImageSize, weight: .bold)
-        view.image = UIImage(systemName: Constants.imageNotFoundName)
+        view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
         view.backgroundColor = CMColor.cmSecondaryBackground
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -75,6 +73,7 @@ final class BackdropImageCell: ReusableCellBaseClass {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
     
     override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
         layoutIfNeeded()
@@ -92,9 +91,12 @@ final class BackdropImageCell: ReusableCellBaseClass {
         )
         backButton.configure(viewModel: vm)
         
-        guard let url = viewModel.imageURL else { return }
+        guard let url = viewModel.imageURL else {
+            backdropImageView.preferredSymbolConfiguration = .init(pointSize: Constants.backdropImageSize, weight: .bold)
+            backdropImageView.image = UIImage(systemName: Constants.imageNotFoundName)
+            return
+        }
         self.loadingIndicator.startAnimating()
-        backdropImageView.contentMode = .scaleAspectFill
         backdropImageView.sd_setImage(with: url) { [weak self] _, _, _, _ in
             guard let self = self else { return }
             self.loadingIndicator.stopAnimating()
@@ -125,8 +127,9 @@ final class BackdropImageCell: ReusableCellBaseClass {
         
         contentView.addSubview(backdropImageView)
         backdropImageView.snp.makeConstraints {
-            imageTopConstraint = $0.top.greaterThanOrEqualToSuperview().constraint
-            $0.horizontalEdges.bottom.equalToSuperview()
+            imageTopConstraint = $0.top.equalToSuperview().constraint
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview()
         }
         
         contentView.addSubview(backButton)

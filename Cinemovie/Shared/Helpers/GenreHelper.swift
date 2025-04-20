@@ -39,4 +39,8 @@ final class GenreHelper {
     public func getMovieGenreID(for genre: MovieGenreName) -> Int {
         return movieGenres.genres.first { $0.name == genre.rawValue }?.id ?? 0
     }
+    
+    public func getSeriesGenreID(for genre: TVSeriesGenreName) -> Int {
+        return tvSeriesGenres.genres.first { $0.name == genre.rawValue }?.id ?? 0
+    }
 }

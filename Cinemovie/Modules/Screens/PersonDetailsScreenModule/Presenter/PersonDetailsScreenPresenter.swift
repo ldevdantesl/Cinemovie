@@ -13,8 +13,7 @@ protocol PersonDetailsScreenPresenterProtocol: AnyObject {
     // MARK: - USER INITIATED
     func didTapBackButton()
     func didTapLogoImage(sourceID: String, sourceType: SourceTypes)
-    func didTapMovie(movie: Movie)
-    func didTapTVSeries(series: TVSeries)
+    func didTapMedia(media: any Media)
     
     // MARK: - PROGRAMMATIC
     func didGetPersonID(_ id: Int)
@@ -38,7 +37,7 @@ final class PersonDetailsScreenPresenter {
     private var personDetails: PersonDetails?
     private var personExternalSources: ExternalSource?
     private var personMovies: [Movie] = []
-    private var personTVShows: [TVSeries] = []
+    private var personTVSeries: [TVSeries] = []
 
     init(creditID: String, interactor: PersonDetailsScreenInteractorProtocol, router: PersonDetailsScreenRouterProtocol) {
         self.creditID = creditID
@@ -63,7 +62,7 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
                 guard let self = self else { return }
                 guard let personDetails = personDetails else { self.view?.didRecieveError("Something went wrong with person details"); return }
                 guard let personExternalSources = personExternalSources else { self.view?.didRecieveError("Something went wrong with external sources"); return }
-                self.view?.didGetAllPersonData(personDetails, sources: personExternalSources, movies: personMovies, tvShows: personTVShows)
+                self.view?.didGetAllPersonData(personDetails, sources: personExternalSources, movies: personMovies, tvSeries: personTVSeries)
             }
         }
         
@@ -97,13 +96,12 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
         router.openSource(sourceID: sourceID, sourceType: sourceType)
     }
     
-    func didTapTVSeries(series: TVSeries) {
-        print("SeriesID", series.id )
-        router.navigateToSeries(seriesID: series.id)
-    }
-    
-    func didTapMovie(movie: Movie) {
-        router.navigateToMovie(movieID: movie.id)
+    func didTapMedia(media: any Media) {
+        switch media {
+        case let movie as Movie: router.navigateToMovie(movieID: movie.id)
+        case let series as TVSeries: router.navigateToSeries(seriesID: series.id)
+        default: break
+        }
     }
     
     // MARK: - PROGRAMMATIC
@@ -142,7 +140,13 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
     }
     
     func didGetPersonTVShows(_ tvShows: [TVSeries]) {
-        self.personTVShows = tvShows
+        let talkGenreId = GenreHelper.shared.getSeriesGenreID(for: .talk)
+        let realityGenreID = GenreHelper.shared.getSeriesGenreID(for: .reality)
+        let warPoliticsGenreId = GenreHelper.shared.getSeriesGenreID(for: .warPolitics)
+        let newsGenreId = GenreHelper.shared.getSeriesGenreID(for: .news)
+        self.personTVSeries = tvShows.filter { !$0.genreIDS.isEmpty }.filter {
+            !$0.genreIDS.contains(where: { $0 == talkGenreId || $0 == realityGenreID || $0 == warPoliticsGenreId || $0 == newsGenreId })
+        }
         downloadGroup.leave()
     }
     

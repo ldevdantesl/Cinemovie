@@ -157,12 +157,12 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     }
     
     func didGetMovieSimilars(queryMovies: [Movie]) {
-        movieSimilars = queryMovies
+        movieSimilars = queryMovies.sorted { ($0.posterPath == nil) && ($1.posterPath != nil) }
         dispatchGroup.leave()
     }
     
     func didGetMovieRecommendations(queryMovies: [Movie]) {
-        self.movieRecommends = queryMovies
+        self.movieRecommends = queryMovies.sorted { ($0.posterPath == nil) && ($1.posterPath != nil) }
         dispatchGroup.leave()
     }
     

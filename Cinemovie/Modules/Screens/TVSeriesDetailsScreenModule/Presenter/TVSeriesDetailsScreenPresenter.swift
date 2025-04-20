@@ -147,12 +147,12 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
     }
     
     func didGetTVSeriesSimilar(_ series: [TVSeries]) {
-        self.seriesSimilars = series
+        self.seriesSimilars = series.sorted { ($0.posterPath == nil) && ($1.posterPath != nil) }
         downloadGroup.leave()
     }
     
     func didGetTVSeriesRecommends(_ series: [TVSeries]) {
-        self.seriesRecommends = series
+        self.seriesRecommends = series.sorted { ($0.posterPath == nil) && ($1.posterPath != nil) }
         downloadGroup.leave()
     }
     
