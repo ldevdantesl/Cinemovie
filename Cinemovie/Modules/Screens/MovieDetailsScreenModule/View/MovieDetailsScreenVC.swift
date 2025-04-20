@@ -87,13 +87,6 @@ final class MovieDetailsScreenVC: UIViewController {
         return cv
     }()
     
-    private let blurView: UIVisualEffectView = {
-        let view = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
-        view.alpha = 0
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
     // MARK: - LIFECYCLE
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -128,12 +121,6 @@ final class MovieDetailsScreenVC: UIViewController {
         view.addSubview(downloadingView)
         downloadingView.snp.makeConstraints {
             $0.edges.equalToSuperview()
-        }
-        
-        view.addSubview(blurView)
-        blurView.snp.makeConstraints {
-            $0.top.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(UIConstants.topInset)
         }
     }
     
@@ -190,6 +177,7 @@ final class MovieDetailsScreenVC: UIViewController {
                 
             case .titleAndTagline(let vm):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? TitleAndTaglineCell
+                cell?.layer.zPosition = 1
                 cell?.configure(with: vm)
                 return cell
                 
@@ -252,7 +240,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         self.downloadingView.hide()
         let backdropVM = BackdropImageCellViewModel(
             imagePath: details.backdropPath, size: .w1280,
-            isBackButtonHidden: isFirstScreen, didTapBackButtonAction: presenter?.didTapBackButton
+            didTapBackButtonAction: presenter?.didTapBackButton
         )
         
         let titleVM = TitleAndTaglineCellViewModel(mediaName: details.title, mediaTagline: details.tagline)

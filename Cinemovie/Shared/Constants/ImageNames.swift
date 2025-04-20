@@ -39,19 +39,6 @@ enum ImageNames: String {
     case imdbLogo = "IMDBLogo"
     case instaLogo = "InstagramLogo"
     case facebookLogo = "FacebookLogo"
-    case twitterLogo = "TwitterLogo"
+    case tiktokLogo = "TikTokLogo"
     case wikiLogo = "WikiLogo"
-    case youtubeLogo = "YoutubeLogo"
-    
-    var identifiedSourceType: ExternalSource.SourceTypes? {
-        switch self {
-        case .imdbLogo: return .imdb
-        case .instaLogo: return .instagram
-        case .facebookLogo: return .facebook
-        case .twitterLogo: return .twitter
-        case .wikiLogo: return .wikipedia
-        case .youtubeLogo: return .youtube
-        default: return nil
-        }
-    }
 }

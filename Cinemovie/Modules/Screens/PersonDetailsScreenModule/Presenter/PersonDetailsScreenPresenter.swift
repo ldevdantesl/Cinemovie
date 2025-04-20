@@ -12,7 +12,7 @@ protocol PersonDetailsScreenPresenterProtocol: AnyObject {
     
     // MARK: - USER INITIATED
     func didTapBackButton()
-    func didTapLogoImage(sourceID: String, sourceType: ExternalSource.SourceTypes)
+    func didTapLogoImage(sourceID: String, sourceType: SourceTypes)
     func didTapMovie(movie: Movie)
     func didTapTVSeries(series: TVSeries)
     
@@ -89,10 +89,11 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
     
     // MARK: - USER INITIATED
     func didTapBackButton() {
+        print("Presenter Did Tap backbutton called")
         router.goBack()
     }
     
-    func didTapLogoImage(sourceID: String, sourceType: ExternalSource.SourceTypes) {
+    func didTapLogoImage(sourceID: String, sourceType: SourceTypes) {
         router.openSource(sourceID: sourceID, sourceType: sourceType)
     }
     

@@ -25,11 +25,26 @@ final class PersonDetailsScreenVC: UIViewController {
         static let defaultCellHeight = 100.0
     }
     
+    // MARK: - SECTIONS
+    fileprivate enum Sections: Hashable {
+        case header
+        case overview
+        case movies
+        case tvSeries
+    }
+    
+    fileprivate enum Items: Hashable {
+        case headerVM(PersonInfoCellViewModel)
+        case overviewVM
+        case moviesVM
+        case tvSeriesVM
+    }
+    
     // MARK: - VIPER
     var presenter: PersonDetailsScreenPresenterProtocol?
     
     // MARK: - PROPERTIES
-    private var viewModels: [PersonDetailsCellViewModel] = []
+    private var visibleSections: [Sections] = []
     private var cachedCollectionViewCellSize: [IndexPath : CGSize] = [:]
     private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
     
@@ -40,19 +55,11 @@ final class PersonDetailsScreenVC: UIViewController {
         return splash
     }()
     
-    private lazy var collectionView: TopBlurredCollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .vertical
-        layout.minimumLineSpacing = Constants.collectionViewSpacing
-        
-        let cv = TopBlurredCollectionView(layout: layout, showsBlur: true)
+    private lazy var collectionView: DiffableCollectionView = {
+        let cv = DiffableCollectionView<Sections, Items>(layout: createLayout(), showsTopBlur: true)
+        cv.layer.zPosition = 0
+        cv.register(cellClass: PersonInfoCell.self)
         cv.backgroundColor = CMColor.cmBackground
-        cv.register(PersonDetailsMediaView.self, forCellWithReuseIdentifier: PersonDetailsMediaView.identifier)
-        cv.register(PersonDetailsBiographyView.self, forCellWithReuseIdentifier: PersonDetailsBiographyView.identifier)
-        cv.register(PersonDetailsSourcesView.self, forCellWithReuseIdentifier: PersonDetailsSourcesView.identifier)
-        cv.register(PersonDetailsInfoView.self, forCellWithReuseIdentifier: PersonDetailsInfoView.identifier)
-        cv.register(PersonDetailsHeaderView.self, forCellWithReuseIdentifier: PersonDetailsHeaderView.identifier)
-        cv.dataSource = self
         cv.translatesAutoresizingMaskIntoConstraints = false
         return cv
     }()
@@ -62,6 +69,7 @@ final class PersonDetailsScreenVC: UIViewController {
         super.viewDidLoad()
         presenter?.viewDidLoad()
         setupUI()
+        configureDataSource()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -92,48 +100,45 @@ final class PersonDetailsScreenVC: UIViewController {
         
         view.bringSubviewToFront(downloadingView)
     }
+    
+    private func createLayout() -> UICollectionViewCompositionalLayout {
+        UICollectionViewCompositionalLayout { [weak self] sectionIndex, env in
+            guard let self = self else {
+                return NSCollectionLayoutSection(group: .init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1))))
+            }
+            
+            let detailsSection = self.visibleSections[sectionIndex]
+            let edgeInsets: NSDirectionalEdgeInsets
+            
+            switch detailsSection {
+            case .header: edgeInsets = .init(top: UIConstants.topInset, leading: 10, bottom: 10, trailing: 10)
+            default: edgeInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
+            }
+            
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(200)))
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: item.layoutSize, subitems: [item])
+            let section = NSCollectionLayoutSection(group: group)
+            section.contentInsets = edgeInsets
+            return section
+        }
+    }
+    
+    private func configureDataSource() {
+        collectionView.configureDataSource { collectionView, indexPath, itemIdentifier in
+            switch itemIdentifier {
+            case .headerVM(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PersonInfoCell.identifier, for: indexPath) as? PersonInfoCell
+                cell?.configure(viewModel: vm)
+                return cell
+            default: return UICollectionViewCell()
+            }
+        }
+    }
 }
 
-extension PersonDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModels.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let viewModel = viewModels[indexPath.row]
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.identifier, for: indexPath)
-        
-        switch viewModel {
-        case let vm as PersonDetailsBiographyViewModel: (cell as? PersonDetailsBiographyView)?.configure(viewModel: vm)
-        case let vm as PersonDetailsMediaViewModel: (cell as? PersonDetailsMediaView)?.configure(viewModel: vm)
-        case let vm as PersonDetailsSourcesViewModel: (cell as? PersonDetailsSourcesView)?.configure(viewModel: vm)
-        case let vm as PersonDetailsHeaderViewModel: (cell as? PersonDetailsHeaderView)?.configure(viewModel: vm)
-        case let vm as PersonDetailsInfoViewModel: (cell as? PersonDetailsInfoView)?.configure(viewModel: vm)
-        default: return UICollectionViewCell()
-        }
-        return cell
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        if let cachedSize = cachedCollectionViewCellSize[indexPath] {
-            return cachedSize
-        }
-        
-        let viewModel = viewModels[indexPath.row]
-        let width = collectionView.frame.width
-        
-        let size: CGSize
-        switch viewModel {
-        case let vm as PersonDetailsBiographyViewModel: size = CGSize(width: width - 20, height: vm.cellHeight)
-        case is PersonDetailsHeaderViewModel: size = CGSize(width: width - 20, height: 200)
-        case let vm as PersonDetailsMediaViewModel: size = CGSize(width: width - 20, height: vm.cellHeight)
-        case let vm as PersonDetailsInfoViewModel: size = CGSize(width: width - 20, height: vm.cellHeight)
-        case is PersonDetailsSourcesViewModel: size = CGSize(width: width - 30, height: 30)
-        default: size = CGSize(width: width - 20, height: Constants.defaultCellHeight)
-        }
-        
-        self.cachedCollectionViewCellSize[indexPath] = size
-        return size
+extension PersonDetailsScreenVC: UICollectionViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        collectionView.showBlur(scrollView)
     }
 }
 
@@ -160,37 +165,14 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
         _ details: PersonDetails, sources: ExternalSource,
         movies: [Movie], tvShows: [TVSeries]
     ) {
-        DispatchQueue.main.async {
-            UIView.animate(withDuration: Constants.aniDuration, delay: Constants.aniDuration, options: .showHideTransitionViews) { [weak self] in
-                guard let self = self else { return }
-                self.downloadingView.alpha = 0
-            } completion: { [weak self] _ in
-                guard let self = self else { return }
-                self.downloadingView.isHidden = true
-            }
-        }
-        
-        viewModels.append(PersonDetailsHeaderViewModel(
-            imagePath: details.profilePath, isBackButtonHidden: self.isFirstScreen,
-            didTapAvaImage: nil, didTapBackButton: presenter?.didTapBackButton
-        ))
-     
-        viewModels.append(PersonDetailsInfoViewModel(
-            name: details.name, job: details.knownForDepartment,
-            birthday: details.birthday, hometown: details.placeOfBirth,
-            gender: details.gender
-        ))
-    
-        !details.biography.isEmpty ? viewModels.append(PersonDetailsBiographyViewModel(biography: details.biography)) : ()
-        viewModels.append(PersonDetailsSourcesViewModel(externalSource: sources, didTapLogo: presenter?.didTapLogoImage))
-        
-        !movies.isEmpty ? viewModels.append(PersonDetailsMediaViewModel(headerTitle: "Movies", headerSubtitle: "Movies in which \(details.name) has played", movies: movies, didTapMovieAction: presenter?.didTapMovie)) : ()
-        !tvShows.isEmpty ? viewModels.append(PersonDetailsMediaViewModel(headerTitle: "TV Shows", headerSubtitle: "TV Shows in which \(details.name) has played", tvShows: tvShows, didTapTVShowAction: presenter?.didTapTVSeries)) : ()
-        
-        DispatchQueue.main.async {
-            self.collectionView.setNeedsLayout()
-            self.collectionView.layoutIfNeeded()
-            self.collectionView.reloadData()
-        }
+        self.downloadingView.hide()
+        let infoVM = PersonInfoCellViewModel(
+            personDetails: details, externalSource: sources,
+            didTapBackButton: presenter?.didTapBackButton, didTapSource: presenter?.didTapLogoImage
+        )
+        self.visibleSections.append(.header)
+        collectionView.applySnapshot(
+            sections: self.visibleSections,
+            itemsBySection: [.header: [.headerVM(infoVM)]])
     }
 }

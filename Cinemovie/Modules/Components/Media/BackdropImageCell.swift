@@ -12,12 +12,10 @@ import SDWebImage
 final class BackdropImageCellViewModel: CellViewModelBaseClass {
     let imageURL: URL?
     let didTapBackButtonAction: (() -> Void)?
-    let isBackButtonHidden: Bool
     
-    init(imagePath: String?, size: ImageSizes, isBackButtonHidden: Bool, didTapBackButtonAction: (() -> Void)?) {
+    init(imagePath: String?, size: ImageSizes, didTapBackButtonAction: (() -> Void)?) {
         self.imageURL = URLHelper.getImageURL(with: imagePath, size: size)
         self.didTapBackButtonAction = didTapBackButtonAction
-        self.isBackButtonHidden = isBackButtonHidden
         super.init(cellIdentifier: "BackdropImageCell")
     }
 }
@@ -61,9 +59,8 @@ final class BackdropImageCell: ReusableCellBaseClass {
         return view
     }()
     
-    private lazy var backButton: CMCircularButton = {
+    private let backButton: CMCircularButton = {
         let view = CMCircularButton()
-        view.isHidden = true
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -94,7 +91,6 @@ final class BackdropImageCell: ReusableCellBaseClass {
             foreColor: CMColor.cmAccent, didTapAction: viewModel.didTapBackButtonAction
         )
         backButton.configure(viewModel: vm)
-        backButton.isHidden = !viewModel.isBackButtonHidden
         
         guard let url = viewModel.imageURL else { return }
         self.loadingIndicator.startAnimating()
@@ -107,9 +103,10 @@ final class BackdropImageCell: ReusableCellBaseClass {
     
     public func scaleImage(to offsetY: CGFloat) {
         let clampedOffset = abs(offsetY)
-        let scale = 1 + (clampedOffset / 300)
+        let scaleX = 1 + (clampedOffset / 600)
+        let scaleY = 1 + (scaleX / 300)
 
-        backdropImageView.transform = CGAffineTransform(scaleX: scale, y: scale)
+        backdropImageView.transform = CGAffineTransform(scaleX: scaleX, y: scaleY)
         imageTopConstraint?.update(offset: offsetY)
     }
 

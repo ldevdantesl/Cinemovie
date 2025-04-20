@@ -12,4 +12,3 @@ open class ReusableCellBaseClass: UICollectionViewCell {
         return String(describing: self)
     }
 }
-

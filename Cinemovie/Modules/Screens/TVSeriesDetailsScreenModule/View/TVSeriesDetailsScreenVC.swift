@@ -161,7 +161,6 @@ final class TVSeriesDetailsScreenVC: UIViewController {
                 
             case .backdropImage(let vm):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? BackdropImageCell
-                cell?.layer.zPosition = -1
                 cell?.configure(with: vm)
                 self.backdropCell = cell
                 return cell
@@ -182,6 +181,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
                 
             case .titleAndTagline(let vm):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? TitleAndTaglineCell
+                cell?.layer.zPosition = 1
                 cell?.configure(with: vm)
                 return cell
                 
@@ -261,7 +261,7 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
         
         let backdropVM = BackdropImageCellViewModel(
             imagePath: details.backdropPath, size: .w1280,
-            isBackButtonHidden: isFirstScreen, didTapBackButtonAction: presenter?.didTapBackButton
+            didTapBackButtonAction: presenter?.didTapBackButton
         )
         
         let titleVM = TitleAndTaglineCellViewModel(mediaName: details.name, mediaTagline: details.tagline)

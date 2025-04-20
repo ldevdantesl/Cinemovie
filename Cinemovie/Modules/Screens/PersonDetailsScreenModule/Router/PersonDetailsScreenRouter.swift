@@ -9,7 +9,7 @@ import UIKit
 
 protocol PersonDetailsScreenRouterProtocol {
     func goBack()
-    func openSource(sourceID: String, sourceType: ExternalSource.SourceTypes)
+    func openSource(sourceID: String, sourceType: SourceTypes)
     func navigateToMovie(movieID: Int)
     func navigateToSeries(seriesID: Int)
 }
@@ -31,15 +31,14 @@ final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
         viewController?.navigationController?.pushViewController(movieDetailsVC, animated: true)
     }
     
-    func openSource(sourceID: String, sourceType: ExternalSource.SourceTypes) {
+    func openSource(sourceID: String, sourceType: SourceTypes) {
         var url: URL?
         switch sourceType {
         case .imdb: url = URLHelper.getPersonIMDBURL(withID: sourceID)
         case .wikipedia: url = URLHelper.getPersonWikiURL(withID: sourceID)
         case .facebook: url = URLHelper.getPersonFacebookURL(withID: sourceID)
         case .instagram: url = URLHelper.getPersonInstagramURL(withID: sourceID)
-        case .twitter: url = URLHelper.getPersonTwitterURL(withID: sourceID)
-        case .youtube: url = URLHelper.getPersonYouTubeURL(withID: sourceID)
+        case .tiktok: url = URLHelper.getPersonTikTokURL(withID: sourceID)
         }
         
         guard let url = url else { return }

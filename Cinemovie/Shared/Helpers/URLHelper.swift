@@ -23,6 +23,7 @@ public struct URLHelper {
         return URL(string: urlString)
     }
     
+    // MARK: - SOURCE URL
     static func getPersonInstagramURL(withID id: String?) -> URL? {
         guard let id = id, !id.isEmpty else { return nil }
         return URL(string: "https://www.instagram.com/\(id)/")
@@ -31,11 +32,6 @@ public struct URLHelper {
     static func getPersonFacebookURL(withID id: String?) -> URL? {
         guard let id = id, !id.isEmpty else { return nil }
         return URL(string: "https://www.facebook.com/\(id)/")
-    }
-    
-    static func getPersonTwitterURL(withID id: String?) -> URL? {
-        guard let id = id, !id.isEmpty else { return nil }
-        return URL(string: "https://twitter.com/\(id)/")
     }
     
     static func getPersonWikiURL(withID id: String?) -> URL? {
@@ -48,21 +44,21 @@ public struct URLHelper {
         return URL(string: "https://www.imdb.com/name/\(id)/")
     }
     
-    static func getPersonYouTubeURL(withID id: String?) -> URL? {
-        guard let id = id, !id.isEmpty else { return nil }
-        print("https://www.youtube.com/channel/\(id)")
-        return URL(string: "https://www.youtube.com/\(id)")
+    static func getPersonTikTokURL(withID id: String?) -> URL? {
+        guard let id = id else { return nil }
+        return URL(string: "https://www.tiktok.com/@\(id)")
+    }
+    
+    // MARK: - OTHER
+    static func getImdbURL(withID id: String?) -> URL? {
+        guard let id = id else { return nil }
+        return URL(string: "https://www.imdb.com/title/\(id)/")
     }
     
     static func getImageURL(with path: String?, size: ImageSizes) -> URL? {
         guard let path = path, !path.isEmpty else { return nil }
         let finalPath = "\(CONSTANTS.imageBaseURLString)/\(size.rawValue)\(path)"
         return URL(string: finalPath)
-    }
-    
-    static func getImdbURL(withID id: String?) -> URL? {
-        guard let id = id else { return nil }
-        return URL(string: "https://www.imdb.com/title/\(id)/")
     }
     
     static func getYouTubeVideoURL(video: Video, playsInline: Bool = true) -> URL? {
