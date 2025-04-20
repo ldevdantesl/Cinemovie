@@ -107,9 +107,13 @@ final class TVSeriesDetailsScreenVC: UIViewController {
         self.showDownloadingView()
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        SDImageCache.shared.clearMemory()
+    }
+    
     deinit {
         print("TVSeriesDetails is deinited")
-        SDImageCache.shared.clearMemory()
     }
     
     // MARK: - PRIVATE FUNC

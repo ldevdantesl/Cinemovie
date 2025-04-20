@@ -79,6 +79,20 @@ final class HomeScreenVC: UIViewController {
         tabBarController?.tabBar.isTranslucent = false
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let cell = collectionView.visibleCells.first(where: { $0 is FeaturedMediaCell }) as? FeaturedMediaCell {
+            cell.startMediaLoop()
+        }
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if let cell = collectionView.visibleCells.first(where: { $0 is FeaturedMediaCell }) as? FeaturedMediaCell {
+            cell.stopTimer()
+        }
+    }
+    
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
         view.addSubview(collectionView)
@@ -234,6 +248,12 @@ extension HomeScreenVC: UICollectionViewDelegate {
         if contentOffsetY < 5 && isBlurToHeaderVisible {
             isBlurToHeaderVisible = false
             headerView.removeBlur()
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if let featuredCell = cell as? FeaturedMediaCell {
+            featuredCell.stopTimer()
         }
     }
 }

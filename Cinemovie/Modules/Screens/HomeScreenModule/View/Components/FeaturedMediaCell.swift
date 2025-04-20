@@ -89,7 +89,25 @@ final class FeaturedMediaCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNCTION
     public func configure(with viewModel: FeaturedMediaCellViewModel) {
         self.viewModel = viewModel
-        startMediaLoop(media: viewModel.media)
+        self.startMediaLoop()
+    }
+    
+    public func stopTimer() {
+        mediaWorkItem?.cancel()
+    }
+    
+    public func startMediaLoop() {
+        print("Changing the featured media")
+        guard let viewModel = viewModel else { return }
+        mediaWorkItem?.cancel()
+        guard let first = viewModel.media.filter({ $0.id != self.currentMedia?.id }).randomElement() else { return }
+        updateMedia(with: first)
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            self.startMediaLoop()
+        }
+        mediaWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + viewModel.changeInSeconds, execute: workItem)
     }
     
     // MARK: - PRIVATE FUNCTIONS
@@ -103,20 +121,6 @@ final class FeaturedMediaCell: ReusableCellBaseClass {
         mediaImage.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-    }
-    
-    private func startMediaLoop(media: [Media]) {
-        guard let viewModel = viewModel else { return }
-        mediaWorkItem?.cancel()
-        let workItem = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
-            guard let randomMedia = media.randomElement() else { return }
-            self.updateMedia(with: randomMedia)
-            
-            self.startMediaLoop(media: media)
-        }
-        mediaWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + viewModel.changeInSeconds, execute: workItem)
     }
     
     private func updateMedia(with media: Media) {

@@ -135,7 +135,6 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
         
         let height = showingItems ? partsCollectionView.contentSize.height : Constants.defaultCellHeight
         layoutAttributes.frame.size.height = height
-        print("Belongs To Collection Height: \(height)")
         self.viewModel?.setCellHeight(to: height)
         return layoutAttributes
     }

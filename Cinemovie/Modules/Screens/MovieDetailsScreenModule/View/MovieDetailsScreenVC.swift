@@ -104,9 +104,13 @@ final class MovieDetailsScreenVC: UIViewController {
         downloadingView.show()
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        SDImageCache.shared.clearMemory()
+    }
+    
     deinit {
         print("MovieDetails is deinited")
-        SDImageCache.shared.clearMemory()
     }
     
     // MARK: - PRIVATE FUNCTIONS

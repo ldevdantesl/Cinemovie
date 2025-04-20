@@ -85,9 +85,13 @@ final class PersonDetailsScreenVC: UIViewController {
         downloadingView.show()
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        SDImageCache.shared.clearMemory()
+    }
+    
     deinit {
         print("Person Details Screen deinit")
-        SDImageCache.shared.clearMemory()
     }
     
     // MARK: - PRIVATE FUNC
