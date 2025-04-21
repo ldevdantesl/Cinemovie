@@ -38,7 +38,7 @@ final class SeasonsPopUpView: PopUPView {
     
     // MARK: - PROPERTIES
     private let viewModel: SeasonsPopUpViewModel
-    private var items: [EpisodeItemPopUpCellViewModel] = []
+    private var items: [EpisodeItemPopUpCellViewModel]
     
     // MARK: - VIEW PROPERTIES
     private let loadingIndicator: UIActivityIndicatorView = {
@@ -62,6 +62,8 @@ final class SeasonsPopUpView: PopUPView {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         layout.minimumInteritemSpacing = Constants.itemSpacing
+        layout.estimatedItemSize = CGSize(width: UIConstants.screenWidth - 40, height: 120)
+        layout.itemSize = UICollectionViewFlowLayout.automaticSize
         
         let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
         view.backgroundColor = .clear
@@ -76,13 +78,8 @@ final class SeasonsPopUpView: PopUPView {
     // MARK: - LIFECYCLE
     init(viewModel: SeasonsPopUpViewModel) {
         self.viewModel = viewModel
+        self.items = viewModel.seasonDetails.episodes.map { EpisodeItemPopUpCellViewModel(episode: $0) }
         super.init(viewModel: viewModel)
-        self.items = viewModel.seasonDetails.episodes.map {
-            EpisodeItemPopUpCellViewModel(episode: $0) { [weak self] in
-                guard let self = self else { return }
-                self.episodesCollectionView.collectionViewLayout.invalidateLayout()
-            }
-        }
         setupUI()
         episodesCollectionView.reloadData()
         
@@ -93,12 +90,9 @@ final class SeasonsPopUpView: PopUPView {
             return
         }
         
-        print("ImageURL: \(imageURL)")
-        
         self.loadingIndicator.startAnimating()
         posterImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
             guard let self = self else { return }
-            self.posterImageView.layoutIfNeeded()
             self.loadingIndicator.stopAnimating()
         }
     }
@@ -140,7 +134,7 @@ final class SeasonsPopUpView: PopUPView {
     }
 }
 
-extension SeasonsPopUpView: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
+extension SeasonsPopUpView: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return items.count
     }
@@ -153,10 +147,5 @@ extension SeasonsPopUpView: UICollectionViewDataSource, UICollectionViewDelegate
         let itemVM = items[indexPath.row]
         cell.configure(viewModel: itemVM)
         return cell
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let cellVM = items[indexPath.row]
-        return CGSize(width: UIConstants.screenWidth - 40, height: cellVM.cellHeight)
     }
 }

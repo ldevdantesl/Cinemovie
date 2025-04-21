@@ -47,15 +47,6 @@ final class OverviewCell: ReusableCellBaseClass {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
-        layoutIfNeeded()
-        let height = systemLayoutSizeFitting(
-            CGSize(width: UIConstants.screenWidth - 20, height: UIView.layoutFittingCompressedSize.height),
-            withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel).height
-        layoutAttributes.frame.size.height = height
-        return layoutAttributes
-    }
-    
     // MARK: - PUBLIC FUNC
     public func configure(with viewModel: ViewModel) {
         self.viewModel = viewModel

@@ -11,18 +11,10 @@ import SDWebImage
 
 final class EpisodeItemPopUpCellViewModel: CellViewModelBaseClass {
     let episode: TVEpisode
-    private(set) var cellHeight: CGFloat = SeasonsPopUpViewModel.defaultItemHeight
-    private let onHeightChangedRequest: (() -> Void)?
     
-    init(episode: TVEpisode, onHeightChangedRequest: (() -> Void)?) {
+    init(episode: TVEpisode) {
         self.episode = episode
-        self.onHeightChangedRequest = onHeightChangedRequest
         super.init(cellIdentifier: "EpisodeItemPopUpCell")
-    }
-    
-    fileprivate func changeCellHeightTo(_ height: CGFloat) {
-        self.cellHeight = height
-        self.onHeightChangedRequest?()
     }
 }
 
@@ -135,6 +127,16 @@ final class EpisodeItemPopUpCell: ReusableCellBaseClass {
         self.overviewTopLabelLeadingConstraint = nil
     }
     
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        let size = contentView.systemLayoutSizeFitting(
+            CGSize(width: layoutAttributes.frame.width, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel
+        )
+        layoutAttributes.frame.size = size
+        return layoutAttributes
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: EpisodeItemPopUpCellViewModel) {
         self.viewModel = viewModel
@@ -151,13 +153,6 @@ final class EpisodeItemPopUpCell: ReusableCellBaseClass {
 
             episodeOverviewTopLabel.text = topText
             episodeOverviewBottomLabel.text = bottomText
-            
-            let bottomTextHeight = episodeOverviewBottomLabel.sizeThatFits(
-                CGSize(width: bounds.width - Constants.hSpacing * 2, height: .greatestFiniteMagnitude)
-            ).height
-
-            let totalHeight = Constants.imageHeight + Constants.spacing + bottomTextHeight + Constants.hSpacing * 2
-            viewModel.changeCellHeightTo(totalHeight)
         }
         
         guard let imageURL = URLHelper.getImageURL(with: viewModel.episode.stillPath, size: .w500) else {
@@ -204,7 +199,7 @@ final class EpisodeItemPopUpCell: ReusableCellBaseClass {
             $0.size.equalTo(Constants.loadingIndicatorSize)
         }
         
-        addSubview(episodeImageView)
+        contentView.addSubview(episodeImageView)
         episodeImageView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(Constants.hSpacing)
             $0.leading.equalToSuperview().offset(Constants.hSpacing)
@@ -212,19 +207,19 @@ final class EpisodeItemPopUpCell: ReusableCellBaseClass {
             $0.height.equalTo(Constants.imageHeight)
         }
         
-        addSubview(episodeTitleLabel)
+        contentView.addSubview(episodeTitleLabel)
         episodeTitleLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(Constants.hSpacing)
             $0.trailing.equalToSuperview().inset(Constants.hSpacing)
         }
 
-        addSubview(episodeOverviewTopLabel)
+        contentView.addSubview(episodeOverviewTopLabel)
         episodeOverviewTopLabel.snp.makeConstraints {
             $0.top.equalTo(episodeTitleLabel.snp.bottom)
             $0.trailing.equalToSuperview().inset(Constants.hSpacing)
         }
         
-        addSubview(episodeOverviewBottomLabel)
+        contentView.addSubview(episodeOverviewBottomLabel)
         episodeOverviewBottomLabel.snp.makeConstraints {
             $0.top.equalTo(episodeImageView.snp.bottom).offset(Constants.spacing)
             $0.horizontalEdges.equalToSuperview().inset(Constants.hSpacing)

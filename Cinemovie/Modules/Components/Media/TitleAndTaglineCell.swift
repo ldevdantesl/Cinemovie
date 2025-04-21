@@ -11,7 +11,6 @@ import SnapKit
 final class TitleAndTaglineCellViewModel: CellViewModelBaseClass {
     let mediaName: String
     let mediaTagline: String?
-    static let estimatedCellHeight: CGFloat = 70.0
     
     init(mediaName: String, mediaTagline: String?) {
         self.mediaName = mediaName
@@ -91,15 +90,6 @@ final class TitleAndTaglineCell: ReusableCellBaseClass {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
-        layoutIfNeeded()
-        let height = systemLayoutSizeFitting(
-            CGSize(width: UIConstants.screenWidth - 20, height: UIView.layoutFittingCompressedSize.height),
-            withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel).height
-        layoutAttributes.frame.size.height = height
-        return layoutAttributes
     }
     
     override func layoutSubviews() {

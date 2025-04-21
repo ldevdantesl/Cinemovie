@@ -87,14 +87,14 @@ final class CastListCell: ReusableCellBaseClass {
     
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
-        self.addSubview(castLabel)
+        contentView.addSubview(castLabel)
         castLabel.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.leading.equalToSuperview()
             $0.trailing.equalToSuperview()
         }
         
-        self.addSubview(collectionView)
+        contentView.addSubview(collectionView)
         collectionView.snp.makeConstraints {
             $0.top.equalTo(castLabel.snp.bottom)
             $0.leading.trailing.equalToSuperview()
