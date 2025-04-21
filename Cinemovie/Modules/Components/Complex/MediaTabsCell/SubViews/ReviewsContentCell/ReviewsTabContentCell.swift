@@ -88,7 +88,7 @@ final class ReviewsTabContentCell: ReusableCellBaseClass {
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        addSubview(reviewsCollectionView)
+        contentView.addSubview(reviewsCollectionView)
         reviewsCollectionView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }

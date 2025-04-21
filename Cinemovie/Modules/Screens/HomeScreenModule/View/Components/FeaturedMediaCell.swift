@@ -34,8 +34,8 @@ final class FeaturedMediaCell: ReusableCellBaseClass {
         static let buttonSize = 40.0
         
         static let bigSpacing = 10.0
-        
         static let stackHeight = 70.0
+        static let selfHeight = UIConstants.screenHeight * 0.55
     }
     
     // MARK: - PROPERTIES
@@ -82,6 +82,12 @@ final class FeaturedMediaCell: ReusableCellBaseClass {
         applyGradientToImageView()
     }
     
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        layoutAttributes.frame.size.height = Constants.selfHeight
+        return layoutAttributes
+    }
+    
     deinit {
         mediaWorkItem?.cancel()
     }
@@ -89,7 +95,10 @@ final class FeaturedMediaCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNCTION
     public func configure(with viewModel: FeaturedMediaCellViewModel) {
         self.viewModel = viewModel
+        guard let first = viewModel.media.randomElement() else { return }
+        updateMedia(with: first)
         self.startMediaLoop()
+        self.invalidateIntrinsicContentSize()
     }
     
     public func stopTimer() {
@@ -97,13 +106,11 @@ final class FeaturedMediaCell: ReusableCellBaseClass {
     }
     
     public func startMediaLoop() {
-        print("Changing the featured media")
         guard let viewModel = viewModel else { return }
         mediaWorkItem?.cancel()
-        guard let first = viewModel.media.filter({ $0.id != self.currentMedia?.id }).randomElement() else { return }
-        updateMedia(with: first)
         let workItem = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
+            guard let self = self, let first = viewModel.media.filter({ $0.id != self.currentMedia?.id }).randomElement() else { return }
+            updateMedia(with: first)
             self.startMediaLoop()
         }
         mediaWorkItem = workItem
@@ -137,7 +144,6 @@ final class FeaturedMediaCell: ReusableCellBaseClass {
                 guard let self = self else { return }
                 self.loadingIndicator.stopAnimating()
             }
-
             UIView.animate(withDuration: 0.3) {[weak self] in
                 guard let self = self else { return }
                 self.mediaImage.alpha = 1.0
@@ -161,7 +167,7 @@ final class FeaturedMediaCell: ReusableCellBaseClass {
             gradientLayer = newGradientLayer
         }
 
-        gradientLayer?.frame = mediaImage.bounds
+        gradientLayer?.frame = contentView.frame
     }
     
     // MARK: - OBJC FUNCTIONS

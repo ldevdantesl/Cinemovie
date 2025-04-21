@@ -136,42 +136,20 @@ final class HomeScreenVC: UIViewController {
             guard let self = self else {
                 return NSCollectionLayoutSection(group: .init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1))))
             }
-            let section = self.visibleItems[sectionIndex]
+            let homeSection = self.visibleItems[sectionIndex]
+            let edgeInsets: NSDirectionalEdgeInsets
             
-            switch section {
-            case .featured: return self.sectionForFeatured()
-            case .movieList: return self.sectionForMediaLists()
-            case .seriesList: return self.sectionForMediaLists()
-            case .trendingPeople: return self.sectionForTrendingPeople()
+            switch homeSection {
+            case .featured: edgeInsets = NSDirectionalEdgeInsets(top: Constants.headerViewHeight, leading: 10, bottom: 10, trailing: 10)
+            default: edgeInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
             }
+            
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(Constants.featuredMovieHeight)))
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: item.layoutSize, subitems: [item])
+            let section = NSCollectionLayoutSection(group: group)
+            section.contentInsets = edgeInsets
+            return section
         }
-    }
-    
-    private func sectionForFeatured() -> NSCollectionLayoutSection {
-        let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1)))
-        let group = NSCollectionLayoutGroup.horizontal(
-            layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(Constants.featuredMovieHeight)),
-            subitems: [item]
-        )
-        let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: Constants.headerViewHeight, leading: 10, bottom: 10, trailing: 10)
-        return section
-    }
-    
-    private func sectionForMediaLists() -> NSCollectionLayoutSection {
-        let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(100)))
-        let group = NSCollectionLayoutGroup.vertical(layoutSize: item.layoutSize, subitems: [item])
-        let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
-        return section
-    }
-    
-    private func sectionForTrendingPeople() -> NSCollectionLayoutSection {
-        let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(100)))
-        let group = NSCollectionLayoutGroup.vertical(layoutSize: item.layoutSize, subitems: [item])
-        let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
-        return section
     }
     
     private func switchTo(_ mediaType: MediaTypes) {
