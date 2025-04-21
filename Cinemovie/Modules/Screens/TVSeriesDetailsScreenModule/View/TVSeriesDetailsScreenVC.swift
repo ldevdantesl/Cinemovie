@@ -20,8 +20,8 @@ protocol TVSeriesDetailsScreenViewProtocol: AnyObject {
     func didRecieveError(_ errorStr: String)
     func didGetAllTVSeriesData(
         _ details: TVSeriesDetails, cast: [Cast],
-        crew: [Cast], videos: [Video], reviews: [Review],
-        recommends: [TVSeries], similars: [TVSeries]
+        crew: [Cast], videos: [Video],
+        reviews: [Review], recommends: [TVSeries]
     )
 }
 
@@ -38,6 +38,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
         case production
         case rateAndShare
         case mediaExtras
+        case unavailable
     }
     
     fileprivate enum Items: Hashable {
@@ -50,6 +51,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
         case production(ProductionInfoCellViewModel)
         case rateAndShare(RateAndShareCellViewModel)
         case mediaExtras(MediaExtrasCellViewModel)
+        case unavailable(UnavailableInfoCellViewModel)
     }
 
     // MARK: - VIPER
@@ -201,6 +203,11 @@ final class TVSeriesDetailsScreenVC: UIViewController {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? RateAndShareCell
                 cell?.configure(with: vm)
                 return cell
+                
+            case .unavailable(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? UnavailableInfoCell
+                cell?.configure(viewModel: vm)
+                return cell
             }
         }
     }
@@ -252,8 +259,8 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
     // MARK: - DATA RECIEVING
     func didGetAllTVSeriesData(
         _ details: TVSeriesDetails, cast: [Cast],
-        crew: [Cast], videos: [Video], reviews: [Review],
-        recommends: [TVSeries], similars: [TVSeries]
+        crew: [Cast], videos: [Video],
+        reviews: [Review], recommends: [TVSeries]
     ) {
         self.downloadView.hide()
         
@@ -294,12 +301,20 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
         sectionsAndTheirItems.append((Sections.rateAndShare, [.rateAndShare(rateVM)]))
         
         let seasons = details.seasons.filter { $0.seasonNumber != 0 }
-        let extrasVM = MediaExtrasCellViewModel(
-            seasons: seasons, similar: similars,
-            recommended: recommends, videos: videos, reviews: reviews,
-            didTapMedia: presenter?.didTapMedia, didTapSeason: self.presenter?.didSelectSeason
-        )
-        sectionsAndTheirItems.append((Sections.mediaExtras, [.mediaExtras(extrasVM)]))
+        if !seasons.isEmpty || !recommends.isEmpty || !videos.isEmpty || !reviews.isEmpty {
+            let extrasVM = MediaExtrasCellViewModel(
+                seasons: seasons, recommended: recommends, videos: videos, reviews: reviews,
+                didTapMedia: presenter?.didTapMedia, didTapSeason: presenter?.didSelectSeason
+            )
+            sectionsAndTheirItems.append((Sections.mediaExtras, [.mediaExtras(extrasVM)]))
+        } else {
+            let unavailableVM = UnavailableInfoCellViewModel(
+                title: "No additional content available",
+                subtitle: "We couldn’t find any related seasons, videos, reviews, or recommendations for this TV Series.",
+                image: UIImage(named: ImageNames.empty2.rawValue)
+            )
+            sectionsAndTheirItems.append((Sections.unavailable, [.unavailable(unavailableVM)]))
+        }
         
         self.visibleSections = sectionsAndTheirItems.map { $0.section }
         

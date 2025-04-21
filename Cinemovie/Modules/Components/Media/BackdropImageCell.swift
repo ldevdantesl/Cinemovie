@@ -31,7 +31,7 @@ final class BackdropImageCell: ReusableCellBaseClass {
         static let backButtonImageName = "chevron.left"
         
         static let indicatorSize: CGFloat = 30
-        static let backdropImageSize: CGFloat = 40
+        static let backdropImageSize: CGFloat = 20
         static let imageNotFoundName = "questionmark.circle"
         static let cellHeight = UIConstants.screenWidth * 0.65
     }
@@ -73,7 +73,6 @@ final class BackdropImageCell: ReusableCellBaseClass {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
     
     override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
         layoutIfNeeded()
@@ -94,6 +93,7 @@ final class BackdropImageCell: ReusableCellBaseClass {
         guard let url = viewModel.imageURL else {
             backdropImageView.preferredSymbolConfiguration = .init(pointSize: Constants.backdropImageSize, weight: .bold)
             backdropImageView.image = UIImage(systemName: Constants.imageNotFoundName)
+            backdropImageView.contentMode = .center
             return
         }
         self.loadingIndicator.startAnimating()

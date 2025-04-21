@@ -42,8 +42,8 @@ final class MediaPosterImageCell: ReusableCellBaseClass {
     
     private lazy var posterImageView: UIImageView = {
         let view = UIImageView()
-        view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
+        view.contentMode = .scaleAspectFill
         view.backgroundColor = CMColor.cmSecondaryBackground
         view.isUserInteractionEnabled = true
         view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapMedia)))
@@ -71,13 +71,16 @@ final class MediaPosterImageCell: ReusableCellBaseClass {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        self.posterImageView.contentMode = .scaleAspectFill
         self.posterImageView.image = nil
+        self.posterImageView.tintColor = nil
+        self.posterImageView.contentMode = .scaleAspectFill
+        self.posterImageView.preferredSymbolConfiguration = nil
     }
     
     // MARK: - PUBLIC FUNCTIONS
     public func configure(with viewModel: MediaPosterImageCellViewModel) {
         self.viewModel = viewModel
+        
         guard let url = URLHelper.getImageURL(with: viewModel.media.posterPath, size: .w1280) else {
             posterImageView.image = UIImage(systemName: Constants.imageNotFoundName)
             posterImageView.preferredSymbolConfiguration = .init(pointSize: Constants.imageNotFoundPointSize, weight: .bold)
@@ -85,6 +88,7 @@ final class MediaPosterImageCell: ReusableCellBaseClass {
             posterImageView.contentMode = .center
             return
         }
+        
         self.loadingIndicator.startAnimating()
         self.posterImageView.sd_setImage(with: url) { [weak self] _, _, _, _ in
             guard let self = self else { return }
@@ -100,7 +104,7 @@ final class MediaPosterImageCell: ReusableCellBaseClass {
             $0.center.equalToSuperview()
         }
         
-        addSubview(posterImageView)
+        contentView.addSubview(posterImageView)
         posterImageView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }

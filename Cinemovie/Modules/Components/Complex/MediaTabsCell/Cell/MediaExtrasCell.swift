@@ -11,7 +11,6 @@ import SnapKit
 final class MediaExtrasCellViewModel: CellViewModelBaseClass {
     let seasons: [TVSeason]
     let collectionDetails: BelongsToCollectionDetails?
-    let similar: [Media]
     let recommended: [Media]
     let videos: [Video]
     let reviews: [Review]
@@ -19,13 +18,12 @@ final class MediaExtrasCellViewModel: CellViewModelBaseClass {
     let didTapSeason: ((TVSeason) -> Void)?
     
     init(
-        collectionDetails: BelongsToCollectionDetails?, similar: [Media],
+        collectionDetails: BelongsToCollectionDetails?,
         recommended: [Media], videos: [Video], reviews: [Review],
         didTapMedia: ((Media) -> Void)?
     ) {
         self.seasons = []
         self.collectionDetails = collectionDetails
-        self.similar = similar
         self.recommended = recommended
         self.videos = videos
         self.reviews = reviews
@@ -35,13 +33,12 @@ final class MediaExtrasCellViewModel: CellViewModelBaseClass {
     }
     
     init(
-        seasons: [TVSeason], similar: [Media],
-        recommended: [Media], videos: [Video], reviews: [Review],
+        seasons: [TVSeason], recommended: [Media],
+        videos: [Video], reviews: [Review],
         didTapMedia: ((Media) -> Void)?, didTapSeason: ((TVSeason) -> Void)?
     ) {
         self.seasons = seasons
         self.collectionDetails = nil
-        self.similar = similar
         self.recommended = recommended
         self.videos = videos
         self.reviews = reviews
@@ -60,7 +57,6 @@ final class MediaExtrasCell: ReusableCellBaseClass {
     private enum Tabs: CaseIterable {
         case seasons
         case collection
-        case similar
         case recommendations
         case trailers
         case reviews
@@ -72,7 +68,6 @@ final class MediaExtrasCell: ReusableCellBaseClass {
             case .network: "Network"
             case .seasons: "Seasons"
             case .collection: "Collection"
-            case .similar: "Similar"
             case .recommendations: "Recommends"
             case .trailers: "Trailers"
             case .reviews: "Reviews"
@@ -166,7 +161,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         layoutIfNeeded()
         contentCollectionView.layoutIfNeeded()
         
-        guard let contentVM = items[selectedTab] else {
+        guard let contentVM = items[selectedTab]  else {
             layoutAttributes.frame.size.height = Constants.tabsHeight + Constants.spacing + Constants.defaultCellHeight
             return layoutAttributes
         }
@@ -193,14 +188,13 @@ final class MediaExtrasCell: ReusableCellBaseClass {
             self.items[.collection] = belongsVM
         }
         
-        if !viewModel.similar.isEmpty {
-            let similarMedia = Array(viewModel.similar.prefix(9))
-            let similarVM = SimilarTabContentCellViewModel(media: similarMedia, didTapAnyMedia: viewModel.didTapMedia)
-            self.items[.similar] = similarVM
-        }
-        
+        let recommendedMedia = Array(
+            viewModel.recommended
+                .filter { $0.posterPath != nil }
+                .prefix(9)
+        )
         if !viewModel.recommended.isEmpty {
-            let recommendedMedia = Array(viewModel.recommended.prefix(9))
+            let recommendedMedia = Array(recommendedMedia)
             let recommendedVM = RecommendsContentCellViewModel(recommendedMedia: recommendedMedia, didTapAnyMedia: viewModel.didTapMedia)
             self.items[.recommendations] = recommendedVM
         }
@@ -317,7 +311,6 @@ extension MediaExtrasCell: UICollectionViewDataSource, UICollectionViewDelegate 
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.cellIdentifier, for: indexPath)
         
         switch viewModel {
-        case let vm as SimilarTabContentCellViewModel: (cell as? SimilarTabContentCell)?.configure(viewModel: vm)
         case let vm as TrailersTabContentCellViewModel: (cell as? TrailersTabContentCell)?.configure(viewModel: vm)
         case let vm as BelongsToCollectionTabContentCellViewModel: (cell as? BelongsToCollectionTabContentCell)?.configure(viewModel: vm)
         case let vm as ReviewsTabContentCellViewModel: (cell as? ReviewsTabContentCell)?.configure(viewModel: vm)

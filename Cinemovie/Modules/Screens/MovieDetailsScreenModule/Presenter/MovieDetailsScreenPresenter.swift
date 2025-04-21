@@ -25,7 +25,6 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     // MARK: - PROGRAMMATIC
     func didGetMovieDetails(_ details: MovieDetails)
     func didGetMovieCast(cast: [Cast], crew: [Cast])
-    func didGetMovieSimilars(queryMovies: [Movie])
     func didGetMovieRecommendations(queryMovies: [Movie])
     func didGetMovieVideos(videos: [Video])
     func didGetMovieReviews(_ reviews: [Review])
@@ -68,9 +67,6 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         interactor.getMovieCast(movieID: movieID)
         
         dispatchGroup.enter()
-        interactor.getMovieSimilars(movieID: movieID)
-        
-        dispatchGroup.enter()
         interactor.getMovieRecommendations(movieID: movieID)
         
         dispatchGroup.enter()
@@ -84,8 +80,8 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
             self.view?.didDownloadAllData(
                 details: details, videos: movieVideos,
                 cast: movieCast, crew: movieCrew,
-                similar: movieSimilars, recommended: movieRecommends,
-                reviews: movieReviews, belongsToCollectionDetails: belongsToCollectionDetails
+                recommended: movieRecommends, reviews: movieReviews,
+                belongsToCollectionDetails: belongsToCollectionDetails
             )
         }
     }
@@ -153,11 +149,6 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     func didGetMovieCast(cast: [Cast], crew: [Cast]) {
         movieCast = cast
         movieCrew = crew
-        dispatchGroup.leave()
-    }
-    
-    func didGetMovieSimilars(queryMovies: [Movie]) {
-        movieSimilars = queryMovies.sorted { ($0.posterPath == nil) && ($1.posterPath != nil) }
         dispatchGroup.leave()
     }
     

@@ -117,7 +117,7 @@ final class FeaturedMediaCell: ReusableCellBaseClass {
             $0.center.equalToSuperview()
         }
         
-        addSubview(mediaImage)
+        contentView.addSubview(mediaImage)
         mediaImage.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
@@ -138,7 +138,8 @@ final class FeaturedMediaCell: ReusableCellBaseClass {
                 self.loadingIndicator.stopAnimating()
             }
 
-            UIView.animate(withDuration: 0.3) {
+            UIView.animate(withDuration: 0.3) {[weak self] in
+                guard let self = self else { return }
                 self.mediaImage.alpha = 1.0
             }
         }

@@ -19,7 +19,7 @@ struct PersonDetails: APIResponse {
     let deathday: String?
     let gender: Int
     let homepage: String?
-    let knownForDepartment: String
+    let knownForDepartment: String?
     let popularity: Double
     let profilePath: String?
     

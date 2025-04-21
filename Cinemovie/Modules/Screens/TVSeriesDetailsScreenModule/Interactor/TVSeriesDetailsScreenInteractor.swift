@@ -13,7 +13,6 @@ protocol TVSeriesDetailsScreenInteractorProtocol: AnyObject {
     func getTVSeriesVideos(seriesID: Int)
     func getTVSeriesReviews(seriesID: Int)
     func getTVSeriesRecommendations(seriesID: Int)
-    func getTVSeriesSimilar(seriesID: Int)
     func getTVSeasonDetails(seriesID: Int, seasonNumber: Int)
 }
 
@@ -40,16 +39,6 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didGetTVSeriesReviews(success.results)
-            case .failure(let failure): presenter?.didRecieveError(failure)
-            }
-        }
-    }
-    
-    func getTVSeriesSimilar(seriesID: Int) {
-        tmdbService?.getTVSeriesSimilars(seriesID: seriesID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didGetTVSeriesSimilar(success.results)
             case .failure(let failure): presenter?.didRecieveError(failure)
             }
         }

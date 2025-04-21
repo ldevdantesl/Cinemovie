@@ -100,19 +100,19 @@ final class MediaListCell: ReusableCellBaseClass {
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        addSubview(titleLabel)
+        contentView.addSubview(titleLabel)
         titleLabel.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
         }
         
-        addSubview(subtitleLabel)
+        contentView.addSubview(subtitleLabel)
         subtitleLabel.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(Constants.spacing)
             $0.horizontalEdges.equalToSuperview()
         }
         
-        addSubview(collectionView)
+        contentView.addSubview(collectionView)
         collectionView.snp.makeConstraints {
             $0.top.equalTo(subtitleLabel.snp.bottom).offset(Constants.biggerSpacing)
             $0.horizontalEdges.equalToSuperview()

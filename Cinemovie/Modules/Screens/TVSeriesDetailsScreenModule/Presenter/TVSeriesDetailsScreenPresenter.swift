@@ -28,7 +28,6 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
     func didGetTVSeriesVideos(_ videos: [Video])
     func didGetTVSeriesReviews(_ reviews: [Review])
     func didGetTVSeriesRecommends(_ series: [TVSeries])
-    func didGetTVSeriesSimilar(_ series: [TVSeries])
     func didGetTVSeasonDetails(_ details: TVSeasonDetails)
     
     // MARK: - ERROR HANDLING
@@ -71,9 +70,6 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
         interactor.getTVSeriesReviews(seriesID: seriesID)
         
         downloadGroup.enter()
-        interactor.getTVSeriesSimilar(seriesID: seriesID)
-        
-        downloadGroup.enter()
         interactor.getTVSeriesRecommendations(seriesID: seriesID)
         
         downloadGroup.notify(queue: .main) { [weak self] in
@@ -81,7 +77,7 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
             self.view?.didGetAllTVSeriesData(
                 details, cast: seriesCast, crew: seriesCrew,
                 videos: seriesVideos, reviews: seriesReviews,
-                recommends: seriesRecommends, similars: seriesSimilars
+                recommends: seriesRecommends
             )
         }
     }
@@ -143,11 +139,6 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
     
     func didGetTVSeriesReviews(_ reviews: [Review]) {
         self.seriesReviews = reviews
-        downloadGroup.leave()
-    }
-    
-    func didGetTVSeriesSimilar(_ series: [TVSeries]) {
-        self.seriesSimilars = series.sorted { ($0.posterPath == nil) && ($1.posterPath != nil) }
         downloadGroup.leave()
     }
     

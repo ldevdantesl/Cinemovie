@@ -58,14 +58,14 @@ final class MediaExtrasTabItemCell: ReusableCellBaseClass {
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        addSubview(topBarView)
+        contentView.addSubview(topBarView)
         topBarView.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(Constants.topBarHeight)
         }
         
-        addSubview(titleLabel)
+        contentView.addSubview(titleLabel)
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(topBarView.snp.bottom).offset(Constants.spacing)
             $0.horizontalEdges.equalToSuperview()

@@ -103,19 +103,19 @@ final class TrendingPeopleCell: ReusableCellBaseClass {
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        addSubview(trendingTitleLabel)
+        contentView.addSubview(trendingTitleLabel)
         trendingTitleLabel.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
         }
         
-        addSubview(trendingSubtitleLabel)
+        contentView.addSubview(trendingSubtitleLabel)
         trendingSubtitleLabel.snp.makeConstraints {
             $0.top.equalTo(trendingTitleLabel.snp.bottom).offset(Constants.spacing)
             $0.horizontalEdges.equalToSuperview()
         }
         
-        addSubview(peopleCollectionView)
+        contentView.addSubview(peopleCollectionView)
         peopleCollectionView.snp.makeConstraints {
             $0.top.equalTo(trendingSubtitleLabel.snp.bottom).offset(Constants.biggerSpacing)
             $0.horizontalEdges.equalToSuperview()

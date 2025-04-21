@@ -171,16 +171,6 @@ final class PersonInfoCell: ReusableCellBaseClass {
         self.personAvaImageView.layer.borderWidth = Constants.imageBorderWidth
     }
     
-    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
-        layoutIfNeeded()
-        let height = contentView.systemLayoutSizeFitting(
-            CGSize(width: layoutAttributes.frame.width, height: .greatestFiniteMagnitude),
-            withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel
-        ).height
-        layoutAttributes.frame.size.height = height
-        return layoutAttributes
-    }
-    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: PersonInfoCellViewModel) {
         self.viewModel = viewModel
@@ -209,7 +199,7 @@ final class PersonInfoCell: ReusableCellBaseClass {
         addSources(externalSource: viewModel.externalSources)
         
         firstPartStackView.addArrangedSubview(personJobLabel)
-        self.personJobLabel.text = viewModel.personDetails.knownForDepartment
+        self.personJobLabel.text = viewModel.personDetails.knownForDepartment ?? "Unknown"
         firstPartStackView.addArrangedSubview(personGenderLabel)
         self.personGenderLabel.text = GenderHelper.identifyGender(gender: viewModel.personDetails.gender)
         
@@ -217,6 +207,7 @@ final class PersonInfoCell: ReusableCellBaseClass {
             personAvaImageView.image = UIImage(systemName: Constants.defaultImageName)
             personAvaImageView.preferredSymbolConfiguration = .init(pointSize: Constants.defaultImagePointSize, weight: .bold)
             personAvaImageView.contentMode = .center
+            self.layoutIfNeeded()
             return
         }
         
@@ -225,6 +216,7 @@ final class PersonInfoCell: ReusableCellBaseClass {
             guard let self = self else { return }
             self.loadingIndicator.stopAnimating()
         }
+        self.layoutIfNeeded()
     }
     
     // MARK: - PRIVATE FUNC

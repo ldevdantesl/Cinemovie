@@ -32,12 +32,14 @@ final class PersonDetailsScreenVC: UIViewController {
         case overview
         case movies
         case tvSeries
+        case unavailable
     }
     
     fileprivate enum Items: Hashable {
         case headerVM(PersonInfoCellViewModel)
         case overviewVM(OverviewCellViewModel)
         case mediaListVM(MediaListCellViewModel)
+        case unavailableVM(UnavailableInfoCellViewModel)
     }
     
     // MARK: - VIPER
@@ -61,6 +63,7 @@ final class PersonDetailsScreenVC: UIViewController {
         cv.register(cellClass: PersonInfoCell.self)
         cv.register(cellClass: MediaListCell.self)
         cv.register(cellClass: OverviewCell.self)
+        cv.register(cellClass: UnavailableInfoCell.self)
         cv.delegate = self
         cv.backgroundColor = CMColor.cmBackground
         cv.translatesAutoresizingMaskIntoConstraints = false
@@ -146,6 +149,10 @@ final class PersonDetailsScreenVC: UIViewController {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MediaListCell.identifier, for: indexPath) as? MediaListCell
                 cell?.configure(viewModel: vm)
                 return cell
+            case .unavailableVM(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: UnavailableInfoCell.identifier, for: indexPath) as? UnavailableInfoCell
+                cell?.configure(viewModel: vm)
+                return cell
             }
         }
     }
@@ -205,6 +212,15 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
                 listSubtitle: "TV Series in which \(details.name) has played", didTapMediaItem: presenter?.didTapMedia
             )
             sectionsAndTheirItems.append((Sections.tvSeries, [.mediaListVM(seriesVM)]))
+        }
+        
+        if movies.isEmpty && tvSeries.isEmpty {
+            let unavailableVm = UnavailableInfoCellViewModel(
+                title: "Additional information is not available",
+                subtitle: "We couldn't find any movies or TV series linked to this person.",
+                image: UIImage(named: ImageNames.empty.rawValue)
+            )
+            sectionsAndTheirItems.append((Sections.unavailable, [.unavailableVM(unavailableVm)]))
         }
         
         self.visibleSections = sectionsAndTheirItems.map { $0.section }

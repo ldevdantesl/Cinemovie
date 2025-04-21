@@ -66,7 +66,7 @@ final class TrendingPersonCell: ReusableCellBaseClass {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        self.personAvaImageView.layer.cornerRadius = self.personAvaImageView.frame.width / 2
+        self.personAvaImageView.layer.cornerRadius = self.contentView.frame.width / 2
         self.personAvaImageView.layer.borderWidth = Constants.imageBorderWidth
         self.personAvaImageView.layer.borderColor = CMColor.cmLabel.cgColor
     }
@@ -85,6 +85,7 @@ final class TrendingPersonCell: ReusableCellBaseClass {
             personAvaImageView.image = UIImage(systemName: Constants.imageDefaultName)
             personAvaImageView.preferredSymbolConfiguration = .init(pointSize: Constants.imageDefaultPointSize, weight: .bold)
             personAvaImageView.contentMode = .center
+            self.layoutIfNeeded()
             return
         }
         
@@ -93,6 +94,7 @@ final class TrendingPersonCell: ReusableCellBaseClass {
             guard let self = self else { return }
             self.loadingIndicator.stopAnimating()
         }
+        self.layoutIfNeeded()
     }
     
     // MARK: - PRIVATE FUNC
@@ -103,7 +105,7 @@ final class TrendingPersonCell: ReusableCellBaseClass {
             $0.size.equalTo(Constants.loadingIndicatorSize)
         }
         
-        addSubview(personAvaImageView)
+        contentView.addSubview(personAvaImageView)
         personAvaImageView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }

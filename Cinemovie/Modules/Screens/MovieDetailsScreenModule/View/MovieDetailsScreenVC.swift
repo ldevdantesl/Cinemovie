@@ -18,7 +18,7 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
     func didDownloadAllData(
         details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
-        similar: [Movie], recommended: [Movie], reviews: [Review],
+        recommended: [Movie], reviews: [Review],
         belongsToCollectionDetails: BelongsToCollectionDetails?
     )
 }
@@ -36,6 +36,7 @@ final class MovieDetailsScreenVC: UIViewController {
         case production
         case rateAndShare
         case mediaExtras
+        case unavailable
     }
     
     fileprivate enum Items: Hashable {
@@ -48,6 +49,7 @@ final class MovieDetailsScreenVC: UIViewController {
         case production(ProductionInfoCellViewModel)
         case rateAndShare(RateAndShareCellViewModel)
         case mediaExtras(MediaExtrasCellViewModel)
+        case unavailable(UnavailableInfoCellViewModel)
     }
     
     // MARK: - VIPER
@@ -80,6 +82,7 @@ final class MovieDetailsScreenVC: UIViewController {
         cv.register(cellClass: BackdropImageCell.self)
         cv.register(cellClass: TitleAndTaglineCell.self)
         cv.register(cellClass: CastListCell.self)
+        cv.register(cellClass: UnavailableInfoCell.self)
         cv.register(cellClass: MediaExtrasCell.self)
         cv.delegate = self
         cv.translatesAutoresizingMaskIntoConstraints = false
@@ -197,6 +200,11 @@ final class MovieDetailsScreenVC: UIViewController {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? RateAndShareCell
                 cell?.configure(with: vm)
                 return cell
+                
+            case .unavailable(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? UnavailableInfoCell
+                cell?.configure(viewModel: vm)
+                return cell
             }
         }
     }
@@ -233,7 +241,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
     func didDownloadAllData(
         details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
-        similar: [Movie], recommended: [Movie], reviews: [Review],
+        recommended: [Movie], reviews: [Review],
         belongsToCollectionDetails: BelongsToCollectionDetails?
     ) {
         self.downloadingView.hide()
@@ -272,13 +280,21 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         let rateVM = RateAndShareCellViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton)
         sectionsAndTheirItems.append((Sections.rateAndShare, [.rateAndShare(rateVM)]))
         
-        let extrasVM = MediaExtrasCellViewModel(
-            collectionDetails: belongsToCollectionDetails, similar: similar,
-            recommended: recommended, videos: videos,
-            reviews: reviews, didTapMedia: presenter?.didTapMedia
-        )
-        
-        sectionsAndTheirItems.append((Sections.mediaExtras, [.mediaExtras(extrasVM)]))
+        if belongsToCollectionDetails != nil || !recommended.isEmpty || !videos.isEmpty || !reviews.isEmpty {
+            let extrasVM = MediaExtrasCellViewModel(
+                collectionDetails: belongsToCollectionDetails,
+                recommended: recommended, videos: videos,
+                reviews: reviews, didTapMedia: presenter?.didTapMedia
+            )
+            sectionsAndTheirItems.append((Sections.mediaExtras, [.mediaExtras(extrasVM)]))
+        } else {
+            let unavailableVM = UnavailableInfoCellViewModel(
+                title: "No additional content available",
+                subtitle: "We couldn’t find any related videos, reviews, or recommendations for this movie.",
+                image: UIImage(named: ImageNames.empty2.rawValue)
+            )
+            sectionsAndTheirItems.append((Sections.unavailable, [.unavailable(unavailableVM)]))
+        }
         
         self.visibleSections = sectionsAndTheirItems.map { $0.sections }
         
