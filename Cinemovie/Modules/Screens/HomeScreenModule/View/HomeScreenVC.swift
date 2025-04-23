@@ -58,7 +58,10 @@ final class HomeScreenVC: UIViewController {
     }()
     
     private lazy var headerView: HomeScreenHeaderView = {
-        let vm = HomeScreenHeaderViewModel(headerTitle: "Discover", didTapSearchButton: nil, didTapMediaButton: self.switchTo)
+        let vm = HomeScreenHeaderViewModel(headerTitle: "Discover", didTapSearchButton: presenter?.didTapSearchButton) { [weak self] in
+            guard let self = self else { return }
+            self.switchTo($0)
+        }
         let view = HomeScreenHeaderView(viewModel: vm)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view

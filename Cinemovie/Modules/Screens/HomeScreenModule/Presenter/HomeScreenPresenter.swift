@@ -14,6 +14,7 @@ protocol HomeScreenPresenterProtocol: AnyObject {
     // MARK: - USER INITIATED
     func didTapMedia(_ media: Media)
     func didTapPerson(_ person: Person)
+    func didTapSearchButton()
     
     // MARK: - MOVIES
     func didDownloadMovieList(listType: MovieListType, queryMovies: [Movie])
@@ -111,6 +112,10 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
     
     func didTapPerson(_ person: Person) {
         router.navigateToPersonDetails(personID: person.id)
+    }
+    
+    func didTapSearchButton() {
+        
     }
 
     // MARK: - MOVIES

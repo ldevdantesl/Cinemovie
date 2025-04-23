@@ -10,7 +10,6 @@ import UIKit
 
 struct HomeScreenHeaderViewModel {
     let headerTitle: String
-    let didTapSearchButton: (() -> Void)?
     let didTapMediaButton: (_ mediaType: MediaTypes) -> Void
 }
 
@@ -21,7 +20,8 @@ final class HomeScreenHeaderView: UIView {
         static let spacing = 5.0
         static let biggerSpacing = 10.0
         static let searchButtonSystemName = "magnifyingglass"
-        static let searchButtonSize = 25.0
+        static let xmarkButtonName = "xmark"
+        static let buttonSize = 30.0
         static let buttonsCornerRadius = 15.0
         static let buttonsBorderWidth = 1.0
     }
@@ -48,13 +48,25 @@ final class HomeScreenHeaderView: UIView {
         return view
     }()
     
-    private let searchButtonImageView: UIImageView = {
-        let view = UIImageView()
-        view.contentMode = .scaleAspectFit
-        view.image = UIImage(systemName: Constants.searchButtonSystemName)
-        view.tintColor = CMColor.cmAccent
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
+    private lazy var searchButton: CMCircularButton = {
+        let vm = CMCircularButtonViewModel(
+            systemName: Constants.searchButtonSystemName, backColor: .clear,
+            foreColor: CMColor.cmAccent, imageSizeByRespectingOuterCircle: 0.8, didTapAction: self.didTapSearchButton
+        )
+        let button = CMCircularButton(viewModel: vm)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private let searchBarView: CMSearchBar = {
+        let vm = CMSearchBarViewModel(
+            backgroundColor: .cmSecondaryBackground, textColor: .cmLabel,
+            placeholder: "Star wars", font: CMFont.font(size: .body, fontName: .avenirBold)
+        )
+        let field = CMSearchBar(viewModel: vm)
+        field.isHidden = true
+        field.translatesAutoresizingMaskIntoConstraints = false
+        return field
     }()
     
     private lazy var mediaButton: CMButton = {
@@ -89,14 +101,14 @@ final class HomeScreenHeaderView: UIView {
     }
     
     public func addBlur() {
-        UIView.transition(with: self, duration: 0.2, options: .transitionCrossDissolve) { [weak self] in
+        UIView.transition(with: self, duration: Constants.aniDuration, options: .transitionCrossDissolve) { [weak self] in
             guard let self = self else { return }
             self.blurView.isHidden = false
         }
     }
     
     public func removeBlur() {
-        UIView.transition(with: self, duration: 0.2, options: .transitionCrossDissolve) { [weak self] in
+        UIView.transition(with: self, duration: Constants.aniDuration, options: .transitionCrossDissolve) { [weak self] in
             guard let self = self else { return }
             self.blurView.isHidden = true
         }
@@ -110,24 +122,36 @@ final class HomeScreenHeaderView: UIView {
             $0.edges.equalToSuperview()
         }
         
-        addSubview(mediaButton)
-        mediaButton.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(Constants.biggerSpacing)
-            $0.bottom.equalToSuperview().inset(Constants.biggerSpacing)
-        }
-        
         addSubview(headerLabel)
         headerLabel.snp.makeConstraints {
-            $0.bottom.equalTo(mediaButton.snp.top).offset(-Constants.spacing)
+            $0.top.equalToSuperview().offset(UIConstants.topInset)
             $0.leading.equalToSuperview().offset(Constants.biggerSpacing)
         }
         
-        addSubview(searchButtonImageView)
-        searchButtonImageView.snp.makeConstraints {
-            $0.bottom.equalTo(mediaButton.snp.top).offset(-Constants.spacing)
-            $0.trailing.equalToSuperview().inset(Constants.biggerSpacing)
-            $0.size.equalTo(Constants.searchButtonSize)
+        addSubview(mediaButton)
+        mediaButton.snp.makeConstraints {
+            $0.top.equalTo(headerLabel.snp.bottom)
+            $0.leading.equalToSuperview().offset(Constants.biggerSpacing)
+            $0.bottom.equalToSuperview().offset(-Constants.biggerSpacing)
         }
+        
+        addSubview(searchButton)
+        searchButton.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(UIConstants.topInset)
+            $0.trailing.equalToSuperview().offset(-Constants.biggerSpacing)
+            $0.size.equalTo(Constants.buttonSize)
+        }
+        
+        addSubview(searchBarView)
+        searchBarView.snp.makeConstraints {
+            $0.top.equalTo(headerLabel.snp.bottom)
+            $0.trailing.equalTo(searchButton.snp.leading).offset(100)
+            $0.leading.equalTo(searchBarView.snp.trailing)
+            $0.bottom.equalToSuperview().offset(-Constants.biggerSpacing)
+        }
+        
+        mediaButton.setContentHuggingPriority(.defaultHigh, for: .vertical)
+        mediaButton.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
     }
     
     private func didTapMediaButton() {
@@ -135,14 +159,10 @@ final class HomeScreenHeaderView: UIView {
         let newType: MediaTypes = isShowingMovie ? .movie : .tvShow
 
         let vm = CMButtonViewModel(
-            text: newType == .movie ? "Movies" : "TVSeries",
-            foreColor: .cmLabel,
-            font: CMFont.font(size: .footnote, fontName: .avenirBold),
-            image: nil,
-            backColor: CMColor.cmBackground,
-            cornerRadius: Constants.buttonsCornerRadius,
-            borderColor: CMColor.cmLabel,
-            borderWidth: Constants.buttonsBorderWidth,
+            text: newType == .movie ? "Movies" : "TVSeries", foreColor: .cmLabel,
+            font: CMFont.font(size: .footnote, fontName: .avenirBold), image: nil,
+            backColor: CMColor.cmBackground, cornerRadius: Constants.buttonsCornerRadius,
+            borderColor: CMColor.cmLabel, borderWidth: Constants.buttonsBorderWidth,
             didTapAction: didTapMediaButton
         )
 
@@ -151,5 +171,85 @@ final class HomeScreenHeaderView: UIView {
         }
 
         viewModel.didTapMediaButton(newType)
+    }
+
+    private func didTapSearchButton() {
+        searchBarView.isHidden = false
+        headerLabel.snp.remakeConstraints {
+            $0.top.equalToSuperview().offset(UIConstants.topInset)
+            $0.horizontalEdges.equalToSuperview().inset(Constants.biggerSpacing)
+        }
+        
+        searchBarView.snp.remakeConstraints {
+            $0.top.equalTo(headerLabel.snp.bottom)
+            $0.leading.equalToSuperview().offset(Constants.biggerSpacing)
+            $0.trailing.equalTo(searchButton.snp.leading).offset(-Constants.biggerSpacing)
+            $0.bottom.equalToSuperview().offset(-Constants.biggerSpacing)
+        }
+        
+        searchButton.snp.remakeConstraints {
+            $0.centerY.equalTo(searchBarView.snp.centerY)
+            $0.trailing.equalToSuperview().offset(-Constants.biggerSpacing)
+            $0.size.equalTo(Constants.buttonSize)
+        }
+        
+        mediaButton.snp.updateConstraints {
+            $0.leading.equalToSuperview().offset(-100)
+        }
+        
+        let newButtonVM = CMCircularButtonViewModel(
+            systemName: Constants.xmarkButtonName, backColor: CMColor.cmSecondaryBackground,
+            foreColor: CMColor.cmLabel, didTapAction: self.didTapXButton
+        )
+        searchButton.reconfigure(newVM: newButtonVM)
+        
+        UIView.animate(withDuration: Constants.aniDuration) { [weak self] in
+            guard let self = self else { return }
+            self.headerLabel.text = "Search"
+            self.layoutIfNeeded()
+        } completion: { [weak self] _ in
+            guard let self = self else { return }
+            self.searchBarView.becomeFirstResponder()
+        }
+    }
+    
+    private func didTapXButton() {
+        let vm = CMCircularButtonViewModel(
+            systemName: Constants.searchButtonSystemName, backColor: .clear,
+            foreColor: CMColor.cmAccent, imageSizeByRespectingOuterCircle: 0.8, didTapAction: self.didTapSearchButton
+        )
+        searchButton.reconfigure(newVM: vm)
+        
+        headerLabel.snp.remakeConstraints {
+            $0.top.equalToSuperview().offset(UIConstants.topInset)
+            $0.leading.equalToSuperview().offset(Constants.biggerSpacing)
+        }
+        
+        searchButton.snp.remakeConstraints {
+            $0.top.equalToSuperview().offset(UIConstants.topInset)
+            $0.trailing.equalToSuperview().offset(-Constants.biggerSpacing)
+            $0.size.equalTo(Constants.buttonSize)
+        }
+        
+        searchBarView.snp.remakeConstraints {
+            $0.top.equalTo(headerLabel.snp.bottom)
+            $0.trailing.equalTo(searchButton.snp.leading).offset(100)
+            $0.leading.equalTo(searchBarView.snp.trailing)
+            $0.bottom.equalToSuperview().offset(-Constants.biggerSpacing)
+        }
+        
+        mediaButton.snp.updateConstraints {
+            $0.leading.equalToSuperview().offset(Constants.biggerSpacing)
+        }
+        
+        UIView.animate(withDuration: Constants.aniDuration) { [weak self] in
+            guard let self = self else { return }
+            self.headerLabel.text = "Discover"
+            self.layoutIfNeeded()
+        } completion: { [weak self] _ in
+            guard let self = self else { return }
+            self.searchBarView.isHidden = true
+            self.searchBarView.resignFirstResponder()
+        }
     }
 }

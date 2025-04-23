@@ -28,19 +28,19 @@ final class TabCoordinator: Coordinator {
 
     func start() {
         let homeCoordinator = HomeCoordinator(tmdbService: tmdbService)
-        let searchCoordinator = SearchCoordinator()
+        let watchlistCoordinator = WatchlistCoordinator(tmdbService: tmdbService)
         let settingsCoordinator = SettingsCoordinator(
             authService: authService,
             appCoordinator: appCoordinator
         )
 
         homeCoordinator.start()
-        searchCoordinator.start()
+        watchlistCoordinator.start()
         settingsCoordinator.start()
 
         tabBarController.viewControllers = [
             homeCoordinator.navigationController,
-            searchCoordinator.navigationController,
+            watchlistCoordinator.navigationController,
             settingsCoordinator.navigationController,
         ]
     }

@@ -13,16 +13,19 @@ struct CMCircularButtonViewModel {
     let backColor: UIColor
     let foreColor: UIColor
     let didTapAction: (() -> Void)?
+    let imageSizeByRespectingOuterCircle: CGFloat?
     
     init(
         systemName: String,
         backColor: UIColor = .cmSecondary,
         foreColor: UIColor = .cmLabel,
+        imageSizeByRespectingOuterCircle: CGFloat? = nil,
         didTapAction: (() -> Void)? = nil
     ) {
         self.systemName = systemName
         self.backColor = backColor
         self.foreColor = foreColor
+        self.imageSizeByRespectingOuterCircle = imageSizeByRespectingOuterCircle
         self.didTapAction = didTapAction
     }
 }
@@ -44,18 +47,13 @@ final class CMCircularButton: UIView {
     // MARK: - LIFECYCLE
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setupUI()
+        setupImage()
     }
     
     convenience init(viewModel: CMCircularButtonViewModel) {
         self.init(frame: .zero)
         self.viewModel = viewModel
-        self.clipsToBounds = true
-        self.isUserInteractionEnabled = true
-        self.backgroundColor = viewModel.backColor
-        imageView.image = UIImage(systemName: viewModel.systemName)
-        imageView.tintColor = viewModel.foreColor
-        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapButton)))
+        self.configure(viewModel: viewModel)
     }
     
     @available(*, unavailable)
@@ -77,14 +75,36 @@ final class CMCircularButton: UIView {
         imageView.image = UIImage(systemName: viewModel.systemName)
         imageView.tintColor = viewModel.foreColor
         imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapButton)))
+        imageView.snp.removeConstraints()
+        setupConstraints()
+    }
+    
+    public func reconfigure(newVM viewModel: CMCircularButtonViewModel, transitionDuration: TimeInterval = 0.25, transitionOptions: UIView.AnimationOptions = .transitionCrossDissolve) {
+        self.viewModel = viewModel
+        self.clipsToBounds = true
+        self.isUserInteractionEnabled = true
+        self.backgroundColor = viewModel.backColor
+        imageView.tintColor = viewModel.foreColor
+        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapButton)))
+        
+        UIView.transition(with: imageView, duration: transitionDuration, options: transitionOptions) { [weak self] in
+            guard let self = self else { return }
+            self.imageView.image = UIImage(systemName: viewModel.systemName)
+        }
+        
+        imageView.snp.removeConstraints()
+        setupConstraints()
     }
     
     // MARK: - PRIVATE FUNC
-    private func setupUI() {
+    private func setupImage() {
         addSubview(imageView)
+    }
+    
+    private func setupConstraints() {
         imageView.snp.makeConstraints {
             $0.center.equalToSuperview()
-            $0.size.equalToSuperview().multipliedBy(0.6)
+            $0.size.equalToSuperview().multipliedBy(viewModel?.imageSizeByRespectingOuterCircle ?? 0.6)
         }
     }
     
