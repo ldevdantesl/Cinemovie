@@ -29,13 +29,13 @@ final class TMDBServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func getMovieRecommendations(movieID: Int, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
+    func getMovieRecommendations(movieID: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
         let endpoint = TMDBEndpoints.getMovieRecommendationsEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func getMovieSimilars(movieID: Int, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
+    func getMovieSimilars(movieID: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
         let endpoint = TMDBEndpoints.getMovieSimilarsEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
@@ -126,9 +126,28 @@ final class TMDBServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func getTrendingPeople(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<TrendingPeopleAPIResponse, NetworkError>) -> Void) {
+    func getTrendingPeople(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<PeopleListAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
         let endpoint = TMDBEndpoints.getTrendingPeopleEndpoint(for: timeWindow, queryParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    // MARK: - SEARCH
+    func getMovieSearchResults(query: String, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getMovieSearchResultsEndpoint(query: query, extraParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    func getPeopleSearchResults(query: String, completion: @escaping (Result<PeopleListAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getPeopleSearchResultsEndpoint(query: query, extraParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    func getTVSeriesSearchResults(query: String, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        let endpoint = TMDBEndpoints.getTVSeriesSearchResultsEndpoint(query: query, extraParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
@@ -140,13 +159,13 @@ final class TMDBServiceImpl: TMDBService {
     }
     
     // MARK: - PRESET MOVIE LIST IMPLEMENTATIONS
-    func getMovieList(listType: MovieListType, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
+    func getMovieList(listType: MovieListType, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
         let extraParams = ["language": "ru"]
         let endpoint = TMDBEndpoints.createMovieListEndpoint(listType: listType, extraParams: extraParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func getTrendingMoviesList(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void) {
+    func getTrendingMoviesList(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]
         let endpoint = TMDBEndpoints.getTrendingMoviesEndpoint(for: timeWindow, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)

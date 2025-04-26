@@ -99,6 +99,25 @@ struct TMDBEndpoints {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/trending/person/\(timeWindow.rawValue)", queryParams: queryParams)
     }
     
+    // MARK: - SEARCH
+    static func getMovieSearchResultsEndpoint(query: String, extraParams: [String : String]? = nil) -> Endpoint {
+        var queryParams = ["query" : query]
+        extraParams?.forEach { queryParams[$0] = $1 }
+        return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/search/movie", queryParams: queryParams)
+    }
+    
+    static func getTVSeriesSearchResultsEndpoint(query: String, extraParams: [String : String]? = nil) -> Endpoint {
+        var queryParams = ["query" : query]
+        extraParams?.forEach { queryParams[$0] = $1 }
+        return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/search/tv", queryParams: queryParams)
+    }
+    
+    static func getPeopleSearchResultsEndpoint(query: String, extraParams: [String : String]? = nil) -> Endpoint {
+        var queryParams = ["query" : query]
+        extraParams?.forEach { queryParams[$0] = $1 }
+        return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/search/person", queryParams: queryParams)
+    }
+    
     // MARK: - OTHER
     static func getBelongsToCollectionDetailsEndpoint(collectionID: Int, queryParams: [String : String]? = nil) -> Endpoint {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/collection/\(collectionID)", queryParams: queryParams)

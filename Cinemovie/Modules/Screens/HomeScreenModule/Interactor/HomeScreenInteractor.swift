@@ -16,6 +16,11 @@ protocol HomeScreenInteractorProtocol: AnyObject {
     
     // MARK: - TRENDING
     func downloadTrendingPeople(timeWindow: TrendingTimeWindow)
+    
+    // MARK: - SEARCH
+    func downloadSearchResultsForMovies(query: String)
+    func downloadSearchResultsForTVSeries(query: String)
+    func downloadSearchResultsForPeople(query: String)
 }
 
 final class HomeScreenInteractor: HomeScreenInteractorProtocol {
@@ -54,6 +59,37 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didDownloadTrendingPeople(success.results)
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    // MARK: - SEARCH
+    func downloadSearchResultsForMovies(query: String) {
+        tmdbService?.getMovieSearchResults(query: query) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didRecieveMovieSearchResults(success.movies)
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func downloadSearchResultsForPeople(query: String) {
+        tmdbService?.getPeopleSearchResults(query: query) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didRecievePeopleSearchResults(success.results)
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func downloadSearchResultsForTVSeries(query: String) {
+        tmdbService?.getTVSeriesSearchResults(query: query) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didRecieveTVSeriesSearchResults(success.results)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }

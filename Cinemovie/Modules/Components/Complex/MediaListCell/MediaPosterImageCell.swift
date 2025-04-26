@@ -80,6 +80,7 @@ final class MediaPosterImageCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNCTIONS
     public func configure(with viewModel: MediaPosterImageCellViewModel) {
         self.viewModel = viewModel
+        self.posterImageView.sd_cancelCurrentImageLoad()
         
         guard let url = URLHelper.getImageURL(with: viewModel.media.posterPath, size: .w1280) else {
             posterImageView.image = UIImage(systemName: Constants.imageNotFoundName)

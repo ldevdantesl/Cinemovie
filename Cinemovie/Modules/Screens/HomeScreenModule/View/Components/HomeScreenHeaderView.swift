@@ -10,7 +10,8 @@ import UIKit
 
 struct HomeScreenHeaderViewModel {
     let headerTitle: String
-    let didTapMediaButton: (_ mediaType: MediaTypes) -> Void
+    let didStartSearching: ((String) -> Void)?
+    let didTapMediaButton: ((_ mediaType: MediaTypes) -> Void)?
 }
 
 final class HomeScreenHeaderView: UIView {
@@ -58,12 +59,13 @@ final class HomeScreenHeaderView: UIView {
         return button
     }()
     
-    private let searchBarView: CMSearchBar = {
+    private lazy var searchBarView: CMSearchBar = {
         let vm = CMSearchBarViewModel(
             backgroundColor: .cmSecondaryBackground, textColor: .cmLabel,
-            placeholder: "Star wars", font: CMFont.font(size: .body, fontName: .avenirBold)
+            placeholder: "Star wars...", font: CMFont.font(size: .body, fontName: .avenirBold)
         )
         let field = CMSearchBar(viewModel: vm)
+        field.delegate = self
         field.isHidden = true
         field.translatesAutoresizingMaskIntoConstraints = false
         return field
@@ -75,7 +77,7 @@ final class HomeScreenHeaderView: UIView {
             font: CMFont.font(size: .footnote, fontName: .avenirBold), image: nil,
             backColor: CMColor.cmBackground, cornerRadius: Constants.buttonsCornerRadius,
             borderColor: CMColor.cmLabel, borderWidth: Constants.buttonsBorderWidth,
-            didTapAction: didTapMediaButton
+            didTapAction: self.didTapMediaButton
         )
         let button = CMButton(viewModel: vm)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -170,7 +172,7 @@ final class HomeScreenHeaderView: UIView {
             self?.mediaButton.configure(viewModel: vm)
         }
 
-        viewModel.didTapMediaButton(newType)
+        viewModel.didTapMediaButton?(newType)
     }
 
     private func didTapSearchButton() {
@@ -249,7 +251,24 @@ final class HomeScreenHeaderView: UIView {
         } completion: { [weak self] _ in
             guard let self = self else { return }
             self.searchBarView.isHidden = true
+            self.searchBarView.text = nil
             self.searchBarView.resignFirstResponder()
         }
+    }
+}
+
+extension HomeScreenHeaderView: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        guard let text = textField.text else { return true}
+        self.viewModel.didStartSearching?(text)
+        return true
+    }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentText = (textField.text as NSString?)?.replacingCharacters(in: range, with: string)
+        guard let query = currentText, !query.isEmpty else { return true }
+        self.viewModel.didStartSearching?(query)
+        return true
     }
 }

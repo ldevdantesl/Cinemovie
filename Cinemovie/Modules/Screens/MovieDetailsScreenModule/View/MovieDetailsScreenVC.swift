@@ -61,7 +61,6 @@ final class MovieDetailsScreenVC: UIViewController {
     // MARK: - PROPERTIES
     private var viewModels: [CellViewModelBaseClass] = []
     private var visibleSections: [Sections] = []
-    private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
     
     // MARK: - VIEW PROPERTIES
     private let downloadingView: CMSplashView = {
@@ -229,7 +228,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
 
         let action = UIAlertAction(title: "OK", style: .cancel) { [weak self] _ in
             guard let self = self else { return }
-            isFirstScreen ? self.dismiss(animated: true) : presenter?.didTapBackButton()
+            presenter?.didTapBackButton()
         }
 
         alert.addAction(action)

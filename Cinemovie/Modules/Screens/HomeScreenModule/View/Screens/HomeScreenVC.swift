@@ -9,7 +9,9 @@ import SnapKit
 import UIKit
 
 protocol HomeScreenViewProtocol: AnyObject {
-    func didRecieveAllData(movieLists: [(listType: MovieListType, movies: [Movie])], trendingPeople: [Person])
+    func didRecieveAllData()
+    func didRecieveSearchResults()
+    func applySnapshot(sections: [HomeScreenVC.Sections], itemsBySection: [HomeScreenVC.Sections: [HomeScreenVC.Items]])
     func didRecieveError(_ errorStr: String)
 }
 
@@ -19,22 +21,23 @@ final class HomeScreenVC: UIViewController {
     fileprivate enum Constants {
         static let featuredMovieHeight = UIConstants.screenHeight * 0.55
         static let headerViewHeight = 75.0 + UIConstants.topInset
-        static let trendingPeopleIndexSection = 5
     }
     
     // MARK: - SECTION
-    private enum Section: Hashable {
+    enum Sections: Hashable {
         case featured
+        case search
         case movieList(MovieListType)
         case seriesList(TVSeriesListType)
         case trendingPeople
     }
 
     // MARK: - ITEM
-    private enum Item: Hashable {
+    enum Items: Hashable {
         case featured(FeaturedMediaCellViewModel)
         case mediaListCell(MediaListCellViewModel)
         case trendingPeopleCell(TrendingPeopleCellViewModel)
+        case searchCell(MediaSearchCellViewModel)
     }
     
     // MARK: - VIPER
@@ -43,14 +46,14 @@ final class HomeScreenVC: UIViewController {
     // MARK: - PROPERTIES
     private var headerViewHeightConstraint: Constraint?
     private var isBlurToHeaderVisible: Bool = false
-    private var visibleItems: [Section] = []
     
     // MARK: - VIEW PROPERTIES
     private lazy var collectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<HomeScreenVC.Section, HomeScreenVC.Item>(layout: createLayout(), showsTopBlur: false)
+        let view = DiffableCollectionView<HomeScreenVC.Sections, HomeScreenVC.Items>(layout: createLayout(), showsTopBlur: false)
         view.register(cellClass: FeaturedMediaCell.self)
         view.register(cellClass: MediaListCell.self)
         view.register(cellClass: TrendingPeopleCell.self)
+        view.register(cellClass: MediaSearchCell.self)
         view.delegate = self
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
@@ -58,10 +61,7 @@ final class HomeScreenVC: UIViewController {
     }()
     
     private lazy var headerView: HomeScreenHeaderView = {
-        let vm = HomeScreenHeaderViewModel(headerTitle: "Discover", didTapSearchButton: presenter?.didTapSearchButton) { [weak self] in
-            guard let self = self else { return }
-            self.switchTo($0)
-        }
+        let vm = HomeScreenHeaderViewModel(headerTitle: "Discover", didStartSearching: presenter?.didStartSearching, didTapMediaButton: presenter?.didChangeMediaType)
         let view = HomeScreenHeaderView(viewModel: vm)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -130,6 +130,11 @@ final class HomeScreenVC: UIViewController {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? TrendingPeopleCell
                 cell?.configure(viewModel: vm)
                 return cell
+                
+            case .searchCell(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? MediaSearchCell
+                cell?.configure(viewModel: vm)
+                return cell
             }
         }
     }
@@ -139,7 +144,7 @@ final class HomeScreenVC: UIViewController {
             guard let self = self else {
                 return NSCollectionLayoutSection(group: .init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1))))
             }
-            let homeSection = self.visibleItems[sectionIndex]
+            let homeSection = presenter?.visibleSections[sectionIndex] ?? Sections.featured
             let edgeInsets: NSDirectionalEdgeInsets
             
             switch homeSection {
@@ -153,67 +158,6 @@ final class HomeScreenVC: UIViewController {
             section.contentInsets = edgeInsets
             return section
         }
-    }
-    
-    private func switchTo(_ mediaType: MediaTypes) {
-        guard let presenter = presenter else { return }
-        
-        var sectionsAndItems: [(section: Section, items: [Item])] = []
-        
-        switch mediaType {
-        case .movie:
-            let featuredVM = FeaturedMediaCellViewModel(media: presenter.movieLists.flatMap { $0.movies }, didTapMedia: presenter.didTapMedia)
-            sectionsAndItems.append((Section.featured, [.featured(featuredVM)]))
-            
-            let movieSections = generateListSections(
-                from: presenter.movieLists.map { ($0.listType, $0.movies) },
-                sectionBuilder: { .movieList($0) }
-            )
-            sectionsAndItems.append(contentsOf: movieSections)
-            
-        case .tvShow:
-            let featuredVM = FeaturedMediaCellViewModel(media: presenter.seriesLists.flatMap { $0.series }, didTapMedia: presenter.didTapMedia)
-            sectionsAndItems.append((Section.featured, [.featured(featuredVM)]))
-            let seriesSections = generateListSections(
-                from: presenter.seriesLists.map { ($0.listType, $0.series) },
-                sectionBuilder: { .seriesList($0) }
-            )
-            sectionsAndItems.append(contentsOf: seriesSections)
-        }
-        
-        let trendingPeopleVM = TrendingPeopleCellViewModel(people: presenter.trendingPeople, didTapPerson: presenter.didTapPerson)
-        sectionsAndItems.insert((Section.trendingPeople, [.trendingPeopleCell(trendingPeopleVM)]), at: Constants.trendingPeopleIndexSection)
-        
-        visibleItems = sectionsAndItems.map(\.section)
-        
-        DispatchQueue.main.async {
-            self.collectionView.applySnapshot(
-                sections: self.visibleItems,
-                itemsBySection: Dictionary(uniqueKeysWithValues: sectionsAndItems)
-            )
-        }
-    }
-    
-    private func generateListSections<T: MediaListType, M: Media>(
-        from lists: [(listType: T, media: [M])],
-        sectionBuilder: (T) -> Section
-    ) -> [(section: Section, items: [Item])] {
-        var result: [(section: Section, items: [Item])] = []
-
-        for (listType, media) in lists {
-            if media.isEmpty { continue }
-
-            let vm = MediaListCellViewModel(
-                mediaItems: media,
-                listName: listType.title,
-                listSubtitle: listType.subtitle,
-                didTapMediaItem: presenter?.didTapMedia
-            )
-
-            result.append((sectionBuilder(listType), [.mediaListCell(vm)]))
-        }
-
-        return result
     }
 }
 
@@ -240,29 +184,17 @@ extension HomeScreenVC: UICollectionViewDelegate {
 }
 
 extension HomeScreenVC: HomeScreenViewProtocol {
-    func didRecieveAllData(movieLists: [(listType: MovieListType, movies: [Movie])], trendingPeople: [Person]) {
-        var sectionsAndItems: [(section: Section, items: [Item])] = []
-
-        let allMovies = movieLists.flatMap { $0.movies }
-        let featuredVM = FeaturedMediaCellViewModel(media: allMovies, didTapMedia: self.presenter?.didTapMedia)
-        sectionsAndItems.append((Section.featured, [.featured(featuredVM)]))
-        
-        let movieSections = generateListSections(
-            from: movieLists.map { ($0.listType, $0.movies) },
-            sectionBuilder: { .movieList($0) }
-        )
-        
-        sectionsAndItems.append(contentsOf: movieSections)
-        
-        let trendingPeopleVM = TrendingPeopleCellViewModel(people: trendingPeople, didTapPerson: self.presenter?.didTapPerson)
-        sectionsAndItems.insert((Section.trendingPeople, [.trendingPeopleCell(trendingPeopleVM)]), at: Constants.trendingPeopleIndexSection)
-        
-        visibleItems = sectionsAndItems.map(\.section)
+    func didRecieveAllData() {
+        presenter?.didChangeMediaType(.movie)
+    }
+    
+    func didRecieveSearchResults() {
+        print("Recieved Results")
+    }
+ 
+    func applySnapshot(sections: [Sections], itemsBySection: [Sections : [Items]]) {
         DispatchQueue.main.async {
-            self.collectionView.applySnapshot(
-                sections: self.visibleItems,
-                itemsBySection: Dictionary(uniqueKeysWithValues: sectionsAndItems)
-            )
+            self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
         }
     }
     

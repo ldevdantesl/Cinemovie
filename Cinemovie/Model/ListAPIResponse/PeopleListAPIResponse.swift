@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TrendingPeopleAPIResponse: APIResponse {
+struct PeopleListAPIResponse: APIResponse {
     let page: Int
     let results: [Person]
     let totalPages, totalResults: Int

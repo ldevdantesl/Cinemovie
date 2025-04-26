@@ -8,14 +8,33 @@
 import UIKit
 import SnapKit
 
-final class MediaExtrasTabItemCell: ReusableCellBaseClass {
+final class TabItemCellViewModel: CellViewModelBaseClass {
+    let text: String
+    let isSelected: Bool
+    let isCapsuled: Bool
+    
+    init(text: String, isSelected: Bool, isCapsuled: Bool) {
+        self.text = text
+        self.isSelected = isSelected
+        self.isCapsuled = isCapsuled
+        super.init(cellIdentifier: "TabItemCell")
+    }
+}
+
+final class TabItemCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let topBarHeight = 5.0
         static let spacing = 5.0
+        static let hSpacing = 10.0
+        static let aniDuration = 0.3
+        static let selfCornerRadius = 15.0
     }
     
     // MARK: - PROPERTIES
+    private var viewModel: TabItemCellViewModel?
+    
+    // MARK: - VIEW PROPERTIES
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = CMFont.font(size: .body, fontName: .avenirBold)
@@ -44,14 +63,28 @@ final class MediaExtrasTabItemCell: ReusableCellBaseClass {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        self.contentView.layer.cornerRadius = (self.viewModel?.isCapsuled ?? false) ? Constants.selfCornerRadius : 0
+    }
+    
     // MARK: - PUBLIC FUNC
-    public func configure(text: String, isSelected: Bool) {
-        self.titleLabel.text = text
+    public func configure(viewModel: TabItemCellViewModel) {
+        self.viewModel = viewModel
+        self.titleLabel.text = viewModel.text
         
-        UIView.animate(withDuration: 0.3) { [weak self] in
+        UIView.animate(withDuration: Constants.aniDuration) { [weak self] in
             guard let self = self else { return }
-            self.titleLabel.textColor = isSelected ? CMColor.cmLabel : CMColor.cmSecondary
-            self.topBarView.alpha = !isSelected ? 0 : 1
+            self.titleLabel.textColor = viewModel.isSelected ? CMColor.cmLabel : CMColor.cmSecondary
+            if viewModel.isCapsuled {
+                self.contentView.backgroundColor = !viewModel.isSelected ? CMColor.cmSecondaryBackground: CMColor.cmSystem
+                self.titleLabel.snp.remakeConstraints {
+                    $0.verticalEdges.equalToSuperview().inset(Constants.spacing)
+                    $0.horizontalEdges.equalToSuperview().inset(Constants.hSpacing)
+                }
+            } else {
+                self.topBarView.alpha = !viewModel.isSelected ? 0 : 1
+            }
             self.layoutIfNeeded()
         }
     }

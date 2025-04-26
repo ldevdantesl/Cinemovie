@@ -51,7 +51,7 @@ final class MediaExtrasCellViewModel: CellViewModelBaseClass {
 
 final class MediaExtrasCell: ReusableCellBaseClass {
     // MARK: - TYPEALIAS
-    typealias Cells = CellViewModelBaseClass & CellWithHeightProtocol
+    typealias CellVMs = CellViewModelBaseClass & CellWithHeightProtocol
     
     // MARK: - OTHER
     private enum Tabs: CaseIterable {
@@ -89,7 +89,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: MediaExtrasCellViewModel?
-    private var items: [Tabs : Cells] = [:]
+    private var items: [Tabs : CellVMs] = [:]
     private var selectedTab: Tabs = .none
     private var visibleTabs: [Tabs] {
         return Tabs.allCases.filter { items[$0] != nil }
@@ -109,7 +109,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         view.showsHorizontalScrollIndicator = false
         view.delegate = self
         view.dataSource = self
-        view.register(MediaExtrasTabItemCell.self, forCellWithReuseIdentifier: MediaExtrasTabItemCell.identifier)
+        view.register(TabItemCell.self, forCellWithReuseIdentifier: TabItemCell.identifier)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -133,7 +133,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         view.register(cellClass: TrailersTabContentCell.self)
         view.register(cellClass: BelongsToCollectionTabContentCell.self)
         view.register(cellClass: ReviewsTabContentCell.self)
-        view.register(cellClass: RecommendsTabContentCell.self)
+        view.register(cellClass: VerticalMediaListCell.self)
         view.register(cellClass: SeasonsTabContentCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -195,7 +195,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         )
         if !viewModel.recommended.isEmpty {
             let recommendedMedia = Array(recommendedMedia)
-            let recommendedVM = RecommendsContentCellViewModel(recommendedMedia: recommendedMedia, didTapAnyMedia: viewModel.didTapMedia)
+            let recommendedVM = VerticalMediaListCellViewModel(recommendedMedia: recommendedMedia, didTapAnyMedia: viewModel.didTapMedia)
             self.items[.recommendations] = recommendedVM
         }
         
@@ -301,8 +301,9 @@ extension MediaExtrasCell: UICollectionViewDataSource, UICollectionViewDelegate 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard collectionView == contentCollectionView else {
             let tab = visibleTabs[indexPath.row]
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MediaExtrasTabItemCell.identifier, for: indexPath) as? MediaExtrasTabItemCell else { return UICollectionViewCell() }
-            cell.configure(text: tab.title, isSelected: tab == selectedTab)
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TabItemCell.identifier, for: indexPath) as? TabItemCell else { return UICollectionViewCell() }
+            let vm = TabItemCellViewModel(text: tab.title, isSelected: tab == selectedTab, isCapsuled: false)
+            cell.configure(viewModel: vm)
             return cell
         }
         
@@ -314,7 +315,7 @@ extension MediaExtrasCell: UICollectionViewDataSource, UICollectionViewDelegate 
         case let vm as TrailersTabContentCellViewModel: (cell as? TrailersTabContentCell)?.configure(viewModel: vm)
         case let vm as BelongsToCollectionTabContentCellViewModel: (cell as? BelongsToCollectionTabContentCell)?.configure(viewModel: vm)
         case let vm as ReviewsTabContentCellViewModel: (cell as? ReviewsTabContentCell)?.configure(viewModel: vm)
-        case let vm as RecommendsContentCellViewModel: (cell as? RecommendsTabContentCell)?.configure(viewModel: vm)
+        case let vm as VerticalMediaListCellViewModel: (cell as? VerticalMediaListCell)?.configure(viewModel: vm)
         case let vm as SeasonsTabContentCellViewModel: (cell as? SeasonsTabContentCell)?.configure(viewModel: vm)
         default: break
         }

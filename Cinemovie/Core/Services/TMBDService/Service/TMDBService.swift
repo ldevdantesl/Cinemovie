@@ -11,8 +11,8 @@ protocol TMDBService: AnyObject {
     // MARK: - MOVIES
     func getMovieDetails(movieID: Int, completion: @escaping (Result<MovieDetails, NetworkError>) -> Void)
     func getMovieCast(movieID: Int, completion: @escaping (Result<MediaCastAPIResponse, NetworkError>) -> Void)
-    func getMovieSimilars(movieID: Int, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
-    func getMovieRecommendations(movieID: Int, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
+    func getMovieSimilars(movieID: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
+    func getMovieRecommendations(movieID: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
     func getMovieVideos(movieID: Int, completion: @escaping (Result<MediaVideosAPIResponse, NetworkError>) -> Void)
     func getMovieReviews(movieID: Int, completion: @escaping (Result<MediaReviewsAPIResponse, NetworkError>) -> Void)
     
@@ -34,13 +34,18 @@ protocol TMDBService: AnyObject {
     func getPersonMovieCredits(personID: Int, completion: @escaping (Result<PersonMovieCreditAPIResponse, NetworkError>) -> Void)
     func getPersonTVShowCredits(personID: Int, completion: @escaping (Result<PersonTVShowCreditAPIResponse, NetworkError>) -> Void)
     
+    // MARK: - SEARCH
+    func getMovieSearchResults(query: String, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
+    func getTVSeriesSearchResults(query: String, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
+    func getPeopleSearchResults(query: String, completion: @escaping (Result<PeopleListAPIResponse, NetworkError>) -> Void)
+    
     // MARK: - OTHER
     func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void)
-    func getTrendingPeople(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<TrendingPeopleAPIResponse, NetworkError>) -> Void)
+    func getTrendingPeople(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<PeopleListAPIResponse, NetworkError>) -> Void)
     
     // MARK: - LIST OF PRESET MOVIES
-    func getMovieList(listType: MovieListType, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
-    func getTrendingMoviesList(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<MovieListsAPIResponse, NetworkError>) -> Void)
+    func getMovieList(listType: MovieListType, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
+    func getTrendingMoviesList(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
     
     // MARK: - LIST OF PRESET TV SERIES
     func getTVSeriesList(listType: TVSeriesListType, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)

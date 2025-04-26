@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct MovieListsAPIResponse: APIResponse {
+struct MovieListAPIResponse: APIResponse {
     let dates: Dates?
     let page: Int
     let movies: [Movie]
