@@ -12,11 +12,13 @@ final class MediaSearchCellViewModel: CellViewModelBaseClass {
     let movies: [Movie]
     let tvSeries: [TVSeries]
     let people: [Person]
+    let didTapAnyMedia: ((Media) -> Void)?
     
-    init(movies: [Movie], tvSeries: [TVSeries], people: [Person]) {
+    init(movies: [Movie], tvSeries: [TVSeries], people: [Person], didTapAnyMedia: ((Media) -> Void)?) {
         self.movies = movies
         self.tvSeries = tvSeries
         self.people = people
+        self.didTapAnyMedia = didTapAnyMedia
         super.init(cellIdentifier: "MediaSearchCell")
     }
 }
@@ -28,6 +30,9 @@ final class MediaSearchCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let tabsSpacing = 10.0
+        static let spacing = 10.0
+        static let defaultCellHeight = 200.0
+        static let tabsHeight = 50.0
     }
     
     fileprivate enum Tabs: CaseIterable {
@@ -35,6 +40,15 @@ final class MediaSearchCell: ReusableCellBaseClass {
         case tvSeries
         case people
         case none
+        
+        var title: String {
+            switch self {
+            case .movies: return "Movies"
+            case .tvSeries: return "TV Series"
+            case .people: return "People"
+            case .none: return ""
+            }
+        }
     }
     
     // MARK: - PROPERTIES
@@ -65,10 +79,24 @@ final class MediaSearchCell: ReusableCellBaseClass {
     private lazy var searchCollectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         view.backgroundColor = CMColor.cmBackground
+        view.register(cellClass: VerticalMediaListCell.self)
         view.delegate = self
         view.dataSource = self
         return view
     }()
+    
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        searchCollectionView.layoutIfNeeded()
+            
+        guard let contentVM = items[selectedTab] else {
+            layoutAttributes.frame.size.height = tabsCollectionView.contentSize.height + Constants.defaultCellHeight + Constants.spacing
+            return layoutAttributes
+        }
+        
+        layoutAttributes.frame.size.height = tabsCollectionView.contentSize.height + contentVM.cellHeight + Constants.spacing
+        return layoutAttributes
+    }
     
     // MARK: - LIFECYCLE
     override init(frame: CGRect) {
@@ -81,35 +109,113 @@ final class MediaSearchCell: ReusableCellBaseClass {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        viewModel = nil
+        items.removeAll()
+        selectedTab = .none
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: MediaSearchCellViewModel) {
         self.viewModel = viewModel
+        if !viewModel.movies.isEmpty {
+            let vm = VerticalMediaListCellViewModel(media: viewModel.movies, didTapAnyMedia: viewModel.didTapAnyMedia)
+            items[.movies] = vm
+        }
         
-    }
+        if !viewModel.tvSeries.isEmpty {
+            let vm = VerticalMediaListCellViewModel(media: viewModel.tvSeries, didTapAnyMedia: viewModel.didTapAnyMedia)
+            items[.tvSeries] = vm
+        }
     
-    // MARK: - PRIVATE FUNC
-    private func setupUI() { }
-    
-    private func createLayout() -> UICollectionViewCompositionalLayout {
-        UICollectionViewCompositionalLayout { sectionIndex, env in
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(100)))
-            let group = NSCollectionLayoutGroup.vertical(layoutSize: item.layoutSize, subitems: [item])
-            let section = NSCollectionLayoutSection(group: group)
-            return section
+        guard let firstTab = items.keys.first else { return }
+        DispatchQueue.main.async {
+            self.selectedTab = firstTab
+            self.switchTabs(to: firstTab, animated: false)
+            self.searchCollectionView.reloadData()
+            self.searchCollectionView.performBatchUpdates(nil)
+            self.invalidateIntrinsicContentSize()
+            self.layoutIfNeeded()
         }
     }
     
-    // MARK: - OBJC FUNC
+    // MARK: - PRIVATE FUNC
+    private func setupUI() {
+        addSubview(tabsCollectionView)
+        tabsCollectionView.snp.makeConstraints {
+            $0.top.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(Constants.tabsHeight).priority(.required)
+        }
+
+        addSubview(searchCollectionView)
+        searchCollectionView.snp.makeConstraints {
+            $0.top.equalTo(tabsCollectionView.snp.bottom).offset(Constants.spacing)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview()
+        }
+    }
+    
+    private func switchTabs(to tab: Tabs, animated: Bool = true) {
+        guard tab != selectedTab else { return }
+        selectedTab = tab
+        tabsCollectionView.reloadData()
+
+        guard let index = visibleTabs.firstIndex(of: tab) else { return }
+        searchCollectionView.scrollToItem(at: IndexPath(item: index, section: 0), at: .centeredHorizontally, animated: animated)
+    }
+    
+    private func createLayout() -> UICollectionViewCompositionalLayout {
+        UICollectionViewCompositionalLayout { [weak self] sectionIndex, env in
+            guard let self = self else { return nil }
+            let vm = self.items[selectedTab]
+            let cellHeight = vm?.cellHeight
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(cellHeight ?? Constants.defaultCellHeight)))
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: item.layoutSize, subitems: [item])
+            let section = NSCollectionLayoutSection(group: group)
+            section.orthogonalScrollingBehavior = .groupPagingCentered
+            section.interGroupSpacing = Constants.tabsSpacing
+            section.visibleItemsInvalidationHandler = { [weak self] _, offset, environment in
+                guard let self = self else { return }
+                let page = Int(round(offset.x / environment.container.contentSize.width))
+                guard page < visibleTabs.count, let tab = visibleTabs[safe: page], tab != self.selectedTab else { return }
+                self.selectedTab = tab
+                self.tabsCollectionView.reloadData()
+                self.searchCollectionView.invalidateIntrinsicContentSize()
+                self.invalidateIntrinsicContentSize()
+            }
+            return section
+        }
+    }
 }
 
 extension MediaSearchCell: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 0
+        return items.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        return UICollectionViewCell()
+        let tab = visibleTabs[indexPath.row]
+        guard collectionView == searchCollectionView else {
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TabItemCell.identifier, for: indexPath) as? TabItemCell else { return UICollectionViewCell() }
+            let vm = TabItemCellViewModel(text: tab.title, font: CMFont.font(size: .caption, fontName: .avenirBold), isSelected: tab == selectedTab, isCapsuled: true)
+            cell.configure(viewModel: vm)
+            return cell
+        }
+        
+        guard let viewModel = items[tab] else { return UICollectionViewCell() }
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.cellIdentifier, for: indexPath)
+        
+        switch viewModel {
+        case let vm as VerticalMediaListCellViewModel: (cell as? VerticalMediaListCell)?.configure(viewModel: vm)
+        default: break
+        }
+        return cell
     }
     
-    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard collectionView == tabsCollectionView else { return }
+        let tab = visibleTabs[indexPath.row]
+        switchTabs(to: tab)
+    }
 }

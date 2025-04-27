@@ -8,7 +8,8 @@
 import Foundation
 
 struct MediaReviewsAPIResponse: APIResponse {
-    let id, page: Int
+    let id: Int
+    let page: Int?
     let results: [Review]
     let totalPages, totalResults: Int
 

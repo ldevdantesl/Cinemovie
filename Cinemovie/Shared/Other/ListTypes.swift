@@ -54,6 +54,20 @@ enum MovieListType: MediaListType {
         case .fantasy: return "Magical and mythical worlds"
         }
     }
+    
+    var genreName: MovieGenreName {
+        switch self {
+        case .animation: return .animation
+        case .documentary: return .documentary
+        case .action: return .action
+        case .comedy: return .comedy
+        case .drama: return .drama
+        case .history: return .history
+        case .horror: return .horror
+        case .fantasy: return .fantasy
+        default: return .unknown
+        }
+    }
 }
 
 enum TVSeriesListType: MediaListType {
@@ -101,6 +115,20 @@ enum TVSeriesListType: MediaListType {
         case .kids: return "Fun and safe for kids"
         case .comedy: return "Laugh-out-loud series picks"
         case .documentary: return "Eye-opening documentary series"
+        }
+    }
+    
+    var genreName: TVSeriesGenreName {
+        switch self {
+        case .actionAdventure: return .actionAdventure
+        case .sciFiFantasy: return .sciFiFantasy
+        case .drama: return .drama
+        case .animation: return .animation
+        case .crime: return .crime
+        case .kids: return .kids
+        case .comedy: return .comedy
+        case .documentary: return .documentary
+        default: return .unknown
         }
     }
 }

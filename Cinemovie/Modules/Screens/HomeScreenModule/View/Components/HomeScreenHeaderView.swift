@@ -7,10 +7,12 @@
 
 import SnapKit
 import UIKit
+import SDWebImage
 
 struct HomeScreenHeaderViewModel {
     let headerTitle: String
     let didStartSearching: ((String) -> Void)?
+    let didFinishSearching: (() -> Void)?
     let didTapMediaButton: ((_ mediaType: MediaTypes) -> Void)?
 }
 
@@ -22,9 +24,11 @@ final class HomeScreenHeaderView: UIView {
         static let biggerSpacing = 10.0
         static let searchButtonSystemName = "magnifyingglass"
         static let xmarkButtonName = "xmark"
-        static let buttonSize = 30.0
+        static let buttonSize = 35.0
         static let buttonsCornerRadius = 15.0
         static let buttonsBorderWidth = 1.0
+        
+        static let farOffset = 100.0
     }
     
     // MARK: - PROPERTIES
@@ -147,7 +151,7 @@ final class HomeScreenHeaderView: UIView {
         addSubview(searchBarView)
         searchBarView.snp.makeConstraints {
             $0.top.equalTo(headerLabel.snp.bottom)
-            $0.trailing.equalTo(searchButton.snp.leading).offset(100)
+            $0.trailing.equalTo(searchButton.snp.leading).offset(Constants.farOffset)
             $0.leading.equalTo(searchBarView.snp.trailing)
             $0.bottom.equalToSuperview().offset(-Constants.biggerSpacing)
         }
@@ -196,7 +200,7 @@ final class HomeScreenHeaderView: UIView {
         }
         
         mediaButton.snp.updateConstraints {
-            $0.leading.equalToSuperview().offset(-100)
+            $0.leading.equalToSuperview().offset(-Constants.farOffset)
         }
         
         let newButtonVM = CMCircularButtonViewModel(
@@ -235,7 +239,7 @@ final class HomeScreenHeaderView: UIView {
         
         searchBarView.snp.remakeConstraints {
             $0.top.equalTo(headerLabel.snp.bottom)
-            $0.trailing.equalTo(searchButton.snp.leading).offset(100)
+            $0.trailing.equalTo(searchButton.snp.leading).offset(Constants.farOffset)
             $0.leading.equalTo(searchBarView.snp.trailing)
             $0.bottom.equalToSuperview().offset(-Constants.biggerSpacing)
         }
@@ -244,6 +248,7 @@ final class HomeScreenHeaderView: UIView {
             $0.leading.equalToSuperview().offset(Constants.biggerSpacing)
         }
         
+        viewModel.didFinishSearching?()
         UIView.animate(withDuration: Constants.aniDuration) { [weak self] in
             guard let self = self else { return }
             self.headerLabel.text = "Discover"
@@ -253,6 +258,7 @@ final class HomeScreenHeaderView: UIView {
             self.searchBarView.isHidden = true
             self.searchBarView.text = nil
             self.searchBarView.resignFirstResponder()
+            SDImageCache.shared.clearMemory()
         }
     }
 }
@@ -260,14 +266,12 @@ final class HomeScreenHeaderView: UIView {
 extension HomeScreenHeaderView: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
-        guard let text = textField.text else { return true}
-        self.viewModel.didStartSearching?(text)
         return true
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let currentText = (textField.text as NSString?)?.replacingCharacters(in: range, with: string)
-        guard let query = currentText, !query.isEmpty else { return true }
+        guard let query = currentText else { return true }
         self.viewModel.didStartSearching?(query)
         return true
     }

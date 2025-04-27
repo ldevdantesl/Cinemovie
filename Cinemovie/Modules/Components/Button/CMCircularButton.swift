@@ -36,9 +36,8 @@ final class CMCircularButton: UIView {
     private var viewModel: CMCircularButtonViewModel?
     
     // MARK: - VIEW PROPERTIES
-    private var imageView: UIImageView = {
+    private let imageView: UIImageView = {
         let image = UIImageView()
-        image.isUserInteractionEnabled = true
         image.contentMode = .scaleAspectFit
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
@@ -72,11 +71,11 @@ final class CMCircularButton: UIView {
         self.clipsToBounds = true
         self.isUserInteractionEnabled = true
         self.backgroundColor = viewModel.backColor
-        imageView.image = UIImage(systemName: viewModel.systemName)
-        imageView.tintColor = viewModel.foreColor
-        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapButton)))
-        imageView.snp.removeConstraints()
-        setupConstraints()
+        self.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapButton)))
+        self.imageView.image = UIImage(systemName: viewModel.systemName)
+        self.imageView.tintColor = viewModel.foreColor
+        self.imageView.snp.removeConstraints()
+        self.setupConstraints()
     }
     
     public func reconfigure(newVM viewModel: CMCircularButtonViewModel, transitionDuration: TimeInterval = 0.25, transitionOptions: UIView.AnimationOptions = .transitionCrossDissolve) {
@@ -84,16 +83,16 @@ final class CMCircularButton: UIView {
         self.clipsToBounds = true
         self.isUserInteractionEnabled = true
         self.backgroundColor = viewModel.backColor
-        imageView.tintColor = viewModel.foreColor
-        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapButton)))
+        self.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapButton)))
+        self.imageView.tintColor = viewModel.foreColor
         
         UIView.transition(with: imageView, duration: transitionDuration, options: transitionOptions) { [weak self] in
             guard let self = self else { return }
             self.imageView.image = UIImage(systemName: viewModel.systemName)
         }
         
-        imageView.snp.removeConstraints()
-        setupConstraints()
+        self.imageView.snp.removeConstraints()
+        self.setupConstraints()
     }
     
     // MARK: - PRIVATE FUNC

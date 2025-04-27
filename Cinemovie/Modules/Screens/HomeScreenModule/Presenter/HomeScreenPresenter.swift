@@ -21,6 +21,9 @@ protocol HomeScreenPresenterProtocol: AnyObject {
     func didRecieveMovieSearchResults(_ results: [Movie])
     func didRecieveTVSeriesSearchResults(_ results: [TVSeries])
     func didRecievePeopleSearchResults(_ results: [Person])
+    func didFinishSearching()
+    func showSearchResults()
+    func showRecentlyViewedMedia()
     
     // MARK: - MOVIES
     func didDownloadMovieList(listType: MovieListType, queryMovies: [Movie])
@@ -32,9 +35,6 @@ protocol HomeScreenPresenterProtocol: AnyObject {
     func didDownloadTrendingPeople(_ people: [Person])
     
     // MARK: - PROPERTIES
-    var movieLists: [(listType: MovieListType, movies: [Movie])] { get set }
-    var seriesLists: [(listType: TVSeriesListType, series: [TVSeries])] { get set }
-    var trendingPeople: [Person] { get set }
     var visibleSections: [HomeScreenVC.Sections] { get set }
     
     // MARK: - ERROR
@@ -67,6 +67,8 @@ final class HomeScreenPresenter {
     public var tvSeriesSearchResults: [TVSeries] = []
     public var peopleSearchResults: [Person] = []
     
+    public var recentlyViewedMedia: [Media] = []
+    
     init(interactor: HomeScreenInteractorProtocol, router: HomeScreenRouterProtocol) {
         self.interactor = interactor
         self.router = router
@@ -97,12 +99,13 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
         
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
-            self.view?.didRecieveAllData()
+            self.didChangeMediaType(.movie)
         }
     }
     
     // MARK: - USER INITIATED
     func didTapMedia(_ media: any Media) {
+        self.recentlyViewedMedia.append(media)
         switch media {
         case is Movie: router.navigateToMovieDetails(movieID: media.id)
         case is TVSeries: router.navigateToTVSeriesDetails(seriesID: media.id)
@@ -158,21 +161,27 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
     
     func didStartSearching(_ query: String) {
         searchWorkItem?.cancel()
-        
         let workItem = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
+            guard !query.isEmpty else {
+                !recentlyViewedMedia.isEmpty ? self.showRecentlyViewedMedia() : ()
+                return
+            }
             
             self.searchDownloadGroup.enter()
+            self.movieSearchResults = []
             self.interactor.downloadSearchResultsForMovies(query: query)
 
             self.searchDownloadGroup.enter()
+            self.tvSeriesSearchResults = []
             self.interactor.downloadSearchResultsForTVSeries(query: query)
 
             self.searchDownloadGroup.enter()
             self.interactor.downloadSearchResultsForPeople(query: query)
 
-            self.searchDownloadGroup.notify(queue: .main) {
-                self.view?.didRecieveSearchResults()
+            self.searchDownloadGroup.notify(queue: .main) {[weak self] in
+                guard let self = self else { return }
+                self.showSearchResults()
             }
         }
         
@@ -182,18 +191,46 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
     
     // MARK: - SEARCH
     func didRecieveMovieSearchResults(_ results: [Movie]) {
-        self.movieSearchResults = results
+        self.movieSearchResults = results.filteringHighRated().filteringByMinimumPopularity().removingMediaWithoutPoster()
         searchDownloadGroup.leave()
     }
     
     func didRecieveTVSeriesSearchResults(_ results: [TVSeries]) {
-        self.tvSeriesSearchResults = results
+        self.tvSeriesSearchResults = results.filteringHighRated().filteringByMinimumPopularity().removingMediaWithoutPoster()
         searchDownloadGroup.leave()
     }
     
     func didRecievePeopleSearchResults(_ results: [Person]) {
         self.peopleSearchResults = results
         searchDownloadGroup.leave()
+    }
+    
+    func showSearchResults() {
+        guard !tvSeriesSearchResults.isEmpty || !movieSearchResults.isEmpty else {
+            visibleSections = [.notFound]
+            let vm = UnavailableInfoCellViewModel(title: "Nothing was found", subtitle: "Try something else", image: UIImage(named: ImageNames.notFound.rawValue))
+            view?.applySnapshot(sections: visibleSections, itemsBySection: [.notFound : [.notFoundCell(vm)]])
+            return
+        }
+        visibleSections = [.search]
+        let vm = MediaSearchCellViewModel(movies: movieSearchResults, tvSeries: tvSeriesSearchResults, people: peopleSearchResults) { [weak self] in
+            guard let self = self else { return }
+            self.didTapMedia($0)
+        }
+        view?.applySnapshot(sections: visibleSections, itemsBySection: [.search : [.searchCell(vm)]])
+    }
+    
+    func showRecentlyViewedMedia() {
+        self.visibleSections = [.recentlyViewed]
+        let vm = VerticalMediaListCellViewModel(media: recentlyViewedMedia, title: "Recently Viewed", subtitle: "Your recently explored titles") { [weak self] in
+            guard let self = self else { return }
+            self.didTapMedia($0)
+        }
+        self.view?.applySnapshot(sections: visibleSections, itemsBySection: [.recentlyViewed : [.verticalMediaListCell(vm)]])
+    }
+    
+    func didFinishSearching() {
+        self.didChangeMediaType(.movie)
     }
 
     // MARK: - MOVIES

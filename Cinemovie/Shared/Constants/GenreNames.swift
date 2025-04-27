@@ -27,6 +27,7 @@ enum MovieGenreName: String {
     case thriller = "Thriller"
     case war = "War"
     case western = "Western"
+    case unknown = "Unknown"
 }
 
 enum TVSeriesGenreName: String {
@@ -46,4 +47,5 @@ enum TVSeriesGenreName: String {
     case talk = "Talk"
     case warPolitics = "War & Politics"
     case western = "Western"
+    case unknown = "Unknown"
 }

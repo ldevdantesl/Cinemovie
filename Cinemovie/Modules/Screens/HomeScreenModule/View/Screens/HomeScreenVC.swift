@@ -9,8 +9,6 @@ import SnapKit
 import UIKit
 
 protocol HomeScreenViewProtocol: AnyObject {
-    func didRecieveAllData()
-    func didRecieveSearchResults()
     func applySnapshot(sections: [HomeScreenVC.Sections], itemsBySection: [HomeScreenVC.Sections: [HomeScreenVC.Items]])
     func didRecieveError(_ errorStr: String)
 }
@@ -30,6 +28,8 @@ final class HomeScreenVC: UIViewController {
         case movieList(MovieListType)
         case seriesList(TVSeriesListType)
         case trendingPeople
+        case recentlyViewed
+        case notFound
     }
 
     // MARK: - ITEM
@@ -38,6 +38,8 @@ final class HomeScreenVC: UIViewController {
         case mediaListCell(MediaListCellViewModel)
         case trendingPeopleCell(TrendingPeopleCellViewModel)
         case searchCell(MediaSearchCellViewModel)
+        case notFoundCell(UnavailableInfoCellViewModel)
+        case verticalMediaListCell(VerticalMediaListCellViewModel)
     }
     
     // MARK: - VIPER
@@ -54,6 +56,8 @@ final class HomeScreenVC: UIViewController {
         view.register(cellClass: MediaListCell.self)
         view.register(cellClass: TrendingPeopleCell.self)
         view.register(cellClass: MediaSearchCell.self)
+        view.register(cellClass: VerticalMediaListCell.self)
+        view.register(cellClass: UnavailableInfoCell.self)
         view.delegate = self
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
@@ -61,7 +65,10 @@ final class HomeScreenVC: UIViewController {
     }()
     
     private lazy var headerView: HomeScreenHeaderView = {
-        let vm = HomeScreenHeaderViewModel(headerTitle: "Discover", didStartSearching: presenter?.didStartSearching, didTapMediaButton: presenter?.didChangeMediaType)
+        let vm = HomeScreenHeaderViewModel(
+            headerTitle: "Discover", didStartSearching: presenter?.didStartSearching,
+            didFinishSearching: presenter?.didFinishSearching, didTapMediaButton: presenter?.didChangeMediaType
+        )
         let view = HomeScreenHeaderView(viewModel: vm)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -135,20 +142,29 @@ final class HomeScreenVC: UIViewController {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? MediaSearchCell
                 cell?.configure(viewModel: vm)
                 return cell
+                
+            case .notFoundCell(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? UnavailableInfoCell
+                cell?.configure(viewModel: vm)
+                return cell
+                
+            case .verticalMediaListCell(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? VerticalMediaListCell
+                cell?.configure(viewModel: vm)
+                return cell
             }
         }
     }
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
         return UICollectionViewCompositionalLayout { [weak self] sectionIndex, env in
-            guard let self = self else {
-                return NSCollectionLayoutSection(group: .init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1))))
-            }
+            guard let self = self else { return nil }
             let homeSection = presenter?.visibleSections[sectionIndex] ?? Sections.featured
             let edgeInsets: NSDirectionalEdgeInsets
             
             switch homeSection {
-            case .featured: edgeInsets = NSDirectionalEdgeInsets(top: Constants.headerViewHeight, leading: 10, bottom: 10, trailing: 10)
+            case .featured, .search, .recentlyViewed: edgeInsets = NSDirectionalEdgeInsets(top: Constants.headerViewHeight, leading: 10, bottom: 10, trailing: 10)
+            case .notFound: edgeInsets = NSDirectionalEdgeInsets(top: UIConstants.screenHeight / 3, leading: 10, bottom: 10, trailing: 10)
             default: edgeInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
             }
             
@@ -163,6 +179,7 @@ final class HomeScreenVC: UIViewController {
 
 extension HomeScreenVC: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        view.endEditing(true)
         let contentOffsetY = scrollView.contentOffset.y + scrollView.adjustedContentInset.top
         
         if contentOffsetY >= 5 && !isBlurToHeaderVisible {
@@ -184,14 +201,6 @@ extension HomeScreenVC: UICollectionViewDelegate {
 }
 
 extension HomeScreenVC: HomeScreenViewProtocol {
-    func didRecieveAllData() {
-        presenter?.didChangeMediaType(.movie)
-    }
-    
-    func didRecieveSearchResults() {
-        print("Recieved Results")
-    }
- 
     func applySnapshot(sections: [Sections], itemsBySection: [Sections : [Items]]) {
         DispatchQueue.main.async {
             self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)

@@ -48,7 +48,7 @@ final class TMDBServiceImpl: TMDBService {
     }
     
     func getMovieReviews(movieID: Int, completion: @escaping (Result<MediaReviewsAPIResponse, NetworkError>) -> Void) {
-        let queryParams = ["language" : "en-US"]
+        let queryParams = ["language" : "en-US", "dummy" : UUID().uuidString]
         let endpoint = TMDBEndpoints.getMovieReviewsEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }

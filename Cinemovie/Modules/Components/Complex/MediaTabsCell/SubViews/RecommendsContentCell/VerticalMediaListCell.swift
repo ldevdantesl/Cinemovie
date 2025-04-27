@@ -10,12 +10,24 @@ import SnapKit
 import SDWebImage
 
 final class VerticalMediaListCellViewModel: CellViewModelBaseClass, CellWithHeightProtocol {
-    let recommendedMedia: [Media]
+    let media: [Media]
     let didTapAnyMedia: ((Media) -> Void)?
+    let title: String?
+    let subtitle: String?
     var cellHeight: CGFloat = 100
     
-    init(recommendedMedia: [Media], didTapAnyMedia: ((Media) -> Void)?) {
-        self.recommendedMedia = recommendedMedia
+    init(media: [Media], didTapAnyMedia: ((Media) -> Void)?) {
+        self.media = media
+        self.didTapAnyMedia = didTapAnyMedia
+        self.title = nil
+        self.subtitle = nil
+        super.init(cellIdentifier: "VerticalMediaListCell")
+    }
+    
+    init(media: [Media], title: String, subtitle: String? = nil, didTapAnyMedia: ((Media) -> Void)?) {
+        self.media = media
+        self.title = title
+        self.subtitle = subtitle
         self.didTapAnyMedia = didTapAnyMedia
         super.init(cellIdentifier: "VerticalMediaListCell")
     }
@@ -32,13 +44,31 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
         static let itemHeight = itemWidth * 1.7
         static let vGroupHeight = itemHeight * 3 + 20
         static let vSpacing = 10.0
+        static let spacing = 5.0
     }
     
     // MARK: - PROPERTIES
     private var viewModel: VerticalMediaListCellViewModel?
     private var items: [MediaPosterImageCellViewModel] = []
+    private var gridCVTopConstraint: Constraint?
     
     // MARK: - VIEW PROPERTIES
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = CMFont.font(size: .body, fontName: .avenirBold)
+        label.textColor = CMColor.cmLabel
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let subtitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = CMFont.font(size: .footnote, fontName: .avenirDemiBoldItalic)
+        label.textColor = CMColor.cmSecondary
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     private lazy var gridCollectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         view.isScrollEnabled = false
@@ -62,7 +92,11 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
     
     override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
         layoutIfNeeded()
-        let height = gridCollectionView.contentSize.height
+        gridCollectionView.performBatchUpdates(nil) { [weak self] _ in
+            guard let self = self else { return }
+            gridCollectionView.layoutIfNeeded()
+        }
+        let height = gridCollectionView.contentSize.height + titleLabel.intrinsicContentSize.height + subtitleLabel.intrinsicContentSize.height + Constants.vSpacing
         layoutAttributes.frame.size.height = height
         self.viewModel?.setCellHeight(to: height)
         return layoutAttributes
@@ -71,16 +105,36 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: VerticalMediaListCellViewModel) {
         self.viewModel = viewModel
-        self.items = viewModel.recommendedMedia.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.didTapAnyMedia) }
+        if let title = viewModel.title {
+            self.titleLabel.text = title
+            self.subtitleLabel.text = viewModel.subtitle
+            self.gridCVTopConstraint?.update(offset: Constants.vSpacing)
+        }
+        self.items = viewModel.media.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.didTapAnyMedia) }
         self.gridCollectionView.reloadData()
+        self.gridCollectionView.layoutIfNeeded()
         self.layoutIfNeeded()
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
+        contentView.addSubview(titleLabel)
+        titleLabel.snp.makeConstraints {
+            $0.top.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
+        }
+        
+        contentView.addSubview(subtitleLabel)
+        subtitleLabel.snp.makeConstraints {
+            $0.top.equalTo(titleLabel.snp.bottom)
+            $0.horizontalEdges.equalToSuperview()
+        }
+        
         contentView.addSubview(gridCollectionView)
         gridCollectionView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            gridCVTopConstraint = $0.top.equalTo(subtitleLabel.snp.bottom).constraint
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview()
         }
     }
     

@@ -130,9 +130,9 @@ struct TMDBEndpoints {
         case .popular: return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/popular", queryParams: extraParams)
         case .topRated: return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/top_rated", queryParams: extraParams)
         case .upcoming: return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/upcoming", queryParams: extraParams)
-
+            
         case .animation, .documentary, .action, .comedy, .drama, .history, .horror, .fantasy:
-            let genreID = GenreHelper.shared.getMovieGenreID(for: movieGenreFrom(listType))
+            let genreID = GenreHelper.shared.getMovieGenreID(for: listType.genreName)
             var queryParams = [
                 "with_genres": "\(genreID)"
             ]
@@ -154,55 +154,26 @@ struct TMDBEndpoints {
             queryParams["sort_by"] = "popularity.desc"
             queryParams["without_genres"] = GenreHelper.shared.getTVSeriesGenreIDsSeperatedByComma(genres: [.news, .reality, .talk, .warPolitics])
             return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/discover/tv", queryParams: queryParams)
-
+            
         case .topRated:
             return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/top_rated", queryParams: extraParams)
-
+            
         case .onTheAir:
             queryParams["sort_by"] = "first_air_date.desc"
             queryParams["air_date.lte"] = CMDateFormatter.currentDateString()
             queryParams["without_genres"] = GenreHelper.shared.getTVSeriesGenreIDsSeperatedByComma(genres: [.news, .reality, .talk, .warPolitics])
             return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/discover/tv", queryParams: queryParams)
-
+            
         case .airingToday:
             queryParams["first_air_date.gte"] = CMDateFormatter.currentDateString()
             queryParams["first_air_date.lte"] = CMDateFormatter.currentDateString()
             queryParams["without_genres"] = GenreHelper.shared.getTVSeriesGenreIDsSeperatedByComma(genres: [.news, .reality, .talk, .warPolitics])
             return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/discover/tv", queryParams: queryParams)
-
+            
         case .actionAdventure, .sciFiFantasy, .drama, .animation, .crime, .kids, .comedy, .documentary:
             queryParams["sort_by"] = "popularity.desc"
-            queryParams["with_genres"] = GenreHelper.shared.getTVSeriesGenreIDsSeperatedByComma(genres: [tvGenreFrom(listType)])
+            queryParams["with_genres"] = GenreHelper.shared.getTVSeriesGenreIDsSeperatedByComma(genres: [listType.genreName])
             return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/discover/tv", queryParams: queryParams)
-        }
-    }
-    
-    // MARK: - PRIVATE FUNC
-    private static func movieGenreFrom(_ listType: MovieListType) -> MovieGenreName {
-        switch listType {
-        case .animation: return .animation
-        case .documentary: return .documentary
-        case .action: return .action
-        case .comedy: return .comedy
-        case .drama: return .drama
-        case .history: return .history
-        case .horror: return .horror
-        case .fantasy: return .fantasy
-        default: fatalError("Invalid genre list type for genreFrom()")
-        }
-    }
-    
-    private static func tvGenreFrom(_ listType: TVSeriesListType) -> TVSeriesGenreName {
-        switch listType {
-        case .actionAdventure: return .actionAdventure
-        case .sciFiFantasy: return .sciFiFantasy
-        case .drama: return .drama
-        case .animation: return .animation
-        case .crime: return .crime
-        case .kids: return .kids
-        case .comedy: return .comedy
-        case .documentary: return .documentary
-        default: fatalError("Invalid genre list type for genreFrom()")
         }
     }
 }

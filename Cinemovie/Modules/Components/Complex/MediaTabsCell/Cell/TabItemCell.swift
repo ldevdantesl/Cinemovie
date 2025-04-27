@@ -12,9 +12,11 @@ final class TabItemCellViewModel: CellViewModelBaseClass {
     let text: String
     let isSelected: Bool
     let isCapsuled: Bool
+    let font: UIFont
     
-    init(text: String, isSelected: Bool, isCapsuled: Bool) {
+    init(text: String, font: UIFont = CMFont.font(size: .body, fontName: .avenirBold), isSelected: Bool, isCapsuled: Bool) {
         self.text = text
+        self.font = font
         self.isSelected = isSelected
         self.isCapsuled = isCapsuled
         super.init(cellIdentifier: "TabItemCell")
@@ -72,6 +74,7 @@ final class TabItemCell: ReusableCellBaseClass {
     public func configure(viewModel: TabItemCellViewModel) {
         self.viewModel = viewModel
         self.titleLabel.text = viewModel.text
+        self.titleLabel.font = viewModel.font
         
         UIView.animate(withDuration: Constants.aniDuration) { [weak self] in
             guard let self = self else { return }

@@ -47,7 +47,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetMovieRecommendations(queryMovies: success.movies)
-            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription)
+            case .failure: self.presenter?.didGetMovieRecommendations(queryMovies: [])
             }
         }
     }
@@ -57,7 +57,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetMovieVideos(videos: success.results)
-            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription)
+            case .failure: self.presenter?.didGetMovieVideos(videos: [])
             }
         }
     }
@@ -67,7 +67,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didGetMovieReviews(success.results)
-            case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription)
+            case .failure: presenter?.didGetMovieReviews([])
             }
         }
     }

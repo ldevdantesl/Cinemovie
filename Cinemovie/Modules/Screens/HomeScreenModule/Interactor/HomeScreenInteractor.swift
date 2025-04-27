@@ -70,7 +70,7 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didRecieveMovieSearchResults(success.movies)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            case .failure: self.presenter?.didRecieveMovieSearchResults([])
             }
         }
     }
@@ -80,7 +80,7 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didRecievePeopleSearchResults(success.results)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            case .failure: self.presenter?.didRecievePeopleSearchResults([])
             }
         }
     }
@@ -90,7 +90,7 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didRecieveTVSeriesSearchResults(success.results)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            case .failure: self.presenter?.didRecieveTVSeriesSearchResults([])
             }
         }
     }

@@ -195,7 +195,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
         )
         if !viewModel.recommended.isEmpty {
             let recommendedMedia = Array(recommendedMedia)
-            let recommendedVM = VerticalMediaListCellViewModel(recommendedMedia: recommendedMedia, didTapAnyMedia: viewModel.didTapMedia)
+            let recommendedVM = VerticalMediaListCellViewModel(media: recommendedMedia, didTapAnyMedia: viewModel.didTapMedia)
             self.items[.recommendations] = recommendedVM
         }
         
@@ -212,7 +212,6 @@ final class MediaExtrasCell: ReusableCellBaseClass {
             }
             self.items[.reviews] = reviewsVM
         }
-        self.layoutIfNeeded()
         
         guard let firstTab = items.keys.first else { return }
         DispatchQueue.main.async {
@@ -220,7 +219,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
             self.switchTabs(to: firstTab, animated: false)
             self.contentCollectionView.reloadData()
             self.contentCollectionView.performBatchUpdates(nil)
-            self.onHeightChangedRequest()
+            self.layoutIfNeeded()
         }
     }
     

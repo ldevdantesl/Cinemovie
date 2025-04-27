@@ -33,7 +33,8 @@ struct Endpoint {
         self.headers = headers ?? [
             "Authorization" : "Bearer \(bearerToken)",
             "accept" : "application/json",
-            "content-type" : "application/json"
+            "content-type" : "application/json",
+            "Cache-Control" : "no-cache"
         ]
         self.queryParams = queryParams
         self.body = body
@@ -52,6 +53,7 @@ struct Endpoint {
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         request.httpBody = body
+        request.cachePolicy = .reloadIgnoringLocalCacheData
         
         headers?.forEach { key, value in
             request.setValue(value, forHTTPHeaderField: key)
