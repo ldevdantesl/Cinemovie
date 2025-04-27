@@ -133,20 +133,20 @@ final class TMDBServiceImpl: TMDBService {
     }
     
     // MARK: - SEARCH
-    func getMovieSearchResults(query: String, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
-        let queryParams = ["language" : "ru"]
+    func getMovieSearchResults(query: String, page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru", "page" : page.description]
         let endpoint = TMDBEndpoints.getMovieSearchResultsEndpoint(query: query, extraParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func getPeopleSearchResults(query: String, completion: @escaping (Result<PeopleListAPIResponse, NetworkError>) -> Void) {
-        let queryParams = ["language" : "ru"]
+    func getPeopleSearchResults(query: String, page: Int, completion: @escaping (Result<PeopleListAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru", "page" : page.description]
         let endpoint = TMDBEndpoints.getPeopleSearchResultsEndpoint(query: query, extraParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func getTVSeriesSearchResults(query: String, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
-        let queryParams = ["language" : "ru"]
+    func getTVSeriesSearchResults(query: String, page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru", "page" : page.description]
         let endpoint = TMDBEndpoints.getTVSeriesSearchResultsEndpoint(query: query, extraParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }

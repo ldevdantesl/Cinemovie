@@ -21,6 +21,11 @@ protocol HomeScreenInteractorProtocol: AnyObject {
     func downloadSearchResultsForMovies(query: String)
     func downloadSearchResultsForTVSeries(query: String)
     func downloadSearchResultsForPeople(query: String)
+    
+    // MARK: - PAGINATION
+    func downloadNewPaginatedSearchResultsForMovies(query: String, page: Int)
+    func downloadNewPaginatedSearchResultsForTVSeries(query: String, page: Int)
+
 }
 
 final class HomeScreenInteractor: HomeScreenInteractorProtocol {
@@ -66,7 +71,7 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
     
     // MARK: - SEARCH
     func downloadSearchResultsForMovies(query: String) {
-        tmdbService?.getMovieSearchResults(query: query) { [weak self] result in
+        tmdbService?.getMovieSearchResults(query: query, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didRecieveMovieSearchResults(success.movies)
@@ -76,7 +81,7 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
     }
     
     func downloadSearchResultsForPeople(query: String) {
-        tmdbService?.getPeopleSearchResults(query: query) { [weak self] result in
+        tmdbService?.getPeopleSearchResults(query: query, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didRecievePeopleSearchResults(success.results)
@@ -86,11 +91,32 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
     }
     
     func downloadSearchResultsForTVSeries(query: String) {
-        tmdbService?.getTVSeriesSearchResults(query: query) { [weak self] result in
+        tmdbService?.getTVSeriesSearchResults(query: query, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didRecieveTVSeriesSearchResults(success.results)
             case .failure: self.presenter?.didRecieveTVSeriesSearchResults([])
+            }
+        }
+    }
+    
+    // MARK: - PAGINATION
+    func downloadNewPaginatedSearchResultsForMovies(query: String, page: Int) {
+        tmdbService?.getMovieSearchResults(query: query, page: page) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didRecievePaginatedMovieSearchResults(success.movies)
+            case .failure: self.presenter?.didRecievePaginatedMovieSearchResults([])
+            }
+        }
+    }
+    
+    func downloadNewPaginatedSearchResultsForTVSeries(query: String, page: Int) {
+        tmdbService?.getTVSeriesSearchResults(query: query, page: page) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didRecievePaginatedTVSeriesSearchResults(success.results)
+            case .failure: self.presenter?.didRecievePaginatedTVSeriesSearchResults([])
             }
         }
     }

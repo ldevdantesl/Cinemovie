@@ -11,6 +11,7 @@ import UIKit
 protocol HomeScreenViewProtocol: AnyObject {
     func applySnapshot(sections: [HomeScreenVC.Sections], itemsBySection: [HomeScreenVC.Sections: [HomeScreenVC.Items]])
     func didRecieveError(_ errorStr: String)
+    func reloadSearchResults(media: [Media], forType type: MediaTypes)
 }
 
 final class HomeScreenVC: UIViewController {
@@ -218,6 +219,14 @@ extension HomeScreenVC: HomeScreenViewProtocol {
 
         DispatchQueue.main.async {
             self.present(alert, animated: true, completion: nil)
+        }
+    }
+    
+    func reloadSearchResults(media: [any Media], forType type: MediaTypes) {
+        DispatchQueue.main.async {
+            let cell = self.collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? MediaSearchCell
+            cell?.didRecieveNewSearchResults(media: media, forType: type)
+            print("Reloading with new items")
         }
     }
 }

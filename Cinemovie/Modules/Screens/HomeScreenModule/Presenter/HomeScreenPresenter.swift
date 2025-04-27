@@ -25,6 +25,11 @@ protocol HomeScreenPresenterProtocol: AnyObject {
     func showSearchResults()
     func showRecentlyViewedMedia()
     
+    // MARK: - PAGINATION
+    func didTriggerPagination(for mediaType: MediaTypes)
+    func didRecievePaginatedMovieSearchResults(_ results: [Movie])
+    func didRecievePaginatedTVSeriesSearchResults(_ results: [TVSeries])
+    
     // MARK: - MOVIES
     func didDownloadMovieList(listType: MovieListType, queryMovies: [Movie])
     
@@ -51,23 +56,28 @@ final class HomeScreenPresenter {
     var router: HomeScreenRouterProtocol
     var interactor: HomeScreenInteractorProtocol
     
-    // MARK: - PROPERTIES
+    // MARK: - PUBLIC PROPERTIES
+    public var visibleSections: [HomeScreenVC.Sections] = []
+
+    // MARK: - PRIVATE PROPERTIES
     private let downloadGroup = DispatchGroup()
     private let searchDownloadGroup = DispatchGroup()
     private var searchWorkItem: DispatchWorkItem?
     
-    public var visibleSections: [HomeScreenVC.Sections] = []
+    private var movieLists: [(listType: MovieListType, movies: [Movie])] = []
+    private var seriesLists: [(listType: TVSeriesListType, series: [TVSeries])] = []
     
-    public var movieLists: [(listType: MovieListType, movies: [Movie])] = []
-    public var seriesLists: [(listType: TVSeriesListType, series: [TVSeries])] = []
+    private var trendingPeople: [Person] = []
     
-    public var trendingPeople: [Person] = []
+    private var movieSearchResults: [Movie] = []
+    private var tvSeriesSearchResults: [TVSeries] = []
+    private var peopleSearchResults: [Person] = []
     
-    public var movieSearchResults: [Movie] = []
-    public var tvSeriesSearchResults: [TVSeries] = []
-    public var peopleSearchResults: [Person] = []
+    private var recentlyViewedMedia: [Media] = []
     
-    public var recentlyViewedMedia: [Media] = []
+    private var lastSearchQuery: String = ""
+    private var currentMoviePage = 1
+    private var currentTVSeriesPage = 1
     
     init(interactor: HomeScreenInteractorProtocol, router: HomeScreenRouterProtocol) {
         self.interactor = interactor
@@ -182,6 +192,7 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
             self.searchDownloadGroup.notify(queue: .main) {[weak self] in
                 guard let self = self else { return }
                 self.showSearchResults()
+                self.lastSearchQuery = query
             }
         }
         
@@ -191,12 +202,12 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
     
     // MARK: - SEARCH
     func didRecieveMovieSearchResults(_ results: [Movie]) {
-        self.movieSearchResults = results.filteringHighRated().filteringByMinimumPopularity().removingMediaWithoutPoster()
+        self.movieSearchResults = results.filteringByMinimumPopularity().removingMediaWithoutPoster()
         searchDownloadGroup.leave()
     }
     
     func didRecieveTVSeriesSearchResults(_ results: [TVSeries]) {
-        self.tvSeriesSearchResults = results.filteringHighRated().filteringByMinimumPopularity().removingMediaWithoutPoster()
+        self.tvSeriesSearchResults = results.filteringByMinimumPopularity().removingMediaWithoutPoster()
         searchDownloadGroup.leave()
     }
     
@@ -216,6 +227,9 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
         let vm = MediaSearchCellViewModel(movies: movieSearchResults, tvSeries: tvSeriesSearchResults, people: peopleSearchResults) { [weak self] in
             guard let self = self else { return }
             self.didTapMedia($0)
+        } didTriggerPagination: { [weak self] in
+            guard let self = self else { return }
+            self.didTriggerPagination(for: $0)
         }
         view?.applySnapshot(sections: visibleSections, itemsBySection: [.search : [.searchCell(vm)]])
     }
@@ -231,6 +245,28 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
     
     func didFinishSearching() {
         self.didChangeMediaType(.movie)
+    }
+    
+    // MARK: - PAGINATION
+    func didTriggerPagination(for mediaType: MediaTypes) {
+        switch mediaType {
+        case .movie:
+            currentMoviePage += 1
+            interactor.downloadNewPaginatedSearchResultsForMovies(query: lastSearchQuery, page: currentMoviePage)
+        case .tvShow:
+            currentTVSeriesPage += 1
+            interactor.downloadNewPaginatedSearchResultsForTVSeries(query: lastSearchQuery, page: currentTVSeriesPage)
+        }
+    }
+    
+    func didRecievePaginatedMovieSearchResults(_ results: [Movie]) {
+        movieSearchResults.append(contentsOf: results.filteringByMinimumPopularity().removingMediaWithoutPoster())
+        self.view?.reloadSearchResults(media: results.filteringByMinimumPopularity().removingMediaWithoutPoster(), forType: .movie)
+    }
+    
+    func didRecievePaginatedTVSeriesSearchResults(_ results: [TVSeries]) {
+        tvSeriesSearchResults.append(contentsOf: results.filteringByMinimumPopularity().removingMediaWithoutPoster())
+        self.view?.reloadSearchResults(media: results.filteringByMinimumPopularity().removingMediaWithoutPoster(), forType: .tvShow)
     }
 
     // MARK: - MOVIES

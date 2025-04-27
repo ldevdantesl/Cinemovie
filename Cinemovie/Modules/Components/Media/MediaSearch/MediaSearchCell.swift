@@ -13,11 +13,13 @@ final class MediaSearchCellViewModel: CellViewModelBaseClass {
     let tvSeries: [TVSeries]
     let people: [Person]
     let didTapAnyMedia: ((Media) -> Void)?
+    let didTriggerPagination: ((MediaTypes) -> Void)?
     
-    init(movies: [Movie], tvSeries: [TVSeries], people: [Person], didTapAnyMedia: ((Media) -> Void)?) {
+    init(movies: [Movie], tvSeries: [TVSeries], people: [Person], didTapAnyMedia: ((Media) -> Void)?, didTriggerPagination: ((MediaTypes) -> Void)?) {
         self.movies = movies
         self.tvSeries = tvSeries
         self.people = people
+        self.didTriggerPagination = didTriggerPagination
         self.didTapAnyMedia = didTapAnyMedia
         super.init(cellIdentifier: "MediaSearchCell")
     }
@@ -31,7 +33,7 @@ final class MediaSearchCell: ReusableCellBaseClass {
     fileprivate enum Constants {
         static let tabsSpacing = 10.0
         static let spacing = 10.0
-        static let defaultCellHeight = 200.0
+        static let defaultCellHeight: CGFloat = 200.0
         static let tabsHeight = 50.0
     }
     
@@ -49,6 +51,14 @@ final class MediaSearchCell: ReusableCellBaseClass {
             case .none: return ""
             }
         }
+        
+        var mediaType: MediaTypes {
+            switch self {
+            case .movies: return .movie
+            case .tvSeries: return .tvShow
+            default: return .movie
+            }
+        }
     }
     
     // MARK: - PROPERTIES
@@ -58,6 +68,7 @@ final class MediaSearchCell: ReusableCellBaseClass {
     private var visibleTabs: [Tabs] {
         return Tabs.allCases.filter { items[$0] != nil }
     }
+    private var didTriggerPagination = false
     
     // MARK: - VIEW PROPERTIES
     private lazy var tabsCollectionView: UICollectionView = {
@@ -88,13 +99,13 @@ final class MediaSearchCell: ReusableCellBaseClass {
     override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
         layoutIfNeeded()
         searchCollectionView.layoutIfNeeded()
-            
+        
         guard let contentVM = items[selectedTab] else {
             layoutAttributes.frame.size.height = tabsCollectionView.contentSize.height + Constants.defaultCellHeight + Constants.spacing
             return layoutAttributes
         }
         
-        layoutAttributes.frame.size.height = tabsCollectionView.contentSize.height + contentVM.cellHeight + Constants.spacing
+        layoutAttributes.frame.size.height = max((tabsCollectionView.contentSize.height + contentVM.cellHeight + Constants.spacing), UIConstants.screenHeight / 2)
         return layoutAttributes
     }
     
@@ -120,15 +131,29 @@ final class MediaSearchCell: ReusableCellBaseClass {
     public func configure(viewModel: MediaSearchCellViewModel) {
         self.viewModel = viewModel
         if !viewModel.movies.isEmpty {
-            let vm = VerticalMediaListCellViewModel(media: viewModel.movies, didTapAnyMedia: viewModel.didTapAnyMedia)
+            let vm = VerticalMediaListCellViewModel(media: viewModel.movies, didTapAnyMedia: viewModel.didTapAnyMedia) { [weak self] in
+                guard let self = self else { return }
+                if self.selectedTab == .movies {
+                    viewModel.didTriggerPagination?(.movie)
+                }
+            } onHeightChangedRequest: { [weak self] in
+                self?.onHeightChangedRequest()
+            }
             items[.movies] = vm
         }
-        
+
         if !viewModel.tvSeries.isEmpty {
-            let vm = VerticalMediaListCellViewModel(media: viewModel.tvSeries, didTapAnyMedia: viewModel.didTapAnyMedia)
+            let vm = VerticalMediaListCellViewModel(media: viewModel.tvSeries, didTapAnyMedia: viewModel.didTapAnyMedia) { [weak self] in
+                guard let self = self else { return }
+                if self.selectedTab == .tvSeries {
+                    viewModel.didTriggerPagination?(.tvShow)
+                }
+            } onHeightChangedRequest: { [weak self] in
+                self?.onHeightChangedRequest()
+            }
             items[.tvSeries] = vm
         }
-    
+        
         guard let firstTab = items.keys.first else { return }
         DispatchQueue.main.async {
             self.selectedTab = firstTab
@@ -138,6 +163,19 @@ final class MediaSearchCell: ReusableCellBaseClass {
             self.invalidateIntrinsicContentSize()
             self.layoutIfNeeded()
         }
+    }
+    
+    public func didRecieveNewSearchResults(media: [Media], forType type: MediaTypes) {
+        let tabToUpdate: Tabs
+        switch type {
+        case .movie: tabToUpdate = .movies
+        case .tvShow: tabToUpdate = .tvSeries
+        }
+        
+        guard let tabIndex = visibleTabs.firstIndex(of: tabToUpdate) else { return }
+        let indexPath = IndexPath(item: tabIndex, section: 0)
+        guard let cell = searchCollectionView.cellForItem(at: indexPath) as? VerticalMediaListCell else { return }
+        cell.reloadData(withNewItems: media)
     }
     
     // MARK: - PRIVATE FUNC
@@ -169,8 +207,8 @@ final class MediaSearchCell: ReusableCellBaseClass {
         UICollectionViewCompositionalLayout { [weak self] sectionIndex, env in
             guard let self = self else { return nil }
             let vm = self.items[selectedTab]
-            let cellHeight = vm?.cellHeight
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(cellHeight ?? Constants.defaultCellHeight)))
+            let cellHeight = max((vm?.cellHeight ?? Constants.defaultCellHeight), UIConstants.screenHeight / 2)
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(cellHeight)))
             let group = NSCollectionLayoutGroup.vertical(layoutSize: item.layoutSize, subitems: [item])
             let section = NSCollectionLayoutSection(group: group)
             section.orthogonalScrollingBehavior = .groupPagingCentered
@@ -186,6 +224,11 @@ final class MediaSearchCell: ReusableCellBaseClass {
             }
             return section
         }
+    }
+    
+    private func onHeightChangedRequest() {
+        self.searchCollectionView.collectionViewLayout.invalidateLayout()
+        self.invalidateIntrinsicContentSize()
     }
 }
 
