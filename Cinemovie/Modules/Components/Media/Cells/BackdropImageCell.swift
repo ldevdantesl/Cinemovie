@@ -11,11 +11,20 @@ import SDWebImage
 
 final class BackdropImageCellViewModel: CellViewModelBaseClass {
     let imagePath: String?
+    let showsBackButton: Bool
     let didTapBackButtonAction: (() -> Void)?
     
     init(imagePath: String?, size: TMDBImageSizes, didTapBackButtonAction: (() -> Void)?) {
         self.imagePath = imagePath
         self.didTapBackButtonAction = didTapBackButtonAction
+        self.showsBackButton = true
+        super.init(cellIdentifier: "BackdropImageCell")
+    }
+    
+    init(imagePath: String?, size: TMDBImageSizes) {
+        self.imagePath = imagePath
+        self.didTapBackButtonAction = nil
+        self.showsBackButton = false
         super.init(cellIdentifier: "BackdropImageCell")
     }
 }
@@ -30,7 +39,6 @@ final class BackdropImageCell: ReusableCellBaseClass {
         static let backButtonSpacing = 10.0
         static let backButtonImageName = "chevron.left"
         
-        static let indicatorSize: CGFloat = 30
         static let backdropImageSize: CGFloat = 20
         static let imageNotFoundName = "questionmark.circle"
         static let cellHeight = UIConstants.screenWidth * 0.65
@@ -73,6 +81,7 @@ final class BackdropImageCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNC
     public func configure(with viewModel: ViewModel) {
         self.viewModel = viewModel
+        self.backButton.isHidden = !viewModel.showsBackButton
         
         let vm = CMCircularButtonViewModel(
             systemName: Constants.backButtonImageName, backColor: CMColor.cmSecondaryBackground,

@@ -132,6 +132,11 @@ final class TMDBServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
+    func getPersonImages(personID: Int, completion: @escaping (Result<PersonImages, NetworkError>) -> Void) {
+        let endpoint = TMDBEndpoints.getPersonImagesEndpoint(personID: personID)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
     // MARK: - SEARCH
     func getMovieSearchResults(query: String, page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru", "page" : page.description]

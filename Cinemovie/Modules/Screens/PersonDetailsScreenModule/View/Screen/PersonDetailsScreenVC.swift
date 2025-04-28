@@ -10,11 +10,10 @@ import SnapKit
 import SDWebImage
 
 protocol PersonDetailsScreenViewProtocol: AnyObject {
+    func applySnapshot(sections: [PersonDetailsScreenVC.Sections], itemsBySection: [PersonDetailsScreenVC.Sections : [PersonDetailsScreenVC.Items]])
     func didRecieveError(_ errorStr: String)
-    func didGetAllPersonData(
-        _ details: PersonDetails, sources: ExternalSource,
-        movies: [Movie], tvSeries: [TVSeries]
-    )
+    
+    var downloadingView: CMSplashView { get }
 }
 
 final class PersonDetailsScreenVC: UIViewController {
@@ -27,16 +26,18 @@ final class PersonDetailsScreenVC: UIViewController {
     }
     
     // MARK: - SECTIONS
-    fileprivate enum Sections: Hashable {
-        case header
+    enum Sections: Hashable {
+        case images
+        case info
         case overview
         case movies
         case tvSeries
         case unavailable
     }
     
-    fileprivate enum Items: Hashable {
-        case headerVM(PersonInfoCellViewModel)
+    enum Items: Hashable {
+        case imageCell(PersonImagesCellViewModel)
+        case infoVM(PersonInfoCellViewModel)
         case overviewVM(OverviewCellViewModel)
         case mediaListVM(MediaListCellViewModel)
         case unavailableVM(UnavailableInfoCellViewModel)
@@ -44,22 +45,17 @@ final class PersonDetailsScreenVC: UIViewController {
     
     // MARK: - VIPER
     var presenter: PersonDetailsScreenPresenterProtocol?
-    
-    // MARK: - PROPERTIES
-    private var visibleSections: [Sections] = []
-    private var cachedCollectionViewCellSize: [IndexPath : CGSize] = [:]
-    private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
-    
-    // MARK: - VIEW PROPERTIES
-    private let downloadingView: CMSplashView = {
+    let downloadingView: CMSplashView = {
         let splash = CMSplashView(frame: .zero, showsLoadingLabel: true)
         splash.translatesAutoresizingMaskIntoConstraints = false
         return splash
     }()
     
+    // MARK: - VIEW PROPERTIES
     private lazy var collectionView: DiffableCollectionView = {
         let cv = DiffableCollectionView<Sections, Items>(layout: createLayout(), showsTopBlur: true)
         cv.layer.zPosition = 0
+        cv.register(cellClass: PersonImagesCell.self)
         cv.register(cellClass: PersonInfoCell.self)
         cv.register(cellClass: MediaListCell.self)
         cv.register(cellClass: OverviewCell.self)
@@ -95,30 +91,29 @@ final class PersonDetailsScreenVC: UIViewController {
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        view.addSubview(downloadingView)
-        downloadingView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-        
         view.addSubview(collectionView)
         collectionView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         
-        view.bringSubviewToFront(downloadingView)
+        view.addSubview(downloadingView)
+        downloadingView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
     }
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
         UICollectionViewCompositionalLayout { [weak self] sectionIndex, env in
-            guard let self = self else {
-                return NSCollectionLayoutSection(group: .init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1))))
-            }
+            guard let self = self, let presenter = self.presenter else { return nil }
             
-            let detailsSection = self.visibleSections[sectionIndex]
+            
+            let detailsSection = presenter.visibleSections[sectionIndex]
             let edgeInsets: NSDirectionalEdgeInsets
+            let containsImages = presenter.visibleSections.contains(.images)
             
             switch detailsSection {
-            case .header: edgeInsets = .init(top: UIConstants.topInset, leading: 10, bottom: 10, trailing: 10)
+            case .images: edgeInsets = .init(top: 0, leading: 0, bottom: 0, trailing: 0)
+            case .info: edgeInsets = .init(top: containsImages ? 10 : UIConstants.topInset, leading: 0, bottom: 0, trailing: 0)
             default: edgeInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
             }
             
@@ -133,20 +128,28 @@ final class PersonDetailsScreenVC: UIViewController {
     private func configureDataSource() {
         collectionView.configureDataSource { collectionView, indexPath, itemIdentifier in
             switch itemIdentifier {
-            case .headerVM(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PersonInfoCell.identifier, for: indexPath) as? PersonInfoCell
+            case .imageCell(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? PersonImagesCell
                 cell?.configure(viewModel: vm)
                 return cell
+                
+            case .infoVM(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? PersonInfoCell
+                cell?.configure(viewModel: vm)
+                return cell
+                
             case .overviewVM(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: OverviewCell.identifier, for: indexPath) as? OverviewCell
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? OverviewCell
                 cell?.configure(with: vm)
                 return cell
+                
             case .mediaListVM(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MediaListCell.identifier, for: indexPath) as? MediaListCell
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? MediaListCell
                 cell?.configure(viewModel: vm)
                 return cell
+                
             case .unavailableVM(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: UnavailableInfoCell.identifier, for: indexPath) as? UnavailableInfoCell
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? UnavailableInfoCell
                 cell?.configure(viewModel: vm)
                 return cell
             }
@@ -179,50 +182,9 @@ extension PersonDetailsScreenVC: PersonDetailsScreenViewProtocol {
         }
     }
     
-    func didGetAllPersonData(
-        _ details: PersonDetails, sources: ExternalSource,
-        movies: [Movie], tvSeries: [TVSeries]
-    ) {
-        self.downloadingView.hide()
-        var sectionsAndTheirItems: [(section: Sections, items: [Items])] = []
-        
-        let infoVM = PersonInfoCellViewModel(
-            personDetails: details, externalSource: sources,
-            didTapBackButton: presenter?.didTapBackButton, didTapSource: presenter?.didTapLogoImage
-        )
-        sectionsAndTheirItems.append((Sections.header, [.headerVM(infoVM)]))
-        let overviewVM = OverviewCellViewModel(overviewText: details.biography)
-        sectionsAndTheirItems.append((Sections.overview, [.overviewVM(overviewVM)]))
-        
-        if !movies.isEmpty {
-            let moviesVM = MediaListCellViewModel(
-                mediaItems: movies, listName: "Movies",
-                listSubtitle: "Movies in which \(details.name) has played", didTapMediaItem: presenter?.didTapMedia
-            )
-            sectionsAndTheirItems.append((Sections.movies, [.mediaListVM(moviesVM)]))
+    func applySnapshot(sections: [Sections], itemsBySection: [Sections : [Items]]) {
+        DispatchQueue.main.async {
+            self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
         }
-        
-        if !tvSeries.isEmpty {
-            let seriesVM = MediaListCellViewModel(
-                mediaItems: tvSeries, listName: "TV Series",
-                listSubtitle: "TV Series in which \(details.name) has played", didTapMediaItem: presenter?.didTapMedia
-            )
-            sectionsAndTheirItems.append((Sections.tvSeries, [.mediaListVM(seriesVM)]))
-        }
-        
-        if movies.isEmpty && tvSeries.isEmpty {
-            let unavailableVm = UnavailableInfoCellViewModel(
-                title: "Additional information is not available",
-                subtitle: "We couldn't find any movies or TV series linked to this person.",
-                image: UIImage(named: ImageNames.empty.rawValue)
-            )
-            sectionsAndTheirItems.append((Sections.unavailable, [.unavailableVM(unavailableVm)]))
-        }
-        
-        self.visibleSections = sectionsAndTheirItems.map { $0.section }
-        collectionView.applySnapshot(
-            sections: self.visibleSections,
-            itemsBySection: Dictionary(uniqueKeysWithValues: sectionsAndTheirItems)
-        )
     }
 }

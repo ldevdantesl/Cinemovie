@@ -11,14 +11,25 @@ import SDWebImage
 
 final class PersonInfoCellViewModel: CellViewModelBaseClass {
     let personDetails: PersonDetails
-    let externalSources: ExternalSource
+    let showsBackButton: Bool
+    let externalSources: ExternalSource?
     let didTapSource: ((String, SourceTypes) -> Void)?
     let didTapBackButton: (() -> Void)?
     
-    init(personDetails: PersonDetails, externalSource: ExternalSource, didTapBackButton: (() -> Void)?, didTapSource: ((String, SourceTypes) -> Void)?) {
+    init(personDetails: PersonDetails, externalSource: ExternalSource?, didTapBackButton: (() -> Void)?, didTapSource: ((String, SourceTypes) -> Void)?) {
         self.personDetails = personDetails
         self.externalSources = externalSource
         self.didTapBackButton = didTapBackButton
+        self.showsBackButton = true
+        self.didTapSource = didTapSource
+        super.init(cellIdentifier: "PersonInfoCell")
+    }
+    
+    init(personDetails: PersonDetails, externalSource: ExternalSource?, didTapSource: ((String, SourceTypes) -> Void)?) {
+        self.personDetails = personDetails
+        self.externalSources = externalSource
+        self.didTapBackButton = nil
+        self.showsBackButton = false
         self.didTapSource = didTapSource
         super.init(cellIdentifier: "PersonInfoCell")
     }
@@ -37,7 +48,7 @@ final class PersonInfoCell: ReusableCellBaseClass {
         static let defaultImageName = "person"
         static let defaultImagePointSize = 20.0
         static let imageBorderWidth = 0.5
-        static let imageHeight = (UIConstants.screenWidth - 20) * 0.3
+        static let imageSize = (UIConstants.screenWidth - 20) * 0.3
         
         static let spacing = 5.0
         static let sourcesSpacing = 5.0
@@ -47,6 +58,8 @@ final class PersonInfoCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: PersonInfoCellViewModel?
+    private var avaImageTopConstraint: Constraint?
+    private var secondStackTopConstraint: Constraint?
     
     // MARK: - VIEW PROPERTIES
     private let personAvaImageView: AsyncImageView = {
@@ -124,6 +137,7 @@ final class PersonInfoCell: ReusableCellBaseClass {
     
     private let backButton: CMCircularButton = {
         let view = CMCircularButton()
+        view.isHidden = true
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -144,13 +158,18 @@ final class PersonInfoCell: ReusableCellBaseClass {
         firstPartStackView.arrangedSubviews.forEach { $0.removeFromSuperview(); firstPartStackView.removeArrangedSubview($0) }
         secondPartStackView.arrangedSubviews.forEach { $0.removeFromSuperview(); secondPartStackView.removeArrangedSubview($0) }
         personSourcesStackView.arrangedSubviews.forEach { $0.removeFromSuperview(); personSourcesStackView.removeArrangedSubview($0) }
-        personAvaImageView.image = nil
-        personAvaImageView.contentMode = .scaleAspectFill
-        personDOBLabel.text = nil
-        personNameLabel.text = nil
-        personHometownLabel.text = nil
-        personGenderLabel.text = nil
-        personJobLabel.text = nil
+        personAvaImageView.reset()
+    }
+    
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        let height = contentView.systemLayoutSizeFitting(
+            CGSize(width: layoutAttributes.frame.width, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel
+        ).height
+        
+        layoutAttributes.frame.size.height = height
+        return layoutAttributes
     }
     
     override func layoutSubviews() {
@@ -162,6 +181,25 @@ final class PersonInfoCell: ReusableCellBaseClass {
     public func configure(viewModel: PersonInfoCellViewModel) {
         self.viewModel = viewModel
         self.personNameLabel.text = viewModel.personDetails.name
+        
+        if viewModel.showsBackButton {
+            let vm = CMCircularButtonViewModel(
+                systemName: Constants.backButtonImageName, backColor: CMColor.cmSecondaryBackground,
+                foreColor: CMColor.cmAccent, didTapAction: viewModel.didTapBackButton
+            )
+            backButton.configure(viewModel: vm)
+            backButton.isHidden = false
+            
+            backButton.snp.remakeConstraints {
+                $0.top.equalToSuperview()
+                $0.leading.equalToSuperview().offset(Constants.vSpacing)
+                $0.size.equalTo(Constants.backButtonSize)
+            }
+
+            avaImageTopConstraint?.update(offset: Constants.backButtonSize + Constants.vSpacing)
+            secondStackTopConstraint?.update(offset: Constants.backButtonSize + Constants.vSpacing)
+            self.layoutIfNeeded()
+        }
         
         let vm = CMCircularButtonViewModel(
             systemName: Constants.backButtonImageName, backColor: CMColor.cmSecondaryBackground,
@@ -178,7 +216,7 @@ final class PersonInfoCell: ReusableCellBaseClass {
             }
         }
         
-        if let hometown = viewModel.personDetails.placeOfBirth{
+        if let hometown = viewModel.personDetails.placeOfBirth {
             self.personHometownLabel.text = hometown
             secondPartStackView.addArrangedSubview(personHometownLabel)
         }
@@ -197,24 +235,18 @@ final class PersonInfoCell: ReusableCellBaseClass {
             notFoundPointSize: Constants.defaultImagePointSize
         )
         
-        self.layoutIfNeeded()
+        self.invalidateIntrinsicContentSize()
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
         contentView.addSubview(backButton)
-        backButton.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.leading.equalToSuperview()
-            $0.size.equalTo(Constants.backButtonSize)
-        }
         
         contentView.addSubview(personAvaImageView)
         personAvaImageView.snp.makeConstraints {
-            $0.top.equalTo(backButton.snp.bottom).offset(Constants.vSpacing)
+            avaImageTopConstraint = $0.top.equalToSuperview().constraint
             $0.leading.equalToSuperview()
-            $0.width.equalToSuperview().multipliedBy(0.3)
-            $0.height.equalTo(personAvaImageView.snp.width)
+            $0.size.equalTo(Constants.imageSize)
         }
         
         contentView.addSubview(firstPartStackView)
@@ -227,7 +259,7 @@ final class PersonInfoCell: ReusableCellBaseClass {
         
         contentView.addSubview(secondPartStackView)
         secondPartStackView.snp.makeConstraints {
-            $0.top.equalTo(backButton.snp.bottom).offset(Constants.vSpacing)
+            secondStackTopConstraint = $0.top.equalToSuperview().constraint
             $0.leading.equalTo(firstPartStackView.snp.trailing).offset(20)
             $0.trailing.equalToSuperview()
             $0.bottom.equalTo(personAvaImageView.snp.bottom).inset(Constants.vSpacing)
@@ -241,13 +273,13 @@ final class PersonInfoCell: ReusableCellBaseClass {
         }
     }
     
-    private func addSources(externalSource: ExternalSource) {
+    private func addSources(externalSource: ExternalSource?) {
         let sourceMap: [(id: String?, type: SourceTypes)] = [
-            (externalSource.instagramID, .instagram),
-            (externalSource.facebookID, .facebook),
-            (externalSource.tiktokID, .tiktok),
-            (externalSource.wikidataID, .wikipedia),
-            (externalSource.imdbID, .imdb),
+            (externalSource?.instagramID, .instagram),
+            (externalSource?.facebookID, .facebook),
+            (externalSource?.tiktokID, .tiktok),
+            (externalSource?.wikidataID, .wikipedia),
+            (externalSource?.imdbID, .imdb),
         ]
 
         sourceMap.forEach { item in

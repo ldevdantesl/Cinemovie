@@ -99,6 +99,10 @@ struct TMDBEndpoints {
         Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/trending/person/\(timeWindow.rawValue)", queryParams: queryParams)
     }
     
+    static func getPersonImagesEndpoint(personID: Int) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)/images")
+    }
+    
     // MARK: - SEARCH
     static func getMovieSearchResultsEndpoint(query: String, extraParams: [String : String]? = nil) -> Endpoint {
         var queryParams = ["query" : query]

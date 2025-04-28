@@ -15,21 +15,33 @@ protocol PersonDetailsScreenPresenterProtocol: AnyObject {
     func didTapLogoImage(sourceID: String, sourceType: SourceTypes)
     func didTapMedia(media: any Media)
     
-    // MARK: - PROGRAMMATIC
+    // MARK: - DOWNLOAD
     func didGetPersonID(_ id: Int)
     func didGetPersonDetails(_ details: PersonDetails)
     func didGetPersonExternalSources(_ sources: ExternalSource)
     func didGetPersonMovies(_ movies: [Movie])
     func didGetPersonTVShows(_ tvShows: [TVSeries])
+    func didGetPersonImages(_ images: [TMDBImage])
+    
+    // MARK: - PROPERTIES
+    var visibleSections: [PersonDetailsScreenVC.Sections] { get set }
+    
     // MARK: - ERROR HANDLING
     func didRecieveError(_ error: Error)
 }
 
 final class PersonDetailsScreenPresenter {
+    // MARK: - TYPEALIASES
+    typealias Sections = PersonDetailsScreenVC.Sections
+    typealias Items = PersonDetailsScreenVC.Items
+    
+    // MARK: - VIPER
     weak var view: PersonDetailsScreenViewProtocol?
     var router: PersonDetailsScreenRouterProtocol
     var interactor: PersonDetailsScreenInteractorProtocol
+    var visibleSections: [PersonDetailsScreenVC.Sections] = []
     
+    // MARK: - PROPERTIES
     private let downloadGroup = DispatchGroup()
     private let creditID: String?
     private var personID: Int?
@@ -38,6 +50,7 @@ final class PersonDetailsScreenPresenter {
     private var personExternalSources: ExternalSource?
     private var personMovies: [Movie] = []
     private var personTVSeries: [TVSeries] = []
+    private var personImages: [TMDBImage] = []
 
     init(creditID: String, interactor: PersonDetailsScreenInteractorProtocol, router: PersonDetailsScreenRouterProtocol) {
         self.creditID = creditID
@@ -60,9 +73,7 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
         defer {
             downloadGroup.notify(queue: .main) { [weak self] in
                 guard let self = self else { return }
-                guard let personDetails = personDetails else { self.view?.didRecieveError("Something went wrong with person details"); return }
-                guard let personExternalSources = personExternalSources else { self.view?.didRecieveError("Something went wrong with external sources"); return }
-                self.view?.didGetAllPersonData(personDetails, sources: personExternalSources, movies: personMovies, tvSeries: personTVSeries)
+                self.didGetAllPersonData()
             }
         }
         
@@ -84,6 +95,9 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
         
         downloadGroup.enter()
         self.interactor.getPersonTVShows(personID: personID)
+        
+        downloadGroup.enter()
+        self.interactor.getPersonImages(personID: personID)
     }
     
     // MARK: - USER INITIATED
@@ -104,7 +118,7 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
         }
     }
     
-    // MARK: - PROGRAMMATIC
+    // MARK: - DOWNLOAD
     func didGetPersonID(_ id: Int) {
         print("PersonID: \(id)")
         self.personID = id
@@ -150,8 +164,87 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
         downloadGroup.leave()
     }
     
+    func didGetPersonImages(_ images: [TMDBImage]) {
+        self.personImages = images
+        downloadGroup.leave()
+    }
+    
     // MARK: - ERROR HANDLING
     func didRecieveError(_ error: any Error) {
         view?.didRecieveError(error.localizedDescription)
+    }
+    
+    // MARK: - PRIVATE FUNC
+    private func didGetAllPersonData() {
+        view?.downloadingView.hide()
+        guard let personDetails = self.personDetails else {
+            self.view?.didRecieveError("Can't get person details")
+            return
+        }
+        
+        var sectionsAndTheirItems: [(section: Sections, items: [Items])] = []
+        
+        if !personImages.isEmpty {
+            let imagesVM = PersonImagesCellViewModel(images: personImages)
+            sectionsAndTheirItems.append((Sections.images, [.imageCell(imagesVM)]))
+            
+            let infoVM = PersonInfoCellViewModel(personDetails: personDetails, externalSource: self.personExternalSources) { [weak self] id, sourceType in
+                guard let self = self else { return }
+                self.didTapLogoImage(sourceID: id, sourceType: sourceType)
+            }
+            sectionsAndTheirItems.append((Sections.info, [.infoVM(infoVM)]))
+        } else {
+            let infoVM = PersonInfoCellViewModel(personDetails: personDetails, externalSource: self.personExternalSources) { [weak self] in
+                guard let self = self else { return }
+                self.didTapBackButton()
+            } didTapSource: { [weak self] id, sourceType in
+                guard let self = self else { return }
+                self.didTapLogoImage(sourceID: id, sourceType: sourceType)
+            }
+            sectionsAndTheirItems.append((Sections.info, [.infoVM(infoVM)]))
+        }
+        
+        if !personDetails.biography.isEmpty {
+            let overviewVM = OverviewCellViewModel(overviewText: personDetails.biography)
+            sectionsAndTheirItems.append((Sections.overview, [.overviewVM(overviewVM)]))
+        }
+        
+        if !self.personMovies.isEmpty {
+            let moviesVM = MediaListCellViewModel(
+                mediaItems: self.personMovies, listName: "Movies",
+                listSubtitle: "Movies in which \(personDetails.name) has played"
+            ) { [weak self] in
+                guard let self = self else { return }
+                self.didTapMedia(media: $0)
+            }
+            sectionsAndTheirItems.append((Sections.movies, [.mediaListVM(moviesVM)]))
+        }
+        
+        if !self.personTVSeries.isEmpty {
+            let seriesVM = MediaListCellViewModel(
+                mediaItems: self.personTVSeries, listName: "TV Series",
+                listSubtitle: "TV Series in which \(personDetails.name) has played"
+            ) { [weak self] in
+                guard let self = self else { return }
+                self.didTapMedia(media: $0)
+            }
+            sectionsAndTheirItems.append((Sections.tvSeries, [.mediaListVM(seriesVM)]))
+        }
+        
+        if self.personMovies.isEmpty && self.personTVSeries.isEmpty {
+            let unavailableVm = UnavailableInfoCellViewModel(
+                title: "Additional information is not available",
+                subtitle: "We couldn't find any movies or TV series linked to this person.",
+                image: UIImage(named: ImageNames.empty.rawValue)
+            )
+            sectionsAndTheirItems.append((Sections.unavailable, [.unavailableVM(unavailableVm)]))
+        }
+        
+        self.visibleSections = sectionsAndTheirItems.map { $0.section }
+        
+        self.view?.applySnapshot(
+            sections: visibleSections,
+            itemsBySection: Dictionary(uniqueKeysWithValues: sectionsAndTheirItems)
+        )
     }
 }

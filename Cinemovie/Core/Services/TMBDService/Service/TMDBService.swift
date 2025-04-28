@@ -33,6 +33,7 @@ protocol TMDBService: AnyObject {
     func getPersonExternalSources(personID: Int, completion: @escaping (Result<ExternalSource, NetworkError>) -> Void)
     func getPersonMovieCredits(personID: Int, completion: @escaping (Result<PersonMovieCreditAPIResponse, NetworkError>) -> Void)
     func getPersonTVShowCredits(personID: Int, completion: @escaping (Result<PersonTVShowCreditAPIResponse, NetworkError>) -> Void)
+    func getPersonImages(personID: Int, completion: @escaping (Result<PersonImages, NetworkError>) -> Void)
     
     // MARK: - SEARCH
     func getMovieSearchResults(query: String, page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)

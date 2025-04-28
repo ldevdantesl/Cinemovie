@@ -13,6 +13,7 @@ protocol PersonDetailsScreenInteractorProtocol: AnyObject {
     func getPersonExternalSources(personID: Int)
     func getPersonMovies(personID: Int)
     func getPersonTVShows(personID: Int)
+    func getPersonImages(personID: Int)
 }
 
 final class PersonDetailsScreenInteractor: PersonDetailsScreenInteractorProtocol {
@@ -69,6 +70,16 @@ final class PersonDetailsScreenInteractor: PersonDetailsScreenInteractorProtocol
             switch result {
             case .success(let success): self.presenter?.didGetPersonTVShows(success.cast)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func getPersonImages(personID: Int) {
+        tmdbService?.getPersonImages(personID: personID) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didGetPersonImages(success.profiles)
+            case .failure: self.presenter?.didGetPersonImages([])
             }
         }
     }

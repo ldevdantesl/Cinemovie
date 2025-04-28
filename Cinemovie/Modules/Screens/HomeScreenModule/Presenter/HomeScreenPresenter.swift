@@ -259,9 +259,7 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
     
     // MARK: - TRENDING
     func didDownloadTrendingPeople(_ people: [Person]) {
-        let trendingPeople = people.sorted {
-            ($0.profilePath != nil ? 0 : 1) < ($1.profilePath != nil ? 0 : 1)
-        }
+        let trendingPeople = people.filter { $0.profilePath != nil }.sorted { $0.popularity > $1.popularity }
         self.trendingPeople = Array(trendingPeople.prefix(upTo: 10))
         downloadGroup.leave()
     }
