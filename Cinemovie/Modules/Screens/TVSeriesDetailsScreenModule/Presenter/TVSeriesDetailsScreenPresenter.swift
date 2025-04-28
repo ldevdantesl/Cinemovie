@@ -143,7 +143,7 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
     }
     
     func didGetTVSeriesRecommends(_ series: [TVSeries]) {
-        self.seriesRecommends = series.sorted { ($0.posterPath == nil) && ($1.posterPath != nil) }
+        self.seriesRecommends = series.removingMediaWithoutPoster().sortByPopularity()
         downloadGroup.leave()
     }
     

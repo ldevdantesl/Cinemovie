@@ -153,7 +153,7 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     }
     
     func didGetMovieRecommendations(queryMovies: [Movie]) {
-        self.movieRecommends = queryMovies.sorted { ($0.posterPath == nil) && ($1.posterPath != nil) }
+        self.movieRecommends = queryMovies.removingMediaWithoutPoster().sortByPopularity()
         dispatchGroup.leave()
     }
     

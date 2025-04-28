@@ -188,13 +188,8 @@ final class MediaExtrasCell: ReusableCellBaseClass {
             self.items[.collection] = belongsVM
         }
         
-        let recommendedMedia = Array(
-            viewModel.recommended
-                .filter { $0.posterPath != nil }
-                .prefix(9)
-        )
-        if !viewModel.recommended.isEmpty {
-            let recommendedMedia = Array(recommendedMedia)
+        let recommendedMedia = Array(viewModel.recommended.prefix(9))
+        if !recommendedMedia.isEmpty {
             let recommendedVM = VerticalMediaListCellViewModel(media: recommendedMedia, didTapAnyMedia: viewModel.didTapMedia)
             self.items[.recommendations] = recommendedVM
         }

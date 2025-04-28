@@ -19,4 +19,8 @@ extension Array where Element: Media {
     func filteringByMinimumPopularity(_ minimumPopularity: Double = 7) -> [Element] {
         self.filter { ($0.popularity ?? 0) >= minimumPopularity }
     }
+    
+    func sortByPopularity() -> [Element] {
+        self.sorted { $0.popularity ?? 0 > $1.popularity ?? 0 }
+    }
 }

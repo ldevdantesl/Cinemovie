@@ -135,7 +135,7 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
     }
     
     func didGetPersonMovies(_ movies: [Movie]) {
-        self.personMovies = movies
+        self.personMovies = movies.removingMediaWithoutPoster().filteringByMinimumPopularity()
         downloadGroup.leave()
     }
     
@@ -146,7 +146,7 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
         let newsGenreId = GenreHelper.shared.getSeriesGenreID(for: .news)
         self.personTVSeries = tvShows.filter { !$0.genreIDS.isEmpty }.filter {
             !$0.genreIDS.contains(where: { $0 == talkGenreId || $0 == realityGenreID || $0 == warPoliticsGenreId || $0 == newsGenreId })
-        }
+        }.removingMediaWithoutPoster().sortByPopularity()
         downloadGroup.leave()
     }
     
