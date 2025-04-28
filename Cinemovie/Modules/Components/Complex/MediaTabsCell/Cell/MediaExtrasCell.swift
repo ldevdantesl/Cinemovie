@@ -219,6 +219,7 @@ final class MediaExtrasCell: ReusableCellBaseClass {
             self.switchTabs(to: firstTab, animated: false)
             self.contentCollectionView.reloadData()
             self.contentCollectionView.performBatchUpdates(nil)
+            self.invalidateIntrinsicContentSize()
             self.layoutIfNeeded()
         }
     }

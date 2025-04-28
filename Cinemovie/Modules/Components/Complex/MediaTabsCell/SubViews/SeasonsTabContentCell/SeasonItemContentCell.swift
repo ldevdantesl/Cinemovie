@@ -38,19 +38,9 @@ final class SeasonItemContentCell: ReusableCellBaseClass {
     private var viewModel: SeasonItemContentCellViewModel?
     
     // MARK: - VIEW PROPERTIES
-    private let loadingIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .medium)
-        indicator.color = .white
-        indicator.hidesWhenStopped = true
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
-    }()
-    
-    private let posterImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.backgroundColor = CMColor.cmSecondary
-        imageView.contentMode = .scaleToFill
-        imageView.clipsToBounds = true
+    private let posterImageView: AsyncImageView = {
+        let imageView = AsyncImageView()
+        imageView.setCornerRadius(Constants.imageCornerRadius)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
@@ -116,7 +106,6 @@ final class SeasonItemContentCell: ReusableCellBaseClass {
     override func layoutSubviews() {
         super.layoutSubviews()
         self.contentView.layer.cornerRadius = Constants.selfCornerRadius
-        self.posterImageView.layer.cornerRadius = Constants.imageCornerRadius
     }
     
     // MARK: - PUBLIC FUNC
@@ -129,29 +118,17 @@ final class SeasonItemContentCell: ReusableCellBaseClass {
         if seasonOverviewLabel.text != nil { vStack.addArrangedSubview(seasonOverviewLabel) }
         vStack.addArrangedSubview(episodeCountLabel)
         
-        guard let imageURL = URLHelper.getImageURL(with: viewModel.season.posterPath, size: .w342) else {
-            posterImageView.contentMode = .center
-            posterImageView.preferredSymbolConfiguration = .init(pointSize: Constants.imagePointSize, weight: .bold)
-            posterImageView.image = UIImage(systemName: Constants.defaultPosterImageName)
-            return
-        }
-        
-        loadingIndicator.startAnimating()
-        posterImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
-            guard let self = self else { return }
-            self.loadingIndicator.stopAnimating()
-        }
+        let imagePath = viewModel.season.posterPath
+        posterImageView.setAsyncImage(
+            path: imagePath, size: .w342,
+            notFoundImageSystemName: Constants.defaultPosterImageName,
+            notFoundPointSize: Constants.imagePointSize
+        )
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
         contentView.backgroundColor = CMColor.cmSecondaryBackground
-        
-        posterImageView.addSubview(loadingIndicator)
-        loadingIndicator.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.size.equalTo(Constants.loadingIndicatorSize)
-        }
         
         addSubview(posterImageView)
         posterImageView.snp.makeConstraints {

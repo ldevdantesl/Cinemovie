@@ -32,6 +32,7 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
     fileprivate enum Constants {
         static let imageHorizontalEdgePaddings = 10.0
         static let imageCornerRadius = 15.0
+        static let imageBorderWidth = 0.7
         static let fakePosterOffsets = 5.0
         static let fakePosterBorderWidth = 0.5
         static let maximumAlphaComponent = 0.8
@@ -42,27 +43,33 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: BelongsToCollectionTabContentCellViewModel?
-    private var fakePosters: [UIView] = []
     private var items: [MediaPosterImageCellViewModel] = []
     private var showingItems: Bool = false
     
     // MARK: - VIEW PROPERTIES
-    private let loadingIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .large)
-        indicator.color = .white
-        indicator.hidesWhenStopped = true
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
-    }()
-    private lazy var collectionImageView: UIImageView = {
-        let view = UIImageView()
-        view.clipsToBounds = true
-        view.contentMode = .scaleAspectFill
-        view.isUserInteractionEnabled = true
-        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapCollection)))
+    private lazy var collectionImageView: AsyncImageView = {
+        let view = AsyncImageView()
+        view.setCornerRadius(Constants.imageCornerRadius)
+        view.setBorder(width: Constants.imageBorderWidth, borderColor: CMColor.cmLabel.withAlphaComponent(0.8))
+        view.setAction(target: self, action: #selector(didTapCollection))
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
+    
+    private let firstFakePoster: UIView = {
+        let view = UIView()
+        view.backgroundColor = CMColor.cmSecondaryBackground.withAlphaComponent(0.7)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let secondFakePoster: UIView = {
+        let view = UIView()
+        view.backgroundColor = CMColor.cmSecondaryBackground.withAlphaComponent(0.4)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     private let collectionNameLabel: UILabel = {
         let label = UILabel()
         label.font = CMFont.font(size: .caption, fontName: .avenirMediumItalic)
@@ -72,6 +79,7 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    
     private let collectionOverviewLabel: UILabel = {
         let label = UILabel()
         label.font = CMFont.font(size: .tiny, fontName: .avenirUltraLight)
@@ -82,6 +90,7 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    
     private lazy var collectionLabelsStack: UIStackView = {
         let vstack = UIStackView()
         vstack.axis = .vertical
@@ -117,16 +126,20 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        self.collectionImageView.layer.cornerRadius = Constants.imageCornerRadius
-        self.collectionImageView.layer.borderWidth = 0.7
-        self.collectionImageView.layer.borderColor = CMColor.cmLabel.withAlphaComponent(0.8).cgColor
+        self.firstFakePoster.layer.cornerRadius = Constants.imageCornerRadius
+        self.firstFakePoster.layer.borderWidth = Constants.fakePosterBorderWidth
+        self.firstFakePoster.layer.borderColor = CMColor.cmLabel.withAlphaComponent(0.7).cgColor
+        
+        self.secondFakePoster.layer.cornerRadius = Constants.imageCornerRadius
+        self.secondFakePoster.layer.borderWidth = Constants.fakePosterBorderWidth
+        self.secondFakePoster.layer.borderColor = CMColor.cmLabel.withAlphaComponent(0.4).cgColor
     }
     
     override func prepareForReuse() {
         super.prepareForReuse()
         collectionLabelsStack.arrangedSubviews.forEach { collectionLabelsStack.removeArrangedSubview($0); $0.removeFromSuperview() }
-        fakePosters.forEach { $0.removeFromSuperview() }
-        fakePosters.removeAll()
+        self.viewModel = nil
+        self.items = []
     }
     
     override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
@@ -145,7 +158,6 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
         self.items = viewModel.collectionDetails.parts.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.onItemTapped) }
         
         guard !showingItems else { return }
-        
         self.collectionNameLabel.text = viewModel.collectionDetails.name
         self.collectionLabelsStack.addArrangedSubview(collectionNameLabel)
         
@@ -154,65 +166,43 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
             collectionLabelsStack.addArrangedSubview(collectionOverviewLabel)
         }
         
-        let imageURL = URLHelper.getImageURL(with: viewModel.collectionDetails.backdropPath, size: .original)
-        guard let imageURL = imageURL else { return }
-    
-        loadingIndicator.startAnimating()
-        self.collectionImageView.sd_setImage(with: imageURL) { [weak self] image, _, _, _ in
-            guard let self = self else { return }
-            loadingIndicator.stopAnimating()
-        }
-        
-        let totalParts = min(Constants.maximumTotalParts, viewModel.collectionDetails.parts.count)
-        self.collectionImageView.snp.remakeConstraints {
-            $0.verticalEdges.equalToSuperview()
-            $0.leading.equalToSuperview()
-            $0.trailing.equalToSuperview().inset(Constants.fakePosterOffsets * Double(totalParts + 1))
-        }
-        
-        createFakePosters(total: totalParts)
+        collectionImageView.setAsyncImage(
+            path: viewModel.collectionDetails.backdropPath, size: .original,
+            notFoundImageSystemName: "questionmark", notFoundPointSize: 20.0
+        )
         self.invalidateIntrinsicContentSize()
         self.layoutIfNeeded()
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        collectionImageView.addSubview(loadingIndicator)
-        loadingIndicator.snp.makeConstraints {
-            $0.center.equalToSuperview()
-        }
-        
         collectionImageView.addSubview(collectionLabelsStack)
         collectionLabelsStack.snp.makeConstraints {
             $0.horizontalEdges.bottom.equalToSuperview()
         }
         
-        addSubview(collectionImageView)
+        contentView.addSubview(collectionImageView)
         collectionImageView.snp.makeConstraints {
             $0.verticalEdges.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview()
-        }
-    }
-    
-    private func createFakePosters(total: Int) {
-        for i in 1...total {
-            let newAlphaComponent: Double = Constants.maximumAlphaComponent - (0.2 * Double(i))
-            let fakePoster = UIView()
-            fakePoster.backgroundColor = CMColor.cmBackground
-            fakePoster.layer.cornerRadius = Constants.imageCornerRadius
-            fakePoster.layer.borderWidth = Constants.fakePosterBorderWidth
-            fakePoster.layer.borderColor = CMColor.cmLabel.withAlphaComponent(newAlphaComponent).cgColor
-
-            addSubview(fakePoster)
-            fakePoster.snp.makeConstraints {
-                $0.verticalEdges.equalToSuperview()
-                $0.leading.equalToSuperview()
-                $0.trailing.equalToSuperview().inset(Constants.fakePosterOffsets * Double(i))
-            }
-            fakePosters.append(fakePoster)
+            $0.leading.equalToSuperview()
+            $0.trailing.equalToSuperview().inset(Constants.fakePosterOffsets * 2)
         }
         
-        self.bringSubviewToFront(collectionImageView)
+        contentView.addSubview(firstFakePoster)
+        firstFakePoster.snp.makeConstraints {
+            $0.verticalEdges.equalTo(collectionImageView.snp.verticalEdges)
+            $0.leading.equalTo(collectionImageView.snp.leading)
+            $0.trailing.equalTo(collectionImageView.snp.trailing).offset(Constants.fakePosterOffsets)
+        }
+        
+        contentView.addSubview(secondFakePoster)
+        secondFakePoster.snp.makeConstraints {
+            $0.verticalEdges.equalTo(collectionImageView.snp.verticalEdges)
+            $0.leading.equalTo(collectionImageView.snp.leading)
+            $0.trailing.equalTo(collectionImageView.snp.trailing).offset(Constants.fakePosterOffsets * 2)
+        }
+        
+        contentView.bringSubviewToFront(collectionImageView)
     }
     
     private func createLayout() -> UICollectionViewCompositionalLayout {

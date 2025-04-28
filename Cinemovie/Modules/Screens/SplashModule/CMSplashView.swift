@@ -15,6 +15,7 @@ final class CMSplashView: UIView {
         static let appLogoSize: CGFloat = 150
         static let appLogoTranslationY: CGFloat = 20
         static let aniDuration: TimeInterval = 1.2
+        static let showAniDuration: TimeInterval = 0.2
     }
     
     // MARK: - VIEW PROPERTIES
@@ -50,6 +51,13 @@ final class CMSplashView: UIView {
     
     // MARK: - PUBLIC FUNC
     public func show() {
+        self.isHidden = false
+        self.alpha = 0
+        UIView.animate(withDuration: Constants.showAniDuration, delay: 0) { [weak self] in
+            guard let self = self else { return }
+            self.alpha = 1
+        }
+        self.appLogo.transform = .identity
         DispatchQueue.main.async {
             UIView.animate(withDuration: Constants.aniDuration, delay: 0, options: [.autoreverse, .repeat, .curveEaseInOut]) { [weak self] in
                 guard let self = self else { return }
@@ -65,7 +73,6 @@ final class CMSplashView: UIView {
         } completion: { [weak self] _ in
             guard let self = self else { return }
             self.isHidden = true
-            self.removeFromSuperview()
         }
     }
     

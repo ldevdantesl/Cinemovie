@@ -94,16 +94,12 @@ final class MovieDetailsScreenVC: UIViewController {
         presenter?.viewDidLoad()
         setupUI()
         configureDataSource()
+        downloadingView.show()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.alpha = 0
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        downloadingView.show()
     }
     
     override func viewDidDisappear(_ animated: Bool) {

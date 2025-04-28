@@ -76,16 +76,12 @@ final class PersonDetailsScreenVC: UIViewController {
         presenter?.viewDidLoad()
         setupUI()
         configureDataSource()
+        downloadingView.show()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.navigationBar.isHidden = true
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        downloadingView.show()
     }
     
     override func viewDidDisappear(_ animated: Bool) {

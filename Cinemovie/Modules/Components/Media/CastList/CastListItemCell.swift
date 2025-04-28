@@ -43,19 +43,13 @@ final class CastListItemCell: ReusableCellBaseClass {
     // MARK: - PROPERTIES
     private var viewModel: CastListItemCellViewModel?
     
-    private lazy var loadingIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .large)
-        indicator.hidesWhenStopped = true
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
-    }()
-    
-    private lazy var avatarImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.clipsToBounds = true
+    // MARK: - VIEW PROPERTIES
+    private lazy var avatarImageView: AsyncImageView = {
+        let imageView = AsyncImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.isUserInteractionEnabled = true
-        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didSelectCast)))
+        imageView.setAction(target: self, action: #selector(didSelectCast))
+        imageView.setCornerRadius(Constants.imageViewCornerRadius)
+        imageView.setBorder(width: Constants.imageViewBorderWidth, borderColor: CMColor.cmAccent)
         return imageView
     }()
     
@@ -87,56 +81,26 @@ final class CastListItemCell: ReusableCellBaseClass {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        avatarImageView.layer.cornerRadius = Constants.imageViewCornerRadius
-        avatarImageView.layer.borderColor = CMColor.cmAccent.cgColor
-        avatarImageView.layer.borderWidth = Constants.imageViewBorderWidth
-    }
-    
     override func prepareForReuse() {
         super.prepareForReuse()
-        self.avatarImageView.image = nil
-        self.nameLabel.text = nil
-        self.characterName.text = nil
-        self.avatarImageView.sd_cancelCurrentImageLoad()
+        self.avatarImageView.reset()
     }
     
     // MARK: - PUBLIC METHOD
     public func configure(viewModel: CastListItemCellViewModel) {
         self.viewModel = viewModel
         guard let cast = viewModel.cast else { return }
-        
         self.nameLabel.text = cast.name
         self.characterName.text = cast.character ?? cast.job ?? Constants.unknownText
-        guard let imageURL = URLHelper.getImageURL(with: cast.profilePath, size: .original) else {
-            self.avatarImageView.contentMode = .center
-            self.avatarImageView.image = UIImage(
-                systemName: Constants.imageViewImageName,
-                withConfiguration: UIImage.SymbolConfiguration(pointSize: Constants.imageViewImagePointSize, weight: .bold)
-            )
-            self.avatarImageView.backgroundColor = CMColor.cmSecondaryBackground
-            return
-        }
-        
-        self.loadingIndicator.startAnimating()
-        self.avatarImageView.contentMode = .scaleAspectFill
-        self.avatarImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
-            guard let self = self else { return }
-            self.loadingIndicator.stopAnimating()
-            self.avatarImageView.setNeedsLayout()
-            self.avatarImageView.layoutIfNeeded()
-        }
+        avatarImageView.setAsyncImage(
+            path: cast.profilePath, size: .original,
+            notFoundImageSystemName: Constants.imageViewImageName,
+            notFoundPointSize: Constants.imageViewImagePointSize
+        )
     }
     
     // MARK: - PRIVATE METHOD
     private func setupUI() {
-        avatarImageView.addSubview(loadingIndicator)
-        loadingIndicator.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.width.height.equalTo(Constants.loadingIndicatorSize)
-        }
-        
         contentView.addSubview(avatarImageView)
         avatarImageView.snp.makeConstraints {
             $0.top.equalToSuperview()

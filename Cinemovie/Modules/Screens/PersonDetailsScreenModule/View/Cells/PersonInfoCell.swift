@@ -34,7 +34,6 @@ final class PersonInfoCell: ReusableCellBaseClass {
     fileprivate enum Constants {
         static let backButtonImageName = "chevron.left"
         static let backButtonSize = 35.0
-        static let loadingIndicatorSize = 15.0
         static let defaultImageName = "person"
         static let defaultImagePointSize = 20.0
         static let imageBorderWidth = 0.5
@@ -50,19 +49,9 @@ final class PersonInfoCell: ReusableCellBaseClass {
     private var viewModel: PersonInfoCellViewModel?
     
     // MARK: - VIEW PROPERTIES
-    private let loadingIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .medium)
-        indicator.color = .white
-        indicator.hidesWhenStopped = true
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
-    }()
-    
-    private let personAvaImageView: UIImageView = {
-        let view = UIImageView()
-        view.contentMode = .scaleAspectFill
-        view.clipsToBounds = true
-        view.backgroundColor = CMColor.cmSecondaryBackground
+    private let personAvaImageView: AsyncImageView = {
+        let view = AsyncImageView()
+        view.setBorder(width: Constants.imageBorderWidth, borderColor: CMColor.cmLabel)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -166,9 +155,7 @@ final class PersonInfoCell: ReusableCellBaseClass {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        self.personAvaImageView.layer.cornerRadius = self.personAvaImageView.frame.height / 2
-        self.personAvaImageView.layer.borderColor = CMColor.cmLabel.cgColor
-        self.personAvaImageView.layer.borderWidth = Constants.imageBorderWidth
+        self.personAvaImageView.makeCircular()
     }
     
     // MARK: - PUBLIC FUNC
@@ -203,30 +190,18 @@ final class PersonInfoCell: ReusableCellBaseClass {
         firstPartStackView.addArrangedSubview(personGenderLabel)
         self.personGenderLabel.text = GenderHelper.identifyGender(gender: viewModel.personDetails.gender)
         
-        guard let imageURL = URLHelper.getImageURL(with: viewModel.personDetails.profilePath, size: .w500) else {
-            personAvaImageView.image = UIImage(systemName: Constants.defaultImageName)
-            personAvaImageView.preferredSymbolConfiguration = .init(pointSize: Constants.defaultImagePointSize, weight: .bold)
-            personAvaImageView.contentMode = .center
-            self.layoutIfNeeded()
-            return
-        }
+        let imagePath = viewModel.personDetails.profilePath
+        personAvaImageView.setAsyncImage(
+            path: imagePath, size: .w500,
+            notFoundImageSystemName: Constants.defaultImageName,
+            notFoundPointSize: Constants.defaultImagePointSize
+        )
         
-        loadingIndicator.startAnimating()
-        personAvaImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
-            guard let self = self else { return }
-            self.loadingIndicator.stopAnimating()
-        }
         self.layoutIfNeeded()
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        personAvaImageView.addSubview(loadingIndicator)
-        loadingIndicator.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.size.equalTo(Constants.loadingIndicatorSize)
-        }
-        
         contentView.addSubview(backButton)
         backButton.snp.makeConstraints {
             $0.top.equalToSuperview()

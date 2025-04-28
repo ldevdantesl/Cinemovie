@@ -32,21 +32,11 @@ final class MediaPosterImageCell: ReusableCellBaseClass {
     private var viewModel: MediaPosterImageCellViewModel?
     
     // MARK: - VIEW PROPERTIES
-    private let loadingIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .large)
-        indicator.color = .white
-        indicator.hidesWhenStopped = true
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
-    }()
-    
-    private lazy var posterImageView: UIImageView = {
-        let view = UIImageView()
-        view.clipsToBounds = true
-        view.contentMode = .scaleAspectFill
-        view.backgroundColor = CMColor.cmSecondaryBackground
-        view.isUserInteractionEnabled = true
-        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapMedia)))
+    private lazy var posterImageView: AsyncImageView = {
+        let view = AsyncImageView()
+        view.setAction(target: self, action: #selector(didTapMedia))
+        view.setCornerRadius(Constants.cornerRadius)
+        view.setBorder(width: Constants.borderWidth, borderColor: CMColor.cmLabel)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -62,49 +52,23 @@ final class MediaPosterImageCell: ReusableCellBaseClass {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        self.posterImageView.layer.cornerRadius = Constants.cornerRadius
-        self.posterImageView.layer.borderColor = CMColor.cmLabel.cgColor
-        self.posterImageView.layer.borderWidth = Constants.borderWidth
-    }
-    
     override func prepareForReuse() {
         super.prepareForReuse()
-        self.posterImageView.image = nil
-        self.posterImageView.tintColor = nil
-        self.posterImageView.contentMode = .scaleAspectFill
-        self.posterImageView.preferredSymbolConfiguration = nil
+        self.posterImageView.reset()
     }
     
     // MARK: - PUBLIC FUNCTIONS
     public func configure(with viewModel: MediaPosterImageCellViewModel) {
         self.viewModel = viewModel
-        self.posterImageView.sd_cancelCurrentImageLoad()
-        
-        guard let url = URLHelper.getImageURL(with: viewModel.media.posterPath, size: .w1280) else {
-            posterImageView.image = UIImage(systemName: Constants.imageNotFoundName)
-            posterImageView.preferredSymbolConfiguration = .init(pointSize: Constants.imageNotFoundPointSize, weight: .bold)
-            posterImageView.tintColor = CMColor.cmAccent
-            posterImageView.contentMode = .center
-            return
-        }
-        
-        self.loadingIndicator.startAnimating()
-        self.posterImageView.sd_setImage(with: url) { [weak self] _, _, _, _ in
-            guard let self = self else { return }
-            self.posterImageView.layoutIfNeeded()
-            self.loadingIndicator.stopAnimating()
-        }
+        self.posterImageView.setAsyncImage(
+            path: viewModel.media.posterPath, size: .w1280,
+            notFoundImageSystemName: Constants.imageNotFoundName,
+            notFoundPointSize: Constants.imageNotFoundPointSize
+        )
     }
     
     // MARK: - PRIVATE FUNCTIONS
     private func setupUI() {
-        posterImageView.addSubview(loadingIndicator)
-        loadingIndicator.snp.makeConstraints {
-            $0.center.equalToSuperview()
-        }
-        
         contentView.addSubview(posterImageView)
         posterImageView.snp.makeConstraints {
             $0.edges.equalToSuperview()

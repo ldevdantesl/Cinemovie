@@ -41,19 +41,10 @@ final class SeasonsPopUpView: PopUPView {
     private var items: [EpisodeItemPopUpCellViewModel]
     
     // MARK: - VIEW PROPERTIES
-    private let loadingIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .medium)
-        indicator.color = .white
-        indicator.hidesWhenStopped = true
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
-    }()
-    
-    private lazy var posterImageView: UIImageView = {
-        let image = UIImageView()
-        image.contentMode = .scaleAspectFill
-        image.clipsToBounds = true
-        image.backgroundColor = CMColor.cmBackground
+    private lazy var posterImageView: AsyncImageView = {
+        let image = AsyncImageView()
+        image.setCornerRadius(Constants.posterCornerRadius)
+        image.setBorder(width: Constants.posterBorderWidth, borderColor: CMColor.cmLabel)
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
@@ -83,18 +74,12 @@ final class SeasonsPopUpView: PopUPView {
         setupUI()
         episodesCollectionView.reloadData()
         
-        guard let imageURL = URLHelper.getImageURL(with: viewModel.seasonDetails.posterPath, size: .original) else {
-            posterImageView.image = UIImage(systemName: Constants.defaultImageName)
-            posterImageView.preferredSymbolConfiguration = .init(pointSize: Constants.defaultImageSize, weight: .bold)
-            posterImageView.contentMode = .center
-            return
-        }
-        
-        self.loadingIndicator.startAnimating()
-        posterImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
-            guard let self = self else { return }
-            self.loadingIndicator.stopAnimating()
-        }
+        let imagePath = viewModel.seasonDetails.posterPath
+        posterImageView.setAsyncImage(
+            path: imagePath, size: .original,
+            notFoundImageSystemName: Constants.defaultImageName,
+            notFoundPointSize: Constants.defaultImageSize
+        )
     }
     
     @available(*, unavailable)
@@ -102,21 +87,8 @@ final class SeasonsPopUpView: PopUPView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        posterImageView.layer.cornerRadius = Constants.posterCornerRadius
-        posterImageView.layer.borderColor = CMColor.cmLabel.cgColor
-        posterImageView.layer.borderWidth = Constants.posterBorderWidth
-    }
-    
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        posterImageView.addSubview(loadingIndicator)
-        loadingIndicator.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.size.equalTo(Constants.loadingIndicatorSize)
-        }
-        
         addSubview(posterImageView)
         posterImageView.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide.snp.top).offset(Constants.vSpacing)

@@ -80,6 +80,12 @@ final class MediaListCell: ReusableCellBaseClass {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        self.viewModel = nil
+        self.items = []
+    }
+    
     override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
         layoutIfNeeded()
         let fittingHeight = titleLabel.intrinsicContentSize.height + subtitleLabel.intrinsicContentSize.height +

@@ -34,21 +34,10 @@ final class TrendingPersonCell: ReusableCellBaseClass {
     private var viewModel: TrendingPersonCellViewModel?
     
     // MARK: - VIEW PROPERTIES
-    private let loadingIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .medium)
-        indicator.color = .white
-        indicator.hidesWhenStopped = true
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
-    }()
-    
-    private lazy var personAvaImageView: UIImageView = {
-        let view = UIImageView()
-        view.backgroundColor = CMColor.cmSecondaryBackground
-        view.contentMode = .scaleAspectFill
-        view.clipsToBounds = true
-        view.isUserInteractionEnabled = true
-        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapPersonImageView)))
+    private lazy var personAvaImageView: AsyncImageView = {
+        let view = AsyncImageView()
+        view.setAction(target: self, action: #selector(didTapPersonImageView))
+        view.setBorder(width: Constants.imageBorderWidth, borderColor: CMColor.cmLabel)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -66,9 +55,7 @@ final class TrendingPersonCell: ReusableCellBaseClass {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        self.personAvaImageView.layer.cornerRadius = self.contentView.frame.width / 2
-        self.personAvaImageView.layer.borderWidth = Constants.imageBorderWidth
-        self.personAvaImageView.layer.borderColor = CMColor.cmLabel.cgColor
+        self.personAvaImageView.makeCircular()
     }
     
     override func prepareForReuse() {
@@ -80,31 +67,17 @@ final class TrendingPersonCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: TrendingPersonCellViewModel) {
         self.viewModel = viewModel
-        
-        guard let imageURL = URLHelper.getImageURL(with: viewModel.person.profilePath, size: .w500) else {
-            personAvaImageView.image = UIImage(systemName: Constants.imageDefaultName)
-            personAvaImageView.preferredSymbolConfiguration = .init(pointSize: Constants.imageDefaultPointSize, weight: .bold)
-            personAvaImageView.contentMode = .center
-            self.layoutIfNeeded()
-            return
-        }
-        
-        self.loadingIndicator.startAnimating()
-        personAvaImageView.sd_setImage(with: imageURL) { [weak self] _, _, _, _ in
-            guard let self = self else { return }
-            self.loadingIndicator.stopAnimating()
-        }
+        let imagePath = viewModel.person.profilePath
+        personAvaImageView.setAsyncImage(
+            path: imagePath, size: .w500,
+            notFoundImageSystemName: Constants.imageDefaultName,
+            notFoundPointSize: Constants.imageDefaultPointSize
+        )
         self.layoutIfNeeded()
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        personAvaImageView.addSubview(loadingIndicator)
-        loadingIndicator.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.size.equalTo(Constants.loadingIndicatorSize)
-        }
-        
         contentView.addSubview(personAvaImageView)
         personAvaImageView.snp.makeConstraints {
             $0.edges.equalToSuperview()

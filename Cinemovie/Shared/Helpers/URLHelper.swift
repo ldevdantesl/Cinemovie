@@ -7,17 +7,6 @@
 
 import Foundation
 
-enum ImageSizes: String {
-    case w92 = "w92"
-    case w154 = "w154"
-    case w185 = "w185"
-    case w342 = "w342"
-    case w500 = "w500"
-    case w780 = "w780"
-    case w1280 = "w1280"
-    case original = "original"
-}
-
 public struct URLHelper {
     static func stringToURL(urlString: String) -> URL? {
         return URL(string: urlString)
@@ -55,7 +44,7 @@ public struct URLHelper {
         return URL(string: "https://www.imdb.com/title/\(id)/")
     }
     
-    static func getImageURL(with path: String?, size: ImageSizes) -> URL? {
+    static func getImageURL(with path: String?, size: TMDBImageSizes) -> URL? {
         guard let path = path, !path.isEmpty else { return nil }
         let finalPath = "\(CONSTANTS.imageBaseURLString)/\(size.rawValue)\(path)"
         return URL(string: finalPath)

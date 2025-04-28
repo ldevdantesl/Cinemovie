@@ -50,19 +50,9 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
     private var viewModel: ReviewItemContentCellViewModel?
     
     // MARK: - VIEW PROPERTIES
-    private let loadingIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .medium)
-        indicator.color = .white
-        indicator.hidesWhenStopped = true
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
-    }()
-    
-    private let reviewAuthorImageView: UIImageView = {
-        let view = UIImageView()
-        view.contentMode = .scaleAspectFill
-        view.clipsToBounds = true
-        view.backgroundColor = CMColor.cmSecondaryBackground
+    private let reviewAuthorImageView: AsyncImageView = {
+        let view = AsyncImageView()
+        view.setBorder(width: Constants.authorImageBorderWidth, borderColor: CMColor.cmLabel)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -131,10 +121,7 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        self.reviewAuthorImageView.layoutIfNeeded()
-        self.reviewAuthorImageView.layer.cornerRadius = self.reviewAuthorImageView.frame.width / 2
-        self.reviewAuthorImageView.layer.borderWidth = Constants.authorImageBorderWidth
-        self.reviewAuthorImageView.layer.borderColor = CMColor.cmLabel.cgColor
+        self.reviewAuthorImageView.makeCircular()
         self.contentView.layer.cornerRadius = Constants.viewCornerRadius
     }
     
@@ -195,32 +182,18 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
         }
         
         // MARK: - IMAGE SETTING
-        guard let imageURL = URLHelper.getImageURL(with: viewModel.review.authorDetails.avatarPath, size: .w342) else {
-            self.reviewAuthorImageView.contentMode = .center
-            self.reviewAuthorImageView.image = UIImage(systemName: Constants.authorDefaultImage)
-            self.reviewAuthorImageView.preferredSymbolConfiguration = .init(pointSize: Constants.authorImageDefaultPointSize, weight: .bold)
-            self.invalidateIntrinsicContentSize()
-            self.layoutIfNeeded()
-            return
-        }
-        
-        loadingIndicator.startAnimating()
-        self.reviewAuthorImageView.sd_setImage(with: imageURL) { [weak self] image, _, _, _ in
-            guard let self = self else { return }
-            self.loadingIndicator.stopAnimating()
-        }
-        
+        let imagePath = viewModel.review.authorDetails.avatarPath
+        reviewAuthorImageView.setAsyncImage(
+            path: imagePath, size: .w342,
+            notFoundImageSystemName: Constants.authorDefaultImage,
+            notFoundPointSize: Constants.authorImageDefaultPointSize
+        )
         self.layoutIfNeeded()
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
         contentView.backgroundColor = CMColor.cmSecondaryBackground
-        
-        reviewAuthorImageView.addSubview(loadingIndicator)
-        loadingIndicator.snp.makeConstraints {
-            $0.center.equalToSuperview()
-        }
         
         contentView.addSubview(reviewAuthorImageView)
         reviewAuthorImageView.snp.makeConstraints {

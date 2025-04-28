@@ -10,11 +10,11 @@ import SnapKit
 import SDWebImage
 
 final class BackdropImageCellViewModel: CellViewModelBaseClass {
-    let imageURL: URL?
+    let imagePath: String?
     let didTapBackButtonAction: (() -> Void)?
     
-    init(imagePath: String?, size: ImageSizes, didTapBackButtonAction: (() -> Void)?) {
-        self.imageURL = URLHelper.getImageURL(with: imagePath, size: size)
+    init(imagePath: String?, size: TMDBImageSizes, didTapBackButtonAction: (() -> Void)?) {
+        self.imagePath = imagePath
         self.didTapBackButtonAction = didTapBackButtonAction
         super.init(cellIdentifier: "BackdropImageCell")
     }
@@ -41,18 +41,8 @@ final class BackdropImageCell: ReusableCellBaseClass {
     private var imageTopConstraint: Constraint?
     
     // MARK: - VIEW PROPERTIES
-    private let loadingIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .large)
-        indicator.hidesWhenStopped = true
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
-    }()
-    
-    private let backdropImageView: UIImageView = {
-        let view = UIImageView()
-        view.contentMode = .scaleAspectFill
-        view.clipsToBounds = true
-        view.backgroundColor = CMColor.cmSecondaryBackground
+    private let backdropImageView: AsyncImageView = {
+        let view = AsyncImageView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -90,17 +80,11 @@ final class BackdropImageCell: ReusableCellBaseClass {
         )
         backButton.configure(viewModel: vm)
         
-        guard let url = viewModel.imageURL else {
-            backdropImageView.preferredSymbolConfiguration = .init(pointSize: Constants.backdropImageSize, weight: .bold)
-            backdropImageView.image = UIImage(systemName: Constants.imageNotFoundName)
-            backdropImageView.contentMode = .center
-            return
-        }
-        self.loadingIndicator.startAnimating()
-        backdropImageView.sd_setImage(with: url) { [weak self] _, _, _, _ in
-            guard let self = self else { return }
-            self.loadingIndicator.stopAnimating()
-        }
+        backdropImageView.setAsyncImage(
+            path: viewModel.imagePath, size: .original,
+            notFoundImageSystemName: Constants.imageNotFoundName,
+            notFoundPointSize: Constants.backdropImageSize
+        )
     }
     
     public func scaleImage(to offsetY: CGFloat) {
@@ -119,12 +103,6 @@ final class BackdropImageCell: ReusableCellBaseClass {
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        backdropImageView.addSubview(loadingIndicator)
-        loadingIndicator.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.width.height.equalTo(Constants.indicatorSize)
-        }
-        
         contentView.addSubview(backdropImageView)
         backdropImageView.snp.makeConstraints {
             imageTopConstraint = $0.top.equalToSuperview().constraint

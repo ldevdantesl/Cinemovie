@@ -11,7 +11,8 @@ import UIKit
 protocol HomeScreenViewProtocol: AnyObject {
     func applySnapshot(sections: [HomeScreenVC.Sections], itemsBySection: [HomeScreenVC.Sections: [HomeScreenVC.Items]])
     func didRecieveError(_ errorStr: String)
-    func reloadSearchResults(media: [Media], forType type: MediaTypes)
+    
+    var downloadingView: CMSplashView { get }
 }
 
 final class HomeScreenVC: UIViewController {
@@ -45,6 +46,11 @@ final class HomeScreenVC: UIViewController {
     
     // MARK: - VIPER
     var presenter: HomeScreenPresenterProtocol?
+    let downloadingView: CMSplashView = {
+        let view = CMSplashView(frame: .zero)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
     // MARK: - PROPERTIES
     private var headerViewHeightConstraint: Constraint?
@@ -81,6 +87,7 @@ final class HomeScreenVC: UIViewController {
         setupUI()
         presenter?.viewDidLoaded()
         configureDataSource()
+        self.downloadingView.show()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -118,6 +125,11 @@ final class HomeScreenVC: UIViewController {
             $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(Constants.headerViewHeight)
+        }
+        
+        view.addSubview(downloadingView)
+        downloadingView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
         }
     }
     
@@ -219,14 +231,6 @@ extension HomeScreenVC: HomeScreenViewProtocol {
 
         DispatchQueue.main.async {
             self.present(alert, animated: true, completion: nil)
-        }
-    }
-    
-    func reloadSearchResults(media: [any Media], forType type: MediaTypes) {
-        DispatchQueue.main.async {
-            let cell = self.collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? MediaSearchCell
-            cell?.didRecieveNewSearchResults(media: media, forType: type)
-            print("Reloading with new items")
         }
     }
 }

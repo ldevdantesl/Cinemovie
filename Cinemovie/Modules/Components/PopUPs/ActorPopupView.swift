@@ -39,19 +39,8 @@ final class ActorPopupView: PopUPView {
     private var viewModel: ActorPopupViewModel
     
     // MARK: - VIEW PROPERTIES
-    private let loadingIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .large)
-        indicator.color = CMColor.cmLabel
-        indicator.hidesWhenStopped = true
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
-    }()
-    
-    private lazy var actorImageView: UIImageView = {
-        let view = UIImageView()
-        view.contentMode = .scaleAspectFill
-        view.clipsToBounds = true
-        view.backgroundColor = CMColor.cmSecondaryBackground
+    private let actorImageView: AsyncImageView = {
+        let view = AsyncImageView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -135,18 +124,12 @@ final class ActorPopupView: PopUPView {
         super.init(viewModel: viewModel)
         setupUI()
         
-        guard let url = URLHelper.getImageURL(with: viewModel.actor.profilePath, size: .w342) else {
-            self.actorImageView.contentMode = .center
-            self.actorImageView.preferredSymbolConfiguration = .init(pointSize: Constants.avaSystemImageSize, weight: .bold)
-            self.actorImageView.image = UIImage(systemName: Constants.buttonImageName)
-            return
-        }
-        
-        loadingIndicator.startAnimating()
-        self.actorImageView.sd_setImage(with: url) { [weak self] _, _, _, _ in
-            guard let self = self else { return }
-            self.loadingIndicator.stopAnimating()
-        }
+        let imagePath = viewModel.actor.profilePath
+        actorImageView.setAsyncImage(
+            path: imagePath, size: .w342,
+            notFoundImageSystemName: Constants.buttonImageName,
+            notFoundPointSize: Constants.avaSystemImageSize
+        )
     }
     
     @available(*, unavailable)
@@ -156,8 +139,8 @@ final class ActorPopupView: PopUPView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        actorImageView.layer.cornerRadius = Constants.imageSize / 2
         self.containerView.layer.cornerRadius = Constants.containerCornerRadius
+        self.actorImageView.makeCircular()
     }
     
     // MARK: - PRIVATE FUNC
@@ -167,12 +150,6 @@ final class ActorPopupView: PopUPView {
             $0.center.equalToSuperview()
             $0.height.equalTo(Constants.containerHeight)
             $0.width.equalTo(Constants.containerWidth)
-        }
-        
-        actorImageView.addSubview(loadingIndicator)
-        loadingIndicator.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.size.equalTo(Constants.loadingIndicatorSize)
         }
         
         containerView.addSubview(actorImageView)

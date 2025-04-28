@@ -25,11 +25,6 @@ protocol HomeScreenPresenterProtocol: AnyObject {
     func showSearchResults()
     func showRecentlyViewedMedia()
     
-    // MARK: - PAGINATION
-    func didTriggerPagination(for mediaType: MediaTypes)
-    func didRecievePaginatedMovieSearchResults(_ results: [Movie])
-    func didRecievePaginatedTVSeriesSearchResults(_ results: [TVSeries])
-    
     // MARK: - MOVIES
     func didDownloadMovieList(listType: MovieListType, queryMovies: [Movie])
     
@@ -110,12 +105,13 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
             self.didChangeMediaType(.movie)
+            self.view?.downloadingView.hide()
         }
     }
     
     // MARK: - USER INITIATED
     func didTapMedia(_ media: any Media) {
-        self.recentlyViewedMedia.append(media)
+        recentlyViewedMedia.map { $0.id }.contains(media.id) ? () : self.recentlyViewedMedia.append(media)
         switch media {
         case is Movie: router.navigateToMovieDetails(movieID: media.id)
         case is TVSeries: router.navigateToTVSeriesDetails(seriesID: media.id)
@@ -171,6 +167,8 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
     
     func didStartSearching(_ query: String) {
         searchWorkItem?.cancel()
+        view?.downloadingView.hide()
+        
         let workItem = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
             guard !query.isEmpty else {
@@ -178,16 +176,17 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
                 return
             }
             
+            self.view?.downloadingView.show()
             self.searchDownloadGroup.enter()
             self.movieSearchResults = []
-            self.interactor.downloadSearchResultsForMovies(query: query)
+            self.interactor.downloadSearchResultsForMovies(query: query, page: 1)
 
             self.searchDownloadGroup.enter()
             self.tvSeriesSearchResults = []
-            self.interactor.downloadSearchResultsForTVSeries(query: query)
+            self.interactor.downloadSearchResultsForTVSeries(query: query, page: 1)
 
             self.searchDownloadGroup.enter()
-            self.interactor.downloadSearchResultsForPeople(query: query)
+            self.interactor.downloadSearchResultsForPeople(query: query, page: 1)
 
             self.searchDownloadGroup.notify(queue: .main) {[weak self] in
                 guard let self = self else { return }
@@ -202,17 +201,17 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
     
     // MARK: - SEARCH
     func didRecieveMovieSearchResults(_ results: [Movie]) {
-        self.movieSearchResults = results.filteringByMinimumPopularity().removingMediaWithoutPoster()
+        self.movieSearchResults.append(contentsOf: results.filteringByMinimumPopularity().removingMediaWithoutPoster())
         searchDownloadGroup.leave()
     }
     
     func didRecieveTVSeriesSearchResults(_ results: [TVSeries]) {
-        self.tvSeriesSearchResults = results.filteringByMinimumPopularity().removingMediaWithoutPoster()
+        self.tvSeriesSearchResults.append(contentsOf: results.filteringByMinimumPopularity().removingMediaWithoutPoster())
         searchDownloadGroup.leave()
     }
     
     func didRecievePeopleSearchResults(_ results: [Person]) {
-        self.peopleSearchResults = results
+        self.peopleSearchResults.append(contentsOf: results)
         searchDownloadGroup.leave()
     }
     
@@ -220,18 +219,17 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
         guard !tvSeriesSearchResults.isEmpty || !movieSearchResults.isEmpty else {
             visibleSections = [.notFound]
             let vm = UnavailableInfoCellViewModel(title: "Nothing was found", subtitle: "Try something else", image: UIImage(named: ImageNames.notFound.rawValue))
-            view?.applySnapshot(sections: visibleSections, itemsBySection: [.notFound : [.notFoundCell(vm)]])
+            self.view?.applySnapshot(sections: visibleSections, itemsBySection: [.notFound : [.notFoundCell(vm)]])
+            self.view?.downloadingView.hide()
             return
         }
         visibleSections = [.search]
         let vm = MediaSearchCellViewModel(movies: movieSearchResults, tvSeries: tvSeriesSearchResults, people: peopleSearchResults) { [weak self] in
             guard let self = self else { return }
             self.didTapMedia($0)
-        } didTriggerPagination: { [weak self] in
-            guard let self = self else { return }
-            self.didTriggerPagination(for: $0)
         }
         view?.applySnapshot(sections: visibleSections, itemsBySection: [.search : [.searchCell(vm)]])
+        self.view?.downloadingView.hide()
     }
     
     func showRecentlyViewedMedia() {
@@ -245,28 +243,6 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
     
     func didFinishSearching() {
         self.didChangeMediaType(.movie)
-    }
-    
-    // MARK: - PAGINATION
-    func didTriggerPagination(for mediaType: MediaTypes) {
-        switch mediaType {
-        case .movie:
-            currentMoviePage += 1
-            interactor.downloadNewPaginatedSearchResultsForMovies(query: lastSearchQuery, page: currentMoviePage)
-        case .tvShow:
-            currentTVSeriesPage += 1
-            interactor.downloadNewPaginatedSearchResultsForTVSeries(query: lastSearchQuery, page: currentTVSeriesPage)
-        }
-    }
-    
-    func didRecievePaginatedMovieSearchResults(_ results: [Movie]) {
-        movieSearchResults.append(contentsOf: results.filteringByMinimumPopularity().removingMediaWithoutPoster())
-        self.view?.reloadSearchResults(media: results.filteringByMinimumPopularity().removingMediaWithoutPoster(), forType: .movie)
-    }
-    
-    func didRecievePaginatedTVSeriesSearchResults(_ results: [TVSeries]) {
-        tvSeriesSearchResults.append(contentsOf: results.filteringByMinimumPopularity().removingMediaWithoutPoster())
-        self.view?.reloadSearchResults(media: results.filteringByMinimumPopularity().removingMediaWithoutPoster(), forType: .tvShow)
     }
 
     // MARK: - MOVIES

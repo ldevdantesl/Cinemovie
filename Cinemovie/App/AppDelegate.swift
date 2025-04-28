@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SDWebImage
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,6 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             UIApplication.LaunchOptionsKey: Any
         ]?
     ) -> Bool {
+        SDImageCache.shared.config.maxMemoryCost = 100 * 1024 * 1024
+        SDImageCache.shared.config.maxMemoryCount = 100
         return true
     }
 
