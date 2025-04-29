@@ -49,10 +49,12 @@ final class PersonInfoCell: ReusableCellBaseClass {
         static let defaultImagePointSize = 20.0
         static let imageBorderWidth = 0.5
         static let imageSize = (UIConstants.screenWidth - 20) * 0.3
-        
+        static let selfCornerRadius = 15.0
+        static let itemSpacing = 20.0
         static let spacing = 5.0
         static let sourcesSpacing = 5.0
-        static let vSpacing = 5.0
+        static let vSpacing = 10.0
+        static let hSpacing = 10.0
         static let sourceSize = 30.0
     }
     
@@ -103,7 +105,7 @@ final class PersonInfoCell: ReusableCellBaseClass {
     
     private let personHometownLabel: UILabel = {
         let label = UILabel()
-        label.font = CMFont.font(size: .caption, fontName: .avenirMedium)
+        label.font = CMFont.font(size: .footnote, fontName: .avenirRegular)
         label.textColor = CMColor.cmLabel
         label.numberOfLines = 1
         return label
@@ -175,6 +177,7 @@ final class PersonInfoCell: ReusableCellBaseClass {
     override func layoutSubviews() {
         super.layoutSubviews()
         self.personAvaImageView.makeCircular()
+        self.contentView.layer.cornerRadius = Constants.selfCornerRadius
     }
     
     // MARK: - PUBLIC FUNC
@@ -240,35 +243,36 @@ final class PersonInfoCell: ReusableCellBaseClass {
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
+        contentView.backgroundColor = CMColor.cmBackground
         contentView.addSubview(backButton)
         
         contentView.addSubview(personAvaImageView)
         personAvaImageView.snp.makeConstraints {
-            avaImageTopConstraint = $0.top.equalToSuperview().constraint
-            $0.leading.equalToSuperview()
+            avaImageTopConstraint = $0.top.equalToSuperview().offset(Constants.vSpacing).constraint
+            $0.leading.equalToSuperview().offset(Constants.hSpacing)
             $0.size.equalTo(Constants.imageSize)
         }
         
         contentView.addSubview(firstPartStackView)
         firstPartStackView.snp.makeConstraints {
             $0.top.equalTo(personAvaImageView.snp.bottom).offset(Constants.spacing)
-            $0.leading.equalToSuperview()
+            $0.leading.equalToSuperview().offset(Constants.hSpacing)
             $0.trailing.equalTo(personAvaImageView.snp.trailing)
             $0.bottom.equalToSuperview()
         }
         
         contentView.addSubview(secondPartStackView)
         secondPartStackView.snp.makeConstraints {
-            secondStackTopConstraint = $0.top.equalToSuperview().constraint
-            $0.leading.equalTo(firstPartStackView.snp.trailing).offset(20)
-            $0.trailing.equalToSuperview()
-            $0.bottom.equalTo(personAvaImageView.snp.bottom).inset(Constants.vSpacing)
+            secondStackTopConstraint = $0.top.equalToSuperview().offset(Constants.vSpacing).constraint
+            $0.leading.equalTo(firstPartStackView.snp.trailing).offset(Constants.itemSpacing)
+            $0.trailing.equalToSuperview().offset(-Constants.hSpacing)
+            $0.bottom.equalTo(personAvaImageView.snp.bottom).inset(Constants.spacing)
         }
         
         contentView.addSubview(personSourcesStackView)
         personSourcesStackView.snp.makeConstraints {
             $0.leading.equalTo(secondPartStackView.snp.leading)
-            $0.trailing.equalToSuperview()
+            $0.trailing.equalToSuperview().offset(-Constants.hSpacing)
             $0.centerY.equalTo(firstPartStackView.snp.centerY)
         }
     }

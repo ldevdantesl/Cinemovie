@@ -112,7 +112,7 @@ final class PersonDetailsScreenVC: UIViewController {
             let containsImages = presenter.visibleSections.contains(.images)
             
             switch detailsSection {
-            case .images: edgeInsets = .init(top: 0, leading: 0, bottom: 0, trailing: 0)
+            case .images: edgeInsets = .init(top: 0, leading: 0, bottom: -50, trailing: 0)
             case .info: edgeInsets = .init(top: containsImages ? 10 : UIConstants.topInset, leading: 0, bottom: 0, trailing: 0)
             default: edgeInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
             }
@@ -131,6 +131,7 @@ final class PersonDetailsScreenVC: UIViewController {
             case .imageCell(let vm):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? PersonImagesCell
                 cell?.configure(viewModel: vm)
+                cell?.layer.zPosition = -1
                 return cell
                 
             case .infoVM(let vm):
@@ -160,6 +161,9 @@ final class PersonDetailsScreenVC: UIViewController {
 extension PersonDetailsScreenVC: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         collectionView.showBlur(scrollView)
+        guard let cell = collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? PersonImagesCell else { return }
+        let offsetY = scrollView.contentOffset.y
+        cell.setTopContraint(offsetY: offsetY)
     }
 }
 

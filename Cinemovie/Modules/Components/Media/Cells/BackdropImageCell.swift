@@ -106,7 +106,9 @@ final class BackdropImageCell: ReusableCellBaseClass {
     }
 
     public func resetScale() {
+        guard backdropImageView.transform != .identity else { return }
         backdropImageView.transform = .identity
+        guard imageTopConstraint?.layoutConstraints.first?.constant != 0 else { return }
         imageTopConstraint?.update(offset: 0)
     }
     

@@ -135,6 +135,9 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
         downloadGroup.enter()
         self.interactor.getPersonTVShows(personID: id)
         
+        downloadGroup.enter()
+        self.interactor.getPersonImages(personID: id)
+        
         downloadGroup.leave()
     }
     
@@ -185,7 +188,10 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
         var sectionsAndTheirItems: [(section: Sections, items: [Items])] = []
         
         if !personImages.isEmpty {
-            let imagesVM = PersonImagesCellViewModel(images: personImages)
+            let imagesVM = PersonImagesCellViewModel(images: personImages) { [weak self] in
+                guard let self = self else { return }
+                self.didTapBackButton()
+            }
             sectionsAndTheirItems.append((Sections.images, [.imageCell(imagesVM)]))
             
             let infoVM = PersonInfoCellViewModel(personDetails: personDetails, externalSource: self.personExternalSources) { [weak self] id, sourceType in
