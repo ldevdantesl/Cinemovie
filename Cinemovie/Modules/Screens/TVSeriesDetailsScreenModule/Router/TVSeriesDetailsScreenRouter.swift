@@ -88,7 +88,7 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
         var tooltipMsg: String = "Unknown"
         switch message {
         case "AirDateLabel": tooltipMsg = "First Aired Year"
-        case "TVSeriesStatus_Cancelled": tooltipMsg = "Series Was Canceled"
+        case "TVSeriesStatus_Canceled": tooltipMsg = "Series Was Cancelled"
         case "TVSeriesStatus_In Production": tooltipMsg = "Currently In Production"
         case "TVSeriesStatus_Returning Series": tooltipMsg = "Actively Airing"
         case "TVSeriesStatus_Planned": tooltipMsg = "Only Announced"
