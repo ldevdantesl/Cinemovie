@@ -6,6 +6,8 @@
 	<string>${BASE_UNIVERSAL_URL}</string>
 	<key>BASE_URL</key>
 	<string>${BASE_URL}</string>
+	<key>BASE_URL_V4</key>
+	<string>${BASE_URL_V4}</string>
 	<key>BEARER_TOKEN</key>
 	<string>${BEARER_TOKEN}</string>
 	<key>CFBundleURLTypes</key>

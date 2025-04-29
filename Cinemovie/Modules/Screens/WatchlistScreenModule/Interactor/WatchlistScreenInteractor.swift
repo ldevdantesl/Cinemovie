@@ -6,6 +6,7 @@
 //
 
 import UIKit
+
 protocol WatchlistScreenInteractorProtocol: AnyObject {}
 
 final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {

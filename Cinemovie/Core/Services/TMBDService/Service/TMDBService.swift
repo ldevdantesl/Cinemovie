@@ -40,6 +40,9 @@ protocol TMDBService: AnyObject {
     func getTVSeriesSearchResults(query: String, page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
     func getPeopleSearchResults(query: String, page: Int, completion: @escaping (Result<PeopleListAPIResponse, NetworkError>) -> Void)
     
+    // MARK: - WATCHLIST
+    
+    
     // MARK: - OTHER
     func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void)
     func getTrendingPeople(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<PeopleListAPIResponse, NetworkError>) -> Void)

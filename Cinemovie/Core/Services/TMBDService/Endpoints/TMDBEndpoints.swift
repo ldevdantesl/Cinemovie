@@ -9,6 +9,7 @@ import Foundation
 
 struct TMDBEndpoints {
     static let baseURL = CONSTANTS.baseURLString
+    static let baseURLV4 = CONSTANTS.baseURLV4String
     static let bearerToken = CONSTANTS.bearerToken
     
     // MARK: - MOVIE
@@ -120,6 +121,31 @@ struct TMDBEndpoints {
         var queryParams = ["query" : query]
         extraParams?.forEach { queryParams[$0] = $1 }
         return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/search/person", queryParams: queryParams)
+    }
+    
+    // MARK: - WATCHLIST, FAVORITE, RATED
+    static func getWatchlistMoviesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/account/\(accountID)/watchlist/movies", queryParams: queryParams)
+    }
+    
+    static func getWatchlistTVSeriesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/account/\(accountID)/watchlist/tv", queryParams: queryParams)
+    }
+    
+    static func getRatedMoviesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/account/\(accountID)/rated/movies", queryParams: queryParams)
+    }
+    
+    static func getRatedTVSeriesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/account/\(accountID)/rated/tv", queryParams: queryParams)
+    }
+    
+    static func getFavoriteMoviesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/account/\(accountID)/favorite/movies")
+    }
+    
+    static func getFavoriteTVSeriesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
+        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/account/\(accountID)/favorite/tv")
     }
     
     // MARK: - OTHER
