@@ -16,14 +16,14 @@ protocol MovieDetailsScreenInteractorProtocol: AnyObject {
 
 final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
     weak var presenter: MovieDetailsScreenPresenterProtocol?
-    weak var tmdbService: TMDBService?
+    private let tmdbService: TMDBService
     
-    init(tmdbService: TMDBService?) {
+    init(tmdbService: TMDBService) {
         self.tmdbService = tmdbService
     }
     
     func getMovieDetails(movieID: Int) {
-        tmdbService?.getMovieDetails(movieID: movieID) { [weak self] result in
+        tmdbService.getMovieDetails(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetMovieDetails(success)
@@ -33,7 +33,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
     }
     
     func getMovieCast(movieID: Int) {
-        tmdbService?.getMovieCast(movieID: movieID) { [weak self] result in
+        tmdbService.getMovieCast(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetMovieCast(cast: success.cast, crew: success.crew)
@@ -43,7 +43,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
     }
     
     func getMovieRecommendations(movieID: Int) {
-        tmdbService?.getMovieRecommendations(movieID: movieID) { [weak self] result in
+        tmdbService.getMovieRecommendations(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetMovieRecommendations(queryMovies: success.movies)
@@ -53,7 +53,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
     }
     
     func getMovieVideos(movieID: Int) {
-        tmdbService?.getMovieVideos(movieID: movieID) { [weak self] result in
+        tmdbService.getMovieVideos(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetMovieVideos(videos: success.results)
@@ -63,7 +63,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
     }
     
     func getMovieReviews(movieID: Int) {
-        tmdbService?.getMovieReviews(movieID: movieID) { [weak self] result in
+        tmdbService.getMovieReviews(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didGetMovieReviews(success.results)
@@ -73,7 +73,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
     }
     
     func getBelongsToCollectionDetails(collectionID: Int) {
-        tmdbService?.getBelongsToCollectionDetails(collectionID: collectionID) { [weak self] result in
+        tmdbService.getBelongsToCollectionDetails(collectionID: collectionID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let details): presenter?.didGetMovieBelongsToCollectionDetails(details)

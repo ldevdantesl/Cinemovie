@@ -8,7 +8,7 @@
 import UIKit
 
 final class WatchlistScreenAssembler {
-    static func assemble(tmdbService: TMDBService?) -> WatchlistScreenVC {
+    static func assemble(tmdbService: TMDBService) -> WatchlistScreenVC {
         let interactor = WatchlistScreenInteractor(tmdbService: tmdbService)
         let router = WatchlistScreenRouter()
         let presenter = WatchlistScreenPresenter(interactor: interactor, router: router)

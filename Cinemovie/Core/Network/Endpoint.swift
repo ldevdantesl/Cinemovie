@@ -8,15 +8,16 @@
 import Foundation
 
 struct Endpoint {
-   
-    // MARK: - PRIVATE PROPERTIES
-    private let baseURL: String
-    private let bearerToken: String
-    private let path: String
-    private let method: HTTPMethod
-    private let headers: [String: String]?
-    private let queryParams: [String : String]?
-    private let body: Data?
+    
+    // MARK: - PROPERTIES
+    let baseURL: String
+    let bearerToken: String?
+    let apiKey: String?
+    let path: String
+    let method: HTTPMethod
+    let headers: [String: String]?
+    let queryParams: [String : String]?
+    let body: Data?
     
     // MARK: - INIT
     init(
@@ -38,6 +39,28 @@ struct Endpoint {
         ]
         self.queryParams = queryParams
         self.body = body
+        self.apiKey = nil
+    }
+    
+    init(
+        baseURL: String, apiKey: String,
+        path: String, method: HTTPMethod = .GET,
+        headers: [String : String]? = nil,
+        queryParams: [String : String]? = nil,
+        body: Data? = nil
+    ) {
+        self.baseURL = baseURL
+        self.apiKey = apiKey
+        self.path = path
+        self.method = method
+        self.headers = headers ?? [
+            "accept" : "application/json",
+            "content-type" : "application/json",
+            "Cache-Control" : "no-cache"
+        ]
+        self.queryParams = queryParams
+        self.body = body
+        self.bearerToken = nil
     }
     
     // MARK: - PUBLIC PROPERTIES
@@ -46,6 +69,14 @@ struct Endpoint {
         
         if let queryParameters = queryParams {
             components?.queryItems = queryParameters.map { URLQueryItem(name: $0.key, value: $0.value) }
+        }
+        
+        if components?.queryItems == nil {
+            components?.queryItems = []
+        }
+        
+        if let apiKey = apiKey {
+            components?.queryItems?.append(URLQueryItem(name: "api_key", value: apiKey))
         }
         
         guard let url = components?.url else { return nil }

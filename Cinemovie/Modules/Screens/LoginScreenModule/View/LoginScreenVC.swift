@@ -11,7 +11,6 @@ import SnapKit
 protocol LoginScreenViewProtocol: AnyObject {
     func didReceiveError(errorString error: String)
     func didReceiveError(error: AuthError)
-    func openURL(_ url: URL)
 }
 
 final class LoginScreenVC: UIViewController {
@@ -154,11 +153,7 @@ final class LoginScreenVC: UIViewController {
     }
 }
 
-extension LoginScreenVC: LoginScreenViewProtocol {    
-    func openURL(_ url: URL) {
-        AppOpener.openURL(url)
-    }
-    
+extension LoginScreenVC: LoginScreenViewProtocol {
     func didReceiveError(error: AuthError) {
         let alert = UIAlertController(
             title: "Oops...",

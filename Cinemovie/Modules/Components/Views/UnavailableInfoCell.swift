@@ -44,7 +44,7 @@ final class UnavailableInfoCell: ReusableCellBaseClass {
     private let unavailableTitleLabel: UILabel = {
         let label = UILabel()
         label.font = CMFont.font(size: .body, fontName: .avenirBold)
-        label.tintColor = CMColor.cmLabel
+        label.textColor = CMColor.cmLabel
         label.numberOfLines = 1
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -54,7 +54,7 @@ final class UnavailableInfoCell: ReusableCellBaseClass {
     private let unavailableSubtitleLabel: UILabel = {
         let label = UILabel()
         label.font = CMFont.font(size: .caption, fontName: .avenirMedium)
-        label.tintColor = CMColor.cmSecondary
+        label.textColor = CMColor.cmSecondary
         label.numberOfLines = 2
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false

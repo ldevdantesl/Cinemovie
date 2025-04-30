@@ -11,13 +11,13 @@ import UIKit
 final class TabCoordinator: Coordinator {
     var tabBarController: UITabBarController
 
-    weak var authService: AuthService?
-    weak var tmdbService: TMDBService?
+    private let authService: AuthService
+    private let tmdbService: TMDBService
     weak var appCoordinator: AppCoordinator?
 
     init(
-        authService: AuthService?,
-        tmdbService: TMDBService?,
+        authService: AuthService,
+        tmdbService: TMDBService,
         appCoordinator: AppCoordinator?
     ) {
         self.tabBarController = UITabBarController()
@@ -29,10 +29,7 @@ final class TabCoordinator: Coordinator {
     func start() {
         let homeCoordinator = HomeCoordinator(tmdbService: tmdbService)
         let watchlistCoordinator = WatchlistCoordinator(tmdbService: tmdbService)
-        let settingsCoordinator = SettingsCoordinator(
-            authService: authService,
-            appCoordinator: appCoordinator
-        )
+        let settingsCoordinator = SettingsCoordinator(authService: authService, appCoordinator: appCoordinator)
 
         homeCoordinator.start()
         watchlistCoordinator.start()

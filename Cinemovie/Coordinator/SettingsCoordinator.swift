@@ -11,10 +11,10 @@ import UIKit
 final class SettingsCoordinator: Coordinator {
     var navigationController: UINavigationController
 
-    weak var authService: AuthService?
+    private let authService: AuthService
     weak var appCoordinator: AppCoordinator?
     
-    init(authService: AuthService?, appCoordinator: AppCoordinator?) {
+    init(authService: AuthService, appCoordinator: AppCoordinator?) {
         self.navigationController = UINavigationController()
         self.authService = authService
         self.appCoordinator = appCoordinator

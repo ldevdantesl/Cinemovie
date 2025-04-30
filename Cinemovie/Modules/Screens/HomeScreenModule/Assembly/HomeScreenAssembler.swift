@@ -8,7 +8,7 @@
 import UIKit
 
 final class HomeScreenAssembler {
-    static func assemble(tmdbService: TMDBService?) -> HomeScreenVC {
+    static func assemble(tmdbService: TMDBService) -> HomeScreenVC {
         let interactor = HomeScreenInteractor(tmdbService: tmdbService)
         let router = HomeScreenRouter(tmdbService: tmdbService)
         let presenter = HomeScreenPresenter(interactor: interactor, router: router)

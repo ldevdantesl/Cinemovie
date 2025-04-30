@@ -16,8 +16,8 @@ protocol LoginScreenPresenterProtocol: AnyObject {
     // MARK: - FINISHING
     func didFinishLogingAsGuest()
     func didFinishLogingAsGuest(withError error: AuthError)
-    func didLoggedInWithOAuth()
-    func didLoggedInWithOAuth(withError error: Error)
+    func didLogInWithOAuth()
+    func didLogInWithOAuth(withError error: Error)
     
     // MARK: - OTHER
     func openOAuthURLWithToken(token: String)
@@ -52,10 +52,8 @@ extension LoginScreenPresenter: LoginScreenPresenterProtocol {
     }
     
     func openOAuthURLWithToken(token: String) {
-        DispatchQueue.main.async { [weak self] in
-            let urlString = CONSTANTS.baseUniversalURLString + "/authenticate/\(token)?redirect_to=cinemovie://callback"
-            guard let url = URL(string: urlString) else { return }
-            self?.view?.openURL(url)
+        DispatchQueue.main.async {
+            self.router.openOAuthURLWithToken(token: token)
         }
     }
     
@@ -76,26 +74,24 @@ extension LoginScreenPresenter: LoginScreenPresenterProtocol {
     
     // MARK: - FINISHING
     func didFinishLogingAsGuest() {
-        DispatchQueue.main.async { [weak self] in
-            self?.router.routeToMainView()
+        DispatchQueue.main.async {
+            self.router.routeToMainView()
         }
     }
     
     func didFinishLogingAsGuest(withError error: AuthError) {
-        DispatchQueue.main.async { [weak self] in
-            self?.view?.didReceiveError(error: error)
+        DispatchQueue.main.async {
+            self.view?.didReceiveError(error: error)
         }
     }
     
-    func didLoggedInWithOAuth() {
-        DispatchQueue.main.async { [weak self] in
-            self?.router.routeToMainView()
+    func didLogInWithOAuth() {
+        DispatchQueue.main.async {
+            self.router.routeToMainView()
         }
     }
-    
-    func didLoggedInWithOAuth(withError error: any Error) {
-        DispatchQueue.main.async { [weak self] in
-            self?.view?.didReceiveError(errorString: "Something went wrong please try again later.\(error.localizedDescription)")
-        }
+
+    func didLogInWithOAuth(withError error: any Error) {
+        view?.didReceiveError(errorString: "Something went wrong please try again later.\(error.localizedDescription)")
     }
 }

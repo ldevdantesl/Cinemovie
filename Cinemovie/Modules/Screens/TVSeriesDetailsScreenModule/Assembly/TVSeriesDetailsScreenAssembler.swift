@@ -8,7 +8,7 @@
 import UIKit
 
 final class TVSeriesDetailsScreenAssembler {
-    static func assemble(seriesID: Int, tmdbService: TMDBService?) -> TVSeriesDetailsScreenVC {
+    static func assemble(seriesID: Int, tmdbService: TMDBService) -> TVSeriesDetailsScreenVC {
         let interactor = TVSeriesDetailsScreenInteractor(tmdbService: tmdbService)
         let router = TVSeriesDetailsScreenRouter(tmdbService: tmdbService)
         let presenter = TVSeriesDetailsScreenPresenter(seriesID: seriesID, interactor: interactor, router: router)

@@ -8,15 +8,29 @@
 import Foundation
 
 final class AccountStoreImpl: AccountStore {
-    private let sessionIDKey = ConstantKeys.SESSION_ID_KEY.rawValue
-    private let accountIDKey = ConstantKeys.ACCOUNT_ID_KEY.rawValue
-    private let accessTokenKey = ConstantKeys.ACCESS_TOKEN_KEY.rawValue
+    // MARK: - PRIVATE PROPERTIES
+    private let sessionIDKey = ConstantKeys.SESSION_ID_KEYCHAIN_KEY.rawValue
+    private let guestSessionIDKey = ConstantKeys.GUEST_SESSION_ID_KEYCHAIN_KEY.rawValue
+    private let accountIDKey = ConstantKeys.ACCOUNT_ID_KEYCHAIN_KEY.rawValue
+    private let accessTokenKey = ConstantKeys.ACCESS_TOKEN_KEYCHAIN_KEY.rawValue
 
+    // MARK: - PROPERTIES
     var sessionID: String? {
         get { KeychainStore.get(for: sessionIDKey) }
         set {
             if let value = newValue {
                 KeychainStore.set(value, for: sessionIDKey)
+            } else {
+                KeychainStore.delete(for: sessionIDKey)
+            }
+        }
+    }
+    
+    var guestSessionID: String? {
+        get { KeychainStore.get(for: guestSessionIDKey) }
+        set {
+            if let newValue = newValue {
+                KeychainStore.set(newValue, for: guestSessionIDKey)
             } else {
                 KeychainStore.delete(for: sessionIDKey)
             }
@@ -46,9 +60,14 @@ final class AccountStoreImpl: AccountStore {
     }
 
     var isLoggedIn: Bool {
-        return sessionID != nil || accessToken != nil
+        return sessionID != nil || guestSessionID != nil
+    }
+    
+    var isGuest: Bool {
+        return guestSessionID != nil
     }
 
+    // MARK: - FUNCTIONS
     func clear() {
         KeychainStore.delete(for: sessionIDKey)
         KeychainStore.delete(for: accountIDKey)

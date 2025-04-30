@@ -18,14 +18,14 @@ protocol TVSeriesDetailsScreenInteractorProtocol: AnyObject {
 
 final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProtocol {
     weak var presenter: TVSeriesDetailsScreenPresenterProtocol?
-    weak var tmdbService: TMDBService?
+    private let tmdbService: TMDBService
     
-    init(tmdbService: TMDBService?) {
+    init(tmdbService: TMDBService) {
         self.tmdbService = tmdbService
     }
     
     func getTVSeriesDetails(seriesID: Int) {
-        tmdbService?.getTVSeriesDetails(seriesID: seriesID) { [weak self] result in
+        tmdbService.getTVSeriesDetails(seriesID: seriesID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetTVSeriesDetails(success)
@@ -35,7 +35,7 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
     }
     
     func getTVSeriesReviews(seriesID: Int) {
-        tmdbService?.getTVSeriesReviews(seriesID: seriesID) { [weak self] result in
+        tmdbService.getTVSeriesReviews(seriesID: seriesID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didGetTVSeriesReviews(success.results)
@@ -45,7 +45,7 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
     }
     
     func getTVSeriesRecommendations(seriesID: Int) {
-        tmdbService?.getTVSeriesRecommendations(seriesID: seriesID) { [weak self] result in
+        tmdbService.getTVSeriesRecommendations(seriesID: seriesID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didGetTVSeriesRecommends(success.results)
@@ -55,7 +55,7 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
     }
     
     func getTVSeriesCast(seriesID: Int) {
-        tmdbService?.getTVSeriesCast(seriesID: seriesID) { [weak self] result in
+        tmdbService.getTVSeriesCast(seriesID: seriesID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetTVSeriesCast(success.cast, crew: success.crew)
@@ -65,7 +65,7 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
     }
     
     func getTVSeriesVideos(seriesID: Int) {
-        tmdbService?.getTVSeriesVideos(seriesID: seriesID) { [weak self] result in
+        tmdbService.getTVSeriesVideos(seriesID: seriesID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetTVSeriesVideos(success.results)
@@ -75,7 +75,7 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
     }
     
     func getTVSeasonDetails(seriesID: Int, seasonNumber: Int) {
-        tmdbService?.getTVSeasonDetails(seriesID: seriesID, seasonNumber: seasonNumber) { [weak self] result in
+        tmdbService.getTVSeasonDetails(seriesID: seriesID, seasonNumber: seasonNumber) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let details): self.presenter?.didGetTVSeasonDetails(details)

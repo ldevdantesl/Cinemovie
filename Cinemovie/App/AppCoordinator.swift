@@ -11,10 +11,10 @@ import UIKit
 final class AppCoordinator: Coordinator {
     private let window: UIWindow?
 
-    weak var authService: AuthService?
-    weak var tmdbService: TMDBService?
+    private let authService: AuthService
+    private let tmdbService: TMDBService
     
-    init(window: UIWindow?, authService: AuthService?, tmdbService: TMDBService?) {
+    init(window: UIWindow?, authService: AuthService, tmdbService: TMDBService) {
         self.window = window
         self.authService = authService
         self.tmdbService = tmdbService
@@ -31,7 +31,6 @@ final class AppCoordinator: Coordinator {
     }
     
     private func checkAuthentication() {
-        guard let authService = authService else { return }
         authService.isLoggedIn ? showMainApp() : showLoginPage()
     }
     
@@ -40,23 +39,17 @@ final class AppCoordinator: Coordinator {
             return
         }
         
-        let tabCoordinator = TabCoordinator(
-            authService: authService,
-            tmdbService: tmdbService,
-            appCoordinator: self
-        )
+        let tabCoordinator = TabCoordinator(authService: authService, tmdbService: tmdbService, appCoordinator: self)
         tabCoordinator.start()
     
-        UIView.transition(
-            with: window,
-            duration: 0.5,
-            options: .transitionCrossDissolve,
-            animations: {
-                DispatchQueue.main.async {
-                    window.rootViewController = tabCoordinator.tabBarController
-                }
+        UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve) { [weak self] in
+            guard let self = self else { return }
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.window?.rootViewController = tabCoordinator.tabBarController
             }
-        )
+        }
+        
     }
     
     func showLoginPage() {
@@ -66,15 +59,12 @@ final class AppCoordinator: Coordinator {
         
         let loginVC = LoginScreenAssembler.assemble(authService: authService, appCoordinator: self)
         
-        UIView.transition(
-            with: window,
-            duration: 0.5,
-            options: .transitionCrossDissolve,
-            animations: {
-                DispatchQueue.main.async {
-                    window.rootViewController = loginVC
-                }
+        UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve) { [weak self] in
+            guard let self = self else { return }
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.window?.rootViewController = loginVC
             }
-        )
+        }
     }
 }

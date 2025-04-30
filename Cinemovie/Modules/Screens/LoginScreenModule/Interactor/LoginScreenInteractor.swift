@@ -37,7 +37,7 @@ final class LoginScreenInteractor: LoginScreenInteractorProtocol {
             guard let self = self else { return }
             
             switch result {
-            case .success(let token): self.presenter?.openOAuthURLWithToken(token: token); print("Token: \(token)")
+            case .success(let token): self.presenter?.openOAuthURLWithToken(token: token)
             case .failure(let error): self.presenter?.cantOpenURLForToken(withError: error)
             }
         }
@@ -48,8 +48,8 @@ final class LoginScreenInteractor: LoginScreenInteractorProtocol {
             guard let self = self else { return }
             
             switch result {
-            case .success: self.presenter?.didLoggedInWithOAuth()
-            case .failure(let error): self.presenter?.didLoggedInWithOAuth(withError: error)
+            case .success: self.presenter?.didLogInWithOAuth()
+            case .failure(let error): self.presenter?.didLogInWithOAuth(withError: error)
             }
         }
     }

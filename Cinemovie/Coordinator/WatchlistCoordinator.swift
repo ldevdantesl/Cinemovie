@@ -10,9 +10,9 @@ import UIKit
 final class WatchlistCoordinator: Coordinator {
     let navigationController: UINavigationController = UINavigationController()
     
-    weak var tmdbService: TMDBService?
+    private let tmdbService: TMDBService
     
-    init(tmdbService: TMDBService?) {
+    init(tmdbService: TMDBService) {
         self.tmdbService = tmdbService
     }
     

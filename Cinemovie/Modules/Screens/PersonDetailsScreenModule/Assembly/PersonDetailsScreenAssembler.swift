@@ -8,7 +8,7 @@
 import UIKit
 
 final class PersonDetailsScreenAssembler {
-    static func assemble(creditID: String, tmdbService: TMDBService?) -> PersonDetailsScreenVC {
+    static func assemble(creditID: String, tmdbService: TMDBService) -> PersonDetailsScreenVC {
         let interactor = PersonDetailsScreenInteractor(tmdbService: tmdbService)
         let router = PersonDetailsScreenRouter(tmdbService: tmdbService)
         let presenter = PersonDetailsScreenPresenter(creditID: creditID, interactor: interactor, router: router)
@@ -20,7 +20,7 @@ final class PersonDetailsScreenAssembler {
         return viewController
     }
     
-    static func assemble(personID: Int, tmdbService: TMDBService?) -> PersonDetailsScreenVC {
+    static func assemble(personID: Int, tmdbService: TMDBService) -> PersonDetailsScreenVC {
         let interactor = PersonDetailsScreenInteractor(tmdbService: tmdbService)
         let router = PersonDetailsScreenRouter(tmdbService: tmdbService)
         let presenter = PersonDetailsScreenPresenter(personID: personID, interactor: interactor, router: router)

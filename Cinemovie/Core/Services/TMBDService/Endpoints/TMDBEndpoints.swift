@@ -10,167 +10,167 @@ import Foundation
 struct TMDBEndpoints {
     static let baseURL = CONSTANTS.baseURLString
     static let baseURLV4 = CONSTANTS.baseURLV4String
-    static let bearerToken = CONSTANTS.bearerToken
-    
+    static let apiKey = CONSTANTS.apiKey
+
     // MARK: - MOVIE
     static func getMovieCastEndpoint(movieID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/\(movieID)/credits", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/movie/\(movieID)/credits", queryParams: queryParams)
     }
-    
+
     static func getMovieDetailsEndpoint(movieID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/\(movieID)", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/movie/\(movieID)", queryParams: queryParams)
     }
-    
+
     static func getMovieSimilarsEndpoint(movieID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/\(movieID)/similar", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/movie/\(movieID)/similar", queryParams: queryParams)
     }
-    
+
     static func getMovieRecommendationsEndpoint(movieID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/\(movieID)/recommendations", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/movie/\(movieID)/recommendations", queryParams: queryParams)
     }
-    
+
     static func getMovieReviewsEndpoint(movieID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/\(movieID)/reviews", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/movie/\(movieID)/reviews", queryParams: queryParams)
     }
-    
+
     static func getMovieVideosEndpoint(movieID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/\(movieID)/videos", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/movie/\(movieID)/videos", queryParams: queryParams)
     }
-    
+
     static func getTrendingMoviesEndpoint(for timeWindow: TrendingTimeWindow, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/trending/movie/\(timeWindow.rawValue)", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/trending/movie/\(timeWindow.rawValue)", queryParams: queryParams)
     }
-    
+
     // MARK: - TV SERIES
     static func getTVSeriesDetailsEndpoint(seriesID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/tv/\(seriesID)", queryParams: queryParams)
     }
-    
+
     static func getTVSeriesCastEndpoint(seriesID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)/credits", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/tv/\(seriesID)/credits", queryParams: queryParams)
     }
-    
+
     static func getTVSeriesVideosEndpoint(seriesID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)/videos", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/tv/\(seriesID)/videos", queryParams: queryParams)
     }
-    
+
     static func getTVSeriesReviewsEndpoint(seriesID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)/reviews", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/tv/\(seriesID)/reviews", queryParams: queryParams)
     }
-    
+
     static func getTVSeriesSimilarsEndpoint(seriesID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)/similar", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/tv/\(seriesID)/similar", queryParams: queryParams)
     }
-    
+
     static func getTVSeriesRecommendsEndpoint(seriesID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)/recommendations", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/tv/\(seriesID)/recommendations", queryParams: queryParams)
     }
-    
+
     static func getTrendingTVSeriesEndpoint(for timeWindow: TrendingTimeWindow, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/trending/tv/\(timeWindow.rawValue)", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/trending/tv/\(timeWindow.rawValue)", queryParams: queryParams)
     }
-    
+
     // MARK: - TV SEASON
     static func getTVSeasonDetailsEndpoint(seriesID: Int, seasonNumber: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/\(seriesID)/season/\(seasonNumber)", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/tv/\(seriesID)/season/\(seasonNumber)", queryParams: queryParams)
     }
-    
+
     // MARK: - PERSON
     static func getPersonIDEndpoint(creditID: String) -> Endpoint {
-        return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/credit/\(creditID)")
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/credit/\(creditID)")
     }
-    
+
     static func getPersonDetailsEndpoint(personID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/person/\(personID)", queryParams: queryParams)
     }
-    
+
     static func getPersonExternalSourcesEndpoint(personID: Int) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)/external_ids")
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/person/\(personID)/external_ids")
     }
-    
+
     static func getPersonMovieCredits(personID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)/movie_credits", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/person/\(personID)/movie_credits", queryParams: queryParams)
     }
-    
+
     static func getPersonTVShowCredits(personID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)/tv_credits", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/person/\(personID)/tv_credits", queryParams: queryParams)
     }
-    
+
     static func getTrendingPeopleEndpoint(for timeWindow: TrendingTimeWindow, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/trending/person/\(timeWindow.rawValue)", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/trending/person/\(timeWindow.rawValue)", queryParams: queryParams)
     }
-    
+
     static func getPersonImagesEndpoint(personID: Int) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/person/\(personID)/images")
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/person/\(personID)/images")
     }
-    
+
     // MARK: - SEARCH
     static func getMovieSearchResultsEndpoint(query: String, extraParams: [String : String]? = nil) -> Endpoint {
         var queryParams = ["query" : query]
         extraParams?.forEach { queryParams[$0] = $1 }
-        return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/search/movie", queryParams: queryParams)
+        return Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/search/movie", queryParams: queryParams)
     }
-    
+
     static func getTVSeriesSearchResultsEndpoint(query: String, extraParams: [String : String]? = nil) -> Endpoint {
         var queryParams = ["query" : query]
         extraParams?.forEach { queryParams[$0] = $1 }
-        return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/search/tv", queryParams: queryParams)
+        return Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/search/tv", queryParams: queryParams)
     }
-    
+
     static func getPeopleSearchResultsEndpoint(query: String, extraParams: [String : String]? = nil) -> Endpoint {
         var queryParams = ["query" : query]
         extraParams?.forEach { queryParams[$0] = $1 }
-        return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/search/person", queryParams: queryParams)
+        return Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/search/person", queryParams: queryParams)
     }
-    
+
     // MARK: - WATCHLIST, FAVORITE, RATED
     static func getWatchlistMoviesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/account/\(accountID)/watchlist/movies", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/account/\(accountID)/watchlist/movies", queryParams: queryParams)
     }
-    
+
     static func getWatchlistTVSeriesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/account/\(accountID)/watchlist/tv", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/account/\(accountID)/watchlist/tv", queryParams: queryParams)
     }
-    
+
     static func getRatedMoviesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/account/\(accountID)/rated/movies", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/account/\(accountID)/rated/movies", queryParams: queryParams)
     }
-    
+
     static func getRatedTVSeriesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/account/\(accountID)/rated/tv", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/account/\(accountID)/rated/tv", queryParams: queryParams)
     }
-    
+
     static func getFavoriteMoviesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/account/\(accountID)/favorite/movies")
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/account/\(accountID)/favorite/movies")
     }
-    
+
     static func getFavoriteTVSeriesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/account/\(accountID)/favorite/tv")
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/account/\(accountID)/favorite/tv")
     }
-    
+
     // MARK: - OTHER
     static func getBelongsToCollectionDetailsEndpoint(collectionID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/collection/\(collectionID)", queryParams: queryParams)
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/collection/\(collectionID)", queryParams: queryParams)
     }
-    
+
     // MARK: - PRESET LIST OF MOVIES
     static func createMovieListEndpoint(listType: MovieListType, extraParams: [String: String]? = nil) -> Endpoint {
         switch listType {
-        case .nowPlaying: return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/now_playing", queryParams: extraParams)
-        case .popular: return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/popular", queryParams: extraParams)
-        case .topRated: return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/top_rated", queryParams: extraParams)
-        case .upcoming: return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/movie/upcoming", queryParams: extraParams)
-            
+        case .nowPlaying: return Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/movie/now_playing", queryParams: extraParams)
+        case .popular: return Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/movie/popular", queryParams: extraParams)
+        case .topRated: return Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/movie/top_rated", queryParams: extraParams)
+        case .upcoming: return Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/movie/upcoming", queryParams: extraParams)
+
         case .animation, .documentary, .action, .comedy, .drama, .history, .horror, .fantasy:
             let genreID = GenreHelper.shared.getMovieGenreID(for: listType.genreName)
             var queryParams = [
                 "with_genres": "\(genreID)"
             ]
             extraParams?.forEach { queryParams[$0] = $1 }
-            return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/discover/movie", queryParams: queryParams)
+            return Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/discover/movie", queryParams: queryParams)
         }
     }
-    
+
     // MARK: - PRESET LIST OF TV SERIES
     static func createTVSeriesListEndpoint(listType: TVSeriesListType, extraParams: [String: String]? = nil) -> Endpoint {
         var queryParams: [String: String] = [
@@ -178,32 +178,32 @@ struct TMDBEndpoints {
             "watch_region": "US"
         ]
         extraParams?.forEach { queryParams[$0] = $1 }
-        
+
         switch listType {
         case .popular:
             queryParams["sort_by"] = "popularity.desc"
             queryParams["without_genres"] = GenreHelper.shared.getTVSeriesGenreIDsSeperatedByComma(genres: [.news, .reality, .talk, .warPolitics])
-            return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/discover/tv", queryParams: queryParams)
-            
+            return Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/discover/tv", queryParams: queryParams)
+
         case .topRated:
-            return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/tv/top_rated", queryParams: extraParams)
-            
+            return Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/tv/top_rated", queryParams: extraParams)
+
         case .onTheAir:
             queryParams["sort_by"] = "first_air_date.desc"
             queryParams["air_date.lte"] = CMDateFormatter.currentDateString()
             queryParams["without_genres"] = GenreHelper.shared.getTVSeriesGenreIDsSeperatedByComma(genres: [.news, .reality, .talk, .warPolitics])
-            return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/discover/tv", queryParams: queryParams)
-            
+            return Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/discover/tv", queryParams: queryParams)
+
         case .airingToday:
             queryParams["first_air_date.gte"] = CMDateFormatter.currentDateString()
             queryParams["first_air_date.lte"] = CMDateFormatter.currentDateString()
             queryParams["without_genres"] = GenreHelper.shared.getTVSeriesGenreIDsSeperatedByComma(genres: [.news, .reality, .talk, .warPolitics])
-            return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/discover/tv", queryParams: queryParams)
-            
+            return Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/discover/tv", queryParams: queryParams)
+
         case .actionAdventure, .sciFiFantasy, .drama, .animation, .crime, .kids, .comedy, .documentary:
             queryParams["sort_by"] = "popularity.desc"
             queryParams["with_genres"] = GenreHelper.shared.getTVSeriesGenreIDsSeperatedByComma(genres: [listType.genreName])
-            return Endpoint(baseURL: baseURL, bearerToken: bearerToken, path: "/discover/tv", queryParams: queryParams)
+            return Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/discover/tv", queryParams: queryParams)
         }
     }
 }

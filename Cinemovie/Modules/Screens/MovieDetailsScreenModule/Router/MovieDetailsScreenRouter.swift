@@ -23,9 +23,9 @@ protocol MovieDetailsScreenRouterProtocol {
 
 final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
     weak var viewController: MovieDetailsScreenVC?
-    weak var tmdbService: TMDBService?
+    private let tmdbService: TMDBService
     
-    init(tmdbService: TMDBService?) {
+    init(tmdbService: TMDBService) {
         self.tmdbService = tmdbService
     }
     

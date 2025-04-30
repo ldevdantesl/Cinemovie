@@ -19,13 +19,7 @@ final class SettingsScreenInteractor: SettingsScreenInteractorProtocol {
     }
     
     func showSessionID() {
-        if let session = authService?.sessionID {
-            print("Logged in with \(session)")
-        } else if let guest = authService?.guestSessionID {
-            print("Logged in as a guest \(guest)")
-        } else {
-            print("Not logged in")
-        }
+        
     }
     
     func logout() {

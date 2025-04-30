@@ -16,9 +16,9 @@ protocol HomeScreenRouterProtocol {
 final class HomeScreenRouter: HomeScreenRouterProtocol {
     weak var viewController: HomeScreenVC?
     
-    private let tmdbService: TMDBService?
+    private let tmdbService: TMDBService
     
-    init(tmdbService: TMDBService?) {
+    init(tmdbService: TMDBService) {
         self.tmdbService = tmdbService
     }
     

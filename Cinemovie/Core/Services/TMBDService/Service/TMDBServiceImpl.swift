@@ -9,11 +9,13 @@ import UIKit
 
 final class TMDBServiceImpl: TMDBService {
     // MARK: - PROPERTIES
-    weak var networkService: NetworkService?
+    private let networkService: NetworkService
+    private let accountStore: AccountStore
     
     // MARK: - INIT
-    init(networkService: NetworkService? = nil) {
+    init(accountStore: AccountStore, networkService: NetworkService) {
         self.networkService = networkService
+        self.accountStore = accountStore
     }
     
     // MARK: - MOVIE
@@ -194,7 +196,7 @@ final class TMDBServiceImpl: TMDBService {
         endpoint: Endpoint,
         completion: @escaping (Result<T, NetworkError>) -> Void
     ) {
-        networkService?.request(endpoint) { (result: Result<T, NetworkError>) in
+        networkService.request(endpoint) { (result: Result<T, NetworkError>) in
             completion(result)
         }
     }

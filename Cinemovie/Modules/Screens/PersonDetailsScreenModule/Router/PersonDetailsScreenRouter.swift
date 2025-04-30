@@ -16,9 +16,9 @@ protocol PersonDetailsScreenRouterProtocol {
 
 final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
     weak var viewController: PersonDetailsScreenVC?
-    weak var tmdbService: TMDBService?
+    private let tmdbService: TMDBService
     
-    init(tmdbService: TMDBService?) {
+    init(tmdbService: TMDBService) {
         self.tmdbService = tmdbService
     }
     

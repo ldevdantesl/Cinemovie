@@ -18,14 +18,14 @@ protocol PersonDetailsScreenInteractorProtocol: AnyObject {
 
 final class PersonDetailsScreenInteractor: PersonDetailsScreenInteractorProtocol {
     weak var presenter: PersonDetailsScreenPresenterProtocol?
-    weak var tmdbService: TMDBService?
+    private let tmdbService: TMDBService
     
-    init(tmdbService: TMDBService?) {
+    init(tmdbService: TMDBService) {
         self.tmdbService = tmdbService
     }
     
     func getPersonID(creditID: String) {
-        tmdbService?.getPersonID(creditID: creditID) { [weak self] result in
+        tmdbService.getPersonID(creditID: creditID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let response): presenter?.didGetPersonID(response.person.id)
@@ -35,7 +35,7 @@ final class PersonDetailsScreenInteractor: PersonDetailsScreenInteractorProtocol
     }
     
     func getPersonDetails(personID: Int) {
-        tmdbService?.getPersonDetails(personID: personID) { [weak self] result in
+        tmdbService.getPersonDetails(personID: personID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didGetPersonDetails(success)
@@ -45,7 +45,7 @@ final class PersonDetailsScreenInteractor: PersonDetailsScreenInteractorProtocol
     }
     
     func getPersonExternalSources(personID: Int) {
-        tmdbService?.getPersonExternalSources(personID: personID) { [weak self] result in
+        tmdbService.getPersonExternalSources(personID: personID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didGetPersonExternalSources(success)
@@ -55,7 +55,7 @@ final class PersonDetailsScreenInteractor: PersonDetailsScreenInteractorProtocol
     }
     
     func getPersonMovies(personID: Int) {
-        tmdbService?.getPersonMovieCredits(personID: personID) { [weak self] result in
+        tmdbService.getPersonMovieCredits(personID: personID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetPersonMovies(success.cast)
@@ -65,7 +65,7 @@ final class PersonDetailsScreenInteractor: PersonDetailsScreenInteractorProtocol
     }
     
     func getPersonTVShows(personID: Int) {
-        tmdbService?.getPersonTVShowCredits(personID: personID) { [weak self] result in
+        tmdbService.getPersonTVShowCredits(personID: personID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetPersonTVShows(success.cast)
@@ -75,7 +75,7 @@ final class PersonDetailsScreenInteractor: PersonDetailsScreenInteractorProtocol
     }
     
     func getPersonImages(personID: Int) {
-        tmdbService?.getPersonImages(personID: personID) { [weak self] result in
+        tmdbService.getPersonImages(personID: personID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetPersonImages(success.profiles)

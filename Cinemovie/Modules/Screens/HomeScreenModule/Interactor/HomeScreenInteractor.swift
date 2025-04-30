@@ -25,15 +25,15 @@ protocol HomeScreenInteractorProtocol: AnyObject {
 
 final class HomeScreenInteractor: HomeScreenInteractorProtocol {
     weak var presenter: HomeScreenPresenterProtocol?
-    weak var tmdbService: TMDBService?
+    private let tmdbService: TMDBService
     
-    init(tmdbService: TMDBService?) {
+    init(tmdbService: TMDBService) {
         self.tmdbService = tmdbService
     }
     
     // MARK: - MOVIES
     func downloadMovieList(listType: MovieListType) {
-        tmdbService?.getMovieList(listType: listType) { [weak self] result in
+        tmdbService.getMovieList(listType: listType) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didDownloadMovieList(listType: listType, queryMovies: success.movies)
@@ -44,7 +44,7 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
     
     // MARK: - TV SERIES
     func downloadTVSeriesList(listType: TVSeriesListType) {
-        tmdbService?.getTVSeriesList(listType: listType) { [weak self] result in
+        tmdbService.getTVSeriesList(listType: listType) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didDownloadSeriesList(listType: listType, querySeries: success.results)
@@ -55,7 +55,7 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
     
     // MARK: - TRENDING
     func downloadTrendingPeople(timeWindow: TrendingTimeWindow) {
-        tmdbService?.getTrendingPeople(for: timeWindow) { [weak self] result in
+        tmdbService.getTrendingPeople(for: timeWindow) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didDownloadTrendingPeople(success.results)
@@ -66,7 +66,7 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
     
     // MARK: - SEARCH
     func downloadSearchResultsForMovies(query: String, page: Int) {
-        tmdbService?.getMovieSearchResults(query: query, page: page) { [weak self] result in
+        tmdbService.getMovieSearchResults(query: query, page: page) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didRecieveMovieSearchResults(success.movies)
@@ -76,7 +76,7 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
     }
     
     func downloadSearchResultsForPeople(query: String, page: Int) {
-        tmdbService?.getPeopleSearchResults(query: query, page: page) { [weak self] result in
+        tmdbService.getPeopleSearchResults(query: query, page: page) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didRecievePeopleSearchResults(success.results)
@@ -86,7 +86,7 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
     }
     
     func downloadSearchResultsForTVSeries(query: String, page: Int) {
-        tmdbService?.getTVSeriesSearchResults(query: query, page: page) { [weak self] result in
+        tmdbService.getTVSeriesSearchResults(query: query, page: page) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didRecieveTVSeriesSearchResults(success.results)
