@@ -7,7 +7,9 @@
 
 import UIKit
 
-protocol WatchlistScreenPresenterProtocol: AnyObject { }
+protocol WatchlistScreenPresenterProtocol: AnyObject {
+    func viewDidLoad()
+}
 
 final class WatchlistScreenPresenter {
     weak var view: WatchlistScreenViewProtocol?
@@ -20,4 +22,8 @@ final class WatchlistScreenPresenter {
     }
 }
 
-extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol { }
+extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
+    func viewDidLoad() {
+        
+    }
+}

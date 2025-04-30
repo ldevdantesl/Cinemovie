@@ -11,7 +11,7 @@ protocol WatchlistScreenInteractorProtocol: AnyObject {}
 
 final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
     weak var presenter: WatchlistScreenPresenterProtocol?
-    private let tmdbService: TMDBService?
+    private let tmdbService: TMDBService
     
     init(tmdbService: TMDBService) {
         self.tmdbService = tmdbService

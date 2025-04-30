@@ -17,7 +17,7 @@ final class DiffableCollectionView<Section: Hashable, Item: Hashable>: TopBlurre
     private var didSelectHandler: ((IndexPath) -> Void)?
     
     // MARK: - LIFECYCLE
-    init(layout: UICollectionViewLayout, showsTopBlur: Bool) {
+    override init(layout: UICollectionViewLayout, showsBlur showsTopBlur: Bool) {
         super.init(layout: layout, showsBlur: showsTopBlur)
     }
     
