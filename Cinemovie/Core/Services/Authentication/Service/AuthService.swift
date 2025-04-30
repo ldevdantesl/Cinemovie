@@ -11,9 +11,14 @@ protocol AuthService: AnyObject {
     // MARK: - PROPERTIES
     var isLoggedIn: Bool { get }
     
-    // MARK: - FUNCTIONS
+    // MARK: - LOGIN
     func createRequestToken(completion: @escaping (Result<String, AuthError>) -> Void)
     func loginWithOAuth(token: String, completion: @escaping (Result<String, AuthError>) -> Void) 
     func loginAsGuest(completion: @escaping (Result<Void, AuthError>) -> Void)
     func logout()
+    
+    // MARK: - OTHER
+    func storeAccountIDIntoAccountStore(completion: @escaping (Bool) -> Void)
+    func getAccountDetails(completion: @escaping (Result<AccountDetails, AuthError>) -> Void)
+    func getSessionID() 
 }

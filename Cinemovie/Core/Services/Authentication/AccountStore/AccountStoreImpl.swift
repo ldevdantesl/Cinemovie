@@ -10,7 +10,6 @@ import Foundation
 final class AccountStoreImpl: AccountStore {
     // MARK: - PRIVATE PROPERTIES
     private let sessionIDKey = ConstantKeys.SESSION_ID_KEYCHAIN_KEY.rawValue
-    private let guestSessionIDKey = ConstantKeys.GUEST_SESSION_ID_KEYCHAIN_KEY.rawValue
     private let accountIDKey = ConstantKeys.ACCOUNT_ID_KEYCHAIN_KEY.rawValue
     private let accessTokenKey = ConstantKeys.ACCESS_TOKEN_KEYCHAIN_KEY.rawValue
 
@@ -25,23 +24,15 @@ final class AccountStoreImpl: AccountStore {
             }
         }
     }
-    
-    var guestSessionID: String? {
-        get { KeychainStore.get(for: guestSessionIDKey) }
-        set {
-            if let newValue = newValue {
-                KeychainStore.set(newValue, for: guestSessionIDKey)
-            } else {
-                KeychainStore.delete(for: sessionIDKey)
-            }
-        }
-    }
 
-    var accountObjectID: String? {
-        get { KeychainStore.get(for: accountIDKey) }
+    var accountID: Int? {
+        get {
+            guard let string = KeychainStore.get(for: accountIDKey) else { return nil }
+            return Int(string)
+        }
         set {
             if let value = newValue {
-                KeychainStore.set(value, for: accountIDKey)
+                KeychainStore.set(String(value), for: accountIDKey)
             } else {
                 KeychainStore.delete(for: accountIDKey)
             }
@@ -60,11 +51,11 @@ final class AccountStoreImpl: AccountStore {
     }
 
     var isLoggedIn: Bool {
-        return sessionID != nil || guestSessionID != nil
+        return sessionID != nil
     }
     
     var isGuest: Bool {
-        return guestSessionID != nil
+        sessionID?.count == 32
     }
 
     // MARK: - FUNCTIONS

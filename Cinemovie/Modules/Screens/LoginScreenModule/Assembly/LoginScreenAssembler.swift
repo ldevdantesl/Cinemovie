@@ -9,8 +9,8 @@ import UIKit
 
 final class LoginScreenAssembler {
     static func assemble(
-        authService: AuthService? = nil,
-        appCoordinator: AppCoordinator
+        authService: AuthService,
+        appCoordinator: AppCoordinator?
     ) -> LoginScreenVC {
         let interactor = LoginScreenInteractor(authService: authService)
         let router = LoginScreenRouter(appCoordinator: appCoordinator)

@@ -10,7 +10,6 @@ import SnapKit
 
 protocol LoginScreenViewProtocol: AnyObject {
     func didReceiveError(errorString error: String)
-    func didReceiveError(error: AuthError)
 }
 
 final class LoginScreenVC: UIViewController {
@@ -18,6 +17,12 @@ final class LoginScreenVC: UIViewController {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let buttonCornerRadius = 10.0
+        static let topOffset = UIConstants.screenHeight / 4
+        static let logoSize = 150.0
+        static let spacing = 5.0
+        static let vSpacing = 10.0
+        static let hugeSpacing = 20.0
+        static let hSpacing = 20.0
     }
     
     // MARK: - VIPER
@@ -39,6 +44,7 @@ final class LoginScreenVC: UIViewController {
         label.font = CMFont.font(size: .body)
         label.numberOfLines = 1
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.textAlignment = .center
         return label
     }()
     
@@ -48,6 +54,7 @@ final class LoginScreenVC: UIViewController {
         label.textColor = CMColor.cmSublabel
         label.font = CMFont.font(size: .body)
         label.numberOfLines = 1
+        label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -91,58 +98,35 @@ final class LoginScreenVC: UIViewController {
     private func setupUI() {
         view.backgroundColor = CMColor.cmBackground
         
+        view.addSubview(logoImg)
         logoImg.snp.makeConstraints {
-            $0.width.height.equalTo(150)
+            $0.top.equalToSuperview().offset(Constants.topOffset)
+            $0.centerX.equalToSuperview()
+            $0.size.equalTo(Constants.logoSize)
         }
         
-        let welcomeStack = UIStackView(arrangedSubviews: [welcomeText, subWelcomeText])
-        welcomeStack.axis = .vertical
-        welcomeStack.spacing = 5
-        welcomeStack.alignment = .center
-        welcomeStack.distribution = .fill
-        welcomeStack.translatesAutoresizingMaskIntoConstraints = false
-        
-        let vStack = UIStackView(arrangedSubviews: [logoImg, welcomeStack])
-        vStack.axis = .vertical
-        vStack.spacing = 10
-        vStack.alignment = .center
-        vStack.distribution = .fill
-        vStack.translatesAutoresizingMaskIntoConstraints = false
-        
-        let spacer = UIView()
-        
-        let vStack2 = UIStackView(arrangedSubviews: [loginButton, asGuestButton])
-        vStack2.axis = .vertical
-        vStack2.spacing = 10
-        vStack2.alignment = .fill
-        vStack2.distribution = .fillEqually
-        vStack2.translatesAutoresizingMaskIntoConstraints = false
-        
-        let finalStack = UIStackView(arrangedSubviews: [vStack, spacer, vStack2])
-        finalStack.axis = .vertical
-        finalStack.alignment = .fill
-        finalStack.spacing = 20
-        finalStack.distribution = .fill
-        finalStack.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(finalStack)
-        
-        finalStack.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.leading.equalToSuperview().offset(15)
-            $0.trailing.equalToSuperview().inset(15)
+        view.addSubview(welcomeText)
+        welcomeText.snp.makeConstraints {
+            $0.top.equalTo(logoImg.snp.bottom).offset(Constants.hugeSpacing)
+            $0.horizontalEdges.equalToSuperview().inset(Constants.hSpacing)
         }
         
-        vStack.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview()
+        view.addSubview(subWelcomeText)
+        subWelcomeText.snp.makeConstraints {
+            $0.top.equalTo(welcomeText.snp.bottom).offset(Constants.spacing)
+            $0.horizontalEdges.equalToSuperview().inset(Constants.hSpacing)
         }
         
-        spacer.snp.makeConstraints {
-            $0.height.greaterThanOrEqualTo(0)
+        view.addSubview(loginButton)
+        loginButton.snp.makeConstraints {
+            $0.top.equalTo(subWelcomeText.snp.bottom).offset(Constants.hugeSpacing)
+            $0.horizontalEdges.equalToSuperview().inset(Constants.hSpacing)
         }
         
-        vStack2.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview()
+        view.addSubview(asGuestButton)
+        asGuestButton.snp.makeConstraints {
+            $0.top.equalTo(loginButton.snp.bottom).offset(Constants.spacing)
+            $0.horizontalEdges.equalToSuperview().inset(Constants.hSpacing)
         }
     }
     
@@ -154,20 +138,6 @@ final class LoginScreenVC: UIViewController {
 }
 
 extension LoginScreenVC: LoginScreenViewProtocol {
-    func didReceiveError(error: AuthError) {
-        let alert = UIAlertController(
-            title: "Oops...",
-            message: error.localizedDescription,
-            preferredStyle: .alert
-        )
-        
-        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
-        
-        DispatchQueue.main.async {
-            self.present(alert, animated: true, completion: nil)
-        }
-    }
-    
     func didReceiveError(errorString error: String) {
         let alert = UIAlertController(
             title: "Oops...",

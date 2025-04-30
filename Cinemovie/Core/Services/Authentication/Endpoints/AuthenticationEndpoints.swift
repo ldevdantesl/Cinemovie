@@ -36,4 +36,8 @@ struct AuthenticationEndpoints {
             path: "/authentication/session/new", method: .POST, body: jsonBody
         )
     }
+    
+    static func getAccountDetailsEndpoint(sessionID: String) -> Endpoint {
+        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/account", queryParams: ["session_id" : sessionID])
+    }
 }

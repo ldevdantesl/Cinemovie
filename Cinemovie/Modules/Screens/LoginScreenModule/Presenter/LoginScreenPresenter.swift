@@ -9,20 +9,21 @@ import Foundation
 import UIKit
 
 protocol LoginScreenPresenterProtocol: AnyObject {
-    // MARK: - STARTING
+    // MARK: - USER INITIATED
     func didPressLoginAsGuest()
     func didPressLoginWithTMDB()
     
-    // MARK: - FINISHING
+    // MARK: - PROGRAMMATIC
     func didFinishLogingAsGuest()
-    func didFinishLogingAsGuest(withError error: AuthError)
     func didLogInWithOAuth()
-    func didLogInWithOAuth(withError error: Error)
+    func didStoreAccountID()
     
     // MARK: - OTHER
     func openOAuthURLWithToken(token: String)
-    func cantOpenURLForToken(withError error: AuthError)
     func handleOAuthCallback(url: URL)
+    
+    // MARK: - ERROR HANDLING
+    func didRecieveError(_ error: Error)
 }
 
 final class LoginScreenPresenter {
@@ -37,7 +38,7 @@ final class LoginScreenPresenter {
 }
 
 extension LoginScreenPresenter: LoginScreenPresenterProtocol {
-    // MARK: - STARTING
+    // MARK: - USER INITIATED
     func didPressLoginWithTMDB() {
         interactor.loginWithTMDB()
     }
@@ -45,12 +46,25 @@ extension LoginScreenPresenter: LoginScreenPresenterProtocol {
     func didPressLoginAsGuest() {
         interactor.loginAsGuest()
     }
-    
-    // MARK: - OTHER
-    func cantOpenURLForToken(withError error: AuthError) {
-        view?.didReceiveError(error: error)
+
+    // MARK: - PROGRAMMATIC
+    func didFinishLogingAsGuest() {
+        DispatchQueue.main.async {
+            self.router.routeToMainView()
+        }
     }
     
+    func didLogInWithOAuth() {
+        self.interactor.storeAccountID()
+    }
+    
+    func didStoreAccountID() {
+        DispatchQueue.main.async {
+            self.router.routeToMainView()
+        }
+    }
+    
+    // MARK: - OTHER
     func openOAuthURLWithToken(token: String) {
         DispatchQueue.main.async {
             self.router.openOAuthURLWithToken(token: token)
@@ -71,27 +85,12 @@ extension LoginScreenPresenter: LoginScreenPresenterProtocol {
             view?.didReceiveError(errorString: "Access was denied. Please try again.")
         }
     }
-    
-    // MARK: - FINISHING
-    func didFinishLogingAsGuest() {
-        DispatchQueue.main.async {
-            self.router.routeToMainView()
-        }
-    }
-    
-    func didFinishLogingAsGuest(withError error: AuthError) {
-        DispatchQueue.main.async {
-            self.view?.didReceiveError(error: error)
-        }
-    }
-    
-    func didLogInWithOAuth() {
-        DispatchQueue.main.async {
-            self.router.routeToMainView()
-        }
-    }
 
-    func didLogInWithOAuth(withError error: any Error) {
-        view?.didReceiveError(errorString: "Something went wrong please try again later.\(error.localizedDescription)")
+    // MARK: - ERROR HANDLING
+    func didRecieveError(_ error: any Error) {
+        switch error {
+        case let error as AuthError: self.view?.didReceiveError(errorString: error.localizedDescription)
+        default: self.view?.didReceiveError(errorString: "Something went wrong please try")
+        }
     }
 }
