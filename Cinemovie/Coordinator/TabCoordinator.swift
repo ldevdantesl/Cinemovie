@@ -40,5 +40,6 @@ final class TabCoordinator: Coordinator {
             watchlistCoordinator.navigationController,
             settingsCoordinator.navigationController,
         ]
+        tabBarController.tabBar.backgroundColor = CMColor.cmBackground
     }
 }
