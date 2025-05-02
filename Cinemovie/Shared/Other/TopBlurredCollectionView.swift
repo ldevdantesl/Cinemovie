@@ -10,12 +10,12 @@ import SnapKit
 
 class TopBlurredCollectionView: UICollectionView, UICollectionViewDelegate {
     private var blurView: UIVisualEffectView?
-    private var showsBlur: Bool
+    private var showsTopBlur: Bool
 
-    init(layout: UICollectionViewLayout, showsBlur: Bool = true) {
-        self.showsBlur = showsBlur
+    init(layout: UICollectionViewLayout, ignoresTopSafeArea: Bool = true, showsTopBlur: Bool = true) {
+        self.showsTopBlur = showsTopBlur
         super.init(frame: .zero, collectionViewLayout: layout)
-        self.contentInsetAdjustmentBehavior = .never
+        self.contentInsetAdjustmentBehavior = ignoresTopSafeArea ? .never : .always
     }
 
     @available(*, unavailable)
@@ -26,7 +26,7 @@ class TopBlurredCollectionView: UICollectionView, UICollectionViewDelegate {
     override func didMoveToSuperview() {
         super.didMoveToSuperview()
         
-        guard showsBlur, blurView == nil, let superview = superview else { return }
+        guard showsTopBlur, blurView == nil, let superview = superview else { return }
         
         let blur = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
         blur.alpha = 0
@@ -41,7 +41,7 @@ class TopBlurredCollectionView: UICollectionView, UICollectionViewDelegate {
     }
 
     func showBlur(_ scrollView: UIScrollView) {
-        guard showsBlur, let blurView else { return }
+        guard showsTopBlur, let blurView else { return }
         let offsetY = scrollView.contentOffset.y
         let clamped = min(max(offsetY, 0), 200)
         blurView.alpha = clamped / 200

@@ -10,6 +10,7 @@ import Foundation
 struct TMDBEndpoints {
     static let baseURL = CONSTANTS.baseURLString
     static let baseURLV4 = CONSTANTS.baseURLV4String
+    static let apiReadAccessToken = CONSTANTS.apiReadAcessToken
     static let apiKey = CONSTANTS.apiKey
 
     // MARK: - MOVIE
@@ -123,29 +124,40 @@ struct TMDBEndpoints {
         return Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/search/person", queryParams: queryParams)
     }
 
-    // MARK: - WATCHLIST, FAVORITE, RATED
-    static func getWatchlistMoviesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/account/\(accountID)/watchlist/movies", queryParams: queryParams)
+    // MARK: - WATCHLIST
+    static func getWatchlistMoviesEndpoint(accountID: Int, sessionID: String, extraParams: [String : String]? = nil) -> Endpoint {
+        var queryParams = ["session_id" : sessionID]
+        extraParams?.forEach { queryParams[$0] = $1 }
+        return Endpoint(baseURL: baseURL, bearerToken: apiReadAccessToken, path: "/account/\(accountID)/watchlist/movies", queryParams: queryParams)
     }
-
-    static func getWatchlistTVSeriesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/account/\(accountID)/watchlist/tv", queryParams: queryParams)
+    
+    static func addMediaToWatchlistEndpoint(accountID: Int, sessionID: String, mediaID: Int, mediaType: MediaTypes) -> Endpoint {
+        let bodyParam: [String : Any] = [
+            "media_type" : mediaType.rawValue,
+            "media_id" : mediaID,
+            "watchlist" : true
+        ]
+        let serializedParams = CMJSONSerializer.dataToJSON(json: bodyParam)
+        let queryParams = ["session_id" : sessionID]
+        return Endpoint(baseURL: baseURL, bearerToken: apiReadAccessToken, path: "/account/\(accountID)/watchlist", method: .POST, queryParams: queryParams, body: serializedParams)
     }
-
-    static func getRatedMoviesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/account/\(accountID)/rated/movies", queryParams: queryParams)
+    
+    // MARK: - FAVORITE
+    static func getFavoriteMoviesEndpoint(accountID: Int, sessionID: String, extraParams: [String : String]? = nil) -> Endpoint {
+        var queryParams = ["session_id" : sessionID]
+        extraParams?.forEach { queryParams[$0] = $1 }
+        return Endpoint(baseURL: baseURL, bearerToken: apiReadAccessToken, path: "/account/\(accountID)/favorite/movies", queryParams: queryParams)
     }
-
-    static func getRatedTVSeriesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/account/\(accountID)/rated/tv", queryParams: queryParams)
-    }
-
-    static func getFavoriteMoviesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/account/\(accountID)/favorite/movies")
-    }
-
-    static func getFavoriteTVSeriesEndpoint(accountID: Int, queryParams: [String : String]? = nil) -> Endpoint {
-        Endpoint(baseURL: baseURL, apiKey: apiKey, path: "/account/\(accountID)/favorite/tv")
+    
+    static func addMediaToFavoritesEndpoint(accountID: Int, sessionID: String, mediaID: Int, mediaType: MediaTypes) -> Endpoint {
+        let bodyParam: [String : Any] = [
+            "media_type" : mediaType.rawValue,
+            "media_id" : mediaID,
+            "favorite" : true
+        ]
+        let serializedParams = CMJSONSerializer.dataToJSON(json: bodyParam)
+        let queryParams = ["session_id" : sessionID]
+        return Endpoint(baseURL: baseURL, bearerToken: apiReadAccessToken, path: "/account/\(accountID)/favorite", method: .POST, queryParams: queryParams, body: serializedParams)
     }
 
     // MARK: - OTHER

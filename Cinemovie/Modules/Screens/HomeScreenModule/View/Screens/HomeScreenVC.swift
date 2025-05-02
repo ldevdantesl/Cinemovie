@@ -58,7 +58,7 @@ final class HomeScreenVC: UIViewController {
     
     // MARK: - VIEW PROPERTIES
     private lazy var collectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<HomeScreenVC.Sections, HomeScreenVC.Items>(layout: createLayout(), showsBlur: false)
+        let view = DiffableCollectionView<HomeScreenVC.Sections, HomeScreenVC.Items>(layout: createLayout(), showsTopBlur: false)
         view.register(cellClass: FeaturedMediaCell.self)
         view.register(cellClass: MediaListCell.self)
         view.register(cellClass: TrendingPeopleCell.self)

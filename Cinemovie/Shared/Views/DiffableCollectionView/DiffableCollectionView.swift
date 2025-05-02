@@ -13,12 +13,12 @@ final class DiffableCollectionView<Section: Hashable, Item: Hashable>: TopBlurre
     typealias DataSource = UICollectionViewDiffableDataSource<Section, Item>
     
     // MARK: - PROPERTIES
-    var diffableDataSource: UICollectionViewDiffableDataSource<Section, Item>!
+    private var diffableDataSource: UICollectionViewDiffableDataSource<Section, Item>!
     private var didSelectHandler: ((IndexPath) -> Void)?
     
     // MARK: - LIFECYCLE
-    override init(layout: UICollectionViewLayout, showsBlur showsTopBlur: Bool) {
-        super.init(layout: layout, showsBlur: showsTopBlur)
+    override init(layout: UICollectionViewLayout, ignoresTopSafeArea: Bool = true, showsTopBlur: Bool = true) {
+        super.init(layout: layout, ignoresTopSafeArea: ignoresTopSafeArea, showsTopBlur: showsTopBlur)
     }
     
     @available(*, unavailable)

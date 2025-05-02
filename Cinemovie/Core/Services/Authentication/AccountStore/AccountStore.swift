@@ -15,4 +15,6 @@ protocol AccountStore: AnyObject {
     var isGuest: Bool { get }
     
     func clear()
+    
+    func printEverything()
 }

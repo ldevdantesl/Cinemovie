@@ -43,7 +43,7 @@ final class MovieDetailsScreenVC: UIViewController {
         case backdropImage(BackdropImageCellViewModel)
         case titleAndTagline(TitleAndTaglineCellViewModel)
         case subDetails(MovieDetailsSubDetailsCellViewModel)
-        case watchListButton
+        case watchListButton(LongButtonCellViewModel)
         case overview(OverviewCellViewModel)
         case cast(CastListCellViewModel)
         case production(ProductionInfoCellViewModel)
@@ -74,7 +74,7 @@ final class MovieDetailsScreenVC: UIViewController {
         cv.backgroundColor = CMColor.cmBackground
         cv.layer.zPosition = 0
         cv.register(cellClass: MovieDetailsSubDetailsCell.self)
-        cv.register(cellClass: WatchlistButtonCell.self)
+        cv.register(cellClass: LongButtonCell.self)
         cv.register(cellClass: OverviewCell.self)
         cv.register(cellClass: RateAndShareCell.self)
         cv.register(cellClass: ProductionInfoCell.self)
@@ -166,8 +166,9 @@ final class MovieDetailsScreenVC: UIViewController {
                 cell?.configure(viewModel: vm)
                 return cell
                 
-            case .watchListButton:
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: WatchlistButtonCell.identifier, for: indexPath) as? WatchlistButtonCell
+            case .watchListButton(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? LongButtonCell
+                cell?.configure(viewModel: vm)
                 return cell
                 
             case .cast(let vm):
@@ -252,11 +253,13 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             didTapIMDB: presenter?.didTapIMDBImage, didTapSubDetails: presenter?.didTapToSubDetails
         )
         
+        let longButtonVM = LongButtonCellViewModel(text: "Watchlist", imageSystemName: "plus", action: presenter?.didTapAddToWatchlist)
+        
         var sectionsAndTheirItems: [(sections: (Sections), items: [Items])] = [
             (Sections.backdropImage, [.backdropImage(backdropVM)]),
             (Sections.titleAndTagline, [.titleAndTagline(titleVM)]),
             (Sections.subDetails, [.subDetails(subDetailsVM)]),
-            (Sections.watchlistButton, [.watchListButton])
+            (Sections.watchlistButton, [.watchListButton(longButtonVM)])
         ]
         
         if !details.overview.isEmpty {

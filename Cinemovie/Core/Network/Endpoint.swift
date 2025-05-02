@@ -63,6 +63,27 @@ struct Endpoint {
         self.bearerToken = nil
     }
     
+    init(
+        baseURL: String, path: String,
+        method: HTTPMethod = .GET,
+        headers: [String : String]? = nil,
+        queryParams: [String : String]? = nil,
+        body: Data? = nil
+    ) {
+        self.baseURL = baseURL
+        self.path = path
+        self.method = method
+        self.headers = headers ?? [
+            "accept" : "application/json",
+            "content-type" : "application/json",
+            "Cache-Control" : "no-cache"
+        ]
+        self.queryParams = queryParams
+        self.body = body
+        self.apiKey = nil
+        self.bearerToken = nil
+    }
+    
     // MARK: - PUBLIC PROPERTIES
     public var urlRequest: URLRequest? {
         var components = URLComponents(string: baseURL + path)
@@ -71,11 +92,10 @@ struct Endpoint {
             components?.queryItems = queryParameters.map { URLQueryItem(name: $0.key, value: $0.value) }
         }
         
-        if components?.queryItems == nil {
-            components?.queryItems = []
-        }
-        
         if let apiKey = apiKey {
+            if components?.queryItems == nil {
+                components?.queryItems = []
+            }
             components?.queryItems?.append(URLQueryItem(name: "api_key", value: apiKey))
         }
         

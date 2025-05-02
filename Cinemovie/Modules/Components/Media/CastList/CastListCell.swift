@@ -43,13 +43,13 @@ final class CastListCell: ReusableCellBaseClass {
         return label
     }()
     
-    private lazy var collectionView: TopBlurredCollectionView = {
+    private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = Constants.hSpacing
         layout.itemSize = CGSize(width: Constants.itemWidth, height: Constants.itemHeight)
         
-        let cv = TopBlurredCollectionView(layout: layout, showsBlur: true)
+        let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.showsHorizontalScrollIndicator = false
         cv.dataSource = self
         cv.backgroundColor = CMColor.cmBackground

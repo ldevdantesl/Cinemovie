@@ -158,6 +158,34 @@ final class TMDBServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
+    // MARK: - WATCHLIST
+    func getWatchlistMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { return }
+        let endpoint = TMDBEndpoints.getWatchlistMoviesEndpoint(accountID: accountID, sessionID: sessionID, extraParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    func addMediaToWatchlist(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void) {
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
+        let endpoint = TMDBEndpoints.addMediaToWatchlistEndpoint(accountID: accountID, sessionID: sessionID, mediaID: mediaID, mediaType: mediaType)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    // MARK: - FAVORITE
+    func getFavoriteMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { return }
+        let endpoint = TMDBEndpoints.getFavoriteMoviesEndpoint(accountID: accountID, sessionID: sessionID, extraParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    func addMediaToFavorites(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void) {
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
+        let endpoint = TMDBEndpoints.addMediaToWatchlistEndpoint(accountID: accountID, sessionID: sessionID, mediaID: mediaID, mediaType: mediaType)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
     // MARK: - OTHER
     func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]

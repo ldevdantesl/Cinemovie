@@ -42,12 +42,16 @@ public struct CMButtonViewModel {
 final class CMButton: UIButton {
 
     // MARK: - PROPERTIES
-    private(set) var viewModel: CMButtonViewModel
+    private(set) var viewModel: CMButtonViewModel?
     
     // MARK: - LIFECYCLE
-    init(viewModel: CMButtonViewModel) {
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+    
+    convenience init(viewModel: CMButtonViewModel) {
+        self.init(frame: .zero)
         self.viewModel = viewModel
-        super.init(frame: .zero)
         setup()
     }
     
@@ -58,6 +62,7 @@ final class CMButton: UIButton {
     
     override func layoutSubviews() {
         super.layoutSubviews()
+        guard let viewModel = viewModel else { return }
         self.layer.cornerRadius = viewModel.cornerRadius
         self.clipsToBounds = true
         self.layer.borderColor = (viewModel.borderColor ?? .clear).cgColor
@@ -72,6 +77,7 @@ final class CMButton: UIButton {
     
     // MARK: - PRIVATE FUNC
     private func setup() {
+        guard let viewModel = viewModel else { return }
         self.setTitle(nil, for: .normal)
         self.setImage(nil, for: .normal)
         self.configuration = nil
@@ -99,13 +105,11 @@ final class CMButton: UIButton {
             self.tintColor = viewModel.foreColor
         }
         
-        if let _ = viewModel.didTapAction {
-            self.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
-        }
+        self.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
     }
     
     // MARK: - OBJC FUNC
     @objc private func didTapButton() {
-        viewModel.didTapAction?()
+        viewModel?.didTapAction?()
     }
 }

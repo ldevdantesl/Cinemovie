@@ -64,4 +64,12 @@ final class AccountStoreImpl: AccountStore {
         KeychainStore.delete(for: accountIDKey)
         KeychainStore.delete(for: accessTokenKey)
     }
+    
+    func printEverything() {
+        print("Account id: \(accountID ?? 0)")
+        print("Session id: \(sessionID ?? "No sessionID")")
+        print("Access Token: \(accessToken ?? "No access token")")
+        print("Is logged in: \(isLoggedIn)")
+        print("Is guest: \(isGuest)")
+    }
 }

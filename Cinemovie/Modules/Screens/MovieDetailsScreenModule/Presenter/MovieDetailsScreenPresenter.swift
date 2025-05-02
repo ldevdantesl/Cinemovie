@@ -18,6 +18,7 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didTapBackButton()
     func didSelectActor(_ actor: Cast)
     func didTapToSubDetails(sendedBy view: UIView, message: String)
+    func didTapAddToWatchlist()
     
     // MARK: - ERROR
     func didRecieveError(_ error: String)
@@ -29,6 +30,7 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didGetMovieVideos(videos: [Video])
     func didGetMovieReviews(_ reviews: [Review])
     func didGetMovieBelongsToCollectionDetails(_ details: BelongsToCollectionDetails)
+    func didAddToWatchlist(_ message: String)
 }
 
 final class MovieDetailsScreenPresenter {
@@ -126,6 +128,10 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         router.showTooltipView(sendedBy: view, message: message)
     }
     
+    func didTapAddToWatchlist() {
+        interactor.addToWatchlist(movieID: movieID)
+    }
+    
     // MARK: - PROGRAMMATIC
     func didGetMovieReviews(_ reviews: [Review]) {
         movieReviews = reviews
@@ -160,5 +166,9 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     func didGetMovieBelongsToCollectionDetails(_ details: BelongsToCollectionDetails) {
         self.belongsToCollectionDetails = details
         dispatchGroup.leave()
+    }
+    
+    func didAddToWatchlist(_ message: String) {
+        print("Successfully added to watchlist: \(message)")
     }
 }

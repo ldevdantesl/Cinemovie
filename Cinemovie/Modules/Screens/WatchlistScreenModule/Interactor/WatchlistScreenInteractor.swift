@@ -7,7 +7,10 @@
 
 import UIKit
 
-protocol WatchlistScreenInteractorProtocol: AnyObject {}
+protocol WatchlistScreenInteractorProtocol: AnyObject {
+    func getWatchlistMovies(refreshing: Bool)
+    func getFavoriteMovies(refreshing: Bool)
+}
 
 final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
     weak var presenter: WatchlistScreenPresenterProtocol?
@@ -15,5 +18,25 @@ final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
     
     init(tmdbService: TMDBService) {
         self.tmdbService = tmdbService
+    }
+    
+    func getWatchlistMovies(refreshing: Bool) {
+        tmdbService.getWatchlistMovies(page: 1) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): presenter?.didGetWatchlistMovies(success.movies, refreshing: refreshing)
+            case .failure: presenter?.didGetWatchlistMovies([], refreshing: refreshing)
+            }
+        }
+    }
+    
+    func getFavoriteMovies(refreshing: Bool) {
+        tmdbService.getFavoriteMovies(page: 1) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): presenter?.didGetFavoriteMovies(success.movies, refreshing: refreshing)
+            case .failure: presenter?.didGetFavoriteMovies([], refreshing: refreshing)
+            }
+        }
     }
 }

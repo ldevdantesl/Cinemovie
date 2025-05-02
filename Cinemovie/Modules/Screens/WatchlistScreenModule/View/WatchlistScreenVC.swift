@@ -12,6 +12,7 @@ protocol WatchlistScreenViewProtocol: AnyObject {
     // MARK: - FUNCTIONS
     func didRecieveError(_ description: String)
     func applySnapshot(sections: [WatchlistScreenVC.Sections], itemsBySection: [WatchlistScreenVC.Sections : [WatchlistScreenVC.Items]])
+    func refreshCompleted()
     
     // MARK: - PROPERTIES
     var downloadingView: CMSplashView { get }
@@ -24,13 +25,11 @@ final class WatchlistScreenVC: UIViewController {
     
     // MARK: - SECTIONS
     enum Sections: Hashable {
-        case favorite
-        case rated
         case watchlist
     }
     
     enum Items: Hashable {
-        
+        case zStackMediaListVM(ZStackMediaListCellViewModel)
     }
     
     // MARK: - ITEMS
@@ -46,9 +45,18 @@ final class WatchlistScreenVC: UIViewController {
     // MARK: - PROPERTIES
     
     // MARK: - VIEW PROPERTIES
+    private lazy var refreshControler: UIRefreshControl = {
+        let control = UIRefreshControl()
+        control.tintColor = CMColor.cmLabel
+        control.addTarget(self, action: #selector(didPullToRefresh), for: .valueChanged)
+        return control
+    }()
+    
     private lazy var collectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<WatchlistScreenVC.Sections, WatchlistScreenVC.Items>(layout: createLayout(), showsBlur: false)
+        let view = DiffableCollectionView<WatchlistScreenVC.Sections, WatchlistScreenVC.Items>(layout: createLayout(), ignoresTopSafeArea: false, showsTopBlur: true)
         view.delegate = self
+        view.refreshControl = refreshControler
+        view.register(cellClass: ZStackMediaListCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
         return view
@@ -57,9 +65,15 @@ final class WatchlistScreenVC: UIViewController {
     // MARK: - LIFECYCLE
     override func viewDidLoad() {
         super.viewDidLoad()
-        presenter?.viewDidLoad()
         configureDataSource()
+        presenter?.viewDidLoad()
         setupUI()
+        downloadingView.show()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.navigationBar.isHidden = true
     }
     
     // MARK: - PRIVATE FUNC
@@ -77,17 +91,30 @@ final class WatchlistScreenVC: UIViewController {
     }
     
     private func configureDataSource() {
-        
+        collectionView.configureDataSource { collectionView, indexPath, itemIdentifier in
+            switch itemIdentifier {
+            case .zStackMediaListVM(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? ZStackMediaListCell
+                cell?.configure(viewModel: vm)
+                return cell
+            }
+        }
     }
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
         UICollectionViewCompositionalLayout { sectionIndex, env in
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(100)))
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: item.layoutSize, subitems: [item])
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1/2), heightDimension: .estimated(200)))
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(200)), subitem: item, count: 2)
+            group.interItemSpacing = .fixed(20)
             let section = NSCollectionLayoutSection(group: group)
-            section.contentInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
+            section.contentInsets = .init(top: 0, leading: 10, bottom: 0, trailing: 10)
             return section
         }
+    }
+    
+    // MARK: - OBJC
+    @objc private func didPullToRefresh() {
+        presenter?.didCallRefresh()
     }
 }
 
@@ -110,5 +137,9 @@ extension WatchlistScreenVC: WatchlistScreenViewProtocol {
     
     func applySnapshot(sections: [Sections], itemsBySection: [Sections : [Items]]) {
         collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
+    }
+    
+    func refreshCompleted() {
+        refreshControler.endRefreshing()
     }
 }

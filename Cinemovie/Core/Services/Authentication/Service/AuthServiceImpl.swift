@@ -63,7 +63,7 @@ final class AuthServiceImpl: AuthService {
     }
     
     func logout() {
-        accountStore.sessionID = nil
+        accountStore.clear()
     }
     
     // MARK: - OTHER

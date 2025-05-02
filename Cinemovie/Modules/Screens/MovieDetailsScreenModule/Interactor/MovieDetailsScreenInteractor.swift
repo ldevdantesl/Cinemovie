@@ -12,6 +12,7 @@ protocol MovieDetailsScreenInteractorProtocol: AnyObject {
     func getMovieVideos(movieID: Int)
     func getMovieReviews(movieID: Int)
     func getBelongsToCollectionDetails(collectionID: Int)
+    func addToWatchlist(movieID: Int)
 }
 
 final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
@@ -77,6 +78,16 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let details): presenter?.didGetMovieBelongsToCollectionDetails(details)
+            case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription)
+            }
+        }
+    }
+
+    func addToWatchlist(movieID: Int) {
+        tmdbService.addMediaToWatchlist(mediaID: movieID, mediaType: .movie) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): presenter?.didAddToWatchlist(success.statusMessage)
             case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription)
             }
         }
