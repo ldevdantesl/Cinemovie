@@ -36,7 +36,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetMovieDetails(success)
-            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription)
+            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription, goesBack: true)
             }
         }
     }
@@ -46,7 +46,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetMovieCast(cast: success.cast, crew: success.crew)
-            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription)
+            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription, goesBack: false)
             }
         }
     }
@@ -56,7 +56,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didGetMovieRecommendations(queryMovies: success.movies)
-            case .failure: self.presenter?.didGetMovieRecommendations(queryMovies: [])
+            case .failure(let error): self.presenter?.didRecieveError(error.localizedDescription, goesBack: false)
             }
         }
     }
@@ -86,7 +86,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let details): presenter?.didGetMovieBelongsToCollectionDetails(details)
-            case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription)
+            case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription, goesBack: false)
             }
         }
     }
@@ -96,7 +96,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let favorited): presenter?.isMovieFavorited(favorited)
-            case .failure(let error): presenter?.didRecieveError(error.localizedDescription)
+            case .failure(let error): presenter?.didRecieveError(error.localizedDescription, goesBack: false)
             }
         }
     }
@@ -106,7 +106,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let favorited): presenter?.isMovieWatchlisted(favorited)
-            case .failure(let error): presenter?.didRecieveError(error.localizedDescription)
+            case .failure(let error): presenter?.didRecieveError(error.localizedDescription, goesBack: false)
             }
         }
     }
@@ -117,7 +117,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didAddToWatchlist(success.statusMessage)
-            case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription)
+            case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription, goesBack: false)
             }
         }
     }
@@ -127,7 +127,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didAddToFavorite(success.statusMessage)
-            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription)
+            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription, goesBack: false)
             }
         }
     }

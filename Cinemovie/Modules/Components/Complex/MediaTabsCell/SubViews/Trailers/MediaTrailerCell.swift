@@ -68,13 +68,13 @@ final class MediaTrailerCell: ReusableCellBaseClass {
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        addSubview(youtubeView)
+        contentView.addSubview(youtubeView)
         youtubeView.snp.makeConstraints {
             $0.top.horizontalEdges.equalToSuperview()
             $0.height.equalTo(Constants.youtubeViewHeight)
         }
         
-        addSubview(trailerName)
+        contentView.addSubview(trailerName)
         trailerName.snp.makeConstraints {
             $0.top.equalTo(youtubeView.snp.bottom).offset(Constants.spacing)
             $0.horizontalEdges.equalToSuperview()

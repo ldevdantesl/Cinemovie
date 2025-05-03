@@ -60,8 +60,7 @@ final class TrailersTabContentCell: ReusableCellBaseClass {
     
     override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
         layoutIfNeeded()
-        let totalTrailers = CGFloat(viewModel?.trailers.count ?? 2)
-        let height = Constants.itemHeight * totalTrailers
+        let height = trailersCollectionView.contentSize.height
         layoutAttributes.frame.size.height = height
         self.viewModel?.setCellHeight(to: height)
         return layoutAttributes
@@ -77,7 +76,7 @@ final class TrailersTabContentCell: ReusableCellBaseClass {
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        addSubview(trailersCollectionView)
+        contentView.addSubview(trailersCollectionView)
         trailersCollectionView.snp.makeConstraints {
             $0.edges.equalToSuperview()
             $0.width.equalToSuperview()

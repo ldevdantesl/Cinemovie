@@ -21,9 +21,6 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didTapAddToWatchlist(adding: Bool)
     func didTapFavoriteButton(adding: Bool)
     
-    // MARK: - ERROR
-    func didRecieveError(_ error: String)
-    
     // MARK: - PROGRAMMATIC
     func didGetMovieDetails(_ details: MovieDetails)
     func didGetMovieCast(cast: [Cast], crew: [Cast])
@@ -35,6 +32,9 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didAddToFavorite(_ message: String)
     func isMovieFavorited(_ isFavorite: Bool)
     func isMovieWatchlisted(_ isInWatchlist: Bool)
+    
+    // MARK: - ERROR
+    func didRecieveError(_ error: String, goesBack: Bool)
 }
 
 final class MovieDetailsScreenPresenter {
@@ -100,11 +100,6 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
                 isWatchlisted: isWatchlisted, isFavorited: isFavorited
             )
         }
-    }
-
-    // MARK: - ERROR
-    func didRecieveError(_ error: String) {
-        view?.didRecieveError(error)
     }
     
     // MARK: - USER INITIATED
@@ -201,6 +196,12 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     
     func isMovieWatchlisted(_ isInWatchlist: Bool) {
         self.isWatchlisted = isInWatchlist
+        dispatchGroup.leave()
+    }
+    
+    // MARK: - ERROR
+    func didRecieveError(_ error: String, goesBack: Bool) {
+        view?.didRecieveError(error, goesBack: goesBack)
         dispatchGroup.leave()
     }
 }

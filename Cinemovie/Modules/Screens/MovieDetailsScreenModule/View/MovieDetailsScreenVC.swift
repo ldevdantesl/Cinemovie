@@ -14,7 +14,7 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
     var activeTooltipWorkItem: DispatchWorkItem? { get set }
     var activePopUpView: ActorPopupView? { get set }
 
-    func didRecieveError(_ errorStr: String)
+    func didRecieveError(_ errorStr: String, goesBack: Bool)
     func didDownloadAllData(
         details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
@@ -217,19 +217,20 @@ extension MovieDetailsScreenVC: UICollectionViewDelegate {
 }
 
 extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
-    func didRecieveError(_ errorStr: String) {
+    func didRecieveError(_ errorStr: String, goesBack: Bool) {
         let alert = UIAlertController(
             title: "Oops..",
             message: errorStr,
             preferredStyle: .alert
         )
-
-        let action = UIAlertAction(title: "OK", style: .cancel) { [weak self] _ in
-            guard let self = self else { return }
-            presenter?.didTapBackButton()
+        
+        if goesBack {
+            let action = UIAlertAction(title: "OK", style: .cancel) { [weak self] _ in
+                guard let self = self else { return }
+                presenter?.didTapBackButton()
+            }
+            alert.addAction(action)
         }
-
-        alert.addAction(action)
         DispatchQueue.main.async {
             self.present(alert, animated: true, completion: nil)
         }

@@ -72,12 +72,11 @@ final class ReviewsTabContentCell: ReusableCellBaseClass {
     }
     
     override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
-        let attributes = super.preferredLayoutAttributesFitting(layoutAttributes)
         layoutIfNeeded()
         let height = reviewsCollectionView.contentSize.height
-        attributes.frame.size.height = height
+        layoutAttributes.frame.size.height = height
         viewModel?.setCellHeight(to: height)
-        return attributes
+        return layoutAttributes
     }
     
     // MARK: - PUBLIC FUNC

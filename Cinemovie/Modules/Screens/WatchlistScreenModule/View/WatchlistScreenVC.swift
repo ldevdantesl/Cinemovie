@@ -32,8 +32,6 @@ final class WatchlistScreenVC: UIViewController {
         case zStackMediaListVM(ZStackMediaListCellViewModel)
     }
     
-    // MARK: - ITEMS
-    
     // MARK: - VIPER
     var presenter: WatchlistScreenPresenterProtocol?
     let downloadingView: CMSplashView = {
@@ -43,6 +41,7 @@ final class WatchlistScreenVC: UIViewController {
     }()
     
     // MARK: - PROPERTIES
+    private var hasAppearedOnce: Bool = false
     
     // MARK: - VIEW PROPERTIES
     private lazy var refreshControler: UIRefreshControl = {
@@ -74,6 +73,15 @@ final class WatchlistScreenVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.navigationBar.isHidden = true
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        guard !hasAppearedOnce else {
+            presenter?.didCallRefresh()
+            return
+        }
+        hasAppearedOnce = true
     }
     
     // MARK: - PRIVATE FUNC
