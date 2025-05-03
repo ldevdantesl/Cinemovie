@@ -202,6 +202,5 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     // MARK: - ERROR
     func didRecieveError(_ error: String, goesBack: Bool) {
         view?.didRecieveError(error, goesBack: goesBack)
-        dispatchGroup.leave()
     }
 }

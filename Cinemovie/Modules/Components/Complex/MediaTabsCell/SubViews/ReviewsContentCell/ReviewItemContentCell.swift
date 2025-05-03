@@ -126,7 +126,10 @@ final class ReviewItemContentCell: ReusableCellBaseClass {
     }
     
     override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
-        layoutIfNeeded()
+        UIView.animate(withDuration: 0.3) { [weak self] in
+            guard let self = self else { return }
+            self.layoutIfNeeded()
+        }
         let isExpanded = viewModel?.isExpanded ?? false
         let height = contentView.systemLayoutSizeFitting(
             CGSize(width: layoutAttributes.frame.width, height: isExpanded ? UIView.layoutFittingCompressedSize.height : Constants.defaultHeight),

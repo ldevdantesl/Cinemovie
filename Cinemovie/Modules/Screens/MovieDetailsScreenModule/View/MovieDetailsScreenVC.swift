@@ -10,11 +10,12 @@ import SnapKit
 import SDWebImage
 
 protocol MovieDetailsScreenViewProtocol: AnyObject {
+    // MARK: - PROPERTIES
     var activeTooltipView: CMTooltipView? { get set }
     var activeTooltipWorkItem: DispatchWorkItem? { get set }
     var activePopUpView: ActorPopupView? { get set }
 
-    func didRecieveError(_ errorStr: String, goesBack: Bool)
+    // MARK: - OTHER
     func didDownloadAllData(
         details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
@@ -22,6 +23,9 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
         belongsToCollectionDetails: BelongsToCollectionDetails?,
         isWatchlisted: Bool, isFavorited: Bool
     )
+    
+    // MARK: - ERROR HANDLING
+    func didRecieveError(_ errorStr: String, goesBack: Bool)
 }
 
 final class MovieDetailsScreenVC: UIViewController {
@@ -217,25 +221,6 @@ extension MovieDetailsScreenVC: UICollectionViewDelegate {
 }
 
 extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
-    func didRecieveError(_ errorStr: String, goesBack: Bool) {
-        let alert = UIAlertController(
-            title: "Oops..",
-            message: errorStr,
-            preferredStyle: .alert
-        )
-        
-        if goesBack {
-            let action = UIAlertAction(title: "OK", style: .cancel) { [weak self] _ in
-                guard let self = self else { return }
-                presenter?.didTapBackButton()
-            }
-            alert.addAction(action)
-        }
-        DispatchQueue.main.async {
-            self.present(alert, animated: true, completion: nil)
-        }
-    }
-    
     func didDownloadAllData(
         details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
@@ -305,5 +290,24 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             sections: visibleSections,
             itemsBySection: Dictionary(uniqueKeysWithValues: sectionsAndTheirItems)
         )
+    }
+    
+    // MARK: - ERROR HANDLING
+    func didRecieveError(_ errorStr: String, goesBack: Bool) {
+        let alert = UIAlertController(
+            title: "Oops..",
+            message: errorStr,
+            preferredStyle: .alert
+        )
+        
+        let action = UIAlertAction(title: "OK", style: .cancel) { [weak self] _ in
+            guard let self = self else { return }
+            goesBack ? presenter?.didTapBackButton() : ()
+        }
+        
+        alert.addAction(action)
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+        }
     }
 }
