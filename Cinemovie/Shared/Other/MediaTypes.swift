@@ -10,4 +10,11 @@ import Foundation
 enum MediaTypes: String, CaseIterable {
     case movie = "movie"
     case tvShow = "tv"
+    
+    var pluralized: String {
+        switch self {
+        case .movie: "movies"
+        case .tvShow: "tv"
+        }
+    }
 }

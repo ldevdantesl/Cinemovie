@@ -42,11 +42,15 @@ protocol TMDBService: AnyObject {
     
     // MARK: - WATCHLIST
     func getWatchlistMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
-    func addMediaToWatchlist(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void)
+    func getWatchlistTVSeries(page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
+    func addOrRemoveMediaInWatchlist(mediaID: Int, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void)
+    func isMediaWatchlisted(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<Bool, NetworkError>) -> Void)
     
     // MARK: - FAVORITE
     func getFavoriteMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
-    func addMediaToFavorites(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void)
+    func getFavoriteTVSeries(page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
+    func addOrRemoveMediaInFavorites(mediaID: Int, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void)
+    func isMediaFavorited(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<Bool, NetworkError>) -> Void)
     
     // MARK: - RATED
     func getRatedMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)

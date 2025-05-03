@@ -14,10 +14,10 @@ final class NetworkServiceImpl: NetworkService {
         self.session = session
     }
 
-    func request<T: APIResponse>(
+    func request<T: Decodable>(
         _ endpoint: Endpoint,
         completion: @escaping (Result<T, NetworkError>) -> Void
-    ) where T: APIResponse {
+    ) {
         
         guard let urlRequest = endpoint.urlRequest else {
             completion(.failure(.invalidURL))

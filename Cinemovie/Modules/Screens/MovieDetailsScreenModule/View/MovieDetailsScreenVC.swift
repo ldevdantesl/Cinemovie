@@ -19,7 +19,8 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
         details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
         recommended: [Movie], reviews: [Review],
-        belongsToCollectionDetails: BelongsToCollectionDetails?
+        belongsToCollectionDetails: BelongsToCollectionDetails?,
+        isWatchlisted: Bool, isFavorited: Bool
     )
 }
 
@@ -43,7 +44,7 @@ final class MovieDetailsScreenVC: UIViewController {
         case backdropImage(BackdropImageCellViewModel)
         case titleAndTagline(TitleAndTaglineCellViewModel)
         case subDetails(MovieDetailsSubDetailsCellViewModel)
-        case watchListButton(LongButtonCellViewModel)
+        case watchListButton(WatchlistButtonCellViewModel)
         case overview(OverviewCellViewModel)
         case cast(CastListCellViewModel)
         case production(ProductionInfoCellViewModel)
@@ -74,7 +75,7 @@ final class MovieDetailsScreenVC: UIViewController {
         cv.backgroundColor = CMColor.cmBackground
         cv.layer.zPosition = 0
         cv.register(cellClass: MovieDetailsSubDetailsCell.self)
-        cv.register(cellClass: LongButtonCell.self)
+        cv.register(cellClass: WatchlistButtonCell.self)
         cv.register(cellClass: OverviewCell.self)
         cv.register(cellClass: RateAndShareCell.self)
         cv.register(cellClass: ProductionInfoCell.self)
@@ -167,7 +168,7 @@ final class MovieDetailsScreenVC: UIViewController {
                 return cell
                 
             case .watchListButton(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? LongButtonCell
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? WatchlistButtonCell
                 cell?.configure(viewModel: vm)
                 return cell
                 
@@ -238,12 +239,13 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         details: MovieDetails, videos: [Video],
         cast: [Cast], crew: [Cast],
         recommended: [Movie], reviews: [Review],
-        belongsToCollectionDetails: BelongsToCollectionDetails?
+        belongsToCollectionDetails: BelongsToCollectionDetails?,
+        isWatchlisted: Bool, isFavorited: Bool
     ) {
         self.downloadingView.hide()
         let backdropVM = BackdropImageCellViewModel(
             imagePath: details.backdropPath,
-            size: .w1280, isFavorite: false,
+            size: .w1280, isFavorite: isFavorited,
             didTapBackButtonAction: presenter?.didTapBackButton,
             didTapFavorite: presenter?.didTapFavoriteButton
         )
@@ -255,16 +257,13 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             didTapIMDB: presenter?.didTapIMDBImage, didTapSubDetails: presenter?.didTapToSubDetails
         )
         
-        let longButtonVM = LongButtonCellViewModel(
-            text: "Watchlist", imageSystemName: "plus",
-            action: presenter?.didTapAddToWatchlist
-        )
+        let watchlistVM = WatchlistButtonCellViewModel(isWatchlisted: isWatchlisted, didTapAction: presenter?.didTapAddToWatchlist)
         
         var sectionsAndTheirItems: [(sections: (Sections), items: [Items])] = [
             (Sections.backdropImage, [.backdropImage(backdropVM)]),
             (Sections.titleAndTagline, [.titleAndTagline(titleVM)]),
             (Sections.subDetails, [.subDetails(subDetailsVM)]),
-            (Sections.watchlistButton, [.watchListButton(longButtonVM)])
+            (Sections.watchlistButton, [.watchListButton(watchlistVM)])
         ]
         
         if !details.overview.isEmpty {

@@ -75,6 +75,14 @@ final class CMButton: UIButton {
         setup()
     }
     
+    public func reconfigure(viewModel: CMButtonViewModel, aniDuration: TimeInterval = 0.3, options: UIView.AnimationOptions = [.transitionCrossDissolve]) {
+        self.viewModel = viewModel
+        UIView.transition(with: self, duration: aniDuration, options: options) { [weak self] in
+            guard let self = self else { return }
+            self.setup()
+        }
+    }
+    
     // MARK: - PRIVATE FUNC
     private func setup() {
         guard let viewModel = viewModel else { return }

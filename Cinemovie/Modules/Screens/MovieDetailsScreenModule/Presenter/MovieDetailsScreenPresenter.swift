@@ -18,10 +18,8 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didTapBackButton()
     func didSelectActor(_ actor: Cast)
     func didTapToSubDetails(sendedBy view: UIView, message: String)
-    func didTapAddToWatchlist()
-    func didTapFavoriteButton()
-    func findIfFavorite()
-    func findIfInWatchlist()
+    func didTapAddToWatchlist(adding: Bool)
+    func didTapFavoriteButton(adding: Bool)
     
     // MARK: - ERROR
     func didRecieveError(_ error: String)
@@ -35,8 +33,8 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didGetMovieBelongsToCollectionDetails(_ details: BelongsToCollectionDetails)
     func didAddToWatchlist(_ message: String)
     func didAddToFavorite(_ message: String)
-    func isMovieFavorite(_ isFavorite: Bool)
-    func isMovieInWatchlist(_ isInWatchlist: Bool)
+    func isMovieFavorited(_ isFavorite: Bool)
+    func isMovieWatchlisted(_ isInWatchlist: Bool)
 }
 
 final class MovieDetailsScreenPresenter {
@@ -57,7 +55,7 @@ final class MovieDetailsScreenPresenter {
     private var movieReviews: [Review] = []
     private var movieRecommends: [Movie] = []
     private var belongsToCollectionDetails: BelongsToCollectionDetails?
-    private var isFavorite: Bool = false
+    private var isFavorited: Bool = false
     private var isWatchlisted: Bool = false
 
     init(movieID: Int, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
@@ -86,13 +84,20 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         dispatchGroup.enter()
         interactor.getMovieReviews(movieID: movieID)
         
+        dispatchGroup.enter()
+        interactor.findIfFavorited(movieID: movieID)
+        
+        dispatchGroup.enter()
+        interactor.findIfWatchlisted(movieID: movieID)
+        
         dispatchGroup.notify(queue: .main) { [weak self] in
             guard let self = self, let details = self.movieDetails else { return }
             self.view?.didDownloadAllData(
                 details: details, videos: movieVideos,
                 cast: movieCast, crew: movieCrew,
                 recommended: movieRecommends, reviews: movieReviews,
-                belongsToCollectionDetails: belongsToCollectionDetails
+                belongsToCollectionDetails: belongsToCollectionDetails,
+                isWatchlisted: isWatchlisted, isFavorited: isFavorited
             )
         }
     }
@@ -137,20 +142,12 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         router.showTooltipView(sendedBy: view, message: message)
     }
     
-    func didTapAddToWatchlist() {
-        interactor.addToWatchlist(movieID: movieID)
+    func didTapAddToWatchlist(adding: Bool) {
+        interactor.addOrRemoveInWatchlist(movieID: movieID, adding: adding)
     }
     
-    func didTapFavoriteButton() {
-        interactor.addToFavorites(movieID: movieID)
-    }
-    
-    func findIfFavorite() {
-        
-    }
-    
-    func findIfInWatchlist() {
-        
+    func didTapFavoriteButton(adding: Bool) {
+        interactor.addOrRemoveInFavorites(movieID: movieID, adding: adding)
     }
     
     // MARK: - PROGRAMMATIC
@@ -197,12 +194,12 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         print("Successfully added to favorite: \(message)")
     }
     
-    func isMovieFavorite(_ isFavorite: Bool) {
-        self.isFavorite = isFavorite
+    func isMovieFavorited(_ isFavorite: Bool) {
+        self.isFavorited = isFavorite
         dispatchGroup.leave()
     }
     
-    func isMovieInWatchlist(_ isInWatchlist: Bool) {
+    func isMovieWatchlisted(_ isInWatchlist: Bool) {
         self.isWatchlisted = isInWatchlist
         dispatchGroup.leave()
     }

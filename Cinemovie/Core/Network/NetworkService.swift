@@ -8,7 +8,7 @@
 import Foundation
 
 protocol NetworkService: AnyObject {
-    func request<T: APIResponse>(
+    func request<T: Decodable>(
         _ endpoint: Endpoint,
         completion: @escaping (Result<T, NetworkError>) -> Void
     )

@@ -14,7 +14,7 @@ final class BackdropImageCellViewModel: CellViewModelBaseClass {
     let showsBackButton: Bool
     let showsFavoriteButton: Bool
     var isFavorite: Bool
-    let didTapFavoriteAction: (() -> Void)?
+    let didTapFavoriteAction: ((Bool) -> Void)?
     let didTapBackButtonAction: (() -> Void)?
     
     init(imagePath: String?, size: TMDBImageSizes, didTapBackButtonAction: (() -> Void)?) {
@@ -27,12 +27,12 @@ final class BackdropImageCellViewModel: CellViewModelBaseClass {
         super.init(cellIdentifier: "BackdropImageCell")
     }
     
-    init(imagePath: String?, size: TMDBImageSizes, isFavorite: Bool, didTapBackButtonAction: (() -> Void)?, didTapFavorite: (() -> Void)?) {
+    init(imagePath: String?, size: TMDBImageSizes, isFavorite: Bool, didTapBackButtonAction: (() -> Void)?, didTapFavorite: ((Bool) -> Void)?) {
         self.imagePath = imagePath
         self.didTapBackButtonAction = didTapBackButtonAction
         self.showsBackButton = true
         self.showsFavoriteButton = true
-        self.didTapFavoriteAction = nil
+        self.didTapFavoriteAction = didTapFavorite
         self.isFavorite = isFavorite
         super.init(cellIdentifier: "BackdropImageCell")
     }
@@ -180,7 +180,7 @@ final class BackdropImageCell: ReusableCellBaseClass {
             backColor: .cmSecondaryBackground, foreColor: CMColor.cmLabel, didTapAction: self.didTapFavoriteButton
         )
         favoriteButton.reconfigure(newVM: favoriteVM)
-        viewModel.didTapFavoriteAction?()
         viewModel.isFavorite.toggle()
+        viewModel.didTapFavoriteAction?(viewModel.isFavorite)
     }
 }

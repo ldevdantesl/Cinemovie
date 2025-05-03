@@ -42,7 +42,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
         case backdropImage(BackdropImageCellViewModel)
         case titleAndTagline(TitleAndTaglineCellViewModel)
         case subDetails(TVSeriesDetailsSubDetailsViewModel)
-        case watchListButton(LongButtonCellViewModel)
+        case watchListButton(WatchlistButtonCellViewModel)
         case overview(OverviewCellViewModel)
         case cast(CastListCellViewModel)
         case production(ProductionInfoCellViewModel)
@@ -74,7 +74,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
         cv.contentInsetAdjustmentBehavior = .never
         cv.backgroundColor = CMColor.cmBackground
         cv.layer.zPosition = 0
-        cv.register(cellClass: LongButtonCell.self)
+        cv.register(cellClass: WatchlistButtonCell.self)
         cv.register(cellClass: OverviewCell.self)
         cv.register(cellClass: RateAndShareCell.self)
         cv.register(cellClass: ProductionInfoCell.self)
@@ -168,7 +168,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
                 return cell
                 
             case .watchListButton(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? LongButtonCell
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? WatchlistButtonCell
                 cell?.configure(viewModel: vm)
                 return cell
                 
@@ -257,12 +257,12 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
             didTapView: presenter?.didTapTooltipView, didTapHomepage: presenter?.didTapHomepage
         )
         
-        let longButtonVM = LongButtonCellViewModel(text: "Watchlist", imageSystemName: "plus", action: nil)
+        let watchlistVm = WatchlistButtonCellViewModel(isWatchlisted: false, didTapAction: nil)
         var sectionsAndTheirItems: [(section: Sections, items: [Items])] = [
             (.backdropImage, [.backdropImage(backdropVM)]),
             (.titleAndTagline, [.titleAndTagline(titleVM)]),
             (.subDetails, [.subDetails(subDetailsVM)]),
-            (.watchlistButton, [.watchListButton(longButtonVM)])
+            (.watchlistButton, [.watchListButton(watchlistVm)])
         ]
         
         if !details.overview.isEmpty {
