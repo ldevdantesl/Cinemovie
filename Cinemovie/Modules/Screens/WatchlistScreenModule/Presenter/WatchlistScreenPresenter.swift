@@ -16,6 +16,7 @@ protocol WatchlistScreenPresenterProtocol: AnyObject {
     // MARK: - PROGRAMMATIC
     func didGetWatchlistMovies(_ movies: [Movie], refreshing: Bool)
     func didGetFavoriteMovies(_ movies: [Movie], refreshing: Bool)
+    func didGetRatedMovies(_ movies: [Movie], refreshing: Bool)
     
     // MARK: - PROPERTIES
     var visibleSections: [WatchlistScreenVC.Sections] { get set }
@@ -38,6 +39,7 @@ final class WatchlistScreenPresenter {
     
     private var watchlistMovies: [Movie] = []
     private var favoriteMovies: [Movie] = []
+    private var ratedMovies: [Movie] = []
 
     init(interactor: WatchlistScreenInteractorProtocol, router: WatchlistScreenRouterProtocol) {
         self.interactor = interactor
@@ -53,6 +55,9 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
         downloadGroup.enter()
         interactor.getFavoriteMovies(refreshing: false)
         
+        downloadGroup.enter()
+        interactor.getRatedMovies(refreshing: false)
+        
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
             self.didGetAllData()
@@ -66,6 +71,9 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
         
         refreshGroup.enter()
         interactor.getWatchlistMovies(refreshing: true)
+        
+        refreshGroup.enter()
+        interactor.getRatedMovies(refreshing: true)
         
         refreshGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
@@ -85,10 +93,23 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
         refreshing ? refreshGroup.leave() : downloadGroup.leave()
     }
     
+    func didGetRatedMovies(_ movies: [Movie], refreshing: Bool) {
+        self.ratedMovies = movies
+        refreshing ? refreshGroup.leave() : downloadGroup.leave()
+    }
+    
     private func didGetAllData() {
         self.view?.downloadingView.hide()
         let watchlistVM = ZStackMediaListCellViewModel(media: watchlistMovies, title: "Watchlist", subtitle: "Added to Watchlist")
         let favoriteVM = ZStackMediaListCellViewModel(media: favoriteMovies, title: "Favorites", subtitle: "Added To Favorites")
-        self.view?.applySnapshot(sections: [.watchlist], itemsBySection: [.watchlist : [.zStackMediaListVM(watchlistVM), .zStackMediaListVM(favoriteVM)]])
+        let ratedVM = ZStackMediaListCellViewModel(media: ratedMovies, title: "Rated", subtitle: nil)
+        self.view?.applySnapshot(
+            sections: [.watchlist],
+            itemsBySection: [.watchlist : [
+                .zStackMediaListVM(watchlistVM),
+                .zStackMediaListVM(favoriteVM),
+                .zStackMediaListVM(ratedVM)
+            ]]
+        )
     }
 }

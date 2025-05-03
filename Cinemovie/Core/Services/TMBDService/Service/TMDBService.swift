@@ -48,6 +48,9 @@ protocol TMDBService: AnyObject {
     func getFavoriteMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
     func addMediaToFavorites(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void)
     
+    // MARK: - RATED
+    func getRatedMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
+    
     // MARK: - OTHER
     func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void)
     func getTrendingPeople(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<PeopleListAPIResponse, NetworkError>) -> Void)

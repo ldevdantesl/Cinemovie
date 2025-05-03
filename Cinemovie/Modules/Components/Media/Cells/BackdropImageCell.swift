@@ -12,12 +12,28 @@ import SDWebImage
 final class BackdropImageCellViewModel: CellViewModelBaseClass {
     let imagePath: String?
     let showsBackButton: Bool
+    let showsFavoriteButton: Bool
+    var isFavorite: Bool
+    let didTapFavoriteAction: (() -> Void)?
     let didTapBackButtonAction: (() -> Void)?
     
     init(imagePath: String?, size: TMDBImageSizes, didTapBackButtonAction: (() -> Void)?) {
         self.imagePath = imagePath
         self.didTapBackButtonAction = didTapBackButtonAction
         self.showsBackButton = true
+        self.showsFavoriteButton = false
+        self.didTapFavoriteAction = nil
+        self.isFavorite = false
+        super.init(cellIdentifier: "BackdropImageCell")
+    }
+    
+    init(imagePath: String?, size: TMDBImageSizes, isFavorite: Bool, didTapBackButtonAction: (() -> Void)?, didTapFavorite: (() -> Void)?) {
+        self.imagePath = imagePath
+        self.didTapBackButtonAction = didTapBackButtonAction
+        self.showsBackButton = true
+        self.showsFavoriteButton = true
+        self.didTapFavoriteAction = nil
+        self.isFavorite = isFavorite
         super.init(cellIdentifier: "BackdropImageCell")
     }
     
@@ -25,6 +41,9 @@ final class BackdropImageCellViewModel: CellViewModelBaseClass {
         self.imagePath = imagePath
         self.didTapBackButtonAction = nil
         self.showsBackButton = false
+        self.showsFavoriteButton = false
+        self.didTapFavoriteAction = nil
+        self.isFavorite = false
         super.init(cellIdentifier: "BackdropImageCell")
     }
 }
@@ -42,6 +61,11 @@ final class BackdropImageCell: ReusableCellBaseClass {
         static let backdropImageSize: CGFloat = 20
         static let imageNotFoundName = "questionmark.circle"
         static let cellHeight = UIConstants.screenWidth * 0.65
+        static let favoriteButtonName = "bookmark"
+        static let favoriteButtonTappedName = "bookmark.fill"
+        static let favoriteButtonBottomOffset = 20.0
+        
+        static let hSpacing = 10.0
     }
     
     // MARK: - PROPERTIES
@@ -56,6 +80,12 @@ final class BackdropImageCell: ReusableCellBaseClass {
     }()
     
     private let backButton: CMCircularButton = {
+        let view = CMCircularButton()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let favoriteButton: CMCircularButton = {
         let view = CMCircularButton()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -82,12 +112,19 @@ final class BackdropImageCell: ReusableCellBaseClass {
     public func configure(with viewModel: ViewModel) {
         self.viewModel = viewModel
         self.backButton.isHidden = !viewModel.showsBackButton
+        self.favoriteButton.isHidden = !viewModel.showsFavoriteButton
         
         let vm = CMCircularButtonViewModel(
             systemName: Constants.backButtonImageName, backColor: CMColor.cmSecondaryBackground,
             foreColor: CMColor.cmAccent, didTapAction: viewModel.didTapBackButtonAction
         )
         backButton.configure(viewModel: vm)
+        
+        let favoriteVM = CMCircularButtonViewModel(
+            systemName: viewModel.isFavorite ? Constants.favoriteButtonTappedName : Constants.favoriteButtonName,
+            backColor: .cmSecondaryBackground, foreColor: CMColor.cmLabel, didTapAction: self.didTapFavoriteButton
+        )
+        favoriteButton.configure(viewModel: favoriteVM)
         
         backdropImageView.setAsyncImage(
             path: viewModel.imagePath, size: .original,
@@ -127,5 +164,23 @@ final class BackdropImageCell: ReusableCellBaseClass {
             $0.leading.equalToSuperview().offset(Constants.backButtonSpacing)
             $0.size.equalTo(Constants.backButtonSize)
         }
+        
+        contentView.addSubview(favoriteButton)
+        favoriteButton.snp.makeConstraints {
+            $0.bottom.equalToSuperview().inset(Constants.favoriteButtonBottomOffset)
+            $0.trailing.equalToSuperview().inset(Constants.hSpacing)
+            $0.size.equalTo(Constants.backButtonSize)
+        }
+    }
+    
+    private func didTapFavoriteButton() {
+        guard let viewModel = viewModel else { return }
+        let favoriteVM = CMCircularButtonViewModel(
+            systemName: viewModel.isFavorite ? Constants.favoriteButtonName : Constants.favoriteButtonTappedName,
+            backColor: .cmSecondaryBackground, foreColor: CMColor.cmLabel, didTapAction: self.didTapFavoriteButton
+        )
+        favoriteButton.reconfigure(newVM: favoriteVM)
+        viewModel.didTapFavoriteAction?()
+        viewModel.isFavorite.toggle()
     }
 }

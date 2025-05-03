@@ -186,6 +186,14 @@ final class TMDBServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
+    // MARK: - RATED
+    func getRatedMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
+        let queryParams = ["language" : "ru"]
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
+        let endpoint = TMDBEndpoints.getRatedMoviesEndpoint(accountID: accountID, sessionID: sessionID, extraParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
     // MARK: - OTHER
     func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void) {
         let queryParams = ["language" : "ru"]

@@ -159,6 +159,13 @@ struct TMDBEndpoints {
         let queryParams = ["session_id" : sessionID]
         return Endpoint(baseURL: baseURL, bearerToken: apiReadAccessToken, path: "/account/\(accountID)/favorite", method: .POST, queryParams: queryParams, body: serializedParams)
     }
+    
+    // MARK: - RATED
+    static func getRatedMoviesEndpoint(accountID: Int, sessionID: String, extraParams: [String : String]? = nil) -> Endpoint {
+        var queryParams = ["session_id" : sessionID]
+        extraParams?.forEach { queryParams[$0] = $1 }
+        return Endpoint(baseURL: baseURL, bearerToken: apiReadAccessToken, path: "/account/\(accountID)/rated/movies", queryParams: queryParams)
+    }
 
     // MARK: - OTHER
     static func getBelongsToCollectionDetailsEndpoint(collectionID: Int, queryParams: [String : String]? = nil) -> Endpoint {

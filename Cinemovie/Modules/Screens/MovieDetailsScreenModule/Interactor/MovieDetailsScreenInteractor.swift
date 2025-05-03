@@ -13,6 +13,9 @@ protocol MovieDetailsScreenInteractorProtocol: AnyObject {
     func getMovieReviews(movieID: Int)
     func getBelongsToCollectionDetails(collectionID: Int)
     func addToWatchlist(movieID: Int)
+    func addToFavorites(movieID: Int)
+    func findIfFavorite(movieID: Int)
+    func findIfWatchlisted(movieID: Int)
 }
 
 final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
@@ -91,5 +94,23 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription)
             }
         }
+    }
+    
+    func addToFavorites(movieID: Int) {
+        tmdbService.addMediaToFavorites(mediaID: movieID, mediaType: .movie) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didAddToFavorite(success.statusMessage)
+            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription)
+            }
+        }
+    }
+    
+    func findIfFavorite(movieID: Int) {
+    
+    }
+    
+    func findIfWatchlisted(movieID: Int) {
+    
     }
 }

@@ -19,6 +19,9 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didSelectActor(_ actor: Cast)
     func didTapToSubDetails(sendedBy view: UIView, message: String)
     func didTapAddToWatchlist()
+    func didTapFavoriteButton()
+    func findIfFavorite()
+    func findIfInWatchlist()
     
     // MARK: - ERROR
     func didRecieveError(_ error: String)
@@ -31,15 +34,19 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didGetMovieReviews(_ reviews: [Review])
     func didGetMovieBelongsToCollectionDetails(_ details: BelongsToCollectionDetails)
     func didAddToWatchlist(_ message: String)
+    func didAddToFavorite(_ message: String)
+    func isMovieFavorite(_ isFavorite: Bool)
+    func isMovieInWatchlist(_ isInWatchlist: Bool)
 }
 
 final class MovieDetailsScreenPresenter {
+    // MARK: - VIPER
     weak var view: MovieDetailsScreenViewProtocol?
     var router: MovieDetailsScreenRouterProtocol
     var interactor: MovieDetailsScreenInteractorProtocol
     
+    // MARK: - PROPERTIES
     private let movieID: Int
-    
     private let dispatchGroup = DispatchGroup()
     
     private var movieDetails: MovieDetails?
@@ -50,6 +57,8 @@ final class MovieDetailsScreenPresenter {
     private var movieReviews: [Review] = []
     private var movieRecommends: [Movie] = []
     private var belongsToCollectionDetails: BelongsToCollectionDetails?
+    private var isFavorite: Bool = false
+    private var isWatchlisted: Bool = false
 
     init(movieID: Int, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
         self.movieID = movieID
@@ -132,6 +141,18 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         interactor.addToWatchlist(movieID: movieID)
     }
     
+    func didTapFavoriteButton() {
+        interactor.addToFavorites(movieID: movieID)
+    }
+    
+    func findIfFavorite() {
+        
+    }
+    
+    func findIfInWatchlist() {
+        
+    }
+    
     // MARK: - PROGRAMMATIC
     func didGetMovieReviews(_ reviews: [Review]) {
         movieReviews = reviews
@@ -170,5 +191,19 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     
     func didAddToWatchlist(_ message: String) {
         print("Successfully added to watchlist: \(message)")
+    }
+    
+    func didAddToFavorite(_ message: String) {
+        print("Successfully added to favorite: \(message)")
+    }
+    
+    func isMovieFavorite(_ isFavorite: Bool) {
+        self.isFavorite = isFavorite
+        dispatchGroup.leave()
+    }
+    
+    func isMovieInWatchlist(_ isInWatchlist: Bool) {
+        self.isWatchlisted = isInWatchlist
+        dispatchGroup.leave()
     }
 }

@@ -242,8 +242,10 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
     ) {
         self.downloadingView.hide()
         let backdropVM = BackdropImageCellViewModel(
-            imagePath: details.backdropPath, size: .w1280,
-            didTapBackButtonAction: presenter?.didTapBackButton
+            imagePath: details.backdropPath,
+            size: .w1280, isFavorite: false,
+            didTapBackButtonAction: presenter?.didTapBackButton,
+            didTapFavorite: presenter?.didTapFavoriteButton
         )
         
         let titleVM = TitleAndTaglineCellViewModel(mediaName: details.title, mediaTagline: details.tagline)
@@ -253,7 +255,10 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             didTapIMDB: presenter?.didTapIMDBImage, didTapSubDetails: presenter?.didTapToSubDetails
         )
         
-        let longButtonVM = LongButtonCellViewModel(text: "Watchlist", imageSystemName: "plus", action: presenter?.didTapAddToWatchlist)
+        let longButtonVM = LongButtonCellViewModel(
+            text: "Watchlist", imageSystemName: "plus",
+            action: presenter?.didTapAddToWatchlist
+        )
         
         var sectionsAndTheirItems: [(sections: (Sections), items: [Items])] = [
             (Sections.backdropImage, [.backdropImage(backdropVM)]),
