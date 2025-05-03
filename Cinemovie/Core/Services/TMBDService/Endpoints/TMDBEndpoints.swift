@@ -161,10 +161,10 @@ struct TMDBEndpoints {
     }
     
     // MARK: - RATED
-    static func getRatedMoviesEndpoint(accountID: Int, sessionID: String, extraParams: [String : String]? = nil) -> Endpoint {
+    static func getRatedMediaEndpoint(accountID: Int, sessionID: String, mediaType: MediaTypes, extraParams: [String : String]? = nil) -> Endpoint {
         var queryParams = ["session_id" : sessionID]
         extraParams?.forEach { queryParams[$0] = $1 }
-        return Endpoint(baseURL: baseURL, bearerToken: apiReadAccessToken, path: "/account/\(accountID)/rated/movies", queryParams: queryParams)
+        return Endpoint(baseURL: baseURL, bearerToken: apiReadAccessToken, path: "/account/\(accountID)/rated/\(mediaType.pluralized)", queryParams: queryParams)
     }
 
     // MARK: - OTHER

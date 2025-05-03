@@ -54,6 +54,8 @@ protocol TMDBService: AnyObject {
     
     // MARK: - RATED
     func getRatedMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
+    func getRatedTVSeries(page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
+    func isMediaRated(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<Bool, NetworkError>) -> Void)
     
     // MARK: - OTHER
     func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void)

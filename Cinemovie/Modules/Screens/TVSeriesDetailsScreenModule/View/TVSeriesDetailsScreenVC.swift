@@ -18,7 +18,8 @@ protocol TVSeriesDetailsScreenViewProtocol: AnyObject {
     func didGetAllTVSeriesData(
         _ details: TVSeriesDetails, cast: [Cast],
         crew: [Cast], videos: [Video],
-        reviews: [Review], recommends: [TVSeries]
+        reviews: [Review], recommends: [TVSeries],
+        isFavorited: Bool, isWatchlisted: Bool
     )
 }
 
@@ -240,13 +241,16 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
     func didGetAllTVSeriesData(
         _ details: TVSeriesDetails, cast: [Cast],
         crew: [Cast], videos: [Video],
-        reviews: [Review], recommends: [TVSeries]
+        reviews: [Review], recommends: [TVSeries],
+        isFavorited: Bool, isWatchlisted: Bool
     ) {
         self.downloadView.hide()
         
         let backdropVM = BackdropImageCellViewModel(
-            imagePath: details.backdropPath, size: .w1280,
-            didTapBackButtonAction: presenter?.didTapBackButton
+            imagePath: details.backdropPath,
+            size: .w1280, isFavorite: isFavorited,
+            didTapBackButtonAction: presenter?.didTapBackButton,
+            didTapFavorite: presenter?.didTapFavoriteButton
         )
         
         let titleVM = TitleAndTaglineCellViewModel(mediaName: details.name, mediaTagline: details.tagline)
@@ -257,7 +261,7 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
             didTapView: presenter?.didTapTooltipView, didTapHomepage: presenter?.didTapHomepage
         )
         
-        let watchlistVm = WatchlistButtonCellViewModel(isWatchlisted: false, didTapAction: nil)
+        let watchlistVm = WatchlistButtonCellViewModel(isWatchlisted: isWatchlisted, didTapAction: presenter?.didTapWatchlistButton)
         var sectionsAndTheirItems: [(section: Sections, items: [Items])] = [
             (.backdropImage, [.backdropImage(backdropVM)]),
             (.titleAndTagline, [.titleAndTagline(titleVM)]),

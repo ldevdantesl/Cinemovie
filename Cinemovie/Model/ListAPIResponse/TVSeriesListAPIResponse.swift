@@ -19,4 +19,6 @@ struct TVSeriesListAPIResponse: APIResponse {
         case totalPages = "total_pages"
         case totalResults = "total_results"
     }
+    
+    static let empty = TVSeriesListAPIResponse(dates: nil, page: 1, results: [], totalPages: 1, totalResults: 1)
 }

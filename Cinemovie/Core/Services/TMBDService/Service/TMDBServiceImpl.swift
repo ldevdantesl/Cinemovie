@@ -150,13 +150,13 @@ final class TMDBServiceImpl: TMDBService {
     
     // MARK: - WATCHLIST
     func getWatchlistMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { return }
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(.empty));return }
         let endpoint = TMDBEndpoints.getWatchlistedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, extraParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
     func getWatchlistTVSeries(page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { return }
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(.empty)); return }
         let endpoint = TMDBEndpoints.getWatchlistedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, extraParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
@@ -168,38 +168,28 @@ final class TMDBServiceImpl: TMDBService {
     }
     
     func isMediaWatchlisted(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { return }
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(false)); return }
         let endpoint = TMDBEndpoints.getWatchlistedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: mediaType, extraParams: queryParams)
-        if mediaType == .movie {
-            networkService.request(endpoint) { (result: Result<MovieListAPIResponse, NetworkError>) in
-                switch result {
-                case .success(let success):
-                    let movieIDS = success.movies.map { $0.id }
-                    completion(.success(movieIDS.contains(mediaID)))
-                case .failure(let failure): completion(.failure(failure))
-                }
-            }
-        } else {
-            networkService.request(endpoint) { (result: Result<TVSeriesListAPIResponse, NetworkError>) in
-                switch result {
-                case .success(let success):
-                    let movieIDS = success.results.map { $0.id }
-                    completion(.success(movieIDS.contains(mediaID)))
-                case .failure(let failure): completion(.failure(failure))
-                }
+        
+        networkService.request(endpoint) { (result: Result<MediaListAPIResponse, NetworkError>) in
+            switch result {
+            case .success(let success):
+                let movieIDS = success.results.map { $0.id }
+                completion(.success(movieIDS.contains(mediaID)))
+            case .failure(let failure): completion(.failure(failure))
             }
         }
     }
     
     // MARK: - FAVORITE
     func getFavoriteMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { return }
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(.empty)); return }
         let endpoint =  TMDBEndpoints.getFavoritedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, extraParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
     func getFavoriteTVSeries(page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { return }
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(.empty)); return }
         let endpoint =  TMDBEndpoints.getFavoritedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, extraParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
@@ -211,32 +201,40 @@ final class TMDBServiceImpl: TMDBService {
     }
     
     func isMediaFavorited(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { return }
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(false)); return }
         let endpoint = TMDBEndpoints.getFavoritedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: mediaType, extraParams: queryParams)
-        if mediaType == .movie {
-            networkService.request(endpoint) { (result: Result<MovieListAPIResponse, NetworkError>) in
-                switch result {
-                case .success(let success): completion(.success(success.movies.map { $0.id }.contains(mediaID)))
-                case .failure(let failure): completion(.failure(failure))
-                }
-            }
-        } else {
-            networkService.request(endpoint) { (result: Result<TVSeriesListAPIResponse, NetworkError>) in
-                switch result {
-                case .success(let success):
-                    let movieIDS = success.results.map { $0.id }
-                    completion(.success(movieIDS.contains(mediaID)))
-                case .failure(let failure): completion(.failure(failure))
-                }
+        
+        networkService.request(endpoint) { (result: Result<MediaListAPIResponse, NetworkError>) in
+            switch result {
+            case .success(let success): completion(.success(success.results.map { $0.id }.contains(mediaID)))
+            case .failure(let failure): completion(.failure(failure))
             }
         }
     }
     
     // MARK: - RATED
     func getRatedMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
-        let endpoint = TMDBEndpoints.getRatedMoviesEndpoint(accountID: accountID, sessionID: sessionID, extraParams: queryParams)
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(MovieListAPIResponse.empty)); return }
+        let endpoint = TMDBEndpoints.getRatedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, extraParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    func getRatedTVSeries(page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(TVSeriesListAPIResponse.empty)); return }
+        let endpoint = TMDBEndpoints.getRatedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, extraParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    func isMediaRated(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(false)); return }
+        let endpoint = TMDBEndpoints.getRatedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: mediaType, extraParams: queryParams)
+        
+        networkService.request(endpoint) { (result: Result<MediaListAPIResponse, NetworkError>) in
+            switch result {
+            case .success(let success): completion(.success(success.results.map { $0.id }.contains(mediaID)))
+            case .failure(let failure): completion(.failure(failure))
+            }
+        }
     }
     
     // MARK: - OTHER

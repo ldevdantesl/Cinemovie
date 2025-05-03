@@ -8,12 +8,20 @@
 import UIKit
 
 protocol TVSeriesDetailsScreenInteractorProtocol: AnyObject {
+    // MARK: - PROGRAMMATIC
     func getTVSeriesDetails(seriesID: Int)
     func getTVSeriesCast(seriesID: Int)
     func getTVSeriesVideos(seriesID: Int)
     func getTVSeriesReviews(seriesID: Int)
     func getTVSeriesRecommendations(seriesID: Int)
     func getTVSeasonDetails(seriesID: Int, seasonNumber: Int)
+    
+    func findIfFavorited(seriesID: Int)
+    func findIfWatchlisted(seriesID: Int)
+    
+    // MARK: - USER INITIATED
+    func addOrRemoveInWatchlist(seriesID: Int, adding: Bool)
+    func addOrRemoveInFavorites(seriesID: Int, adding: Bool)
 }
 
 final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProtocol {
@@ -80,6 +88,46 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
             switch result {
             case .success(let details): self.presenter?.didGetTVSeasonDetails(details)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func findIfFavorited(seriesID: Int) {
+        tmdbService.isMediaFavorited(mediaID: seriesID, mediaType: .tvShow) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.isTVSeriesFavorited(success)
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func findIfWatchlisted(seriesID: Int) {
+        tmdbService.isMediaWatchlisted(mediaID: seriesID, mediaType: .tvShow) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.isTVSeriesWatchlisted(success)
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func addOrRemoveInFavorites(seriesID: Int, adding: Bool) {
+        tmdbService.addOrRemoveMediaInFavorites(mediaID: seriesID, mediaType: .tvShow, adding: adding) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): presenter?.didAddOrRemoveFromFavorites(message: success.statusMessage)
+            case .failure(let failure): presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func addOrRemoveInWatchlist(seriesID: Int, adding: Bool) {
+        tmdbService.addOrRemoveMediaInWatchlist(mediaID: seriesID, mediaType: .tvShow, adding: adding) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): presenter?.didAddOrRemoveFromWatchlist(message: success.statusMessage)
+            case .failure(let failure): presenter?.didRecieveError(failure)
             }
         }
     }

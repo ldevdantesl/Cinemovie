@@ -6,16 +6,20 @@
 //
 
 protocol MovieDetailsScreenInteractorProtocol: AnyObject {
+    // MARK: - PROGRAMMATIC
     func getMovieDetails(movieID: Int)
     func getMovieCast(movieID: Int)
     func getMovieRecommendations(movieID: Int)
     func getMovieVideos(movieID: Int)
     func getMovieReviews(movieID: Int)
     func getBelongsToCollectionDetails(collectionID: Int)
-    func addOrRemoveInWatchlist(movieID: Int, adding: Bool)
-    func addOrRemoveInFavorites(movieID: Int, adding: Bool)
+    
     func findIfFavorited(movieID: Int)
     func findIfWatchlisted(movieID: Int)
+    
+    // MARK: - USER INITIATED
+    func addOrRemoveInWatchlist(movieID: Int, adding: Bool)
+    func addOrRemoveInFavorites(movieID: Int, adding: Bool)
 }
 
 final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
@@ -26,6 +30,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
         self.tmdbService = tmdbService
     }
     
+    // MARK: - PROGRAMMATIC
     func getMovieDetails(movieID: Int) {
         tmdbService.getMovieDetails(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
@@ -85,26 +90,6 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             }
         }
     }
-
-    func addOrRemoveInWatchlist(movieID: Int, adding: Bool) {
-        tmdbService.addOrRemoveMediaInWatchlist(mediaID: movieID, mediaType: .movie, adding: adding){ [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didAddToWatchlist(success.statusMessage)
-            case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription)
-            }
-        }
-    }
-    
-    func addOrRemoveInFavorites(movieID: Int, adding: Bool) {
-        tmdbService.addOrRemoveMediaInFavorites(mediaID: movieID, mediaType: .movie, adding: adding) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didAddToFavorite(success.statusMessage)
-            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription)
-            }
-        }
-    }
     
     func findIfFavorited(movieID: Int) {
         tmdbService.isMediaFavorited(mediaID: movieID, mediaType: .movie) { [weak self] result in
@@ -122,6 +107,27 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             switch result {
             case .success(let favorited): presenter?.isMovieWatchlisted(favorited)
             case .failure(let error): presenter?.didRecieveError(error.localizedDescription)
+            }
+        }
+    }
+    
+    // MARK: - USER INITIATED
+    func addOrRemoveInWatchlist(movieID: Int, adding: Bool) {
+        tmdbService.addOrRemoveMediaInWatchlist(mediaID: movieID, mediaType: .movie, adding: adding){ [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): presenter?.didAddToWatchlist(success.statusMessage)
+            case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription)
+            }
+        }
+    }
+    
+    func addOrRemoveInFavorites(movieID: Int, adding: Bool) {
+        tmdbService.addOrRemoveMediaInFavorites(mediaID: movieID, mediaType: .movie, adding: adding) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didAddToFavorite(success.statusMessage)
+            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription)
             }
         }
     }
