@@ -12,11 +12,24 @@ final class ZStackMediaListCellViewModel: CellViewModelBaseClass {
     let media: [Media]
     let title: String
     let subtitle: String?
+    let didTapList: ((UserListTypes) -> Void)?
+    let listType: UserListTypes?
     
     init(media: [Media], title: String, subtitle: String? = nil) {
         self.media = media
         self.title = title
         self.subtitle = subtitle
+        self.didTapList = nil
+        self.listType = nil
+        super.init(cellIdentifier: "ZStackMediaListCell")
+    }
+    
+    init(media: [Media], title: String, subtitle: String? = nil, listType: UserListTypes?, didTapList: ((UserListTypes) -> Void)?) {
+        self.media = media
+        self.title = title
+        self.subtitle = subtitle
+        self.didTapList = didTapList
+        self.listType = listType
         super.init(cellIdentifier: "ZStackMediaListCell")
     }
 }
@@ -41,7 +54,7 @@ final class ZStackMediaListCell: ReusableCellBaseClass {
     private var viewModel: ZStackMediaListCellViewModel?
     
     // MARK: - VIEW PROPERTIES
-    private let posterStackView: UIView = {
+    private lazy var posterStackView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -114,6 +127,7 @@ final class ZStackMediaListCell: ReusableCellBaseClass {
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
+        contentView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapAction)))
         contentView.addSubview(posterStackView)
         posterStackView.snp.makeConstraints {
             $0.top.equalToSuperview()
@@ -173,4 +187,9 @@ final class ZStackMediaListCell: ReusableCellBaseClass {
         }
     }
     
+    // MARK: - OBJC FUNC
+    @objc private func didTapAction() {
+        guard let listType = viewModel?.listType else { return }
+        viewModel?.didTapList?(listType)
+    }
 }

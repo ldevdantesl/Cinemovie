@@ -12,6 +12,7 @@ protocol WatchlistScreenPresenterProtocol: AnyObject {
     
     // MARK: - USER INITIATED
     func didCallRefresh()
+    func didTapList(listType: UserListTypes)
     
     // MARK: - WATCHLIST
     func didGetWatchlistMovies(_ movies: [Movie], refreshing: Bool)
@@ -111,6 +112,10 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
         }
     }
     
+    func didTapList(listType: UserListTypes) {
+        router.navigateToList(listType: listType)
+    }
+    
     // MARK: - WATCHLIST
     func didGetWatchlistMovies(_ movies: [Movie], refreshing: Bool) {
         self.watchlistMedia.append(contentsOf: movies)
@@ -146,9 +151,31 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
     
     private func didGetAllData() {
         self.view?.downloadingView.hide()
-        let watchlistVM = ZStackMediaListCellViewModel(media: interLeavedMedia(media: watchlistMedia), title: "Watchlist", subtitle: "Added to Watchlist")
-        let favoriteVM = ZStackMediaListCellViewModel(media: interLeavedMedia(media: favoriteMedia), title: "Favorites", subtitle: "Added To Favorites")
-        let ratedVM = ZStackMediaListCellViewModel(media: interLeavedMedia(media: ratedMedia), title: "Rated", subtitle: nil)
+        let watchlistVM = ZStackMediaListCellViewModel(
+            media: interLeavedMedia(media: watchlistMedia),
+            title: "Watchlist", subtitle: "Added to Watchlist",
+            listType: .watchlist
+        ) { [weak self] in
+            guard let self = self else { return }
+            self.didTapList(listType: $0)
+        }
+        
+        let favoriteVM = ZStackMediaListCellViewModel(
+            media: interLeavedMedia(media: favoriteMedia), title: "Favorites",
+            subtitle: "Added To Favorites", listType: .favorite
+        ) { [weak self] in
+            guard let self = self else { return }
+            self.didTapList(listType: $0)
+        }
+        
+        let ratedVM = ZStackMediaListCellViewModel(
+            media: interLeavedMedia(media: ratedMedia),
+            title: "Rated", subtitle: nil, listType: .rated
+        ) { [weak self] in
+            guard let self = self else { return }
+            self.didTapList(listType: $0)
+        }
+        
         self.view?.applySnapshot(
             sections: [.watchlist],
             itemsBySection: [.watchlist : [

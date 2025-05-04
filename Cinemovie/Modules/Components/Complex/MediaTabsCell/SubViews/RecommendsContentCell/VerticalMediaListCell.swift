@@ -41,7 +41,7 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let itemWidth = (UIConstants.screenWidth / 3) - 40
-        static let itemHeight = itemWidth * 1.7
+        static let itemHeight = (itemWidth * 1.8)
         static let vGroupHeight = itemHeight * 3 + 20
         static let vSpacing = 10.0
         static let spacing = 5.0

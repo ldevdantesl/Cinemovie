@@ -40,9 +40,6 @@ final class WatchlistScreenVC: UIViewController {
         return view
     }()
     
-    // MARK: - PROPERTIES
-    private var hasAppearedOnce: Bool = false
-    
     // MARK: - VIEW PROPERTIES
     private lazy var refreshControler: UIRefreshControl = {
         let control = UIRefreshControl()
@@ -73,15 +70,6 @@ final class WatchlistScreenVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.navigationBar.isHidden = true
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        guard !hasAppearedOnce else {
-            presenter?.didCallRefresh()
-            return
-        }
-        hasAppearedOnce = true
     }
     
     // MARK: - PRIVATE FUNC
