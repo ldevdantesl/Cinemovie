@@ -8,33 +8,20 @@
 import UIKit
 import SnapKit
 
-final class ZStackMediaListCellViewModel: CellViewModelBaseClass {
+final class WatchlistItemCellViewModel: CellViewModelBaseClass {
     let media: [Media]
-    let title: String
-    let subtitle: String?
-    let didTapList: ((UserListTypes) -> Void)?
     let listType: UserListTypes?
+    let didTapList: ((UserListTypes) -> Void)?
     
-    init(media: [Media], title: String, subtitle: String? = nil) {
+    init(media: [Media], listType: UserListTypes?, didTapList: ((UserListTypes) -> Void)?) {
         self.media = media
-        self.title = title
-        self.subtitle = subtitle
-        self.didTapList = nil
-        self.listType = nil
-        super.init(cellIdentifier: "ZStackMediaListCell")
-    }
-    
-    init(media: [Media], title: String, subtitle: String? = nil, listType: UserListTypes?, didTapList: ((UserListTypes) -> Void)?) {
-        self.media = media
-        self.title = title
-        self.subtitle = subtitle
         self.didTapList = didTapList
         self.listType = listType
-        super.init(cellIdentifier: "ZStackMediaListCell")
+        super.init(cellIdentifier: "WatchlistItemCell")
     }
 }
 
-final class ZStackMediaListCell: ReusableCellBaseClass {
+final class WatchlistItemCell: ReusableCellBaseClass {
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -51,7 +38,7 @@ final class ZStackMediaListCell: ReusableCellBaseClass {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: ZStackMediaListCellViewModel?
+    private var viewModel: WatchlistItemCellViewModel?
     
     // MARK: - VIEW PROPERTIES
     private lazy var posterStackView: UIView = {
@@ -118,10 +105,10 @@ final class ZStackMediaListCell: ReusableCellBaseClass {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: ZStackMediaListCellViewModel) {
+    public func configure(viewModel: WatchlistItemCellViewModel) {
         self.viewModel = viewModel
-        self.stackTitleLabel.text = viewModel.title
-        self.stackSubtitleLabel.text = viewModel.subtitle
+        self.stackTitleLabel.text = viewModel.listType?.title
+        self.stackSubtitleLabel.text = viewModel.listType?.subtitle
         self.stackPosters(items: viewModel.media.reversed())
     }
     

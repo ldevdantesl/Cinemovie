@@ -12,4 +12,21 @@ enum UserListTypes {
     case favorite
     case rated
     case custom(Int)
+    
+    var title: String {
+        switch self {
+        case .watchlist: "Watchlist"
+        case .favorite: "Favorites"
+        case .rated: "Rated"
+        case .custom: "Custom"
+        }
+    }
+    
+    var subtitle: String? {
+        switch self {
+        case .watchlist: "Added To Watchlist"
+        case .favorite: "Added To Favorited"
+        default: nil
+        }
+    }
 }

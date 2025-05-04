@@ -13,6 +13,7 @@ protocol Media {
     var backdropPath: String? { get }
     var genreIDS: [Int] { get }
     var originalLanguage: String { get }
+    var title: String { get }
     var overview: String { get }
     var popularity: Double? { get }
     var posterPath: String? { get }

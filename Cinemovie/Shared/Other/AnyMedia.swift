@@ -22,6 +22,13 @@ enum AnyMedia: Media, Decodable {
         }
     }
     
+    var title: String {
+        switch self {
+        case .movie(let movie): movie.title
+        case .tvSeries(let tVSeries): tVSeries.title
+        }
+    }
+    
     var backdropPath: String? {
         switch self {
         case .movie(let movie): movie.backdropPath

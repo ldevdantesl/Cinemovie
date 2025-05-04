@@ -17,7 +17,7 @@ struct TVSeries: APIResponse, Media, Hashable {
     let popularity: Double?
     let posterPath: String?
     let firstAirDate: String
-    let name: String
+    let title: String
     let voteAverage: Double?
     let voteCount: Int?
     let character: String?
@@ -28,7 +28,8 @@ struct TVSeries: APIResponse, Media, Hashable {
     let episodeCount: Int?
 
     enum CodingKeys: String, CodingKey {
-        case id, adult, character, department, job, overview, popularity, name
+        case id, adult, character, department, job, overview, popularity
+        case title = "name"
         case mediaType = "media_type"
         case episodeCount = "episode_count"
         case creditID = "credit_id"

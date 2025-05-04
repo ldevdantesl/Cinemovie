@@ -29,7 +29,7 @@ final class WatchlistScreenVC: UIViewController {
     }
     
     enum Items: Hashable {
-        case zStackMediaListVM(ZStackMediaListCellViewModel)
+        case zStackMediaListVM(WatchlistItemCellViewModel)
     }
     
     // MARK: - VIPER
@@ -52,7 +52,7 @@ final class WatchlistScreenVC: UIViewController {
         let view = DiffableCollectionView<WatchlistScreenVC.Sections, WatchlistScreenVC.Items>(layout: createLayout(), ignoresTopSafeArea: false, showsTopBlur: true)
         view.delegate = self
         view.refreshControl = refreshControler
-        view.register(cellClass: ZStackMediaListCell.self)
+        view.register(cellClass: WatchlistItemCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
         return view
@@ -90,7 +90,7 @@ final class WatchlistScreenVC: UIViewController {
         collectionView.configureDataSource { collectionView, indexPath, itemIdentifier in
             switch itemIdentifier {
             case .zStackMediaListVM(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? ZStackMediaListCell
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? WatchlistItemCell
                 cell?.configure(viewModel: vm)
                 return cell
             }

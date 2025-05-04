@@ -151,26 +151,25 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
     
     private func didGetAllData() {
         self.view?.downloadingView.hide()
-        let watchlistVM = ZStackMediaListCellViewModel(
+        let watchlistVM = WatchlistItemCellViewModel(
             media: interLeavedMedia(media: watchlistMedia),
-            title: "Watchlist", subtitle: "Added to Watchlist",
             listType: .watchlist
         ) { [weak self] in
             guard let self = self else { return }
             self.didTapList(listType: $0)
         }
         
-        let favoriteVM = ZStackMediaListCellViewModel(
-            media: interLeavedMedia(media: favoriteMedia), title: "Favorites",
-            subtitle: "Added To Favorites", listType: .favorite
+        let favoriteVM = WatchlistItemCellViewModel(
+            media: interLeavedMedia(media: favoriteMedia),
+            listType: .favorite
         ) { [weak self] in
             guard let self = self else { return }
             self.didTapList(listType: $0)
         }
         
-        let ratedVM = ZStackMediaListCellViewModel(
+        let ratedVM = WatchlistItemCellViewModel(
             media: interLeavedMedia(media: ratedMedia),
-            title: "Rated", subtitle: nil, listType: .rated
+            listType: .rated
         ) { [weak self] in
             guard let self = self else { return }
             self.didTapList(listType: $0)

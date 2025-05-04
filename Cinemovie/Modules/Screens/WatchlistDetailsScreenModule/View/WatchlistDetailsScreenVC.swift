@@ -27,6 +27,7 @@ final class WatchlistDetailsScreenVC: UIViewController {
     }()
     
     // MARK: - PROPERTIES
+    private let listType: UserListTypes
     private var items: [Media] = []
     
     // MARK: - VIEW PROPERTIES
@@ -49,6 +50,16 @@ final class WatchlistDetailsScreenVC: UIViewController {
     }()
 
     // MARK: - LIFECYCLE
+    init(listType: UserListTypes) {
+        self.listType = listType
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         presenter?.viewDidLoad()
@@ -103,7 +114,7 @@ extension WatchlistDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDa
         guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: VerticalMediaListCell.identifier, for: indexPath
         ) as? VerticalMediaListCell else { return UICollectionViewCell() }
-        let vm = VerticalMediaListCellViewModel(media: items, didTapAnyMedia: presenter?.didTapAnyMedia)
+        let vm = VerticalMediaListCellViewModel(media: items, title: listType.title, subtitle: listType.subtitle, didTapAnyMedia: presenter?.didTapAnyMedia)
         cell.configure(viewModel: vm)
         return cell
     }

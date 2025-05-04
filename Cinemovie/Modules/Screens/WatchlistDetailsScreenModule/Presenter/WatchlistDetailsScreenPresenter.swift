@@ -42,10 +42,10 @@ extension WatchlistDetailsScreenPresenter: WatchlistDetailsScreenPresenterProtoc
     
     func viewDidLoad() {
         downloadGroup.enter()
-        interactor.getWatchlistMovies(refreshing: false)
+        interactor.getListMovies(listType: listType, refreshing: false)
         
         downloadGroup.enter()
-        interactor.getWatchlistSeries(refreshing: false)
+        interactor.getListSeries(listType: listType, refreshing: false)
         
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
@@ -70,10 +70,10 @@ extension WatchlistDetailsScreenPresenter: WatchlistDetailsScreenPresenterProtoc
     func didCallRefresh() {
         self.media = []
         refreshGroup.enter()
-        interactor.getWatchlistMovies(refreshing: true)
+        interactor.getListMovies(listType: listType, refreshing: true)
         
         refreshGroup.enter()
-        interactor.getWatchlistSeries(refreshing: true)
+        interactor.getListSeries(listType: listType, refreshing: true)
         
         refreshGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
