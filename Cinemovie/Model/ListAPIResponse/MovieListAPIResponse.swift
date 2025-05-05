@@ -11,7 +11,7 @@ struct MovieListAPIResponse: APIResponse {
     let dates: Dates?
     let page: Int
     let movies: [Movie]
-    let totalPages: Int?
+    let totalPages: Int
     let totalResults: Int?
 
     enum CodingKeys: String, CodingKey {

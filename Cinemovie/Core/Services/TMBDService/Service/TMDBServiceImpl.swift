@@ -149,15 +149,31 @@ final class TMDBServiceImpl: TMDBService {
     }
     
     // MARK: - WATCHLIST
-    func getWatchlistMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(.empty));return }
-        let endpoint = TMDBEndpoints.getWatchlistedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, extraParams: queryParams)
+    func getUserListMovies(listType: UserListTypes, page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(.empty)); return }
+        var newParams = queryParams
+        newParams["page"] = page.description
+        let endpoint: Endpoint
+        switch listType {
+        case .watchlist: endpoint = TMDBEndpoints.getWatchlistedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, extraParams: newParams)
+        case .favorite: endpoint = TMDBEndpoints.getFavoritedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, extraParams: newParams)
+        case .rated: endpoint = TMDBEndpoints.getRatedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, extraParams: newParams)
+        default: endpoint = TMDBEndpoints.getWatchlistedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, extraParams: newParams)
+        }
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func getWatchlistTVSeries(page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
+    func getUserListSeries(listType: UserListTypes, page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
         guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(.empty)); return }
-        let endpoint = TMDBEndpoints.getWatchlistedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, extraParams: queryParams)
+        var newParams = queryParams
+        newParams["page"] = page.description
+        let endpoint: Endpoint
+        switch listType {
+        case .watchlist: endpoint = TMDBEndpoints.getWatchlistedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, extraParams: newParams)
+        case .favorite: endpoint = TMDBEndpoints.getFavoritedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, extraParams: newParams)
+        case .rated: endpoint = TMDBEndpoints.getRatedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, extraParams: newParams)
+        default: endpoint = TMDBEndpoints.getWatchlistedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, extraParams: newParams)
+        }
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
@@ -182,18 +198,6 @@ final class TMDBServiceImpl: TMDBService {
     }
     
     // MARK: - FAVORITE
-    func getFavoriteMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(.empty)); return }
-        let endpoint =  TMDBEndpoints.getFavoritedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, extraParams: queryParams)
-        handleRequest(endpoint: endpoint, completion: completion)
-    }
-    
-    func getFavoriteTVSeries(page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(.empty)); return }
-        let endpoint =  TMDBEndpoints.getFavoritedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, extraParams: queryParams)
-        handleRequest(endpoint: endpoint, completion: completion)
-    }
-    
     func addOrRemoveMediaInFavorites(mediaID: Int, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void) {
         guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
         let endpoint = TMDBEndpoints.addOrRemoveMediaInFavoritesEndpoint(accountID: accountID, sessionID: sessionID, mediaID: mediaID, mediaType: mediaType, adding: adding)
@@ -213,18 +217,6 @@ final class TMDBServiceImpl: TMDBService {
     }
     
     // MARK: - RATED
-    func getRatedMovies(page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(MovieListAPIResponse.empty)); return }
-        let endpoint = TMDBEndpoints.getRatedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, extraParams: queryParams)
-        handleRequest(endpoint: endpoint, completion: completion)
-    }
-    
-    func getRatedTVSeries(page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(TVSeriesListAPIResponse.empty)); return }
-        let endpoint = TMDBEndpoints.getRatedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, extraParams: queryParams)
-        handleRequest(endpoint: endpoint, completion: completion)
-    }
-    
     func isMediaRated(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
         guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(false)); return }
         let endpoint = TMDBEndpoints.getRatedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: mediaType, extraParams: queryParams)

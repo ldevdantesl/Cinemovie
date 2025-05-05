@@ -11,10 +11,15 @@ import SnapKit
 protocol WatchlistDetailsScreenViewProtocol: AnyObject {
     // MARK: - PROPERTIES
     var downloadView: CMSplashView { get }
+    var refreshController: UIRefreshControl { get }
     
     // MARK: - OTHER
     func reloadData(newItems: [Media])
+    func didReceievePaginatedItems(_ items: [Media], at indexPaths: [IndexPath])
     func didRecieveError(_ errorStr: String, goesBack: Bool)
+    
+    func showPaginatedLoading()
+    func hidePaginatedLoading()
 }
 
 final class WatchlistDetailsScreenVC: UIViewController {
@@ -31,7 +36,7 @@ final class WatchlistDetailsScreenVC: UIViewController {
     private var items: [Media] = []
     
     // MARK: - VIEW PROPERTIES
-    private lazy var refreshControler: UIRefreshControl = {
+    lazy var refreshController: UIRefreshControl = {
         let control = UIRefreshControl()
         control.addTarget(self, action: #selector(didCallRefresh), for: .valueChanged)
         control.tintColor = CMColor.cmLabel
@@ -41,7 +46,7 @@ final class WatchlistDetailsScreenVC: UIViewController {
     private lazy var collectionView: TopBlurredCollectionView = {
         let view = TopBlurredCollectionView(layout: createLayout())
         view.register(cellClass: VerticalMediaListCell.self)
-        view.refreshControl = refreshControler
+        view.refreshControl = refreshController
         view.dataSource = self
         view.delegate = self
         view.backgroundColor = CMColor.cmBackground
@@ -84,6 +89,7 @@ final class WatchlistDetailsScreenVC: UIViewController {
     }
     
     private func setupUI() {
+        view.backgroundColor = CMColor.cmBackground
         view.addSubview(collectionView)
         collectionView.snp.makeConstraints {
             $0.edges.equalToSuperview()
@@ -106,6 +112,15 @@ extension WatchlistDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDa
         collectionView.showBlur(scrollView)
     }
     
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let height = scrollView.frame.size.height
+
+        let isAtBottom = offsetY + height >= contentHeight - 10
+        isAtBottom ? presenter?.didCallPagination() : ()
+    }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 1
     }
@@ -114,16 +129,47 @@ extension WatchlistDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDa
         guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: VerticalMediaListCell.identifier, for: indexPath
         ) as? VerticalMediaListCell else { return UICollectionViewCell() }
-        let vm = VerticalMediaListCellViewModel(media: items, title: listType.title, subtitle: listType.subtitle, didTapAnyMedia: presenter?.didTapAnyMedia)
+        let vm = VerticalMediaListCellViewModel(
+            media: items, title: listType.title, subtitle: listType.subtitle,
+            didTapBackButton: presenter?.didTapBackButton, didTapAnyMedia: presenter?.didTapAnyMedia
+        )
         cell.configure(viewModel: vm)
         return cell
     }
 }
 
 extension WatchlistDetailsScreenVC: WatchlistDetailsScreenViewProtocol {
+    func showPaginatedLoading() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            guard let cell = self.collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? VerticalMediaListCell else { return }
+            cell.startPaginatingLoadingAnimation()
+        }
+    }
+    
+    func hidePaginatedLoading() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            guard let cell = self.collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? VerticalMediaListCell else { return }
+            cell.stopPaginatingLoadingAnimation()
+        }
+    }
+    
+    func didReceievePaginatedItems(_ items: [any Media], at indexPaths: [IndexPath]) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            guard let cell = collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? VerticalMediaListCell else { return }
+            cell.insertNewItems(items, at: indexPaths)
+        }
+    }
+    
+    
     func reloadData(newItems: [Media]) {
         self.items = newItems
-        collectionView.reloadData()
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.collectionView.reloadData()
+        }
     }
     
     func didRecieveError(_ errorStr: String, goesBack: Bool) {
