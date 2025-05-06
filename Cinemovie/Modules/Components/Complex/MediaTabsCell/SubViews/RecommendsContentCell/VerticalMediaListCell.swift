@@ -53,7 +53,7 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let itemWidth = (UIConstants.screenWidth / 3) - 40
-        static let itemHeight = (itemWidth * 1.8)
+        static let itemHeight = (itemWidth * 2)
         static let vGroupHeight = itemHeight * 3 + 20
         static let vSpacing = 10.0
         static let spacing = 5.0
@@ -71,7 +71,8 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
     private let paginatingLoadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .medium)
         indicator.color = .white
-        indicator.hidesWhenStopped = true
+        indicator.hidesWhenStopped = false
+        indicator.alpha = 0
         indicator.translatesAutoresizingMaskIntoConstraints = false
         return indicator
     }()
@@ -138,28 +139,50 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: VerticalMediaListCellViewModel) {
         self.viewModel = viewModel
+        
+        let hasBackButton = viewModel.didTapBackButton != nil
+        backButton.isHidden = !hasBackButton
+
         if let title = viewModel.title {
-            self.titleLabel.text = title
-            self.subtitleLabel.text = viewModel.subtitle
-            self.gridCVTopConstraint?.update(offset: Constants.vSpacing)
+            titleLabel.text = title
+            subtitleLabel.text = viewModel.subtitle
+            gridCVTopConstraint?.update(offset: Constants.vSpacing)
         }
+
+        let leadingView = hasBackButton ? backButton.snp.trailing : contentView.snp.leading
+        let leadingOffset = hasBackButton ? Constants.vSpacing : 0
+
+        titleLabel.snp.remakeConstraints {
+            $0.top.equalToSuperview()
+            $0.leading.equalTo(leadingView).offset(leadingOffset)
+            $0.trailing.equalToSuperview()
+        }
+
+        subtitleLabel.snp.remakeConstraints {
+            $0.top.equalTo(titleLabel.snp.bottom)
+            $0.leading.equalTo(leadingView).offset(leadingOffset)
+            $0.trailing.equalToSuperview()
+        }
+
         let vm = CMCircularButtonViewModel(
             systemName: Constants.backButtonName, backColor: .cmSecondaryBackground,
             foreColor: CMColor.cmLabel, didTapAction: viewModel.didTapBackButton
         )
         backButton.configure(viewModel: vm)
-        backButton.isHidden = viewModel.didTapBackButton == nil ? true : false
-        
-        self.items = viewModel.media.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.didTapAnyMedia) }
+
+        self.items = viewModel.media.map {
+            MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.didTapAnyMedia)
+        }
         self.gridCollectionView.reloadData()
         self.gridCollectionView.layoutIfNeeded()
         self.layoutIfNeeded()
     }
     
-    public func startPaginatingLoadingAnimation() {
+    public func startPaginatingLoadingAnimation(){
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.paginatingLoadingIndicator.startAnimating()
+            self.paginatingLoadingIndicator.alpha = 1.0
         }
     }
     
@@ -167,7 +190,12 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.paginatingLoadingIndicator.stopAnimating()
+            self.paginatingLoadingIndicator.alpha = 0
         }
+    }
+    
+    public func setLoadingAlpha(_ alpha: CGFloat) {
+        paginatingLoadingIndicator.alpha = alpha
     }
     
     public func insertNewItems(_ items: [Media], at indexPaths: [IndexPath]) {
@@ -197,6 +225,7 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
             $0.leading.equalToSuperview()
             $0.size.equalTo(Constants.backButtonSize)
         }
+        
         contentView.addSubview(titleLabel)
         titleLabel.snp.makeConstraints {
             $0.top.equalToSuperview()

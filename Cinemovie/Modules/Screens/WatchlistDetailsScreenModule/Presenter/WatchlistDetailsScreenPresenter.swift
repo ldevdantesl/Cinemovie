@@ -23,9 +23,16 @@ protocol WatchlistDetailsScreenPresenterProtocol: AnyObject {
     
     // MARK: - ERROR
     func didRecieveError(_ error: Error)
+    
+    // MARK: - PROPERTIES
+    var media: [Media] { get }
 }
 
 final class WatchlistDetailsScreenPresenter {
+    // MARK: - TYPEALIASES
+    typealias Sections = WatchlistDetailsScreenVC.Sections
+    typealias Items = WatchlistDetailsScreenVC.Items
+    
     weak var view: WatchlistDetailsScreenViewProtocol?
     var router: WatchlistDetailsScreenRouterProtocol
     var interactor: WatchlistDetailsScreenInteractorProtocol
@@ -43,7 +50,7 @@ final class WatchlistDetailsScreenPresenter {
     private var didFinishInitialMovies = false
     private var didFinishInitialSeries = false
     
-    private var media: [Media] = []
+    var media: [Media] = []
     
     init(listType: UserListTypes, interactor: WatchlistDetailsScreenInteractorProtocol, router: WatchlistDetailsScreenRouterProtocol) {
         self.listType = listType
@@ -63,6 +70,7 @@ extension WatchlistDetailsScreenPresenter: WatchlistDetailsScreenPresenterProtoc
         
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
+            self.applySnapshot()
             self.view?.downloadView.hide()
         }
     }
@@ -89,6 +97,7 @@ extension WatchlistDetailsScreenPresenter: WatchlistDetailsScreenPresenterProtoc
         
         refreshGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
+            self.applySnapshot()
             self.view?.refreshController.endRefreshing()
         }
     }
@@ -125,19 +134,17 @@ extension WatchlistDetailsScreenPresenter: WatchlistDetailsScreenPresenterProtoc
     // MARK: - PROGRAMMATIC
     func didRecieveInitialMedia(_ media: [any Media]) {
         self.media.append(contentsOf: media)
-        self.view?.reloadData(newItems: self.media)
         downloadGroup.leave()
     }
     
     func didRecieveRefreshingMedia(_ media: [any Media]) {
-        let newIDs = Set(media.map { $0.id })
-        self.media.removeAll { newIDs.contains($0.id) }
-        self.media.insert(contentsOf: media, at: 0)
+        let existingIDs = Set(self.media.map { $0.id })
+        let newItems = media.filter { !existingIDs.contains($0.id) }
+        self.media.insert(contentsOf: newItems, at: 0)
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.view?.refreshController.endRefreshing()
         }
-        self.view?.reloadData(newItems: self.media)
         refreshGroup.leave()
     }
     
@@ -158,5 +165,32 @@ extension WatchlistDetailsScreenPresenter: WatchlistDetailsScreenPresenterProtoc
     // MARK: - ERROR
     func didRecieveError(_ error: any Error) {
         self.view?.didRecieveError(error.localizedDescription, goesBack: true)
+    }
+    
+    // MARK: - PRIVATE FUNC
+    private func applySnapshot() {
+        let vm = VerticalMediaListCellViewModel(
+            media: self.media, title: listType.title, subtitle: listType.subtitle,
+            didTapBackButton: { [weak self] in self?.didTapBackButton() },
+            didTapAnyMedia: { [weak self] in self?.didTapAnyMedia(media: $0) }
+        )
+
+        var sectionAndItems: [(sections: Sections, items: [Items])] = []
+        sectionAndItems.append((.media, [.mediaList(vm)]))
+
+        if self.media.isEmpty {
+            let unavailableVM = UnavailableInfoCellViewModel(
+                title: "No media added",
+                subtitle: "Add media to \(listType.title) in order to see it here",
+                image: UIImage(named: ImageNames.notFound.rawValue)
+            )
+            sectionAndItems.append((.notFound, [.notFound(unavailableVM)]))
+        }
+
+        let itemsBySection = Dictionary(uniqueKeysWithValues: sectionAndItems)
+        self.view?.applySnapshot(
+            sections: sectionAndItems.map { $0.sections },
+            itemsBySection: itemsBySection
+        )
     }
 }

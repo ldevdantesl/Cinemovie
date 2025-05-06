@@ -125,8 +125,8 @@ struct TMDBEndpoints {
     }
 
     // MARK: - WATCHLIST
-    static func getWatchlistedMediaEndpoint(accountID: Int, sessionID: String, mediaType: MediaTypes,extraParams: [String : String]? = nil) -> Endpoint {
-        var queryParams = ["session_id" : sessionID]
+    static func getWatchlistedMediaEndpoint(accountID: Int, sessionID: String, mediaType: MediaTypes, extraParams: [String : String]? = nil) -> Endpoint {
+        var queryParams = ["session_id" : sessionID, "sort_by" : "created_at.desc"]
         extraParams?.forEach { queryParams[$0] = $1 }
         return Endpoint(baseURL: baseURL, bearerToken: apiReadAccessToken, path: "/account/\(accountID)/watchlist/\(mediaType.pluralized)", queryParams: queryParams)
     }
@@ -144,7 +144,7 @@ struct TMDBEndpoints {
     
     // MARK: - FAVORITE
     static func getFavoritedMediaEndpoint(accountID: Int, sessionID: String, mediaType: MediaTypes,extraParams: [String : String]? = nil) -> Endpoint {
-        var queryParams = ["session_id" : sessionID]
+        var queryParams = ["session_id" : sessionID, "sort_by" : "created_at.desc"]
         extraParams?.forEach { queryParams[$0] = $1 }
         return Endpoint(baseURL: baseURL, bearerToken: apiReadAccessToken, path: "/account/\(accountID)/favorite/\(mediaType.pluralized)", queryParams: queryParams)
     }
@@ -162,7 +162,7 @@ struct TMDBEndpoints {
     
     // MARK: - RATED
     static func getRatedMediaEndpoint(accountID: Int, sessionID: String, mediaType: MediaTypes, extraParams: [String : String]? = nil) -> Endpoint {
-        var queryParams = ["session_id" : sessionID]
+        var queryParams = ["session_id" : sessionID, "sort_by" : "created_at.desc"]
         extraParams?.forEach { queryParams[$0] = $1 }
         return Endpoint(baseURL: baseURL, bearerToken: apiReadAccessToken, path: "/account/\(accountID)/rated/\(mediaType.pluralized)", queryParams: queryParams)
     }

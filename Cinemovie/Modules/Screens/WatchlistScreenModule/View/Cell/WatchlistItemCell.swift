@@ -109,7 +109,7 @@ final class WatchlistItemCell: ReusableCellBaseClass {
         self.viewModel = viewModel
         self.stackTitleLabel.text = viewModel.listType?.title
         self.stackSubtitleLabel.text = viewModel.listType?.subtitle
-        self.stackPosters(items: viewModel.media.reversed())
+        self.stackPosters(items: viewModel.media)
     }
     
     // MARK: - PRIVATE FUNC
@@ -153,7 +153,7 @@ final class WatchlistItemCell: ReusableCellBaseClass {
         let count = postersToShow.count
         let totalOffset = Double(count - 1) * baseOffset
 
-        for (index, item) in postersToShow.enumerated().reversed() {
+        for (index, item) in postersToShow.enumerated() {
             let imageView = AsyncImageView()
             imageView.setBorder(width: Constants.posterBorderWidth, borderColor: CMColor.cmLabel)
             imageView.setCornerRadius(Constants.posterCornerRadius)
@@ -163,7 +163,7 @@ final class WatchlistItemCell: ReusableCellBaseClass {
                 notFoundPointSize: Constants.notFoundPointSize
             )
             posterStackView.addSubview(imageView)
-            let centerOffset = -(Double(index) * baseOffset - totalOffset / 2)
+            let centerOffset = (Double(index) * baseOffset - totalOffset / 2)
 
             imageView.snp.makeConstraints {
                 $0.centerY.equalToSuperview()

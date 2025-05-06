@@ -14,7 +14,7 @@ protocol WatchlistDetailsScreenViewProtocol: AnyObject {
     var refreshController: UIRefreshControl { get }
     
     // MARK: - OTHER
-    func reloadData(newItems: [Media])
+    func applySnapshot(sections: [WatchlistDetailsScreenVC.Sections], itemsBySection: [WatchlistDetailsScreenVC.Sections : [WatchlistDetailsScreenVC.Items]])
     func didReceievePaginatedItems(_ items: [Media], at indexPaths: [IndexPath])
     func didRecieveError(_ errorStr: String, goesBack: Bool)
     
@@ -23,6 +23,17 @@ protocol WatchlistDetailsScreenViewProtocol: AnyObject {
 }
 
 final class WatchlistDetailsScreenVC: UIViewController {
+    // MARK: - SECTIONS
+    enum Sections: Hashable {
+        case media
+        case notFound
+    }
+    
+    enum Items: Hashable {
+        case mediaList(VerticalMediaListCellViewModel)
+        case notFound(UnavailableInfoCellViewModel)
+    }
+    
     // MARK: - VIPER
     var presenter: WatchlistDetailsScreenPresenterProtocol?
     let downloadView: CMSplashView = {
@@ -33,7 +44,6 @@ final class WatchlistDetailsScreenVC: UIViewController {
     
     // MARK: - PROPERTIES
     private let listType: UserListTypes
-    private var items: [Media] = []
     
     // MARK: - VIEW PROPERTIES
     lazy var refreshController: UIRefreshControl = {
@@ -43,11 +53,11 @@ final class WatchlistDetailsScreenVC: UIViewController {
         return control
     }()
     
-    private lazy var collectionView: TopBlurredCollectionView = {
-        let view = TopBlurredCollectionView(layout: createLayout())
+    private lazy var collectionView: DiffableCollectionView = {
+        let view = DiffableCollectionView<Sections, Items>(layout: createLayout(), showsTopBlur: true)
         view.register(cellClass: VerticalMediaListCell.self)
+        view.register(cellClass: UnavailableInfoCell.self)
         view.refreshControl = refreshController
-        view.dataSource = self
         view.delegate = self
         view.backgroundColor = CMColor.cmBackground
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -67,9 +77,10 @@ final class WatchlistDetailsScreenVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        presenter?.viewDidLoad()
         setupUI()
         downloadView.show()
+        configureDataSource()
+        presenter?.viewDidLoad()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -78,6 +89,21 @@ final class WatchlistDetailsScreenVC: UIViewController {
     }
     
     // MARK: - PRIVATE FUNC
+    private func configureDataSource() {
+        collectionView.configureDataSource { collectionView, indexPath, itemIdentifier in
+            switch itemIdentifier {
+            case .mediaList(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? VerticalMediaListCell
+                cell?.configure(viewModel: vm)
+                return cell
+            case .notFound(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? UnavailableInfoCell
+                cell?.configure(viewModel: vm)
+                return cell
+            }
+        }
+    }
+    
     private func createLayout() -> UICollectionViewCompositionalLayout {
         UICollectionViewCompositionalLayout { sectionIndex, env in
             let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(100)))
@@ -107,9 +133,23 @@ final class WatchlistDetailsScreenVC: UIViewController {
     }
 }
 
-extension WatchlistDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDataSource {
+extension WatchlistDetailsScreenVC: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         collectionView.showBlur(scrollView)
+        
+        if (presenter?.media.count ?? 0) > 20 {
+            let offsetY = scrollView.contentOffset.y
+            let contentHeight = scrollView.contentSize.height
+            let height = scrollView.frame.size.height
+            let distanceFromBottom = offsetY + height - contentHeight
+            
+            if let cell = collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? VerticalMediaListCell {
+                let progress = min(distanceFromBottom / 100.0, 1.0)
+                UIView.animate(withDuration: 0.15) {
+                    cell.setLoadingAlpha(progress)
+                }
+            }
+        }
     }
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
@@ -119,22 +159,6 @@ extension WatchlistDetailsScreenVC: UICollectionViewDelegate, UICollectionViewDa
 
         let isAtBottom = offsetY + height >= contentHeight - 10
         isAtBottom ? presenter?.didCallPagination() : ()
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 1
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: VerticalMediaListCell.identifier, for: indexPath
-        ) as? VerticalMediaListCell else { return UICollectionViewCell() }
-        let vm = VerticalMediaListCellViewModel(
-            media: items, title: listType.title, subtitle: listType.subtitle,
-            didTapBackButton: presenter?.didTapBackButton, didTapAnyMedia: presenter?.didTapAnyMedia
-        )
-        cell.configure(viewModel: vm)
-        return cell
     }
 }
 
@@ -163,12 +187,10 @@ extension WatchlistDetailsScreenVC: WatchlistDetailsScreenViewProtocol {
         }
     }
     
-    
-    func reloadData(newItems: [Media]) {
-        self.items = newItems
+    func applySnapshot(sections: [WatchlistDetailsScreenVC.Sections], itemsBySection: [WatchlistDetailsScreenVC.Sections : [WatchlistDetailsScreenVC.Items]]) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.collectionView.reloadData()
+            self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
         }
     }
     
