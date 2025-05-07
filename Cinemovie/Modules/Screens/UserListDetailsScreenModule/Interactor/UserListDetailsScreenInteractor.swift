@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol WatchlistDetailsScreenInteractorProtocol: AnyObject {
+protocol UserListDetailsScreenInteractorProtocol: AnyObject {
     func getInitialListMovies(listType: UserListTypes)
     func getInitialListSeries(listType: UserListTypes)
     
@@ -18,8 +18,8 @@ protocol WatchlistDetailsScreenInteractorProtocol: AnyObject {
     func getPaginatedListSeries(listType: UserListTypes, page: Int)
 }
 
-final class WatchlistDetailsScreenInteractor: WatchlistDetailsScreenInteractorProtocol {
-    weak var presenter: WatchlistDetailsScreenPresenterProtocol?
+final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProtocol {
+    weak var presenter: UserListDetailsScreenPresenterProtocol?
     private var tmdbService: TMDBService
     
     init(tmdbService: TMDBService) {

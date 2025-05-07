@@ -6,7 +6,7 @@
 //
 import UIKit
 
-protocol WatchlistDetailsScreenPresenterProtocol: AnyObject {
+protocol UserListDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
     
     // MARK: - USER INITIATED
@@ -28,14 +28,14 @@ protocol WatchlistDetailsScreenPresenterProtocol: AnyObject {
     var media: [Media] { get }
 }
 
-final class WatchlistDetailsScreenPresenter {
+final class UserListDetailsScreenPresenter {
     // MARK: - TYPEALIASES
-    typealias Sections = WatchlistDetailsScreenVC.Sections
-    typealias Items = WatchlistDetailsScreenVC.Items
+    typealias Sections = UserListDetailsScreenVC.Sections
+    typealias Items = UserListDetailsScreenVC.Items
     
-    weak var view: WatchlistDetailsScreenViewProtocol?
-    var router: WatchlistDetailsScreenRouterProtocol
-    var interactor: WatchlistDetailsScreenInteractorProtocol
+    weak var view: UserListDetailsScreenViewProtocol?
+    var router: UserListDetailsScreenRouterProtocol
+    var interactor: UserListDetailsScreenInteractorProtocol
     
     private let listType: UserListTypes
     private let downloadGroup = DispatchGroup()
@@ -52,14 +52,14 @@ final class WatchlistDetailsScreenPresenter {
     
     var media: [Media] = []
     
-    init(listType: UserListTypes, interactor: WatchlistDetailsScreenInteractorProtocol, router: WatchlistDetailsScreenRouterProtocol) {
+    init(listType: UserListTypes, interactor: UserListDetailsScreenInteractorProtocol, router: UserListDetailsScreenRouterProtocol) {
         self.listType = listType
         self.interactor = interactor
         self.router = router
     }
 }
 
-extension WatchlistDetailsScreenPresenter: WatchlistDetailsScreenPresenterProtocol {
+extension UserListDetailsScreenPresenter: UserListDetailsScreenPresenterProtocol {
     
     func viewDidLoad() {
         downloadGroup.enter()

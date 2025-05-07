@@ -8,21 +8,22 @@
 import UIKit
 import SnapKit
 
-protocol WatchlistDetailsScreenViewProtocol: AnyObject {
+protocol UserListDetailsScreenViewProtocol: AnyObject {
     // MARK: - PROPERTIES
     var downloadView: CMSplashView { get }
     var refreshController: UIRefreshControl { get }
     
     // MARK: - OTHER
-    func applySnapshot(sections: [WatchlistDetailsScreenVC.Sections], itemsBySection: [WatchlistDetailsScreenVC.Sections : [WatchlistDetailsScreenVC.Items]])
+    func applySnapshot(sections: [UserListDetailsScreenVC.Sections], itemsBySection: [UserListDetailsScreenVC.Sections : [UserListDetailsScreenVC.Items]])
     func didReceievePaginatedItems(_ items: [Media])
     func didRecieveError(_ errorStr: String, goesBack: Bool)
     
+    // MARK: - PAGINATION
     func showPaginatedLoading()
     func hidePaginatedLoading()
 }
 
-final class WatchlistDetailsScreenVC: UIViewController {
+final class UserListDetailsScreenVC: UIViewController {
     // MARK: - SECTIONS
     enum Sections: Hashable {
         case media
@@ -35,7 +36,7 @@ final class WatchlistDetailsScreenVC: UIViewController {
     }
     
     // MARK: - VIPER
-    var presenter: WatchlistDetailsScreenPresenterProtocol?
+    var presenter: UserListDetailsScreenPresenterProtocol?
     let downloadView: CMSplashView = {
         let view = CMSplashView(frame: .zero, showsLoadingLabel: true)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -135,7 +136,7 @@ final class WatchlistDetailsScreenVC: UIViewController {
     }
 }
 
-extension WatchlistDetailsScreenVC: UICollectionViewDelegate {
+extension UserListDetailsScreenVC: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if isScrollLocked {
             scrollView.setContentOffset(previousOffset, animated: false)
@@ -169,7 +170,7 @@ extension WatchlistDetailsScreenVC: UICollectionViewDelegate {
     }
 }
 
-extension WatchlistDetailsScreenVC: WatchlistDetailsScreenViewProtocol {
+extension UserListDetailsScreenVC: UserListDetailsScreenViewProtocol {
     func showPaginatedLoading() {
         DispatchQueue.main.async { [weak self] in
             guard let self = self, let cell = self.collectionView.cellForItem(
@@ -196,7 +197,7 @@ extension WatchlistDetailsScreenVC: WatchlistDetailsScreenViewProtocol {
         }
     }
     
-    func applySnapshot(sections: [WatchlistDetailsScreenVC.Sections], itemsBySection: [WatchlistDetailsScreenVC.Sections : [WatchlistDetailsScreenVC.Items]]) {
+    func applySnapshot(sections: [UserListDetailsScreenVC.Sections], itemsBySection: [UserListDetailsScreenVC.Sections : [UserListDetailsScreenVC.Items]]) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)

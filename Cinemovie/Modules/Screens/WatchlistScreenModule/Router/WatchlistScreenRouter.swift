@@ -20,7 +20,7 @@ final class WatchlistScreenRouter: WatchlistScreenRouterProtocol {
     }
     
     func navigateToList(listType: UserListTypes) {
-        let vc = WatchlistDetailsScreenAssembler.assemble(listType: listType, tmdbService: tmdbService)
+        let vc = UserListDetailsScreenAssembler.assemble(listType: listType, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
 }
