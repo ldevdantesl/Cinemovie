@@ -15,7 +15,7 @@ protocol WatchlistDetailsScreenViewProtocol: AnyObject {
     
     // MARK: - OTHER
     func applySnapshot(sections: [WatchlistDetailsScreenVC.Sections], itemsBySection: [WatchlistDetailsScreenVC.Sections : [WatchlistDetailsScreenVC.Items]])
-    func didReceievePaginatedItems(_ items: [Media], at indexPaths: [IndexPath])
+    func didReceievePaginatedItems(_ items: [Media])
     func didRecieveError(_ errorStr: String, goesBack: Bool)
     
     func showPaginatedLoading()
@@ -44,6 +44,8 @@ final class WatchlistDetailsScreenVC: UIViewController {
     
     // MARK: - PROPERTIES
     private let listType: UserListTypes
+    private var isScrollLocked: Bool = false
+    private var previousOffset: CGPoint = .zero
     
     // MARK: - VIEW PROPERTIES
     lazy var refreshController: UIRefreshControl = {
@@ -135,6 +137,11 @@ final class WatchlistDetailsScreenVC: UIViewController {
 
 extension WatchlistDetailsScreenVC: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if isScrollLocked {
+            scrollView.setContentOffset(previousOffset, animated: false)
+            return
+        }
+        
         collectionView.showBlur(scrollView)
         
         if (presenter?.media.count ?? 0) > 20 {
@@ -165,8 +172,9 @@ extension WatchlistDetailsScreenVC: UICollectionViewDelegate {
 extension WatchlistDetailsScreenVC: WatchlistDetailsScreenViewProtocol {
     func showPaginatedLoading() {
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            guard let cell = self.collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? VerticalMediaListCell else { return }
+            guard let self = self, let cell = self.collectionView.cellForItem(
+                at: IndexPath(item: 0, section: 0)
+            ) as? VerticalMediaListCell else { return }
             cell.startPaginatingLoadingAnimation()
         }
     }
@@ -179,11 +187,12 @@ extension WatchlistDetailsScreenVC: WatchlistDetailsScreenViewProtocol {
         }
     }
     
-    func didReceievePaginatedItems(_ items: [any Media], at indexPaths: [IndexPath]) {
+    func didReceievePaginatedItems(_ items: [any Media]) {
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            guard let cell = collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? VerticalMediaListCell else { return }
-            cell.insertNewItems(items, at: indexPaths)
+            guard let self = self, let cell = self.collectionView.cellForItem(
+                at: IndexPath(item: 0, section: 0)
+            ) as? VerticalMediaListCell else { return }
+            cell.insertNewItems(items)
         }
     }
     

@@ -55,8 +55,8 @@ final class DiffableCollectionView<Section: Hashable, Item: Hashable>: TopBlurre
         diffableDataSource.apply(snapshot, animatingDifferences: true)
     }
     
-    public func applySnapshot(snapshot: NSDiffableDataSourceSnapshot<Section, Item>) {
-        diffableDataSource.apply(snapshot, animatingDifferences: true)
+    public func applySnapshot(snapshot: NSDiffableDataSourceSnapshot<Section, Item>, animatingDifferences: Bool = true, completion: (() -> Void)? = nil) {
+        diffableDataSource.apply(snapshot, animatingDifferences: animatingDifferences, completion: completion)
     }
     
     public func snapshot() -> NSDiffableDataSourceSnapshot<Section, Item> {

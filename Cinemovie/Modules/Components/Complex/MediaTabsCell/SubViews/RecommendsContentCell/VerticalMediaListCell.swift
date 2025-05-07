@@ -99,11 +99,9 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
         return label
     }()
     
-    private lazy var gridCollectionView: UICollectionView = {
-        let view = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
+    private lazy var gridCollectionView: DiffableCollectionView = {
+        let view = DiffableCollectionView<Int, MediaPosterImageCellViewModel>(layout: createLayout())
         view.isScrollEnabled = false
-        view.dataSource = self
-        view.delegate = self
         view.backgroundColor = CMColor.cmBackground
         view.register(cellClass: MediaPosterImageCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -113,6 +111,7 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
     // MARK: - LIFECYCLE
     override init(frame: CGRect) {
         super.init(frame: frame)
+        configureDataSource()
         setupUI()
     }
     
@@ -142,38 +141,42 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
         
         let hasBackButton = viewModel.didTapBackButton != nil
         backButton.isHidden = !hasBackButton
-
+        
         if let title = viewModel.title {
             titleLabel.text = title
             subtitleLabel.text = viewModel.subtitle
             gridCVTopConstraint?.update(offset: Constants.vSpacing)
         }
-
+        
         let leadingView = hasBackButton ? backButton.snp.trailing : contentView.snp.leading
         let leadingOffset = hasBackButton ? Constants.vSpacing : 0
-
+        
         titleLabel.snp.remakeConstraints {
             $0.top.equalToSuperview()
             $0.leading.equalTo(leadingView).offset(leadingOffset)
             $0.trailing.equalToSuperview()
         }
-
+        
         subtitleLabel.snp.remakeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom)
             $0.leading.equalTo(leadingView).offset(leadingOffset)
             $0.trailing.equalToSuperview()
         }
-
+        
         let vm = CMCircularButtonViewModel(
             systemName: Constants.backButtonName, backColor: .cmSecondaryBackground,
             foreColor: CMColor.cmLabel, didTapAction: viewModel.didTapBackButton
         )
         backButton.configure(viewModel: vm)
-
+        
         self.items = viewModel.media.map {
             MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.didTapAnyMedia)
         }
-        self.gridCollectionView.reloadData()
+        
+        var snapshot = NSDiffableDataSourceSnapshot<Int, MediaPosterImageCellViewModel>()
+        snapshot.appendSections([0])
+        snapshot.appendItems(items, toSection: 0)
+        self.gridCollectionView.applySnapshot(snapshot: snapshot, animatingDifferences: true)
         self.gridCollectionView.layoutIfNeeded()
         self.layoutIfNeeded()
     }
@@ -198,7 +201,7 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
         paginatingLoadingIndicator.alpha = alpha
     }
     
-    public func insertNewItems(_ items: [Media], at indexPaths: [IndexPath]) {
+    public func insertNewItems(_ items: [Media], onCompletion: (() -> Void)? = nil) {
         let vms = items.map {
             MediaPosterImageCellViewModel(media: $0) { [weak self] in
                 guard let self = self else { return }
@@ -206,14 +209,14 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
             }
         }
         self.items.append(contentsOf: vms)
-        DispatchQueue.main.async { [weak self] in
+        
+        var snapshot = NSDiffableDataSourceSnapshot<Int, MediaPosterImageCellViewModel>()
+        snapshot.appendSections([0])
+        snapshot.appendItems(self.items, toSection: 0)
+        self.gridCollectionView.applySnapshot(snapshot: snapshot, animatingDifferences: true) { [weak self] in
             guard let self = self else { return }
-            self.gridCollectionView.performBatchUpdates { [weak self] in
-                guard let self = self else { return }
-                self.gridCollectionView.insertItems(at: indexPaths)
-                self.invalidateIntrinsicContentSize()
-                self.gridCollectionView.collectionViewLayout.invalidateLayout()
-            }
+            self.invalidateIntrinsicContentSize()
+            onCompletion?()
         }
     }
     
@@ -254,6 +257,14 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
         }
     }
     
+    private func configureDataSource() {
+        self.gridCollectionView.configureDataSource { collectionView, indexPath, itemIdentifier in
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: itemIdentifier.cellIdentifier, for: indexPath) as? MediaPosterImageCell
+            cell?.configure(with: itemIdentifier)
+            return cell
+        }
+    }
+    
     private func createLayout() -> UICollectionViewCompositionalLayout {
         return UICollectionViewCompositionalLayout { sectionIndex, env in
             let itemWidth = Constants.itemWidth
@@ -268,20 +279,5 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
             section.interGroupSpacing = Constants.vSpacing
             return section
         }
-    }
-}
-
-extension VerticalMediaListCell: UICollectionViewDataSource, UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return items.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: MediaPosterImageCell.identifier, for: indexPath
-        ) as? MediaPosterImageCell else { return UICollectionViewCell() }
-        let vm = items[indexPath.row]
-        cell.configure(with: vm)
-        return cell
     }
 }

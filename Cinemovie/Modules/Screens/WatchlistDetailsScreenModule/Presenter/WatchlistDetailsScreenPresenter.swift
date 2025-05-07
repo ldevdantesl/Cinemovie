@@ -149,17 +149,15 @@ extension WatchlistDetailsScreenPresenter: WatchlistDetailsScreenPresenterProtoc
     }
     
     func didRecievePaginatedMedia(_ media: [any Media]) {
-        let startIndex = self.media.count
         self.media.append(contentsOf: media)
-        let endIndex = self.media.count
-        let indexPaths = (startIndex..<endIndex).map { IndexPath(item: $0, section: 0) }
         if let _ = media as? [Movie] {
             movieCurrentPage += 1
-        } else if let _ = media as? [TVSeries] {
+        }
+        else if let _ = media as? [TVSeries] {
             seriesCurrentPage += 1
         }
         self.view?.hidePaginatedLoading()
-        self.view?.didReceievePaginatedItems(media, at: indexPaths)
+        self.view?.didReceievePaginatedItems(media)
     }
     
     // MARK: - ERROR
