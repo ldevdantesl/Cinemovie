@@ -25,7 +25,7 @@ struct CMCircularButtonViewModel {
         self.systemName = systemName
         self.backColor = backColor
         self.foreColor = foreColor
-        self.imageSizeByRespectingOuterCircle = imageSizeByRespectingOuterCircle
+        self.imageSizeByRespectingOuterCircle = min(0.99, imageSizeByRespectingOuterCircle ?? 0.6)
         self.didTapAction = didTapAction
     }
 }

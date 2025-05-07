@@ -11,7 +11,7 @@ struct MediaListAPIResponse: APIResponse {
     let dates: Dates?
     let page: Int
     let results: [AnyMedia]
-    let totalPages: Int?
+    let totalPages: Int
     let totalResults: Int?
 
     enum CodingKeys: String, CodingKey {

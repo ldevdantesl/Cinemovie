@@ -93,7 +93,7 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
     }
     
     func findIfFavorited(seriesID: Int) {
-        tmdbService.isMediaFavorited(mediaID: seriesID, mediaType: .tvShow) { [weak self] result in
+        tmdbService.isSeriesFavorited(seriesID: seriesID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.isTVSeriesFavorited(success)
@@ -103,7 +103,7 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
     }
     
     func findIfWatchlisted(seriesID: Int) {
-        tmdbService.isMediaWatchlisted(mediaID: seriesID, mediaType: .tvShow) { [weak self] result in
+        tmdbService.isSeriesWatchlisted(seriesID: seriesID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.isTVSeriesWatchlisted(success)
@@ -113,7 +113,7 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
     }
     
     func addOrRemoveInFavorites(seriesID: Int, adding: Bool) {
-        tmdbService.addOrRemoveMediaInFavorites(mediaID: seriesID, mediaType: .tvShow, adding: adding) { [weak self] result in
+        tmdbService.addOrRemoveMediaInUserList(mediaID: seriesID, listType: .favorite, mediaType: .tvShow, adding: adding) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didAddOrRemoveFromFavorites(message: success.statusMessage)
@@ -123,7 +123,7 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
     }
     
     func addOrRemoveInWatchlist(seriesID: Int, adding: Bool) {
-        tmdbService.addOrRemoveMediaInWatchlist(mediaID: seriesID, mediaType: .tvShow, adding: adding) { [weak self] result in
+        tmdbService.addOrRemoveMediaInUserList(mediaID: seriesID, listType: .watchlist, mediaType: .tvShow, adding: adding) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didAddOrRemoveFromWatchlist(message: success.statusMessage)

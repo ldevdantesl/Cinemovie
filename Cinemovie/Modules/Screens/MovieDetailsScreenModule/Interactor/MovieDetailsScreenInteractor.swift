@@ -92,7 +92,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
     }
     
     func findIfFavorited(movieID: Int) {
-        tmdbService.isMediaFavorited(mediaID: movieID, mediaType: .movie) { [weak self] result in
+        tmdbService.isMovieFavorited(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let favorited): presenter?.isMovieFavorited(favorited)
@@ -102,7 +102,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
     }
     
     func findIfWatchlisted(movieID: Int) {
-        tmdbService.isMediaWatchlisted(mediaID: movieID, mediaType: .movie) { [weak self] result in
+        tmdbService.isMovieWatchlisted(movieID: movieID) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let favorited): presenter?.isMovieWatchlisted(favorited)
@@ -113,7 +113,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
     
     // MARK: - USER INITIATED
     func addOrRemoveInWatchlist(movieID: Int, adding: Bool) {
-        tmdbService.addOrRemoveMediaInWatchlist(mediaID: movieID, mediaType: .movie, adding: adding){ [weak self] result in
+        tmdbService.addOrRemoveMediaInUserList(mediaID: movieID, listType: .watchlist, mediaType: .movie, adding: adding){ [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didAddToWatchlist(success.statusMessage)
@@ -123,7 +123,7 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
     }
     
     func addOrRemoveInFavorites(movieID: Int, adding: Bool) {
-        tmdbService.addOrRemoveMediaInFavorites(mediaID: movieID, mediaType: .movie, adding: adding) { [weak self] result in
+        tmdbService.addOrRemoveMediaInUserList(mediaID: movieID, listType: .favorite, mediaType: .movie, adding: adding) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didAddToFavorite(success.statusMessage)

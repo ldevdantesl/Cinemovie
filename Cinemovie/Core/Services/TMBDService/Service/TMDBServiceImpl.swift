@@ -153,13 +153,7 @@ final class TMDBServiceImpl: TMDBService {
         guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(.empty)); return }
         var newParams = queryParams
         newParams["page"] = page.description
-        let endpoint: Endpoint
-        switch listType {
-        case .watchlist: endpoint = TMDBEndpoints.getWatchlistedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, extraParams: newParams)
-        case .favorite: endpoint = TMDBEndpoints.getFavoritedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, extraParams: newParams)
-        case .rated: endpoint = TMDBEndpoints.getRatedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, extraParams: newParams)
-        default: endpoint = TMDBEndpoints.getWatchlistedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, extraParams: newParams)
-        }
+        let endpoint = TMDBEndpoints.getUserListMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, userListType: listType, extraParams: newParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
@@ -167,64 +161,121 @@ final class TMDBServiceImpl: TMDBService {
         guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(.empty)); return }
         var newParams = queryParams
         newParams["page"] = page.description
-        let endpoint: Endpoint
-        switch listType {
-        case .watchlist: endpoint = TMDBEndpoints.getWatchlistedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, extraParams: newParams)
-        case .favorite: endpoint = TMDBEndpoints.getFavoritedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, extraParams: newParams)
-        case .rated: endpoint = TMDBEndpoints.getRatedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, extraParams: newParams)
-        default: endpoint = TMDBEndpoints.getWatchlistedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, extraParams: newParams)
-        }
+        let endpoint = TMDBEndpoints.getUserListMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, userListType: listType, extraParams: newParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func addOrRemoveMediaInWatchlist(mediaID: Int, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void) {
+    func getAllUserListMovies(listType: UserListTypes, completion: @escaping (Result<[Movie], NetworkError>) -> Void) {
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success([])); return }
+        fetchUserListMoviesRecursively(listType: listType, accountID: accountID, sessionID: sessionID, page: 1, accumulated: [], extraParams: queryParams, completion: completion)
+    }
+    
+    func getAllUserListSeries(listType: UserListTypes, completion: @escaping (Result<[TVSeries], NetworkError>) -> Void) {
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success([])); return }
+        fetchUserListSeriesRecursively(listType: listType, accountID: accountID, sessionID: sessionID, page: 1, accumulated: [], extraParams: queryParams, completion: completion)
+    }
+    
+    func addOrRemoveMediaInUserList(mediaID: Int, listType: UserListTypes, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void) {
         guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
-        let endpoint = TMDBEndpoints.addOrRemovieMediaInWatchlistEndpoint(accountID: accountID, sessionID: sessionID, mediaID: mediaID, mediaType: mediaType, adding: adding)
+        let endpoint = TMDBEndpoints.addOrRemoveMediaInUserListEndpoint(accountID: accountID, sessionID: sessionID, listType: listType, mediaID: mediaID, mediaType: mediaType, adding: adding)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func isMediaWatchlisted(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(false)); return }
-        let endpoint = TMDBEndpoints.getWatchlistedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: mediaType, extraParams: queryParams)
-        
-        networkService.request(endpoint) { (result: Result<MediaListAPIResponse, NetworkError>) in
+    // MARK: - WATCHLIST
+    func isMovieWatchlisted(movieID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
+        fetchUserListMoviesRecursively(listType: .watchlist, accountID: accountID, sessionID: sessionID, extraParams: queryParams) { result in
             switch result {
             case .success(let success):
-                let movieIDS = success.results.map { $0.id }
-                completion(.success(movieIDS.contains(mediaID)))
-            case .failure(let failure): completion(.failure(failure))
+                if success.allSatisfy({ $0.id != movieID }) {
+                    completion(.success(false))
+                } else {
+                    completion(.success(true))
+                }
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
+        }
+    }
+    
+    func isSeriesWatchlisted(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
+        fetchUserListSeriesRecursively(listType: .watchlist, accountID: accountID, sessionID: sessionID, extraParams: queryParams) { result in
+            switch result {
+            case .success(let success):
+                if success.allSatisfy({ $0.id != seriesID }) {
+                    completion(.success(false))
+                } else {
+                    completion(.success(true))
+                }
+            case .failure(let failure):
+                completion(.failure(failure))
             }
         }
     }
     
     // MARK: - FAVORITE
-    func addOrRemoveMediaInFavorites(mediaID: Int, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
-        let endpoint = TMDBEndpoints.addOrRemoveMediaInFavoritesEndpoint(accountID: accountID, sessionID: sessionID, mediaID: mediaID, mediaType: mediaType, adding: adding)
-        handleRequest(endpoint: endpoint, completion: completion)
+    func isMovieFavorited(movieID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(false)); return }
+        fetchUserListMoviesRecursively(listType: .favorite, accountID: accountID, sessionID: sessionID, extraParams: queryParams) { result in
+            switch result {
+            case .success(let success):
+                if success.allSatisfy({ $0.id != movieID }) {
+                    completion(.success(false))
+                } else {
+                    completion(.success(true))
+                }
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
+        }
     }
     
-    func isMediaFavorited(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(false)); return }
-        let endpoint = TMDBEndpoints.getFavoritedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: mediaType, extraParams: queryParams)
-        
-        networkService.request(endpoint) { (result: Result<MediaListAPIResponse, NetworkError>) in
+    func isSeriesFavorited(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
+        fetchUserListSeriesRecursively(listType: .favorite, accountID: accountID, sessionID: sessionID, extraParams: queryParams) { result in
             switch result {
-            case .success(let success): completion(.success(success.results.map { $0.id }.contains(mediaID)))
-            case .failure(let failure): completion(.failure(failure))
+            case .success(let success):
+                if success.allSatisfy({ $0.id != seriesID }) {
+                    completion(.success(false))
+                } else {
+                    completion(.success(true))
+                }
+            case .failure(let failure):
+                completion(.failure(failure))
             }
         }
     }
     
     // MARK: - RATED
-    func isMediaRated(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
+    func isMovieRated(movieID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
         guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(false)); return }
-        let endpoint = TMDBEndpoints.getRatedMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: mediaType, extraParams: queryParams)
-        
-        networkService.request(endpoint) { (result: Result<MediaListAPIResponse, NetworkError>) in
+        fetchUserListMoviesRecursively(listType: .rated, accountID: accountID, sessionID: sessionID, extraParams: queryParams) { result in
             switch result {
-            case .success(let success): completion(.success(success.results.map { $0.id }.contains(mediaID)))
-            case .failure(let failure): completion(.failure(failure))
+            case .success(let success):
+                if success.allSatisfy({ $0.id != movieID }) {
+                    completion(.success(false))
+                } else {
+                    completion(.success(true))
+                }
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
+        }
+    }
+    
+    func isSeriesRated(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
+        fetchUserListSeriesRecursively(listType: .rated, accountID: accountID, sessionID: sessionID, extraParams: queryParams) { result in
+            switch result {
+            case .success(let success):
+                if success.allSatisfy({ $0.id != seriesID }) {
+                    completion(.success(false))
+                } else {
+                    completion(.success(true))
+                }
+            case .failure(let failure):
+                completion(.failure(failure))
             }
         }
     }
@@ -257,13 +308,73 @@ final class TMDBServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    // MARK: - Private func
+    // MARK: - PRIVATE FUNC
     private func handleRequest<T: Decodable>(
         endpoint: Endpoint,
         completion: @escaping (Result<T, NetworkError>) -> Void
     ) {
         networkService.request(endpoint) { (result: Result<T, NetworkError>) in
             completion(result)
+        }
+    }
+    
+    private func fetchUserListMoviesRecursively(
+        listType: UserListTypes, accountID: Int, sessionID: String,
+        page: Int = 1, accumulated: [Movie] = [], extraParams: [String : String],
+        completion: @escaping (Result<[Movie], NetworkError>) -> Void
+    ) {
+        var params = extraParams
+        params["page"] = "\(page.description)"
+        
+        let endpoint = TMDBEndpoints.getUserListMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .movie, userListType: listType, extraParams: params)
+        
+        handleRequest(endpoint: endpoint) { (result: Result<MovieListAPIResponse, NetworkError>) in
+            switch result {
+            case .success(let success):
+                let combined = accumulated + success.movies
+                if page < success.totalPages {
+                    self.fetchUserListMoviesRecursively(
+                        listType: listType, accountID: accountID,
+                        sessionID: sessionID, page: page + 1, accumulated: combined,
+                        extraParams: extraParams, completion: completion
+                    )
+                } else {
+                    completion(.success(combined))
+                }
+                
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
+        }
+    }
+    
+    private func fetchUserListSeriesRecursively(
+        listType: UserListTypes, accountID: Int, sessionID: String,
+        page: Int = 1, accumulated: [TVSeries] = [], extraParams: [String : String],
+        completion: @escaping (Result<[TVSeries], NetworkError>) -> Void
+    ) {
+        var params = extraParams
+        params["page"] = "\(page.description)"
+        
+        let endpoint = TMDBEndpoints.getUserListMediaEndpoint(accountID: accountID, sessionID: sessionID, mediaType: .tvShow, userListType: listType, extraParams: params)
+        
+        handleRequest(endpoint: endpoint) { (result: Result<TVSeriesListAPIResponse, NetworkError>) in
+            switch result {
+            case .success(let success):
+                let combined = accumulated + success.results
+                if page < success.totalPages {
+                    self.fetchUserListSeriesRecursively(
+                        listType: listType, accountID: accountID,
+                        sessionID: sessionID, page: page + 1, accumulated: combined,
+                        extraParams: extraParams, completion: completion
+                    )
+                } else {
+                    completion(.success(combined))
+                }
+                
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
         }
     }
 }

@@ -29,4 +29,13 @@ enum UserListTypes {
         default: nil
         }
     }
+    
+    var titleForEndpoint: String {
+        switch self {
+        case .watchlist: "watchlist"
+        case .favorite: "favorite"
+        case .rated: "rated"
+        case .custom(let int): "lists/\(int.description)"
+        }
+    }
 }

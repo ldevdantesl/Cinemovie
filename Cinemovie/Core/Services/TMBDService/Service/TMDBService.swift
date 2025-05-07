@@ -43,15 +43,22 @@ protocol TMDBService: AnyObject {
     // MARK: - USER LISTS
     func getUserListMovies(listType: UserListTypes, page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
     func getUserListSeries(listType: UserListTypes, page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
-    func addOrRemoveMediaInWatchlist(mediaID: Int, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void)
-    func isMediaWatchlisted(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<Bool, NetworkError>) -> Void)
+    func getAllUserListMovies(listType: UserListTypes, completion: @escaping (Result<[Movie], NetworkError>) -> Void)
+    func getAllUserListSeries(listType: UserListTypes, completion: @escaping (Result<[TVSeries], NetworkError>) -> Void)
+    
+    func addOrRemoveMediaInUserList(mediaID: Int, listType: UserListTypes, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void)
+    
+    // MARK: - WATCHLIST
+    func isMovieWatchlisted(movieID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void)
+    func isSeriesWatchlisted(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void)
     
     // MARK: - FAVORITE
-    func addOrRemoveMediaInFavorites(mediaID: Int, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void)
-    func isMediaFavorited(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<Bool, NetworkError>) -> Void)
+    func isMovieFavorited(movieID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void)
+    func isSeriesFavorited(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void)
     
     // MARK: - RATED
-    func isMediaRated(mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<Bool, NetworkError>) -> Void)
+    func isMovieRated(movieID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void)
+    func isSeriesRated(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void)
     
     // MARK: - OTHER
     func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void)

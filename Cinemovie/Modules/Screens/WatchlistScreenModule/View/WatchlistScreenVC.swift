@@ -21,7 +21,9 @@ protocol WatchlistScreenViewProtocol: AnyObject {
 final class WatchlistScreenVC: UIViewController {
 
     // MARK: - CONSTANTS
-    fileprivate enum Constants { }
+    fileprivate enum Constants {
+        static let headerViewHeight = 30.0 + UIConstants.topInset
+    }
     
     // MARK: - SECTIONS
     enum Sections: Hashable {
@@ -40,6 +42,9 @@ final class WatchlistScreenVC: UIViewController {
         return view
     }()
     
+    // MARK: - PROPERTIES
+    private var isBlurToHeaderVisible: Bool = false
+    
     // MARK: - VIEW PROPERTIES
     private lazy var refreshControler: UIRefreshControl = {
         let control = UIRefreshControl()
@@ -48,8 +53,16 @@ final class WatchlistScreenVC: UIViewController {
         return control
     }()
     
+    private lazy var headerView: WatchlistScreenHeaderView = {
+        let headerVM = WatchlistScreenHeaderViewModel(didTapAddListAction: nil)
+        let view = WatchlistScreenHeaderView()
+        view.configure(viewModel: headerVM)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     private lazy var collectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<WatchlistScreenVC.Sections, WatchlistScreenVC.Items>(layout: createLayout(), ignoresTopSafeArea: false, showsTopBlur: true)
+        let view = DiffableCollectionView<WatchlistScreenVC.Sections, WatchlistScreenVC.Items>(layout: createLayout(), ignoresTopSafeArea: false, showsTopBlur: false)
         view.delegate = self
         view.refreshControl = refreshControler
         view.register(cellClass: WatchlistItemCell.self)
@@ -80,6 +93,13 @@ final class WatchlistScreenVC: UIViewController {
             $0.edges.equalToSuperview()
         }
         
+        view.addSubview(headerView)
+        headerView.snp.makeConstraints {
+            $0.top.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(Constants.headerViewHeight)
+        }
+        
         view.addSubview(downloadingView)
         downloadingView.snp.makeConstraints {
             $0.edges.equalToSuperview()
@@ -103,7 +123,7 @@ final class WatchlistScreenVC: UIViewController {
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(200)), subitem: item, count: 2)
             group.interItemSpacing = .fixed(20)
             let section = NSCollectionLayoutSection(group: group)
-            section.contentInsets = .init(top: 0, leading: 10, bottom: 0, trailing: 10)
+            section.contentInsets = .init(top: 10, leading: 10, bottom: 0, trailing: 10)
             return section
         }
     }
@@ -114,7 +134,21 @@ final class WatchlistScreenVC: UIViewController {
     }
 }
 
-extension WatchlistScreenVC: UICollectionViewDelegate { }
+extension WatchlistScreenVC: UICollectionViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let contentOffsetY = scrollView.contentOffset.y + scrollView.adjustedContentInset.top
+        
+        if contentOffsetY >= 5 && !isBlurToHeaderVisible {
+            isBlurToHeaderVisible = true
+            headerView.addBlur()
+        }
+        
+        if contentOffsetY < 5 && isBlurToHeaderVisible {
+            isBlurToHeaderVisible = false
+            headerView.removeBlur()
+        }
+    }
+}
 
 extension WatchlistScreenVC: WatchlistScreenViewProtocol {
     func didRecieveError(_ description: String) {
