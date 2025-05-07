@@ -54,6 +54,7 @@ final class MediaPosterImageCell: ReusableCellBaseClass {
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        self.viewModel = nil
         self.posterImageView.reset()
     }
     

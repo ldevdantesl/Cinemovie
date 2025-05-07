@@ -18,7 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         ]?
     ) -> Bool {
         SDImageCache.shared.config.maxMemoryCost = 100 * 1024 * 1024
-        SDImageCache.shared.config.maxMemoryCount = 100
+        SDImageCache.shared.config.maxMemoryCount = 50
         return true
     }
 

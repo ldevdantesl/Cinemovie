@@ -100,6 +100,7 @@ final class AsyncImageView: UIImageView {
         self.contentMode = .scaleAspectFill
         self.preferredSymbolConfiguration = nil
         self.sd_cancelCurrentImageLoad()
+        SDImageCache.shared.deleteOldFiles()
     }
     
     // MARK: - PRIVATE FUNC

@@ -20,7 +20,6 @@ protocol HomeScreenPresenterProtocol: AnyObject {
     // MARK: - SEARCH
     func didRecieveMovieSearchResults(_ results: [Movie])
     func didRecieveTVSeriesSearchResults(_ results: [TVSeries])
-    func didRecievePeopleSearchResults(_ results: [Person])
     func didFinishSearching()
     func showSearchResults()
     func showRecentlyViewedMedia()
@@ -179,14 +178,11 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
             self.view?.downloadingView.show()
             self.searchDownloadGroup.enter()
             self.movieSearchResults = []
-            self.interactor.downloadSearchResultsForMovies(query: query, page: 1)
+            self.interactor.downloadSearchResultsForMovies(query: query, untilPage: 1)
 
             self.searchDownloadGroup.enter()
             self.tvSeriesSearchResults = []
-            self.interactor.downloadSearchResultsForTVSeries(query: query, page: 1)
-
-            self.searchDownloadGroup.enter()
-            self.interactor.downloadSearchResultsForPeople(query: query, page: 1)
+            self.interactor.downloadSearchResultsForTVSeries(query: query, untilPage: 1)
 
             self.searchDownloadGroup.notify(queue: .main) {[weak self] in
                 guard let self = self else { return }
@@ -207,11 +203,6 @@ extension HomeScreenPresenter: HomeScreenPresenterProtocol {
     
     func didRecieveTVSeriesSearchResults(_ results: [TVSeries]) {
         self.tvSeriesSearchResults.append(contentsOf: results.filteringByMinimumPopularity().removingMediaWithoutPoster())
-        searchDownloadGroup.leave()
-    }
-    
-    func didRecievePeopleSearchResults(_ results: [Person]) {
-        self.peopleSearchResults.append(contentsOf: results)
         searchDownloadGroup.leave()
     }
     

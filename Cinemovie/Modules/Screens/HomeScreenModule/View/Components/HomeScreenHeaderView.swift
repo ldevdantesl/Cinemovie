@@ -258,7 +258,6 @@ final class HomeScreenHeaderView: UIView {
             self.searchBarView.isHidden = true
             self.searchBarView.text = nil
             self.searchBarView.resignFirstResponder()
-            SDImageCache.shared.clearMemory()
         }
     }
 }

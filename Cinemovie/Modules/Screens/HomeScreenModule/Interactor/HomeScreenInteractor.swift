@@ -18,9 +18,8 @@ protocol HomeScreenInteractorProtocol: AnyObject {
     func downloadTrendingPeople(timeWindow: TrendingTimeWindow)
     
     // MARK: - SEARCH
-    func downloadSearchResultsForMovies(query: String, page: Int)
-    func downloadSearchResultsForTVSeries(query: String, page: Int)
-    func downloadSearchResultsForPeople(query: String, page: Int)
+    func downloadSearchResultsForMovies(query: String, untilPage: Int)
+    func downloadSearchResultsForTVSeries(query: String, untilPage: Int)
 }
 
 final class HomeScreenInteractor: HomeScreenInteractorProtocol {
@@ -65,31 +64,21 @@ final class HomeScreenInteractor: HomeScreenInteractorProtocol {
     }
     
     // MARK: - SEARCH
-    func downloadSearchResultsForMovies(query: String, page: Int) {
-        tmdbService.getMovieSearchResults(query: query, page: page) { [weak self] result in
+    func downloadSearchResultsForMovies(query: String, untilPage: Int) {
+        tmdbService.getMovieSearchResults(query: query, untilPage: untilPage) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): self.presenter?.didRecieveMovieSearchResults(success.movies)
+            case .success(let success): self.presenter?.didRecieveMovieSearchResults(success)
             case .failure: self.presenter?.didRecieveMovieSearchResults([])
             }
         }
     }
     
-    func downloadSearchResultsForPeople(query: String, page: Int) {
-        tmdbService.getPeopleSearchResults(query: query, page: page) { [weak self] result in
+    func downloadSearchResultsForTVSeries(query: String, untilPage: Int) {
+        tmdbService.getTVSeriesSearchResults(query: query, untilPage: untilPage) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): self.presenter?.didRecievePeopleSearchResults(success.results)
-            case .failure: self.presenter?.didRecievePeopleSearchResults([])
-            }
-        }
-    }
-    
-    func downloadSearchResultsForTVSeries(query: String, page: Int) {
-        tmdbService.getTVSeriesSearchResults(query: query, page: page) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didRecieveTVSeriesSearchResults(success.results)
+            case .success(let success): self.presenter?.didRecieveTVSeriesSearchResults(success)
             case .failure: self.presenter?.didRecieveTVSeriesSearchResults([])
             }
         }

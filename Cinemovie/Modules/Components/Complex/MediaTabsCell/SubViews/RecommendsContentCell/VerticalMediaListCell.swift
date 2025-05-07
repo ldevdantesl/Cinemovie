@@ -63,7 +63,8 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: VerticalMediaListCellViewModel?
-    private var items: [MediaPosterImageCellViewModel] = []
+    private var items: [Media] = []
+    private var itemVMS: [MediaPosterImageCellViewModel] = []
     private var gridCVTopConstraint: Constraint?
     private var backButtonSizeConstraint: Constraint?
     
@@ -133,11 +134,14 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
         super.prepareForReuse()
         self.viewModel = nil
         self.items = []
+        self.itemVMS.removeAll()
     }
     
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: VerticalMediaListCellViewModel) {
         self.viewModel = viewModel
+        self.items = viewModel.media
+        self.itemVMS.removeAll()
         
         let hasBackButton = viewModel.didTapBackButton != nil
         backButton.isHidden = !hasBackButton
@@ -169,13 +173,10 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
         )
         backButton.configure(viewModel: vm)
         
-        self.items = viewModel.media.map {
-            MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.didTapAnyMedia)
-        }
-        
+        self.itemVMS = items.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.didTapAnyMedia)}
         var snapshot = NSDiffableDataSourceSnapshot<Int, MediaPosterImageCellViewModel>()
         snapshot.appendSections([0])
-        snapshot.appendItems(items, toSection: 0)
+        snapshot.appendItems(self.itemVMS, toSection: 0)
         self.gridCollectionView.applySnapshot(snapshot: snapshot, animatingDifferences: true)
         self.gridCollectionView.layoutIfNeeded()
         self.layoutIfNeeded()
@@ -202,17 +203,17 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
     }
     
     public func insertNewItems(_ items: [Media], onCompletion: (() -> Void)? = nil) {
-        let vms = items.map {
+        self.items.append(contentsOf: items)
+        let newVMs = items.map {
             MediaPosterImageCellViewModel(media: $0) { [weak self] in
                 guard let self = self else { return }
                 self.viewModel?.didTapAnyMedia?($0)
             }
         }
-        self.items.append(contentsOf: vms)
-        
+        self.itemVMS.append(contentsOf: newVMs)
         var snapshot = NSDiffableDataSourceSnapshot<Int, MediaPosterImageCellViewModel>()
         snapshot.appendSections([0])
-        snapshot.appendItems(self.items, toSection: 0)
+        snapshot.appendItems(self.itemVMS, toSection: 0)
         self.gridCollectionView.applySnapshot(snapshot: snapshot, animatingDifferences: true) { [weak self] in
             guard let self = self else { return }
             self.invalidateIntrinsicContentSize()

@@ -34,7 +34,7 @@ final class MediaListCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: MediaListCellViewModel?
-    private var items: [MediaPosterImageCellViewModel] = []
+    private var items: [Media] = []
     
     // MARK: - VIEW PROPERTIES
     private let titleLabel: UILabel = {
@@ -99,7 +99,7 @@ final class MediaListCell: ReusableCellBaseClass {
         self.viewModel = viewModel
         self.titleLabel.text = viewModel.listName
         self.subtitleLabel.text = viewModel.listSubtitle
-        self.items = viewModel.mediaItems.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.didTapMediaItem) }
+        self.items = viewModel.mediaItems
         
         self.collectionView.reloadData()
     }
@@ -137,8 +137,12 @@ extension MediaListCell: UICollectionViewDataSource, UICollectionViewDelegate {
             withReuseIdentifier: MediaPosterImageCell.identifier, for: indexPath
         ) as? MediaPosterImageCell else { return UICollectionViewCell() }
         
-        let itemVM = items[indexPath.row]
-        cell.configure(with: itemVM)
+        let item = items[indexPath.item]
+        let vm = MediaPosterImageCellViewModel(media: item) { [weak self] in
+            guard let self = self else { return }
+            self.viewModel?.didTapMediaItem?($0)
+        }
+        cell.configure(with: vm)
         return cell
     }
 }

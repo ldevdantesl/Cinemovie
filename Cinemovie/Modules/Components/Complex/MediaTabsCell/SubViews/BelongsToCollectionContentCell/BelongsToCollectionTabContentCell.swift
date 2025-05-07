@@ -43,7 +43,7 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: BelongsToCollectionTabContentCellViewModel?
-    private var items: [MediaPosterImageCellViewModel] = []
+    private var items: [Media] = []
     private var showingItems: Bool = false
     
     // MARK: - VIEW PROPERTIES
@@ -155,7 +155,7 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: BelongsToCollectionTabContentCellViewModel) {
         self.viewModel = viewModel
-        self.items = viewModel.collectionDetails.parts.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.onItemTapped) }
+        self.items = viewModel.collectionDetails.parts
         
         guard !showingItems else { return }
         self.collectionNameLabel.text = viewModel.collectionDetails.name
@@ -258,9 +258,12 @@ extension BelongsToCollectionTabContentCell: UICollectionViewDelegate, UICollect
         guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: MediaPosterImageCell.identifier, for: indexPath
         ) as? MediaPosterImageCell else { return UICollectionViewCell() }
-        
-        let itemVM = items[indexPath.row]
-        cell.configure(with: itemVM)
+        let media = items[indexPath.item]
+        let vm = MediaPosterImageCellViewModel(media: media) { [weak self] in
+            guard let self = self else { return }
+            self.viewModel?.onItemTapped?($0)
+        }
+        cell.configure(with: vm)
         return cell
     }
 }

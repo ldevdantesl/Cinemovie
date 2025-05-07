@@ -126,6 +126,7 @@ final class MediaSearchCell: ReusableCellBaseClass {
     
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: MediaSearchCellViewModel) {
+        cleanUp()
         self.viewModel = viewModel
         if !viewModel.movies.isEmpty {
             let vm = VerticalMediaListCellViewModel(media: viewModel.movies, didTapAnyMedia: viewModel.didTapAnyMedia)
@@ -146,6 +147,12 @@ final class MediaSearchCell: ReusableCellBaseClass {
             self.invalidateIntrinsicContentSize()
             self.layoutIfNeeded()
         }
+    }
+    
+    public func cleanUp() {
+        viewModel = nil
+        items.removeAll()
+        selectedTab = .none
     }
     
     // MARK: - PRIVATE FUNC

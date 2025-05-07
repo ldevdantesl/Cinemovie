@@ -210,6 +210,10 @@ extension HomeScreenVC: UICollectionViewDelegate {
         if let featuredCell = cell as? FeaturedMediaCell {
             featuredCell.stopTimer()
         }
+        
+        if let searchCell = cell as? MediaSearchCell {
+            searchCell.cleanUp()
+        }
     }
 }
 

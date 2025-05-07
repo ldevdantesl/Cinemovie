@@ -34,7 +34,7 @@ final class SimilarTabContentCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: SimilarTabContentCellViewModel?
-    private var items: [MediaPosterImageCellViewModel] = []
+    private var items: [Media] = []
     
     // MARK: - VIEW PROPERTIES
     private lazy var gridCollectionView: UICollectionView = {
@@ -74,7 +74,7 @@ final class SimilarTabContentCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: SimilarTabContentCellViewModel) {
         self.viewModel = viewModel
-        self.items = viewModel.media.map { MediaPosterImageCellViewModel(media: $0, didTapMedia: viewModel.didTapAnyMedia) }
+        self.items = viewModel.media
         self.gridCollectionView.reloadData()
         self.layoutIfNeeded()
     }
@@ -111,7 +111,11 @@ extension SimilarTabContentCell: UICollectionViewDataSource {
         guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: MediaPosterImageCell.identifier, for: indexPath
         ) as? MediaPosterImageCell else { return UICollectionViewCell() }
-        let itemVM = items[indexPath.row]
+        let media = items[indexPath.row]
+        let itemVM = MediaPosterImageCellViewModel(media: media) { [weak self] in
+            guard let self = self else { return }
+            self.viewModel?.didTapAnyMedia?($0)
+        }
         cell.configure(with: itemVM)
         return cell
     }

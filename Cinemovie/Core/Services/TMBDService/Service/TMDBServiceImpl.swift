@@ -127,25 +127,12 @@ final class TMDBServiceImpl: TMDBService {
     }
     
     // MARK: - SEARCH
-    func getMovieSearchResults(query: String, page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
-        var newParams = queryParams
-        newParams["page"] = page.description
-        let endpoint = TMDBEndpoints.getMovieSearchResultsEndpoint(query: query, extraParams: newParams)
-        handleRequest(endpoint: endpoint, completion: completion)
+    func getMovieSearchResults(query: String, untilPage: Int, completion: @escaping (Result<[Movie], NetworkError>) -> Void) {
+        fetchMoviesSearchResultsRecursively(query: query, untilPage: untilPage, extraParams: queryParams, completion: completion)
     }
     
-    func getPeopleSearchResults(query: String, page: Int, completion: @escaping (Result<PeopleListAPIResponse, NetworkError>) -> Void) {
-        var newParams = queryParams
-        newParams["page"] = page.description
-        let endpoint = TMDBEndpoints.getPeopleSearchResultsEndpoint(query: query, extraParams: newParams)
-        handleRequest(endpoint: endpoint, completion: completion)
-    }
-    
-    func getTVSeriesSearchResults(query: String, page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
-        var newParams = queryParams
-        newParams["page"] = page.description
-        let endpoint = TMDBEndpoints.getTVSeriesSearchResultsEndpoint(query: query, extraParams: newParams)
-        handleRequest(endpoint: endpoint, completion: completion)
+    func getTVSeriesSearchResults(query: String, untilPage: Int, completion: @escaping (Result<[TVSeries], NetworkError>) -> Void) {
+        fetchSeriesSearchResultsRecursively(query: query, untilPage: untilPage, extraParams: queryParams, completion: completion)
     }
     
     // MARK: - WATCHLIST
@@ -368,6 +355,58 @@ final class TMDBServiceImpl: TMDBService {
                         sessionID: sessionID, page: page + 1, accumulated: combined,
                         extraParams: extraParams, completion: completion
                     )
+                } else {
+                    completion(.success(combined))
+                }
+                
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
+        }
+    }
+    
+    private func fetchMoviesSearchResultsRecursively(
+        query: String, page: Int = 1, untilPage: Int,
+        accumulated: [Movie] = [], extraParams: [String : String],
+        completion: @escaping (Result<[Movie], NetworkError>) -> Void
+    ) {
+        var params = extraParams
+        params["page"] = "\(page.description)"
+        
+        let endpoint = TMDBEndpoints.getMovieSearchResultsEndpoint(query: query, extraParams: params)
+        
+        handleRequest(endpoint: endpoint) { (result: Result<MovieListAPIResponse, NetworkError>) in
+            switch result {
+            case .success(let success):
+                let combined = accumulated + success.movies
+                if page < untilPage {
+                    self.fetchMoviesSearchResultsRecursively(query: query, page: page + 1, untilPage: untilPage, accumulated: combined, extraParams: extraParams, completion: completion)
+                } else {
+                    completion(.success(combined))
+                }
+                
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
+        }
+    }
+    
+    private func fetchSeriesSearchResultsRecursively(
+        query: String, page: Int = 1, untilPage: Int,
+        accumulated: [TVSeries] = [], extraParams: [String : String],
+        completion: @escaping (Result<[TVSeries], NetworkError>) -> Void
+    ) {
+        var params = extraParams
+        params["page"] = "\(page.description)"
+        
+        let endpoint = TMDBEndpoints.getTVSeriesSearchResultsEndpoint(query: query, extraParams: params)
+        
+        handleRequest(endpoint: endpoint) { (result: Result<TVSeriesListAPIResponse, NetworkError>) in
+            switch result {
+            case .success(let success):
+                let combined = accumulated + success.results
+                if page < untilPage {
+                    self.fetchSeriesSearchResultsRecursively(query: query, page: page + 1, untilPage: untilPage, accumulated: combined, extraParams: extraParams, completion: completion)
                 } else {
                     completion(.success(combined))
                 }
