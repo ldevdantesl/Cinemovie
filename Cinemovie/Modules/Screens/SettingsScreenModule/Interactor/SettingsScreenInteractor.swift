@@ -19,7 +19,7 @@ final class SettingsScreenInteractor: SettingsScreenInteractorProtocol {
     }
     
     func showSessionID() {
-        authService?.getSessionID()
+        print("Yup")
     }
     
     func logout() {

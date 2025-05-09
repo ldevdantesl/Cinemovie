@@ -9,19 +9,17 @@ import Foundation
 import UIKit
 
 enum AuthError: Error {
-    case invalidCredentials
+    case cantCreateRequestToken
     case networkError(NetworkError)
-    case userCancelled
+    case cantExchangeRequestTokenToAccessToken
     case notValidSessionID
-    case custom(String)
     
     var localizedDescription: String {
         switch self {
-        case .invalidCredentials: "Error: Error with credentials"
+        case .cantCreateRequestToken: "Error: Something is wrong with backend, please try again later"
         case .networkError(let error): "Error: Something is wrong with network \(error)"
-        case .userCancelled: "Error: User cancelled"
         case .notValidSessionID: "Error: Session ID is not valid or its a guest session"
-        case .custom(let error) : "Error: \(error)"
+        case .cantExchangeRequestTokenToAccessToken: "Error: Something is wrong with backend, please try again later"
         }
     }
 }

@@ -10,7 +10,7 @@ import SnapKit
 
 struct SeasonsPopUpViewModel: PopUPViewModel {
     let seasonDetails: TVSeasonDetails
-    let didTapClose: (() -> Void)?
+    let onClose: (() -> Void)?
     
     static let defaultItemHeight = 120.0
 }

@@ -10,6 +10,7 @@ import UIKit
 protocol LoginScreenRouterProtocol {
     func routeToMainView()
     func openOAuthURLWithToken(token: String)
+    func openOAuthURLWithTokenV4(token: String)
 }
 
 final class LoginScreenRouter: LoginScreenRouterProtocol {
@@ -22,6 +23,12 @@ final class LoginScreenRouter: LoginScreenRouterProtocol {
     
     func openOAuthURLWithToken(token: String) {
         let urlString = CONSTANTS.baseUniversalURLString + "/authenticate/\(token)?redirect_to=cinemovie://callback"
+        guard let url = URL(string: urlString) else { return }
+        AppOpener.openURL(url)
+    }
+    
+    func openOAuthURLWithTokenV4(token: String) {
+        let urlString = CONSTANTS.baseUniversalURLString + "/auth/access?request_token=\(token)"
         guard let url = URL(string: urlString) else { return }
         AppOpener.openURL(url)
     }

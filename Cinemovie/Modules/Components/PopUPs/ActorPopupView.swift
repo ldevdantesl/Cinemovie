@@ -12,7 +12,7 @@ import SDWebImage
 struct ActorPopupViewModel: PopUPViewModel {
     let actor: Cast
     let didTapActorDetails: ((String) -> Void)?
-    let didTapClose: (() -> Void)?
+    let onClose: (() -> Void)?
 }
 
 final class ActorPopupView: PopUPView {

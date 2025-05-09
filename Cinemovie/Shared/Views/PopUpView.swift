@@ -9,12 +9,13 @@ import UIKit
 import SnapKit
 
 protocol PopUPViewModel {
-    var didTapClose: (() -> Void)? { get }
+    var onClose: (() -> Void)? { get }
 }
 
 open class PopUPView: UIView {
     // MARK: - PROPERTIES
     private let viewModel: PopUPViewModel
+    private let closesOnBackgroundTap: Bool
     
     // MARK: - VIEW PROPERTIES
     private lazy var blurView: UIVisualEffectView = {
@@ -26,8 +27,9 @@ open class PopUPView: UIView {
         return view
     }()
     
-    init(viewModel: PopUPViewModel) {
+    init(viewModel: PopUPViewModel, closesOnBackgroundTap: Bool = true) {
         self.viewModel = viewModel
+        self.closesOnBackgroundTap = closesOnBackgroundTap
         super.init(frame: .zero)
         setupUI()
     }
@@ -42,7 +44,7 @@ open class PopUPView: UIView {
     }
         
     // MARK: - PUBLIC FUNC
-    func show(in parentView: UIView) {
+    public func show(in parentView: UIView) {
         parentView.addSubview(self)
         
         self.translatesAutoresizingMaskIntoConstraints = false
@@ -62,7 +64,7 @@ open class PopUPView: UIView {
         }
     }
     
-    func dismiss() {
+    public func dismiss() {
         UIView.animate(
             withDuration: 0.5, delay: 0,
             usingSpringWithDamping: 0.7, initialSpringVelocity: 1,
@@ -74,7 +76,7 @@ open class PopUPView: UIView {
         } completion: { [weak self] _ in
             guard let self = self else { return }
             self.removeFromSuperview()
-            self.viewModel.didTapClose?()
+            self.viewModel.onClose?()
         }
     }
     
@@ -88,6 +90,6 @@ open class PopUPView: UIView {
     
     // MARK: - OBJC
     @objc private func didTapClose() {
-        self.dismiss()
+        closesOnBackgroundTap ? self.dismiss() : ()
     }
 }

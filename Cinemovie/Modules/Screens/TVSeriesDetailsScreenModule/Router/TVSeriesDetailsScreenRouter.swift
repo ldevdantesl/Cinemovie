@@ -54,7 +54,7 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     // MARK: - PRESENT
     func showActorPopUp(actor: Cast) {
         guard let vcView = viewController?.view else { return }
-        let vm = ActorPopupViewModel(actor: actor, didTapActorDetails: self.navigateToPersonDetails, didTapClose: self.hidePopUpView)
+        let vm = ActorPopupViewModel(actor: actor, didTapActorDetails: self.navigateToPersonDetails, onClose: self.hidePopUpView)
         let popupView = ActorPopupView(viewModel: vm)
         popupView.show(in: vcView)
         viewController?.activePopUpView = popupView
@@ -63,7 +63,7 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     func showSeasonPopUp(seasonDetails: TVSeasonDetails) {
         DispatchQueue.main.async {
             guard let vcView = self.viewController?.view else { return }
-            let vm = SeasonsPopUpViewModel(seasonDetails: seasonDetails, didTapClose: self.hidePopUpView)
+            let vm = SeasonsPopUpViewModel(seasonDetails: seasonDetails, onClose: self.hidePopUpView)
             let popupView = SeasonsPopUpView(viewModel: vm)
             popupView.show(in: vcView)
             self.viewController?.activePopUpView = popupView

@@ -8,17 +8,28 @@
 import Foundation
 
 protocol AuthService: AnyObject {
-    // MARK: - PROPERTIES
     var isLoggedIn: Bool { get }
     
-    // MARK: - LOGIN
-    func createRequestToken(completion: @escaping (Result<String, AuthError>) -> Void)
-    func loginWithOAuth(token: String, completion: @escaping (Result<String, AuthError>) -> Void) 
     func loginAsGuest(completion: @escaping (Result<Void, AuthError>) -> Void)
     func logout()
+}
+
+protocol AuthServiceV3: AuthService {
+    // MARK: - LOGIN
+    func createRequestToken(completion: @escaping (Result<String, AuthError>) -> Void)
+    func exchangeRequestToSession(token: String, completion: @escaping (Result<String, AuthError>) -> Void)
     
     // MARK: - OTHER
     func storeAccountIDIntoAccountStore(completion: @escaping (Bool) -> Void)
     func getAccountDetails(completion: @escaping (Result<AccountDetails, AuthError>) -> Void)
-    func getSessionID() 
+    func getSessionID()
+}
+
+protocol AuthServiceV4: AuthService {
+    
+    // MARK: - LOGIN
+    func createRequestToken(completion: @escaping (Result<RequestTokenResponseV4, AuthError>) -> Void)
+    func exchangeRequestToAccessToken(token: String, completion: @escaping (Result<AccessTokenResponseV4, AuthError>) -> Void)
+    func getSessionIDUsingAccessToken(token: String, completion: @escaping (Result<NewSessionResponse, AuthError>) -> Void)
+    func loginAsGuest(completion: @escaping (Result<Void, AuthError>) -> Void)
 }

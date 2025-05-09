@@ -13,6 +13,7 @@ protocol WatchlistScreenPresenterProtocol: AnyObject {
     // MARK: - USER INITIATED
     func didCallRefresh()
     func didTapList(listType: UserListTypes)
+    func didTapAddNewList()
     
     // MARK: - WATCHLIST
     func didGetWatchlistMovies(_ movies: [Movie], refreshing: Bool)
@@ -57,6 +58,8 @@ final class WatchlistScreenPresenter {
 
 extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
     func viewDidLoad() {
+        self.view?.showDownloadingView()
+        
         downloadGroup.enter()
         interactor.getFavoriteMovies(refreshing: false)
         
@@ -116,6 +119,18 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
         router.navigateToList(listType: listType)
     }
     
+    func didTapAddNewList() {
+        router.presentAddNewListPopUp { [weak self] listName, listDescription in
+            guard let self = self else { return }
+            self.view?.showDownloadingView()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                guard let self = self else { return }
+                self.view?.hideDownloadingView()
+            }
+        }
+    }
+    
     // MARK: - WATCHLIST
     func didGetWatchlistMovies(_ movies: [Movie], refreshing: Bool) {
         self.watchlistMedia.append(contentsOf: movies)
@@ -150,7 +165,7 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
     }
     
     private func didGetAllData() {
-        self.view?.downloadingView.hide()
+        self.view?.hideDownloadingView()
         let watchlistVM = WatchlistItemCellViewModel(
             media: interLeavedMedia(media: watchlistMedia),
             listType: .watchlist

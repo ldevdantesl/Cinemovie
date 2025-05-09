@@ -25,14 +25,11 @@ final class AccountStoreImpl: AccountStore {
         }
     }
 
-    var accountID: Int? {
-        get {
-            guard let string = KeychainStore.get(for: accountIDKey) else { return nil }
-            return Int(string)
-        }
+    var accountID: String? {
+        get { KeychainStore.get(for: accountIDKey) }
         set {
             if let value = newValue {
-                KeychainStore.set(String(value), for: accountIDKey)
+                KeychainStore.set(value, for: accountIDKey)
             } else {
                 KeychainStore.delete(for: accountIDKey)
             }
@@ -60,13 +57,13 @@ final class AccountStoreImpl: AccountStore {
 
     // MARK: - FUNCTIONS
     func clear() {
-        KeychainStore.delete(for: sessionIDKey)
-        KeychainStore.delete(for: accountIDKey)
-        KeychainStore.delete(for: accessTokenKey)
+        self.sessionID = nil
+        self.accessToken = nil
+        self.accountID = nil
     }
     
     func printEverything() {
-        print("Account id: \(accountID ?? 0)")
+        print("Account id: \(accountID ?? "")")
         print("Session id: \(sessionID ?? "No sessionID")")
         print("Access Token: \(accessToken ?? "No access token")")
         print("Is logged in: \(isLoggedIn)")

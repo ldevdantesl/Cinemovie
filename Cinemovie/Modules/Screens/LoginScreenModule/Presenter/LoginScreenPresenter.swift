@@ -15,11 +15,14 @@ protocol LoginScreenPresenterProtocol: AnyObject {
     
     // MARK: - PROGRAMMATIC
     func didFinishLogingAsGuest()
-    func didLogInWithOAuth()
+    func didLogInWithOAuthUsingV3()
+    func didLogInWithOAuthUsingV4()
     func didStoreAccountID()
+    func didReceiveAccessToken(accessToken: String)
     
     // MARK: - OTHER
     func openOAuthURLWithToken(token: String)
+    func openOAuthURLWithTokenV4(requestToken: String)
     func handleOAuthCallback(url: URL)
     
     // MARK: - ERROR HANDLING
@@ -54,14 +57,24 @@ extension LoginScreenPresenter: LoginScreenPresenterProtocol {
         }
     }
     
-    func didLogInWithOAuth() {
+    func didLogInWithOAuthUsingV3() {
         self.interactor.storeAccountID()
+    }
+    
+    func didLogInWithOAuthUsingV4() {
+        DispatchQueue.main.async {
+            self.router.routeToMainView()
+        }
     }
     
     func didStoreAccountID() {
         DispatchQueue.main.async {
             self.router.routeToMainView()
         }
+    }
+    
+    func didReceiveAccessToken(accessToken: String) {
+        self.interactor.getSessionIDUsingAccessToken(accessToken: accessToken)
     }
     
     // MARK: - OTHER
@@ -71,18 +84,27 @@ extension LoginScreenPresenter: LoginScreenPresenterProtocol {
         }
     }
     
+    func openOAuthURLWithTokenV4(requestToken: String) {
+        DispatchQueue.main.async {
+            self.router.openOAuthURLWithTokenV4(token: requestToken)
+        }
+    }
+    
     func handleOAuthCallback(url: URL) {
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
-              let token = components.queryItems?.first(where: { $0.name == "request_token" })?.value,
-              let approved = components.queryItems?.first(where: { $0.name == "approved" })?.value else {
-            view?.didReceiveError(errorString:" Invalid OAuth response ")
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+            view?.didReceiveError(errorString: "Invalid OAuth response")
             return
         }
-        
-        if approved == "true" {
-            interactor.exchangeRequestTokenForSession(token)
+
+        if let token = components.queryItems?.first(where: { $0.name == "request_token" })?.value,
+           let approved = components.queryItems?.first(where: { $0.name == "approved" })?.value {
+            if approved == "true" {
+                interactor.exchangeRequestTokenForSession(token)
+            } else {
+                view?.didReceiveError(errorString: "Access was denied. Please try again.")
+            }
         } else {
-            view?.didReceiveError(errorString: "Access was denied. Please try again.")
+            interactor.exchangeRequestTokenForAccessToken()
         }
     }
 

@@ -18,7 +18,7 @@ final class DIContainer {
         self.userService = UserServiceImpl()
         self.accountStore = AccountStoreImpl()
         self.networkService = NetworkServiceImpl()
-        self.authService = AuthServiceImpl(accountStore: accountStore, networkService: networkService)
+        self.authService = AuthServiceV4Impl(accountStore: accountStore, networkService: networkService)
         self.tmdbService = TMDBServiceImpl(accountStore: accountStore, networkService: networkService, userService: userService)
     }
 }

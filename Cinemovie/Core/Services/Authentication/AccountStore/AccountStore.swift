@@ -9,7 +9,7 @@ import Foundation
 
 protocol AccountStore: AnyObject {
     var sessionID: String? { get set }
-    var accountID: Int? { get set }
+    var accountID: String? { get set }
     var accessToken: String? { get set }
     var isLoggedIn: Bool { get }
     var isGuest: Bool { get }

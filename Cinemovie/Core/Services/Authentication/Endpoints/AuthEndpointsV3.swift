@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct AuthenticationEndpoints {
+struct AuthEndpointsV3 {
     static let baseURL = CONSTANTS.baseURLString
     static let apiKey = CONSTANTS.apiKey
     

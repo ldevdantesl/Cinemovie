@@ -19,6 +19,9 @@ protocol WatchlistScreenInteractorProtocol: AnyObject {
     // MARK: - RATED
     func getRatedMovies(refreshing: Bool)
     func getRatedTVSeries(refreshing: Bool)
+    
+    // MARK: - CUSTOM LIST
+    func createNewList(listName: String, listDescription: String?)
 }
 
 final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
@@ -90,5 +93,10 @@ final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
             case .failure: presenter?.didGetRatedTVSeries([], refreshing: refreshing)
             }
         }
+    }
+    
+    // MARK: - CUSTOM
+    func createNewList(listName: String, listDescription: String?) {
+        
     }
 }

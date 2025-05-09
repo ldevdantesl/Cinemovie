@@ -9,6 +9,7 @@ import UIKit
 
 protocol WatchlistScreenRouterProtocol {
     func navigateToList(listType: UserListTypes)
+    func presentAddNewListPopUp(onAdd: @escaping ((String, String?) -> Void))
 }
 
 final class WatchlistScreenRouter: WatchlistScreenRouterProtocol {
@@ -22,5 +23,21 @@ final class WatchlistScreenRouter: WatchlistScreenRouterProtocol {
     func navigateToList(listType: UserListTypes) {
         let vc = UserListDetailsScreenAssembler.assemble(listType: listType, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func presentAddNewListPopUp(onAdd: @escaping ((String, String?) -> Void)) {
+        guard let vcView = viewController?.view else { return }
+        let vm = AddNewListPopUpViewModel(didTapAdd: onAdd, onClose: self.hidePopUp)
+        let view = AddNewListPopUpView(viewModel: vm)
+        view.show(in: vcView)
+        self.viewController?.popUpView = view
+    }
+    
+    // MARK: - PRIVATE FUNC
+    private func hidePopUp() {
+        DispatchQueue.main.async {
+            self.viewController?.popUpView?.removeFromSuperview()
+            self.viewController?.popUpView = nil
+        }
     }
 }

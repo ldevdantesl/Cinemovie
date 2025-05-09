@@ -14,8 +14,13 @@ protocol WatchlistScreenViewProtocol: AnyObject {
     func applySnapshot(sections: [WatchlistScreenVC.Sections], itemsBySection: [WatchlistScreenVC.Sections : [WatchlistScreenVC.Items]])
     func refreshCompleted()
     
+    // MARK: - LOADING
+    func showDownloadingView()
+    func hideDownloadingView()
+    
     // MARK: - PROPERTIES
     var downloadingView: CMSplashView { get }
+    var popUpView: PopUPView? { get set }
 }
 
 final class WatchlistScreenVC: UIViewController {
@@ -36,6 +41,7 @@ final class WatchlistScreenVC: UIViewController {
     
     // MARK: - VIPER
     var presenter: WatchlistScreenPresenterProtocol?
+    var popUpView: PopUPView?
     let downloadingView: CMSplashView = {
         let view = CMSplashView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -54,7 +60,7 @@ final class WatchlistScreenVC: UIViewController {
     }()
     
     private lazy var headerView: WatchlistScreenHeaderView = {
-        let headerVM = WatchlistScreenHeaderViewModel(didTapAddListAction: nil)
+        let headerVM = WatchlistScreenHeaderViewModel(didTapAddListAction: presenter?.didTapAddNewList)
         let view = WatchlistScreenHeaderView()
         view.configure(viewModel: headerVM)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -77,7 +83,6 @@ final class WatchlistScreenVC: UIViewController {
         configureDataSource()
         presenter?.viewDidLoad()
         setupUI()
-        downloadingView.show()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -151,6 +156,7 @@ extension WatchlistScreenVC: UICollectionViewDelegate {
 }
 
 extension WatchlistScreenVC: WatchlistScreenViewProtocol {
+    // MARK: - ERROR HANDLING
     func didRecieveError(_ description: String) {
         let alert = UIAlertController(
             title: "Oops...", message: description,
@@ -165,11 +171,22 @@ extension WatchlistScreenVC: WatchlistScreenViewProtocol {
         }
     }
     
+    // MARK: - OTHER
     func applySnapshot(sections: [Sections], itemsBySection: [Sections : [Items]]) {
         collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
     }
     
     func refreshCompleted() {
         refreshControler.endRefreshing()
+    }
+    
+    // MARK: - DOWNLOADING
+    func showDownloadingView() {
+        self.view.bringSubviewToFront(downloadingView)
+        downloadingView.show()
+    }
+    
+    func hideDownloadingView() {
+        downloadingView.hide()
     }
 }

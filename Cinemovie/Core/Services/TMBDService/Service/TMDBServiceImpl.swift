@@ -170,7 +170,7 @@ final class TMDBServiceImpl: TMDBService {
     
     // MARK: - WATCHLIST
     func isMovieWatchlisted(movieID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(false)); return }
         fetchUserListMoviesRecursively(listType: .watchlist, accountID: accountID, sessionID: sessionID, extraParams: queryParams) { result in
             switch result {
             case .success(let success):
@@ -186,7 +186,7 @@ final class TMDBServiceImpl: TMDBService {
     }
     
     func isSeriesWatchlisted(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(false)); return }
         fetchUserListSeriesRecursively(listType: .watchlist, accountID: accountID, sessionID: sessionID, extraParams: queryParams) { result in
             switch result {
             case .success(let success):
@@ -219,7 +219,7 @@ final class TMDBServiceImpl: TMDBService {
     }
     
     func isSeriesFavorited(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(false)); return }
         fetchUserListSeriesRecursively(listType: .favorite, accountID: accountID, sessionID: sessionID, extraParams: queryParams) { result in
             switch result {
             case .success(let success):
@@ -252,7 +252,7 @@ final class TMDBServiceImpl: TMDBService {
     }
     
     func isSeriesRated(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
+        guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.success(false)); return }
         fetchUserListSeriesRecursively(listType: .rated, accountID: accountID, sessionID: sessionID, extraParams: queryParams) { result in
             switch result {
             case .success(let success):
@@ -306,7 +306,7 @@ final class TMDBServiceImpl: TMDBService {
     }
     
     private func fetchUserListMoviesRecursively(
-        listType: UserListTypes, accountID: Int, sessionID: String,
+        listType: UserListTypes, accountID: String, sessionID: String,
         page: Int = 1, accumulated: [Movie] = [], extraParams: [String : String],
         completion: @escaping (Result<[Movie], NetworkError>) -> Void
     ) {
@@ -336,7 +336,7 @@ final class TMDBServiceImpl: TMDBService {
     }
     
     private func fetchUserListSeriesRecursively(
-        listType: UserListTypes, accountID: Int, sessionID: String,
+        listType: UserListTypes, accountID: String, sessionID: String,
         page: Int = 1, accumulated: [TVSeries] = [], extraParams: [String : String],
         completion: @escaping (Result<[TVSeries], NetworkError>) -> Void
     ) {

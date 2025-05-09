@@ -8,29 +8,40 @@
 import UIKit
 import SnapKit
 
-struct CMSearchBarViewModel {
+struct CMTextFieldViewModel {
     let backgroundColor: UIColor
     let textColor: UIColor
+    let returnKeyType: UIReturnKeyType
     let cornerRadius: CGFloat
+    let borderColor: UIColor?
+    let borderWidth: CGFloat?
     let placeholder: String?
     let font: UIFont
     
-    init(backgroundColor: UIColor, textColor: UIColor = CMColor.cmLabel, cornerRadius: CGFloat = 15.0, placeholder: String? = nil, font: UIFont) {
+    init(
+        backgroundColor: UIColor, textColor: UIColor = CMColor.cmLabel,
+        cornerRadius: CGFloat = 15.0, placeholder: String? = nil,
+        font: UIFont, returnKeyType: UIReturnKeyType = .search,
+        borderColor: UIColor? = nil, borderWidth: CGFloat? = nil
+    ) {
         self.backgroundColor = backgroundColor
         self.textColor = textColor
         self.cornerRadius = cornerRadius
         self.placeholder = placeholder
+        self.returnKeyType = returnKeyType
+        self.borderColor = borderColor
+        self.borderWidth = borderWidth
         self.font = font
     }
 }
 
-final class CMSearchBar: UITextField {
+final class CMTextField: UITextField {
      
     // MARK: - PROPERTIES
-    private(set) var viewModel: CMSearchBarViewModel
+    private(set) var viewModel: CMTextFieldViewModel
     
     // MARK: - LIFECYCLE
-    init(viewModel: CMSearchBarViewModel) {
+    init(viewModel: CMTextFieldViewModel) {
         self.viewModel = viewModel
         super.init(frame: .zero)
         setup()
@@ -44,6 +55,12 @@ final class CMSearchBar: UITextField {
     override func layoutSubviews() {
         super.layoutSubviews()
         self.layer.cornerRadius = viewModel.cornerRadius
+        if let borderColor = viewModel.borderColor {
+            self.layer.borderColor = borderColor.cgColor
+        }
+        if let borderWidth = viewModel.borderWidth {
+            self.layer.borderWidth = borderWidth
+        }
     }
     
     override func textRect(forBounds bounds: CGRect) -> CGRect {
@@ -55,14 +72,14 @@ final class CMSearchBar: UITextField {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: CMSearchBarViewModel) {
+    public func configure(viewModel: CMTextFieldViewModel) {
         self.viewModel = viewModel
         setup()
     }
     
     // MARK: - PRIVATE FUNC
     private func setup() {
-        self.returnKeyType = .search
+        self.returnKeyType = viewModel.returnKeyType
         self.placeholder = viewModel.placeholder
         self.textColor = viewModel.textColor
         self.font = viewModel.font

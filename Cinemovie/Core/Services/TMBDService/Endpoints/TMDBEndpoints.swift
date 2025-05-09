@@ -126,7 +126,7 @@ struct TMDBEndpoints {
 
     // MARK: - USER LIST
     static func getUserListMediaEndpoint(
-        accountID: Int, sessionID: String, mediaType: MediaTypes,
+        accountID: String, sessionID: String, mediaType: MediaTypes,
         userListType: UserListTypes, extraParams: [String : String]? = nil
     ) -> Endpoint {
         var queryParams = ["session_id" : sessionID, "sort_by" : "created_at.desc"]
@@ -134,7 +134,7 @@ struct TMDBEndpoints {
         return Endpoint(baseURL: baseURL, bearerToken: apiReadAccessToken, path: "/account/\(accountID)/\(userListType.titleForEndpoint)/\(mediaType.pluralized)", queryParams: queryParams)
     }
     
-    static func addOrRemoveMediaInUserListEndpoint(accountID: Int, sessionID: String, listType: UserListTypes, mediaID: Int, mediaType: MediaTypes, adding: Bool) -> Endpoint {
+    static func addOrRemoveMediaInUserListEndpoint(accountID: String, sessionID: String, listType: UserListTypes, mediaID: Int, mediaType: MediaTypes, adding: Bool) -> Endpoint {
         let bodyParam: [String : Any] = [
             "media_type" : mediaType.rawValue,
             "media_id" : mediaID,

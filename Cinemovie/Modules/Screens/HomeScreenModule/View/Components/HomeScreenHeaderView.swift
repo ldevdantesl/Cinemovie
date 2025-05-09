@@ -63,12 +63,12 @@ final class HomeScreenHeaderView: UIView {
         return button
     }()
     
-    private lazy var searchBarView: CMSearchBar = {
-        let vm = CMSearchBarViewModel(
+    private lazy var searchBarView: CMTextField = {
+        let vm = CMTextFieldViewModel(
             backgroundColor: .cmSecondaryBackground, textColor: .cmLabel,
             placeholder: "Star wars...", font: CMFont.font(size: .body, fontName: .avenirBold)
         )
-        let field = CMSearchBar(viewModel: vm)
+        let field = CMTextField(viewModel: vm)
         field.delegate = self
         field.isHidden = true
         field.translatesAutoresizingMaskIntoConstraints = false

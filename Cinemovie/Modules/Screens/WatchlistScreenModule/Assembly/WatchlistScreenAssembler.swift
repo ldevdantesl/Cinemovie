@@ -13,7 +13,7 @@ final class WatchlistScreenAssembler {
         let router = WatchlistScreenRouter(tmdbService: tmdbService)
         let presenter = WatchlistScreenPresenter(interactor: interactor, router: router)
         let viewController = WatchlistScreenVC()
-        presenter.view  = viewController
+        presenter.view = viewController
         viewController.presenter = presenter
         interactor.presenter = presenter
         router.viewController = viewController
