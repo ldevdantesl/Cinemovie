@@ -18,6 +18,9 @@ protocol WatchlistScreenViewProtocol: AnyObject {
     func showDownloadingView()
     func hideDownloadingView()
     
+    // MARK: - ERORR HANDLING
+    func showError(errorStr: String)
+    
     // MARK: - PROPERTIES
     var downloadingView: CMSplashView { get }
     var popUpView: PopUPView? { get set }
@@ -188,5 +191,18 @@ extension WatchlistScreenVC: WatchlistScreenViewProtocol {
     
     func hideDownloadingView() {
         downloadingView.hide()
+    }
+    
+    // MARK: - ERORR HANDLING
+    func showError(errorStr: String) {
+        let alert = UIAlertController(
+            title: "Oops..",
+            message: errorStr,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+        }
     }
 }

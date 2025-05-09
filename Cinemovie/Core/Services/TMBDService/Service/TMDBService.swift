@@ -46,6 +46,10 @@ protocol TMDBService: AnyObject {
     func getAllUserListSeries(listType: UserListTypes, completion: @escaping (Result<[TVSeries], NetworkError>) -> Void)
     func addOrRemoveMediaInUserList(mediaID: Int, listType: UserListTypes, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void)
     
+    // MARK: - CUSTOM LISTS
+    func createCustomList(name: String, description: String?, isPublic: Bool, completion: @escaping (Result<CreateUserListResponse, NetworkError>) -> Void)
+    func getUserCustomLists(completion: @escaping (Result<UserCustomListsResponse, NetworkError>) -> Void)
+    
     // MARK: - WATCHLIST
     func isMovieWatchlisted(movieID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void)
     func isSeriesWatchlisted(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void)

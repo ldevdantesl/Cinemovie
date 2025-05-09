@@ -126,12 +126,79 @@ struct TMDBEndpoints {
 
     // MARK: - USER LIST
     static func getUserListMediaEndpoint(
-        accountID: String, sessionID: String, mediaType: MediaTypes,
+        accountID: String, accessToken: String, mediaType: MediaTypes,
         userListType: UserListTypes, extraParams: [String : String]? = nil
     ) -> Endpoint {
-        var queryParams = ["session_id" : sessionID, "sort_by" : "created_at.desc"]
+        var queryParams = ["sort_by" : "created_at.desc"]
         extraParams?.forEach { queryParams[$0] = $1 }
-        return Endpoint(baseURL: baseURL, bearerToken: apiReadAccessToken, path: "/account/\(accountID)/\(userListType.titleForEndpoint)/\(mediaType.pluralized)", queryParams: queryParams)
+        return Endpoint(baseURL: baseURLV4, bearerToken: accessToken, path: "/account/\(accountID)/\(mediaType.rawValue)/\(userListType.titleForEndpoint)", queryParams: queryParams)
+    }
+    
+    static func getCustomListDetailsEndpoint(listID: Int, accessToken: String, queryParams: [String : String] = [:]) -> Endpoint {
+        return Endpoint(baseURL: baseURLV4, bearerToken: accessToken, path: "/list/\(listID)", queryParams: queryParams)
+    }
+    
+    static func getUserCustomListsEndpoint(accountID: String, accessToken: String, page: Int) -> Endpoint {
+        let queryParams = ["page" : String(page)]
+        return Endpoint(baseURL: baseURLV4, bearerToken: accessToken, path: "/account/\(accountID)/lists", queryParams: queryParams)
+    }
+    
+    static func createCustomListEndpoint(name: String, description: String?, isPublic: Bool, language: String, accessToken: String) -> Endpoint {
+        var json: [String: Any] = [
+            "name" : name,
+            "iso_639_1" : language,
+            "public" : isPublic
+        ]
+        if let description = description {
+            json["description"] = description
+        }
+        
+        let body = CMJSONSerializer.dataToJSON(json: json)
+        return Endpoint(baseURL: baseURLV4, bearerToken: accessToken, path: "/list", method: .POST, body: body)
+    }
+    
+    static func updateCustomListEndpoint(listID: Int, newName: String, newDescription: String?, isPublic: Bool, language: String, accessToken: String) -> Endpoint {
+        var json: [String: Any] = [
+            "name" : newName,
+            "iso_639_1" : language,
+            "public" : isPublic
+        ]
+        if let description = newDescription {
+            json["description"] = description
+        }
+        
+        let body = CMJSONSerializer.dataToJSON(json: json)
+        return Endpoint(baseURL: baseURLV4, bearerToken: accessToken, path: "/list/\(listID)", method: .PUT, body: body)
+    }
+    
+    static func addOrRemoveItemInListEndpoint(listID: Int, mediaID: Int, mediaType: MediaTypes, accessToken: String, adding: Bool) -> Endpoint  {
+        let json: [String: Any] = [
+            "items": [
+                [
+                    "media_type": mediaType.rawValue,
+                    "media_id": mediaID
+                ]
+            ]
+        ]
+        let body = CMJSONSerializer.dataToJSON(json: json)
+        let method: Endpoint.HTTPMethod = adding ? .POST : .DELETE
+        return Endpoint(baseURL: baseURLV4, bearerToken: accessToken, path: "/list/\(listID)/items", method: method, body: body)
+    }
+    
+    static func listItemStatusEndpoint(listID: Int, mediaID: Int, mediaType: MediaTypes, accessToken: String) -> Endpoint {
+        let queryParams: [String : String] = [
+            "mediaID" : mediaID.description,
+            "media_type" : mediaType.rawValue
+        ]
+        return Endpoint(baseURL: baseURLV4, bearerToken: accessToken, path: "/list/\(listID)/item_status", queryParams: queryParams)
+    }
+    
+    static func clearCustomListEndpoint(listID: Int, accessToken: String) -> Endpoint {
+        return Endpoint(baseURL: baseURLV4, bearerToken: accessToken, path: "/list/\(listID)/clear")
+    }
+    
+    static func deleteCustomListEndpoint(listID: Int, accessToken: String) -> Endpoint {
+        return Endpoint(baseURL: baseURLV4, bearerToken: accessToken, path: "/\(listID)", method: .DELETE)
     }
     
     static func addOrRemoveMediaInUserListEndpoint(accountID: String, sessionID: String, listType: UserListTypes, mediaID: Int, mediaType: MediaTypes, adding: Bool) -> Endpoint {

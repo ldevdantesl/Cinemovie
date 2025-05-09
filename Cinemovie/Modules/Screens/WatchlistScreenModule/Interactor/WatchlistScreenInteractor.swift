@@ -21,7 +21,8 @@ protocol WatchlistScreenInteractorProtocol: AnyObject {
     func getRatedTVSeries(refreshing: Bool)
     
     // MARK: - CUSTOM LIST
-    func createNewList(listName: String, listDescription: String?)
+    func createNewList(listName: String, listDescription: String?, isPublic: Bool)
+    func getCustomLists(refreshing: Bool)
 }
 
 final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
@@ -96,7 +97,23 @@ final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
     }
     
     // MARK: - CUSTOM
-    func createNewList(listName: String, listDescription: String?) {
-        
+    func createNewList(listName: String, listDescription: String?, isPublic: Bool) {
+        tmdbService.createCustomList(name: listName, description: listDescription, isPublic: isPublic) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success: self.presenter?.didCreateNewList()
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func getCustomLists(refreshing: Bool) {
+        tmdbService.getUserCustomLists { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didReceieveCustomLists(lists: success.results, refreshing: refreshing)
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
+        }
     }
 }

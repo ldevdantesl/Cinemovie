@@ -82,9 +82,9 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
     
     private let collectionOverviewLabel: UILabel = {
         let label = UILabel()
-        label.font = CMFont.font(size: .tiny, fontName: .avenirUltraLight)
+        label.font = CMFont.font(size: .tiny, fontName: .avenirRegular)
         label.numberOfLines = 2
-        label.textColor = CMColor.cmSecondary
+        label.textColor = CMColor.cmSublabel
         label.lineBreakMode = .byTruncatingTail
         label.textAlignment = .left
         label.translatesAutoresizingMaskIntoConstraints = false

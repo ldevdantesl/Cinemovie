@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 
 struct AddNewListPopUpViewModel: PopUPViewModel {
-    let didTapAdd: ((String, String?) -> Void)?
+    let didTapAdd: ((String, String?, Bool) -> Void)?
     let onClose: (() -> Void)?
 }
 
@@ -44,7 +44,7 @@ final class AddNewListPopUpView: PopUPView {
     
     private let addNewListSubtitleLabel: UILabel = {
         let label = UILabel()
-        label.textColor = CMColor.cmLabel
+        label.textColor = CMColor.cmSublabel
         label.numberOfLines = 1
         label.text = "Create your custom collection"
         label.font = CMFont.font(size: .footnote, fontName: .avenirMediumItalic)
@@ -59,6 +59,33 @@ final class AddNewListPopUpView: PopUPView {
         label.numberOfLines = 1
         label.textAlignment = .left
         label.alpha = 0
+        return label
+    }()
+    
+    private let isPublicSwitch: UISwitch = {
+        let view = UISwitch()
+        view.isOn = true
+        view.onTintColor = CMColor.cmSuccess
+        view.preferredStyle = .sliding
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let publicLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Public"
+        label.textColor = CMColor.cmLabel
+        label.font = CMFont.font(size: .body, fontName: .avenirBold)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let publicDescriptionLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Allow other users to view your collection"
+        label.textColor = CMColor.cmSublabel
+        label.font = CMFont.font(size: .footnote, fontName: .avenirRegular)
+        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
@@ -165,6 +192,30 @@ final class AddNewListPopUpView: PopUPView {
             $0.height.equalTo(Constants.textFieldHeight)
         }
         
+        addSubview(publicLabel)
+        publicLabel.snp.makeConstraints {
+            $0.top.equalTo(listDescriptionTextField.snp.bottom).offset(Constants.hugeSpacing)
+            $0.leading.equalToSuperview().offset(Constants.hSpacing)
+        }
+        
+        addSubview(publicDescriptionLabel)
+        publicDescriptionLabel.snp.makeConstraints {
+            $0.top.equalTo(publicLabel.snp.bottom)
+            $0.leading.equalToSuperview().offset(Constants.hSpacing)
+        }
+        
+        publicLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        publicLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        
+        publicDescriptionLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        publicDescriptionLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        
+        addSubview(isPublicSwitch)
+        isPublicSwitch.snp.makeConstraints {
+            $0.top.equalTo(listDescriptionTextField.snp.bottom).offset(Constants.hugeSpacing)
+            $0.trailing.equalToSuperview().inset(Constants.hSpacing)
+        }
+        
         addSubview(addButton)
         addButton.snp.makeConstraints {
             $0.bottom.equalToSuperview().offset(-Constants.hugeSpacing)
@@ -196,7 +247,7 @@ final class AddNewListPopUpView: PopUPView {
     @objc private func didTapAddButton() {
         guard let name = listNameTextField.text, validateTextField() else { return }
         let descriptionText = (listDescriptionTextField.text ?? "").isEmpty ? nil : listDescriptionTextField.text
-        viewModel.didTapAdd?(name, descriptionText)
+        viewModel.didTapAdd?(name, descriptionText, isPublicSwitch.isOn)
     }
 }
 

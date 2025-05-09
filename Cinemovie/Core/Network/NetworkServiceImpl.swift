@@ -11,7 +11,10 @@ final class NetworkServiceImpl: NetworkService {
     private let session: URLSession
 
     init(session: URLSession = .shared) {
-        self.session = session
+        let config = URLSessionConfiguration.default
+        config.httpAdditionalHeaders = ["Alt-Svc": "clear"] // ⛔ disable HTTP/3
+
+        self.session = URLSession(configuration: config)
     }
 
     func request<T: Decodable>(

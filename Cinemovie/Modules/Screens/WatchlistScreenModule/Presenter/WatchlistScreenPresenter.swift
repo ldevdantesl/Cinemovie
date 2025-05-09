@@ -27,6 +27,15 @@ protocol WatchlistScreenPresenterProtocol: AnyObject {
     func didGetRatedMovies(_ movies: [Movie], refreshing: Bool)
     func didGetRatedTVSeries(_ series: [TVSeries], refreshing: Bool)
     
+    // MARK: - CUSTOM LISTS
+    func didReceieveCustomLists(lists: [UserCustomList], refreshing: Bool)
+    
+    // MARK: - PROGRAMMATIC
+    func didCreateNewList()
+    
+    // MARK: - ERROR HANDLING
+    func didRecieveError(_ error: Error)
+    
     // MARK: - PROPERTIES
     var visibleSections: [WatchlistScreenVC.Sections] { get set }
 }
@@ -49,6 +58,7 @@ final class WatchlistScreenPresenter {
     private var watchlistMedia: [Media] = []
     private var favoriteMedia: [Media] = []
     private var ratedMedia: [Media] = []
+    private var userCustomLists: [UserCustomList] = []
     
     init(interactor: WatchlistScreenInteractorProtocol, router: WatchlistScreenRouterProtocol) {
         self.interactor = interactor
@@ -108,6 +118,9 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
         refreshGroup.enter()
         interactor.getRatedTVSeries(refreshing: true)
         
+        refreshGroup.enter()
+        interactor.getCustomLists(refreshing: true)
+        
         refreshGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
             self.didGetAllData()
@@ -120,14 +133,10 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
     }
     
     func didTapAddNewList() {
-        router.presentAddNewListPopUp { [weak self] listName, listDescription in
+        router.presentAddNewListPopUp { [weak self] listName, listDescription, isPublic in
             guard let self = self else { return }
             self.view?.showDownloadingView()
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-                guard let self = self else { return }
-                self.view?.hideDownloadingView()
-            }
+            self.interactor.createNewList(listName: listName, listDescription: listDescription, isPublic: isPublic)
         }
     }
     
@@ -164,6 +173,22 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
         refreshing ? refreshGroup.leave() : downloadGroup.leave()
     }
     
+    // MARK: - PROGRAMMATIC
+    func didCreateNewList() {
+        self.view?.hideDownloadingView()
+        self.router.hidePopUp()
+    }
+    
+    func didRecieveError(_ error: any Error) {
+        self.view?.showError(errorStr: error.localizedDescription)
+    }
+    
+    func didReceieveCustomLists(lists: [UserCustomList], refreshing: Bool) {
+        self.userCustomLists = lists
+        refreshing ? refreshGroup.leave() : downloadGroup.leave()
+    }
+    
+    // MARK: - PRIVATE FUNC
     private func didGetAllData() {
         self.view?.hideDownloadingView()
         let watchlistVM = WatchlistItemCellViewModel(
