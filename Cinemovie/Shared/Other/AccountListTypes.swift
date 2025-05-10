@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum UserListTypes {
+enum AccountListTypes {
     case watchlist
     case favorite
     case rated
@@ -23,12 +23,20 @@ enum UserListTypes {
     var subtitle: String? {
         switch self {
         case .watchlist: "Added To Watchlist"
-        case .favorite: "Added To Favorited"
+        case .favorite: "Added To Favorites"
         case .rated: nil
         }
     }
     
-    var titleForEndpoint: String {
+    var titleForEndpointsV3: String {
+        switch self {
+        case .watchlist: "watchlist"
+        case .favorite: "favorite"
+        case .rated: "rated"
+        }
+    }
+    
+    var titleForEndpointsV4: String {
         switch self {
         case .watchlist: "watchlist"
         case .favorite: "favorites"

@@ -35,7 +35,7 @@ final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
     
     // MARK: - WATCHLIST
     func getWatchlistMovies(refreshing: Bool) {
-        tmdbService.getUserListMovies(listType: .watchlist, page: 1) { [weak self] result in
+        tmdbService.getMoviesInAccountList(listType: .watchlist, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didGetWatchlistMovies(success.movies, refreshing: refreshing)
@@ -45,7 +45,7 @@ final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
     }
     
     func getWatchlistTVSeries(refreshing: Bool) {
-        tmdbService.getUserListSeries(listType: .watchlist, page: 1) { [weak self] result in
+        tmdbService.getSeriesInAccountList(listType: .watchlist, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didGetWatchlistTVSeries(success.results, refreshing: refreshing)
@@ -56,7 +56,7 @@ final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
     
     // MARK: - FAVORITE
     func getFavoriteMovies(refreshing: Bool) {
-        tmdbService.getUserListMovies(listType: .favorite, page: 1){ [weak self] result in
+        tmdbService.getMoviesInAccountList(listType: .favorite, page: 1){ [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didGetFavoriteMovies(success.movies, refreshing: refreshing)
@@ -66,7 +66,7 @@ final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
     }
     
     func getFavoriteTVSeries(refreshing: Bool) {
-        tmdbService.getUserListSeries(listType: .favorite, page: 1) { [weak self] result in
+        tmdbService.getSeriesInAccountList(listType: .favorite, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didGetFavoriteTVSeries(success.results, refreshing: refreshing)
@@ -77,7 +77,7 @@ final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
     
     // MARK: - RATED
     func getRatedMovies(refreshing: Bool) {
-        tmdbService.getUserListMovies(listType: .rated, page: 1) { [weak self] result in
+        tmdbService.getMoviesInAccountList(listType: .rated, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didGetRatedMovies(success.movies, refreshing: refreshing)
@@ -87,7 +87,7 @@ final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
     }
     
     func getRatedTVSeries(refreshing: Bool) {
-        tmdbService.getUserListSeries(listType: .rated, page: 1) { [weak self] result in
+        tmdbService.getSeriesInAccountList(listType: .rated, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): presenter?.didGetRatedTVSeries(success.results, refreshing: refreshing)
@@ -98,7 +98,7 @@ final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
     
     // MARK: - CUSTOM
     func createNewList(listName: String, listDescription: String?, isPublic: Bool) {
-        tmdbService.createCustomList(name: listName, description: listDescription, isPublic: isPublic) { [weak self] result in
+        tmdbService.createUserList(name: listName, description: listDescription, isPublic: isPublic) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success: self.presenter?.didCreateNewList()
@@ -108,7 +108,7 @@ final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
     }
     
     func getCustomLists(refreshing: Bool) {
-        tmdbService.getUserCustomLists { [weak self] result in
+        tmdbService.getUserLists { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didReceieveCustomLists(lists: success.results, refreshing: refreshing)

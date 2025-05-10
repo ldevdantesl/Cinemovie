@@ -8,20 +8,20 @@
 import UIKit
 import SnapKit
 
-final class WatchlistItemCellViewModel: CellViewModelBaseClass {
+final class AccountListCellViewModel: CellViewModelBaseClass {
     let media: [Media]
-    let listType: UserListTypes?
-    let didTapList: ((UserListTypes) -> Void)?
+    let listType: AccountListTypes?
+    let didTapList: ((AccountListTypes) -> Void)?
     
-    init(media: [Media], listType: UserListTypes?, didTapList: ((UserListTypes) -> Void)?) {
+    init(media: [Media], listType: AccountListTypes?, didTapList: ((AccountListTypes) -> Void)?) {
         self.media = media
         self.didTapList = didTapList
         self.listType = listType
-        super.init(cellIdentifier: "WatchlistItemCell")
+        super.init(cellIdentifier: "AccountListCell")
     }
 }
 
-final class WatchlistItemCell: ReusableCellBaseClass {
+final class AccountListCell: ReusableCellBaseClass {
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -38,7 +38,7 @@ final class WatchlistItemCell: ReusableCellBaseClass {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: WatchlistItemCellViewModel?
+    private var viewModel: AccountListCellViewModel?
     
     // MARK: - VIEW PROPERTIES
     private lazy var posterStackView: UIView = {
@@ -105,7 +105,7 @@ final class WatchlistItemCell: ReusableCellBaseClass {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: WatchlistItemCellViewModel) {
+    public func configure(viewModel: AccountListCellViewModel) {
         self.viewModel = viewModel
         self.stackTitleLabel.text = viewModel.listType?.title
         self.stackSubtitleLabel.text = viewModel.listType?.subtitle

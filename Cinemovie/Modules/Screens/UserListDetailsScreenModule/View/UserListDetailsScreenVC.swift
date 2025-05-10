@@ -44,7 +44,7 @@ final class UserListDetailsScreenVC: UIViewController {
     }()
     
     // MARK: - PROPERTIES
-    private let listType: UserListTypes
+    private let listType: AccountListTypes
     private var isScrollLocked: Bool = false
     private var previousOffset: CGPoint = .zero
     
@@ -68,7 +68,7 @@ final class UserListDetailsScreenVC: UIViewController {
     }()
 
     // MARK: - LIFECYCLE
-    init(listType: UserListTypes) {
+    init(listType: AccountListTypes) {
         self.listType = listType
         super.init(nibName: nil, bundle: nil)
     }

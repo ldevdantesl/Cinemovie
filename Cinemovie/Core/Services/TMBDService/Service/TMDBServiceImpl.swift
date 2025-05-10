@@ -28,6 +28,12 @@ final class TMDBServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
+    func getMovieAccountStates(movieID: Int, completion: @escaping (Result<MediaAccountStates, NetworkError>) -> Void) {
+        guard let sessionID = accountStore.sessionID else { completion(.success(.empty)); return }
+        let endpoint = TMDBEndpoints.getMovieAccountStateEndpoint(movieID: movieID, sessionID: sessionID)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
     func getMovieCast(movieID: Int, completion: @escaping (Result<MediaCastAPIResponse, NetworkError>) -> Void) {
         let endpoint = TMDBEndpoints.getMovieCastEndpoint(movieID: movieID, queryParams: queryParams)
         handleRequest(endpoint: endpoint, completion: completion)
@@ -56,6 +62,12 @@ final class TMDBServiceImpl: TMDBService {
     // MARK: - TV SERIES
     func getTVSeriesDetails(seriesID: Int, completion: @escaping (Result<TVSeriesDetails, NetworkError>) -> Void) {
         let endpoint = TMDBEndpoints.getTVSeriesDetailsEndpoint(seriesID: seriesID, queryParams: queryParams)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    func getTVSeriesAccountStates(seriesID: Int, completion: @escaping (Result<MediaAccountStates, NetworkError>) -> Void) {
+        guard let sessionID = accountStore.sessionID else { completion(.success(.empty)); return }
+        let endpoint = TMDBEndpoints.getTVSeriesAccountStateEndpoint(seriesID: seriesID, sessionID: sessionID)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
@@ -135,150 +147,41 @@ final class TMDBServiceImpl: TMDBService {
         fetchSeriesSearchResultsRecursively(query: query, untilPage: untilPage, extraParams: queryParams, completion: completion)
     }
     
-    // MARK: - USER LIST
-    func getUserListMovies(listType: UserListTypes, page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
+    // MARK: - ACCOUNT LIST
+    func getMoviesInAccountList(listType: AccountListTypes, page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void) {
         guard let accountID = accountStore.accountID, let accessToken = accountStore.accessToken else { completion(.success(.empty)); return }
         var newParams = queryParams
         newParams["page"] = page.description
-        let endpoint = TMDBEndpoints.getUserListMediaEndpoint(accountID: accountID, accessToken: accessToken, mediaType: .movie, userListType: listType, extraParams: newParams)
+        let endpoint = TMDBEndpoints.getAccountListMediaEndpoint(accountID: accountID, accessToken: accessToken, mediaType: .movie, accountListType: listType, extraParams: newParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func getUserListSeries(listType: UserListTypes, page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
+    func getSeriesInAccountList(listType: AccountListTypes, page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void) {
         guard let accountID = accountStore.accountID, let accessToken = accountStore.accessToken else { completion(.success(.empty)); return }
         var newParams = queryParams
         newParams["page"] = page.description
-        let endpoint = TMDBEndpoints.getUserListMediaEndpoint(accountID: accountID, accessToken: accessToken, mediaType: .tvShow, userListType: listType, extraParams: newParams)
+        let endpoint = TMDBEndpoints.getAccountListMediaEndpoint(accountID: accountID, accessToken: accessToken, mediaType: .tvShow, accountListType: listType, extraParams: newParams)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func getAllUserListMovies(listType: UserListTypes, completion: @escaping (Result<[Movie], NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let accessToken = accountStore.accessToken else { completion(.success([])); return }
-        fetchUserListMoviesRecursively(listType: listType, accountID: accountID, accessToken: accessToken, page: 1, accumulated: [], extraParams: queryParams, completion: completion)
-    }
-    
-    func getAllUserListSeries(listType: UserListTypes, completion: @escaping (Result<[TVSeries], NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let accessToken = accountStore.accessToken else { completion(.success([])); return }
-        fetchUserListSeriesRecursively(listType: listType, accountID: accountID, accessToken: accessToken, page: 1, accumulated: [], extraParams: queryParams, completion: completion)
-    }
-    
-    func addOrRemoveMediaInUserList(mediaID: Int, listType: UserListTypes, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void) {
+    func addOrRemoveMediaInAccountList(mediaID: Int, listType: AccountListTypes, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddToAccountListResponse, NetworkError>) -> Void) {
         guard let accountID = accountStore.accountID, let sessionID = accountStore.sessionID else { completion(.failure(.noData)); return }
-        let endpoint = TMDBEndpoints.addOrRemoveMediaInUserListEndpoint(accountID: accountID, sessionID: sessionID, listType: listType, mediaID: mediaID, mediaType: mediaType, adding: adding)
+        let endpoint = TMDBEndpoints.addOrRemoveMediaInAccountListEndpoint(accountID: accountID, sessionID: sessionID, listType: listType, mediaID: mediaID, mediaType: mediaType, adding: adding)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    // MARK: - CUSTOM LIST
-    func createCustomList(name: String, description: String?, isPublic: Bool, completion: @escaping (Result<CreateUserListResponse, NetworkError>) -> Void) {
+    // MARK: - USER LIST
+    func createUserList(name: String, description: String?, isPublic: Bool, completion: @escaping (Result<CreateUserListResponse, NetworkError>) -> Void) {
         guard let accessToken = accountStore.accessToken else { return }
         let language = userService.userLanguage
-        let endpoint = TMDBEndpoints.createCustomListEndpoint(name: name, description: description, isPublic: isPublic, language: language, accessToken: accessToken)
+        let endpoint = TMDBEndpoints.createUserListEndpoint(name: name, description: description, isPublic: isPublic, language: language, accessToken: accessToken)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func getUserCustomLists(completion: @escaping (Result<UserCustomListsResponse, NetworkError>) -> Void) {
+    func getUserLists(completion: @escaping (Result<UserListsResponse, NetworkError>) -> Void) {
         guard let accessToken = accountStore.accessToken, let accountID = accountStore.accountID else { return }
-        let endpoint = TMDBEndpoints.getUserCustomListsEndpoint(accountID: accountID, accessToken: accessToken, page: 1)
+        let endpoint = TMDBEndpoints.getUserListsEndpoint(accountID: accountID, accessToken: accessToken, page: 1)
         handleRequest(endpoint: endpoint, completion: completion)
-    }
-    
-    // MARK: - WATCHLIST
-    func isMovieWatchlisted(movieID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let accessToken = accountStore.accessToken else { completion(.success(false)); return }
-        fetchUserListMoviesRecursively(listType: .watchlist, accountID: accountID, accessToken: accessToken, extraParams: queryParams) { result in
-            switch result {
-            case .success(let success):
-                if success.allSatisfy({ $0.id != movieID }) {
-                    completion(.success(false))
-                } else {
-                    completion(.success(true))
-                }
-            case .failure(let failure):
-                completion(.failure(failure))
-            }
-        }
-    }
-    
-    func isSeriesWatchlisted(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let accessToken = accountStore.accessToken else { completion(.success(false)); return }
-        fetchUserListSeriesRecursively(listType: .watchlist, accountID: accountID, accessToken: accessToken, extraParams: queryParams) { result in
-            switch result {
-            case .success(let success):
-                if success.allSatisfy({ $0.id != seriesID }) {
-                    completion(.success(false))
-                } else {
-                    completion(.success(true))
-                }
-            case .failure(let failure):
-                completion(.failure(failure))
-            }
-        }
-    }
-    
-    // MARK: - FAVORITE
-    func isMovieFavorited(movieID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let accessToken = accountStore.accessToken else { completion(.success(false)); return }
-        fetchUserListMoviesRecursively(listType: .favorite, accountID: accountID, accessToken: accessToken, extraParams: queryParams) { result in
-            switch result {
-            case .success(let success):
-                if success.allSatisfy({ $0.id != movieID }) {
-                    completion(.success(false))
-                } else {
-                    completion(.success(true))
-                }
-            case .failure(let failure):
-                completion(.failure(failure))
-            }
-        }
-    }
-    
-    func isSeriesFavorited(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let accessToken = accountStore.accessToken else { completion(.success(false)); return }
-        fetchUserListSeriesRecursively(listType: .favorite, accountID: accountID, accessToken: accessToken, extraParams: queryParams) { result in
-            switch result {
-            case .success(let success):
-                if success.allSatisfy({ $0.id != seriesID }) {
-                    completion(.success(false))
-                } else {
-                    completion(.success(true))
-                }
-            case .failure(let failure):
-                completion(.failure(failure))
-            }
-        }
-    }
-    
-    // MARK: - RATED
-    func isMovieRated(movieID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let accessToken = accountStore.accessToken else { completion(.success(false)); return }
-        fetchUserListMoviesRecursively(listType: .rated, accountID: accountID, accessToken: accessToken, extraParams: queryParams) { result in
-            switch result {
-            case .success(let success):
-                if success.allSatisfy({ $0.id != movieID }) {
-                    completion(.success(false))
-                } else {
-                    completion(.success(true))
-                }
-            case .failure(let failure):
-                completion(.failure(failure))
-            }
-        }
-    }
-    
-    func isSeriesRated(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        guard let accountID = accountStore.accountID, let accessToken = accountStore.accessToken else { completion(.success(false)); return }
-        fetchUserListSeriesRecursively(listType: .rated, accountID: accountID, accessToken: accessToken, extraParams: queryParams) { result in
-            switch result {
-            case .success(let success):
-                if success.allSatisfy({ $0.id != seriesID }) {
-                    completion(.success(false))
-                } else {
-                    completion(.success(true))
-                }
-            case .failure(let failure):
-                completion(.failure(failure))
-            }
-        }
     }
     
     // MARK: - OTHER
@@ -316,66 +219,6 @@ final class TMDBServiceImpl: TMDBService {
     ) {
         networkService.request(endpoint) { (result: Result<T, NetworkError>) in
             completion(result)
-        }
-    }
-    
-    private func fetchUserListMoviesRecursively(
-        listType: UserListTypes, accountID: String, accessToken: String,
-        page: Int = 1, accumulated: [Movie] = [], extraParams: [String : String],
-        completion: @escaping (Result<[Movie], NetworkError>) -> Void
-    ) {
-        var params = extraParams
-        params["page"] = "\(page.description)"
-        
-        let endpoint = TMDBEndpoints.getUserListMediaEndpoint(accountID: accountID, accessToken: accessToken, mediaType: .movie, userListType: listType, extraParams: params)
-        
-        handleRequest(endpoint: endpoint) { (result: Result<MovieListAPIResponse, NetworkError>) in
-            switch result {
-            case .success(let success):
-                let combined = accumulated + success.movies
-                if page < success.totalPages {
-                    self.fetchUserListMoviesRecursively(
-                        listType: listType, accountID: accountID,
-                        accessToken: accessToken, page: page + 1, accumulated: combined,
-                        extraParams: extraParams, completion: completion
-                    )
-                } else {
-                    completion(.success(combined))
-                }
-                
-            case .failure(let failure):
-                completion(.failure(failure))
-            }
-        }
-    }
-    
-    private func fetchUserListSeriesRecursively(
-        listType: UserListTypes, accountID: String, accessToken: String,
-        page: Int = 1, accumulated: [TVSeries] = [], extraParams: [String : String],
-        completion: @escaping (Result<[TVSeries], NetworkError>) -> Void
-    ) {
-        var params = extraParams
-        params["page"] = "\(page.description)"
-        
-        let endpoint = TMDBEndpoints.getUserListMediaEndpoint(accountID: accountID, accessToken: accessToken, mediaType: .tvShow, userListType: listType, extraParams: params)
-        
-        handleRequest(endpoint: endpoint) { (result: Result<TVSeriesListAPIResponse, NetworkError>) in
-            switch result {
-            case .success(let success):
-                let combined = accumulated + success.results
-                if page < success.totalPages {
-                    self.fetchUserListSeriesRecursively(
-                        listType: listType, accountID: accountID,
-                        accessToken: accessToken, page: page + 1, accumulated: combined,
-                        extraParams: extraParams, completion: completion
-                    )
-                } else {
-                    completion(.success(combined))
-                }
-                
-            case .failure(let failure):
-                completion(.failure(failure))
-            }
         }
     }
     

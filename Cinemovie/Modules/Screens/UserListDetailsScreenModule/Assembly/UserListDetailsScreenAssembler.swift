@@ -8,7 +8,7 @@
 import UIKit
 
 final class UserListDetailsScreenAssembler {
-    static func assemble(listType: UserListTypes, tmdbService: TMDBService) -> UserListDetailsScreenVC {
+    static func assemble(listType: AccountListTypes, tmdbService: TMDBService) -> UserListDetailsScreenVC {
         let interactor = UserListDetailsScreenInteractor(tmdbService: tmdbService)
         let router = UserListDetailsScreenRouter(tmdbService: tmdbService)
         let presenter = UserListDetailsScreenPresenter(listType: listType, interactor: interactor, router: router)

@@ -35,11 +35,12 @@ final class WatchlistScreenVC: UIViewController {
     
     // MARK: - SECTIONS
     enum Sections: Hashable {
-        case watchlist
+        case accountLists
+        case userLists
     }
     
     enum Items: Hashable {
-        case zStackMediaListVM(WatchlistItemCellViewModel)
+        case accountListVM(AccountListCellViewModel)
     }
     
     // MARK: - VIPER
@@ -74,7 +75,7 @@ final class WatchlistScreenVC: UIViewController {
         let view = DiffableCollectionView<WatchlistScreenVC.Sections, WatchlistScreenVC.Items>(layout: createLayout(), ignoresTopSafeArea: false, showsTopBlur: false)
         view.delegate = self
         view.refreshControl = refreshControler
-        view.register(cellClass: WatchlistItemCell.self)
+        view.register(cellClass: AccountListCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
         return view
@@ -117,8 +118,8 @@ final class WatchlistScreenVC: UIViewController {
     private func configureDataSource() {
         collectionView.configureDataSource { collectionView, indexPath, itemIdentifier in
             switch itemIdentifier {
-            case .zStackMediaListVM(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? WatchlistItemCell
+            case .accountListVM(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? AccountListCell
                 cell?.configure(viewModel: vm)
                 return cell
             }

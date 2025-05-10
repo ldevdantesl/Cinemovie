@@ -37,7 +37,7 @@ final class UserListDetailsScreenPresenter {
     var router: UserListDetailsScreenRouterProtocol
     var interactor: UserListDetailsScreenInteractorProtocol
     
-    private let listType: UserListTypes
+    private let listType: AccountListTypes
     private let downloadGroup = DispatchGroup()
     private let refreshGroup = DispatchGroup()
     private var isPaginating = false
@@ -52,7 +52,7 @@ final class UserListDetailsScreenPresenter {
     
     var media: [Media] = []
     
-    init(listType: UserListTypes, interactor: UserListDetailsScreenInteractorProtocol, router: UserListDetailsScreenRouterProtocol) {
+    init(listType: AccountListTypes, interactor: UserListDetailsScreenInteractorProtocol, router: UserListDetailsScreenRouterProtocol) {
         self.listType = listType
         self.interactor = interactor
         self.router = router

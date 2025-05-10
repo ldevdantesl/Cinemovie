@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct AddToListResponse: APIResponse {
+struct AddToAccountListResponse: APIResponse {
     let statusCode: Int
     let statusMessage: String
     

@@ -12,7 +12,7 @@ protocol WatchlistScreenPresenterProtocol: AnyObject {
     
     // MARK: - USER INITIATED
     func didCallRefresh()
-    func didTapList(listType: UserListTypes)
+    func didTapList(listType: AccountListTypes)
     func didTapAddNewList()
     
     // MARK: - WATCHLIST
@@ -28,7 +28,7 @@ protocol WatchlistScreenPresenterProtocol: AnyObject {
     func didGetRatedTVSeries(_ series: [TVSeries], refreshing: Bool)
     
     // MARK: - CUSTOM LISTS
-    func didReceieveCustomLists(lists: [UserCustomList], refreshing: Bool)
+    func didReceieveCustomLists(lists: [UserList], refreshing: Bool)
     
     // MARK: - PROGRAMMATIC
     func didCreateNewList()
@@ -58,7 +58,7 @@ final class WatchlistScreenPresenter {
     private var watchlistMedia: [Media] = []
     private var favoriteMedia: [Media] = []
     private var ratedMedia: [Media] = []
-    private var userCustomLists: [UserCustomList] = []
+    private var userCustomLists: [UserList] = []
     
     init(interactor: WatchlistScreenInteractorProtocol, router: WatchlistScreenRouterProtocol) {
         self.interactor = interactor
@@ -87,6 +87,9 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
         
         downloadGroup.enter()
         interactor.getRatedTVSeries(refreshing: false)
+        
+        downloadGroup.enter()
+        interactor.getCustomLists(refreshing: false)
         
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
@@ -128,7 +131,7 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
         }
     }
     
-    func didTapList(listType: UserListTypes) {
+    func didTapList(listType: AccountListTypes) {
         router.navigateToList(listType: listType)
     }
     
@@ -183,7 +186,7 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
         self.view?.showError(errorStr: error.localizedDescription)
     }
     
-    func didReceieveCustomLists(lists: [UserCustomList], refreshing: Bool) {
+    func didReceieveCustomLists(lists: [UserList], refreshing: Bool) {
         self.userCustomLists = lists
         refreshing ? refreshGroup.leave() : downloadGroup.leave()
     }
@@ -191,7 +194,7 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
     // MARK: - PRIVATE FUNC
     private func didGetAllData() {
         self.view?.hideDownloadingView()
-        let watchlistVM = WatchlistItemCellViewModel(
+        let watchlistVM = AccountListCellViewModel(
             media: interLeavedMedia(media: watchlistMedia),
             listType: .watchlist
         ) { [weak self] in
@@ -199,7 +202,7 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
             self.didTapList(listType: $0)
         }
         
-        let favoriteVM = WatchlistItemCellViewModel(
+        let favoriteVM = AccountListCellViewModel(
             media: interLeavedMedia(media: favoriteMedia),
             listType: .favorite
         ) { [weak self] in
@@ -207,7 +210,7 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
             self.didTapList(listType: $0)
         }
         
-        let ratedVM = WatchlistItemCellViewModel(
+        let ratedVM = AccountListCellViewModel(
             media: interLeavedMedia(media: ratedMedia),
             listType: .rated
         ) { [weak self] in
@@ -216,11 +219,11 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
         }
         
         self.view?.applySnapshot(
-            sections: [.watchlist],
-            itemsBySection: [.watchlist : [
-                .zStackMediaListVM(watchlistVM),
-                .zStackMediaListVM(favoriteVM),
-                .zStackMediaListVM(ratedVM)
+            sections: [.accountLists],
+            itemsBySection: [.accountLists : [
+                .accountListVM(watchlistVM),
+                .accountListVM(favoriteVM),
+                .accountListVM(ratedVM)
             ]]
         )
     }

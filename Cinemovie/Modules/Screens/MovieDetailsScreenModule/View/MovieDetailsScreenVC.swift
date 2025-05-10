@@ -21,7 +21,7 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
         cast: [Cast], crew: [Cast],
         recommended: [Movie], reviews: [Review],
         belongsToCollectionDetails: BelongsToCollectionDetails?,
-        isWatchlisted: Bool, isFavorited: Bool
+        accountStates: MediaAccountStates
     )
     
     // MARK: - ERROR HANDLING
@@ -226,12 +226,12 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         cast: [Cast], crew: [Cast],
         recommended: [Movie], reviews: [Review],
         belongsToCollectionDetails: BelongsToCollectionDetails?,
-        isWatchlisted: Bool, isFavorited: Bool
+        accountStates: MediaAccountStates
     ) {
         self.downloadingView.hide()
         let backdropVM = BackdropImageCellViewModel(
             imagePath: details.backdropPath,
-            size: .w1280, isFavorite: isFavorited,
+            size: .w1280, isFavorite: accountStates.favorite,
             didTapBackButtonAction: presenter?.didTapBackButton,
             didTapFavorite: presenter?.didTapFavoriteButton
         )
@@ -243,7 +243,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             didTapIMDB: presenter?.didTapIMDBImage, didTapSubDetails: presenter?.didTapToSubDetails
         )
         
-        let watchlistVM = WatchlistButtonCellViewModel(isWatchlisted: isWatchlisted, didTapAction: presenter?.didTapAddToWatchlist)
+        let watchlistVM = WatchlistButtonCellViewModel(isWatchlisted: accountStates.watchlist, didTapAction: presenter?.didTapAddToWatchlist)
         
         var sectionsAndTheirItems: [(sections: (Sections), items: [Items])] = [
             (Sections.backdropImage, [.backdropImage(backdropVM)]),

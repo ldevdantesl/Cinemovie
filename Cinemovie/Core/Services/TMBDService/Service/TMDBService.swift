@@ -10,6 +10,7 @@ import Foundation
 protocol TMDBService: AnyObject {
     // MARK: - MOVIES
     func getMovieDetails(movieID: Int, completion: @escaping (Result<MovieDetails, NetworkError>) -> Void)
+    func getMovieAccountStates(movieID: Int, completion: @escaping (Result<MediaAccountStates, NetworkError>) -> Void)
     func getMovieCast(movieID: Int, completion: @escaping (Result<MediaCastAPIResponse, NetworkError>) -> Void)
     func getMovieSimilars(movieID: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
     func getMovieRecommendations(movieID: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
@@ -18,6 +19,7 @@ protocol TMDBService: AnyObject {
     
     // MARK: - TV SERIES
     func getTVSeriesDetails(seriesID: Int, completion: @escaping (Result<TVSeriesDetails, NetworkError>) -> Void)
+    func getTVSeriesAccountStates(seriesID: Int, completion: @escaping (Result<MediaAccountStates, NetworkError>) -> Void)
     func getTVSeriesCast(seriesID: Int, completion: @escaping (Result<MediaCastAPIResponse, NetworkError>) -> Void)
     func getTVSeriesVideos(seriesID: Int, completion: @escaping (Result<MediaVideosAPIResponse, NetworkError>) -> Void)
     func getTVSeriesSimilars(seriesID: Int, completion: @escaping(Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
@@ -39,28 +41,14 @@ protocol TMDBService: AnyObject {
     func getMovieSearchResults(query: String, untilPage: Int, completion: @escaping (Result<[Movie], NetworkError>) -> Void)
     func getTVSeriesSearchResults(query: String, untilPage: Int, completion: @escaping (Result<[TVSeries], NetworkError>) -> Void)
     
-    // MARK: - USER LISTS
-    func getUserListMovies(listType: UserListTypes, page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
-    func getUserListSeries(listType: UserListTypes, page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
-    func getAllUserListMovies(listType: UserListTypes, completion: @escaping (Result<[Movie], NetworkError>) -> Void)
-    func getAllUserListSeries(listType: UserListTypes, completion: @escaping (Result<[TVSeries], NetworkError>) -> Void)
-    func addOrRemoveMediaInUserList(mediaID: Int, listType: UserListTypes, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddToListResponse, NetworkError>) -> Void)
+    // MARK: - ACCOUNT LIST
+    func getMoviesInAccountList(listType: AccountListTypes, page: Int, completion: @escaping (Result<MovieListAPIResponse, NetworkError>) -> Void)
+    func getSeriesInAccountList(listType: AccountListTypes, page: Int, completion: @escaping (Result<TVSeriesListAPIResponse, NetworkError>) -> Void)
+    func addOrRemoveMediaInAccountList(mediaID: Int, listType: AccountListTypes, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddToAccountListResponse, NetworkError>) -> Void)
     
-    // MARK: - CUSTOM LISTS
-    func createCustomList(name: String, description: String?, isPublic: Bool, completion: @escaping (Result<CreateUserListResponse, NetworkError>) -> Void)
-    func getUserCustomLists(completion: @escaping (Result<UserCustomListsResponse, NetworkError>) -> Void)
-    
-    // MARK: - WATCHLIST
-    func isMovieWatchlisted(movieID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void)
-    func isSeriesWatchlisted(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void)
-    
-    // MARK: - FAVORITE
-    func isMovieFavorited(movieID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void)
-    func isSeriesFavorited(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void)
-    
-    // MARK: - RATED
-    func isMovieRated(movieID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void)
-    func isSeriesRated(seriesID: Int, completion: @escaping (Result<Bool, NetworkError>) -> Void)
+    // MARK: - USER LIST
+    func createUserList(name: String, description: String?, isPublic: Bool, completion: @escaping (Result<CreateUserListResponse, NetworkError>) -> Void)
+    func getUserLists(completion: @escaping (Result<UserListsResponse, NetworkError>) -> Void)
     
     // MARK: - OTHER
     func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void)

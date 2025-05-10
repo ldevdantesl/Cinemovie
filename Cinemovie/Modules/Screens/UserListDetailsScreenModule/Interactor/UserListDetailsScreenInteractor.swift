@@ -8,14 +8,14 @@
 import UIKit
 
 protocol UserListDetailsScreenInteractorProtocol: AnyObject {
-    func getInitialListMovies(listType: UserListTypes)
-    func getInitialListSeries(listType: UserListTypes)
+    func getInitialListMovies(listType: AccountListTypes)
+    func getInitialListSeries(listType: AccountListTypes)
     
-    func getRefreshingListMovies(listType: UserListTypes)
-    func getRefreshingListSeries(listType: UserListTypes)
+    func getRefreshingListMovies(listType: AccountListTypes)
+    func getRefreshingListSeries(listType: AccountListTypes)
     
-    func getPaginatedListMovies(listType: UserListTypes, page: Int)
-    func getPaginatedListSeries(listType: UserListTypes, page: Int)
+    func getPaginatedListMovies(listType: AccountListTypes, page: Int)
+    func getPaginatedListSeries(listType: AccountListTypes, page: Int)
 }
 
 final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProtocol {
@@ -27,8 +27,8 @@ final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProt
     }
     
     // MARK: - INITIAL
-    func getInitialListMovies(listType: UserListTypes) {
-        tmdbService.getUserListMovies(listType: listType, page: 1) { [weak self] result in
+    func getInitialListMovies(listType: AccountListTypes) {
+        tmdbService.getMoviesInAccountList(listType: listType, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success):
@@ -39,8 +39,8 @@ final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProt
         }
     }
     
-    func getInitialListSeries(listType: UserListTypes) {
-        tmdbService.getUserListSeries(listType: listType, page: 1) { [weak self] result in
+    func getInitialListSeries(listType: AccountListTypes) {
+        tmdbService.getSeriesInAccountList(listType: listType, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success):
@@ -52,8 +52,8 @@ final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProt
     }
     
     // MARK: - REFRESHINGG
-    func getRefreshingListMovies(listType: UserListTypes) {
-        tmdbService.getUserListMovies(listType: listType, page: 1) { [weak self] result in
+    func getRefreshingListMovies(listType: AccountListTypes) {
+        tmdbService.getMoviesInAccountList(listType: listType, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didRecieveRefreshingMedia(success.movies)
@@ -62,8 +62,8 @@ final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProt
         }
     }
     
-    func getRefreshingListSeries(listType: UserListTypes) {
-        tmdbService.getUserListSeries(listType: listType, page: 1) { [weak self] result in
+    func getRefreshingListSeries(listType: AccountListTypes) {
+        tmdbService.getSeriesInAccountList(listType: listType, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didRecieveRefreshingMedia(success.results)
@@ -73,8 +73,8 @@ final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProt
     }
     
     // MARK: - PAGINATING
-    func getPaginatedListMovies(listType: UserListTypes, page: Int) {
-        tmdbService.getUserListMovies(listType: listType, page: page) { [weak self] result in
+    func getPaginatedListMovies(listType: AccountListTypes, page: Int) {
+        tmdbService.getMoviesInAccountList(listType: listType, page: page) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didRecievePaginatedMedia(success.movies)
@@ -83,8 +83,8 @@ final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProt
         }
     }
     
-    func getPaginatedListSeries(listType: UserListTypes, page: Int) {
-        tmdbService.getUserListSeries(listType: listType, page: page) { [weak self] result in
+    func getPaginatedListSeries(listType: AccountListTypes, page: Int) {
+        tmdbService.getSeriesInAccountList(listType: listType, page: page) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didRecievePaginatedMedia(success.results)

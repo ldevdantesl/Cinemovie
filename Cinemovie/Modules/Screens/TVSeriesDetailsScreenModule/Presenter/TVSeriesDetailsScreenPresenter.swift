@@ -20,7 +20,6 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
     func didTapHomepage(homepage: String)
     func didTapFavoriteButton(adding: Bool)
     func didTapWatchlistButton(adding: Bool)
-    
     func didSelectActor(_ actor: Cast)
     func didSelectSeason(_ season: TVSeason)
     
@@ -31,11 +30,9 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
     func didGetTVSeriesReviews(_ reviews: [Review])
     func didGetTVSeriesRecommends(_ series: [TVSeries])
     func didGetTVSeasonDetails(_ details: TVSeasonDetails)
+    func didGetTVSeriesAccountStates(_ accountStates: MediaAccountStates)
     func didAddOrRemoveFromWatchlist(message: String)
     func didAddOrRemoveFromFavorites(message: String)
-    
-    func isTVSeriesWatchlisted(_ isWatchlisted: Bool)
-    func isTVSeriesFavorited(_ isFavorited: Bool)
     
     // MARK: - ERROR HANDLING
     func didRecieveError(_ error: Error)
@@ -55,9 +52,7 @@ final class TVSeriesDetailsScreenPresenter {
     private var seriesRecommends: [TVSeries] = []
     private var seriesSimilars: [TVSeries] = []
     private var seriesReviews: [Review] = []
-    
-    private var isFavorited: Bool = false
-    private var isWatchlisted: Bool = false
+    private var seriesAccountStates: MediaAccountStates = .empty
 
     init(seriesID: Int, interactor: TVSeriesDetailsScreenInteractorProtocol, router: TVSeriesDetailsScreenRouterProtocol) {
         self.seriesID = seriesID
@@ -83,18 +78,14 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
         interactor.getTVSeriesRecommendations(seriesID: seriesID)
         
         downloadGroup.enter()
-        interactor.findIfFavorited(seriesID: seriesID)
-        
-        downloadGroup.enter()
-        interactor.findIfWatchlisted(seriesID: seriesID)
+        interactor.getTVSeriesAccountStates(seriesID: seriesID)
         
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self, let details = self.seriesDetails else { return }
             self.view?.didGetAllTVSeriesData(
                 details, cast: seriesCast, crew: seriesCrew,
                 videos: seriesVideos, reviews: seriesReviews,
-                recommends: seriesRecommends,
-                isFavorited: isFavorited, isWatchlisted: isWatchlisted
+                recommends: seriesRecommends, accountStates: seriesAccountStates
             )
         }
     }
@@ -183,14 +174,9 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
     func didGetTVSeasonDetails(_ details: TVSeasonDetails) {
         router.showSeasonPopUp(seasonDetails: details)
     }
-    
-    func isTVSeriesFavorited(_ isFavorited: Bool) {
-        self.isFavorited = isFavorited
-        downloadGroup.leave()
-    }
-    
-    func isTVSeriesWatchlisted(_ isWatchlisted: Bool) {
-        self.isWatchlisted = isWatchlisted
+
+    func didGetTVSeriesAccountStates(_ accountStates: MediaAccountStates) {
+        self.seriesAccountStates = accountStates
         downloadGroup.leave()
     }
     

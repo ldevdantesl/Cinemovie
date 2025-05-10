@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct UserCustomListsResponse: APIResponse {
+struct UserListsResponse: APIResponse {
     let page: Int
-    let results: [UserCustomList]
+    let results: [UserList]
     let totalPages: Int
     let totalResults: Int
     

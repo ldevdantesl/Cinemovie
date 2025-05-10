@@ -19,7 +19,7 @@ protocol TVSeriesDetailsScreenViewProtocol: AnyObject {
         _ details: TVSeriesDetails, cast: [Cast],
         crew: [Cast], videos: [Video],
         reviews: [Review], recommends: [TVSeries],
-        isFavorited: Bool, isWatchlisted: Bool
+        accountStates: MediaAccountStates
     )
 }
 
@@ -242,13 +242,13 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
         _ details: TVSeriesDetails, cast: [Cast],
         crew: [Cast], videos: [Video],
         reviews: [Review], recommends: [TVSeries],
-        isFavorited: Bool, isWatchlisted: Bool
+        accountStates: MediaAccountStates
     ) {
         self.downloadView.hide()
         
         let backdropVM = BackdropImageCellViewModel(
             imagePath: details.backdropPath,
-            size: .w1280, isFavorite: isFavorited,
+            size: .w1280, isFavorite: accountStates.favorite,
             didTapBackButtonAction: presenter?.didTapBackButton,
             didTapFavorite: presenter?.didTapFavoriteButton
         )
@@ -261,7 +261,7 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
             didTapView: presenter?.didTapTooltipView, didTapHomepage: presenter?.didTapHomepage
         )
         
-        let watchlistVm = WatchlistButtonCellViewModel(isWatchlisted: isWatchlisted, didTapAction: presenter?.didTapWatchlistButton)
+        let watchlistVm = WatchlistButtonCellViewModel(isWatchlisted: accountStates.watchlist, didTapAction: presenter?.didTapWatchlistButton)
         var sectionsAndTheirItems: [(section: Sections, items: [Items])] = [
             (.backdropImage, [.backdropImage(backdropVM)]),
             (.titleAndTagline, [.titleAndTagline(titleVM)]),
