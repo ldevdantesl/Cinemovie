@@ -59,7 +59,7 @@ final class AccountListCell: ReusableCellBaseClass {
     
     private let stackSubtitleLabel: UILabel = {
         let label = UILabel()
-        label.textColor = CMColor.cmLabel
+        label.textColor = CMColor.cmSublabel
         label.font = CMFont.font(size: .caption, fontName: .avenirMediumItalic)
         label.numberOfLines = 2
         label.textAlignment = .center
@@ -98,10 +98,20 @@ final class AccountListCell: ReusableCellBaseClass {
         layoutAttributes.frame.size.height = height
         return layoutAttributes
     }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        self.viewModel = nil
+        self.stackSubtitleLabel.text = nil
+        self.stackTitleLabel.text = nil
+        self.posterStackView.subviews.forEach { $0.removeFromSuperview() }
+    }
     
     override func layoutSubviews() {
         super.layoutSubviews()
         self.plusPosterView.layer.cornerRadius = Constants.posterCornerRadius
+        self.plusPosterView.layer.borderColor = CMColor.cmLabel.cgColor
+        self.plusPosterView.layer.borderWidth = Constants.posterBorderWidth
     }
     
     // MARK: - PUBLIC FUNC
@@ -118,13 +128,13 @@ final class AccountListCell: ReusableCellBaseClass {
         contentView.addSubview(posterStackView)
         posterStackView.snp.makeConstraints {
             $0.top.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(15)
             $0.height.equalTo(posterStackView.snp.width).multipliedBy(1.5).priority(.high)
         }
 
         contentView.addSubview(stackTitleLabel)
         stackTitleLabel.snp.makeConstraints {
-            $0.top.equalTo(posterStackView.snp.bottom)
+            $0.top.equalTo(posterStackView.snp.bottom).offset(Constants.vSpacing)
             $0.horizontalEdges.equalToSuperview()
         }
         
@@ -142,7 +152,7 @@ final class AccountListCell: ReusableCellBaseClass {
             posterStackView.addSubview(plusPosterView)
             plusPosterView.snp.makeConstraints {
                 $0.center.equalToSuperview()
-                $0.width.equalToSuperview().multipliedBy(0.8)
+                $0.width.equalToSuperview()
                 $0.height.equalTo(plusPosterView.snp.width).multipliedBy(1.5)
             }
             return
@@ -168,7 +178,7 @@ final class AccountListCell: ReusableCellBaseClass {
             imageView.snp.makeConstraints {
                 $0.centerY.equalToSuperview()
                 $0.centerX.equalToSuperview().offset(centerOffset)
-                $0.width.equalToSuperview().multipliedBy(0.8)
+                $0.width.equalToSuperview()
                 $0.height.equalTo(imageView.snp.width).multipliedBy(1.5)
             }
         }

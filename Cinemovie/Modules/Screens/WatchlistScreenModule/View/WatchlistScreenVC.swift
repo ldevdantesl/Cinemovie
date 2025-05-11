@@ -30,7 +30,7 @@ final class WatchlistScreenVC: UIViewController {
 
     // MARK: - CONSTANTS
     fileprivate enum Constants {
-        static let headerViewHeight = 30.0 + UIConstants.topInset
+        static let headerViewHeight = 40.0 + UIConstants.topInset
     }
     
     // MARK: - SECTIONS
@@ -41,6 +41,7 @@ final class WatchlistScreenVC: UIViewController {
     
     enum Items: Hashable {
         case accountListVM(AccountListCellViewModel)
+        case userListVM(UserListCellViewModel)
     }
     
     // MARK: - VIPER
@@ -76,6 +77,8 @@ final class WatchlistScreenVC: UIViewController {
         view.delegate = self
         view.refreshControl = refreshControler
         view.register(cellClass: AccountListCell.self)
+        view.register(cellClass: UserListCell.self)
+        view.registerSupplementaryHeaderItem(cellClass: SupplementaryHeaderCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
         return view
@@ -122,17 +125,57 @@ final class WatchlistScreenVC: UIViewController {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? AccountListCell
                 cell?.configure(viewModel: vm)
                 return cell
+                
+            case .userListVM(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? UserListCell
+                cell?.configure(viewModel: vm)
+                return cell
             }
+        }
+        
+        collectionView.setSupplementaryViewProvider { collectionView, elementKind, indexPath in
+            guard let cell = collectionView.dequeueReusableSupplementaryView(
+                ofKind: elementKind, withReuseIdentifier: SupplementaryHeaderCell.identifier, for: indexPath
+            ) as? SupplementaryHeaderCell else { return nil }
+            let section = self.collectionView.snapshot().sectionIdentifiers[indexPath.section]
+            switch section {
+            case .accountLists:
+                let vm = SupplementaryHeaderViewModel(title: "Account Lists", subtitle: "Default Lists for your account")
+                cell.configure(viewModel: vm)
+            case .userLists:
+                let vm = SupplementaryHeaderViewModel(title: "Custom Lists", subtitle: "Lists that you created")
+                cell.configure(viewModel: vm)
+            }
+            return cell
         }
     }
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
-        UICollectionViewCompositionalLayout { sectionIndex, env in
+        UICollectionViewCompositionalLayout { [weak self] sectionIndex, env in
+            guard let self = self else { return nil }
             let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1/2), heightDimension: .estimated(200)))
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(200)), subitem: item, count: 2)
             group.interItemSpacing = .fixed(20)
+            
             let section = NSCollectionLayoutSection(group: group)
-            section.contentInsets = .init(top: 10, leading: 10, bottom: 0, trailing: 10)
+            section.interGroupSpacing = 10
+            let currentSection = self.collectionView.snapshot().sectionIdentifiers[sectionIndex]
+            let edgeInsets: NSDirectionalEdgeInsets
+            switch currentSection {
+            case .accountLists:
+                edgeInsets = .init(top: Constants.headerViewHeight, leading: 10, bottom: 10, trailing: 10)
+            case .userLists:
+                edgeInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
+            }
+            section.contentInsets = edgeInsets
+            
+            let headerItem = NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(60)),
+                elementKind: UICollectionView.elementKindSectionHeader, alignment: .top
+            )
+            headerItem.contentInsets = .init(top: edgeInsets.top, leading: 0, bottom: edgeInsets.bottom, trailing: 0)
+            
+            section.boundarySupplementaryItems = [headerItem]
             return section
         }
     }

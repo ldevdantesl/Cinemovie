@@ -218,13 +218,18 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
             self.didTapList(listType: $0)
         }
         
+        let userLists: [Items] = userCustomLists.map { Items.userListVM(UserListCellViewModel(userList: $0, didTapList: nil)) }
+        
         self.view?.applySnapshot(
-            sections: [.accountLists],
-            itemsBySection: [.accountLists : [
-                .accountListVM(watchlistVM),
-                .accountListVM(favoriteVM),
-                .accountListVM(ratedVM)
-            ]]
+            sections: [.accountLists, .userLists],
+            itemsBySection: [
+                .accountLists : [
+                    .accountListVM(watchlistVM),
+                    .accountListVM(favoriteVM),
+                    .accountListVM(ratedVM)
+                ],
+                .userLists : userLists
+            ]
         )
     }
     
