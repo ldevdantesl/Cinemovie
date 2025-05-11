@@ -66,7 +66,7 @@ final class CMSplashView: UIView {
         }
     }
     
-    public func hide() {
+    public func hide(completion: (() -> Void)? = nil) {
         DispatchQueue.main.async {
             UIView.animate(withDuration: Constants.aniDuration, delay: Constants.aniDuration, options: .showHideTransitionViews) { [weak self] in
                 guard let self = self else { return }
@@ -74,6 +74,11 @@ final class CMSplashView: UIView {
             } completion: { [weak self] _ in
                 guard let self = self else { return }
                 self.isHidden = true
+            }
+            
+            guard let completion else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + Constants.aniDuration * 0.99) {
+                completion()
             }
         }
     }

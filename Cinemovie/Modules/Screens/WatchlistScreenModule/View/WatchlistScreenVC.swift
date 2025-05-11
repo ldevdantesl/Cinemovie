@@ -30,7 +30,13 @@ final class WatchlistScreenVC: UIViewController {
 
     // MARK: - CONSTANTS
     fileprivate enum Constants {
-        static let headerViewHeight = 40.0 + UIConstants.topInset
+        static let topDecorHeight = UIConstants.topInset
+        static let plusButtonName = "plus"
+    }
+    
+    enum SupplementaryKind {
+        static let headerItem = "WatchlistScreenVC.headerItem"
+        static let headerBlur = "WatchlistScreenVC.headerBlur"
     }
     
     // MARK: - SECTIONS
@@ -53,23 +59,20 @@ final class WatchlistScreenVC: UIViewController {
         return view
     }()
     
-    // MARK: - PROPERTIES
-    private var isBlurToHeaderVisible: Bool = false
-    
     // MARK: - VIEW PROPERTIES
+    private let topDecorLayer: CALayer = {
+        let layer = CAGradientLayer()
+        layer.backgroundColor = UIColor.black.cgColor
+        layer.opacity = 0
+        return layer
+    }()
+    
     private lazy var refreshControler: UIRefreshControl = {
         let control = UIRefreshControl()
         control.tintColor = CMColor.cmLabel
+        control.backgroundColor = .black
         control.addTarget(self, action: #selector(didPullToRefresh), for: .valueChanged)
         return control
-    }()
-    
-    private lazy var headerView: WatchlistScreenHeaderView = {
-        let headerVM = WatchlistScreenHeaderViewModel(didTapAddListAction: presenter?.didTapAddNewList)
-        let view = WatchlistScreenHeaderView()
-        view.configure(viewModel: headerVM)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
     }()
     
     private lazy var collectionView: DiffableCollectionView = {
@@ -78,7 +81,8 @@ final class WatchlistScreenVC: UIViewController {
         view.refreshControl = refreshControler
         view.register(cellClass: AccountListCell.self)
         view.register(cellClass: UserListCell.self)
-        view.registerSupplementaryHeaderItem(cellClass: SupplementaryHeaderCell.self)
+        view.register(TopBlurHeaderCell.self, forSupplementaryViewOfKind: SupplementaryKind.headerBlur, withReuseIdentifier: TopBlurHeaderCell.identifier)
+        view.register(SupplementaryHeaderCell.self, forSupplementaryViewOfKind: SupplementaryKind.headerItem, withReuseIdentifier: SupplementaryHeaderCell.identifier)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
         return view
@@ -90,6 +94,8 @@ final class WatchlistScreenVC: UIViewController {
         configureDataSource()
         presenter?.viewDidLoad()
         setupUI()
+        view.layer.addSublayer(topDecorLayer)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -97,19 +103,21 @@ final class WatchlistScreenVC: UIViewController {
         self.navigationController?.navigationBar.isHidden = true
     }
     
+    override func viewDidLayoutSubviews() {
+        
+        super.viewDidLayoutSubviews()
+        self.topDecorLayer.frame = CGRect(
+            x: 0, y: 0,
+            width: view.bounds.width,
+            height: Constants.topDecorHeight
+        )
+    }
+    
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        view.backgroundColor = CMColor.cmBackground
         view.addSubview(collectionView)
         collectionView.snp.makeConstraints {
             $0.edges.equalToSuperview()
-        }
-        
-        view.addSubview(headerView)
-        headerView.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(Constants.headerViewHeight)
         }
         
         view.addSubview(downloadingView)
@@ -134,6 +142,10 @@ final class WatchlistScreenVC: UIViewController {
         }
         
         collectionView.setSupplementaryViewProvider { collectionView, elementKind, indexPath in
+            guard elementKind == SupplementaryKind.headerItem else {
+                return collectionView.dequeueReusableSupplementaryView(ofKind: elementKind, withReuseIdentifier: TopBlurHeaderCell.identifier, for: indexPath) as? TopBlurHeaderCell
+            }
+            
             guard let cell = collectionView.dequeueReusableSupplementaryView(
                 ofKind: elementKind, withReuseIdentifier: SupplementaryHeaderCell.identifier, for: indexPath
             ) as? SupplementaryHeaderCell else { return nil }
@@ -143,7 +155,13 @@ final class WatchlistScreenVC: UIViewController {
                 let vm = SupplementaryHeaderViewModel(title: "Account Lists", subtitle: "Default Lists for your account")
                 cell.configure(viewModel: vm)
             case .userLists:
-                let vm = SupplementaryHeaderViewModel(title: "Custom Lists", subtitle: "Lists that you created")
+                let vm = SupplementaryHeaderViewModel(
+                    title: "Custom Lists", subtitle: "Lists that you created",
+                    buttonImageName: Constants.plusButtonName, buttonTintColor: CMColor.cmAccent
+                ) { [weak self] in
+                    guard let self = self else { return }
+                    self.presenter?.didTapAddNewList()
+                }
                 cell.configure(viewModel: vm)
             }
             return cell
@@ -151,33 +169,31 @@ final class WatchlistScreenVC: UIViewController {
     }
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
-        UICollectionViewCompositionalLayout { [weak self] sectionIndex, env in
-            guard let self = self else { return nil }
+        let config = UICollectionViewCompositionalLayoutConfiguration()
+        let headerItem = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)),
+            elementKind: SupplementaryKind.headerBlur, alignment: .topLeading
+        )
+        headerItem.pinToVisibleBounds = true
+        headerItem.extendsBoundary = false
+        config.boundarySupplementaryItems = [headerItem]
+        
+        return UICollectionViewCompositionalLayout(sectionProvider: { sectionIndex, env in
             let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1/2), heightDimension: .estimated(200)))
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(200)), subitem: item, count: 2)
             group.interItemSpacing = .fixed(20)
-            
             let section = NSCollectionLayoutSection(group: group)
             section.interGroupSpacing = 10
-            let currentSection = self.collectionView.snapshot().sectionIdentifiers[sectionIndex]
-            let edgeInsets: NSDirectionalEdgeInsets
-            switch currentSection {
-            case .accountLists:
-                edgeInsets = .init(top: Constants.headerViewHeight, leading: 10, bottom: 10, trailing: 10)
-            case .userLists:
-                edgeInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
-            }
-            section.contentInsets = edgeInsets
+            section.contentInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
             
             let headerItem = NSCollectionLayoutBoundarySupplementaryItem(
-                layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(60)),
-                elementKind: UICollectionView.elementKindSectionHeader, alignment: .top
+                layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)),
+                elementKind: SupplementaryKind.headerItem, alignment: .topLeading
             )
-            headerItem.contentInsets = .init(top: edgeInsets.top, leading: 0, bottom: edgeInsets.bottom, trailing: 0)
-            
+            headerItem.pinToVisibleBounds = true
             section.boundarySupplementaryItems = [headerItem]
             return section
-        }
+        }, configuration: config)
     }
     
     // MARK: - OBJC
@@ -186,21 +202,7 @@ final class WatchlistScreenVC: UIViewController {
     }
 }
 
-extension WatchlistScreenVC: UICollectionViewDelegate {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let contentOffsetY = scrollView.contentOffset.y + scrollView.adjustedContentInset.top
-        
-        if contentOffsetY >= 5 && !isBlurToHeaderVisible {
-            isBlurToHeaderVisible = true
-            headerView.addBlur()
-        }
-        
-        if contentOffsetY < 5 && isBlurToHeaderVisible {
-            isBlurToHeaderVisible = false
-            headerView.removeBlur()
-        }
-    }
-}
+extension WatchlistScreenVC: UICollectionViewDelegate { }
 
 extension WatchlistScreenVC: WatchlistScreenViewProtocol {
     // MARK: - ERROR HANDLING
@@ -234,7 +236,12 @@ extension WatchlistScreenVC: WatchlistScreenViewProtocol {
     }
     
     func hideDownloadingView() {
-        downloadingView.hide()
+        downloadingView.hide {
+            UIView.animate(withDuration: 2) { [weak self] in
+                guard let self = self else { return }
+                self.topDecorLayer.opacity = 1
+            }
+        }
     }
     
     // MARK: - ERORR HANDLING

@@ -95,6 +95,17 @@ final class CMCircularButton: UIView {
         self.setupConstraints()
     }
     
+    public func clear() {
+        self.viewModel = nil
+        self.clipsToBounds = false
+        self.isUserInteractionEnabled = false
+        self.backgroundColor = nil
+        self.removeGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapButton)))
+        self.imageView.image = nil
+        self.imageView.tintColor = nil
+        self.imageView.snp.removeConstraints()
+    }
+    
     // MARK: - PRIVATE FUNC
     private func setupImage() {
         addSubview(imageView)
