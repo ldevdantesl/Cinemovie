@@ -61,7 +61,7 @@ final class WatchlistScreenVC: UIViewController {
     
     // MARK: - VIEW PROPERTIES
     private let topDecorLayer: CALayer = {
-        let layer = CAGradientLayer()
+        let layer = CALayer()
         layer.backgroundColor = UIColor.black.cgColor
         layer.opacity = 0
         return layer

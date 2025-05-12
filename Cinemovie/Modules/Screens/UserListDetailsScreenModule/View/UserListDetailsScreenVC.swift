@@ -11,30 +11,15 @@ import SnapKit
 protocol UserListDetailsScreenViewProtocol: AnyObject {
     // MARK: - PROPERTIES
     var downloadView: CMSplashView { get }
-    var refreshController: UIRefreshControl { get }
+    
+    // MARK: - PROGRAMMATIC
+    func didRecieveMedia(movies: [Movie], series: [TVSeries])
     
     // MARK: - OTHER
-    func applySnapshot(sections: [UserListDetailsScreenVC.Sections], itemsBySection: [UserListDetailsScreenVC.Sections : [UserListDetailsScreenVC.Items]])
-    func didReceievePaginatedItems(_ items: [Media])
     func didRecieveError(_ errorStr: String, goesBack: Bool)
-    
-    // MARK: - PAGINATION
-    func showPaginatedLoading()
-    func hidePaginatedLoading()
 }
 
-final class UserListDetailsScreenVC: UIViewController {
-    // MARK: - SECTIONS
-    enum Sections: Hashable {
-        case media
-        case notFound
-    }
-    
-    enum Items: Hashable {
-        case mediaList(VerticalMediaListCellViewModel)
-        case notFound(UnavailableInfoCellViewModel)
-    }
-    
+final class UserListDetailsScreenVC: UIPageViewController {
     // MARK: - VIPER
     var presenter: UserListDetailsScreenPresenterProtocol?
     let downloadView: CMSplashView = {
@@ -44,46 +29,30 @@ final class UserListDetailsScreenVC: UIViewController {
     }()
     
     // MARK: - PROPERTIES
-    private let listType: AccountListTypes
-    private var isScrollLocked: Bool = false
-    private var previousOffset: CGPoint = .zero
+    private lazy var viewControllersList: [UIViewController] = []
     
     // MARK: - VIEW PROPERTIES
-    lazy var refreshController: UIRefreshControl = {
-        let control = UIRefreshControl()
-        control.addTarget(self, action: #selector(didCallRefresh), for: .valueChanged)
-        control.tintColor = CMColor.cmLabel
-        return control
+    private let topDecorLayer: CALayer = {
+        let layer = CALayer()
+        layer.backgroundColor = UIColor.black.cgColor
+        layer.opacity = 0
+        return layer
     }()
     
-    private lazy var collectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<Sections, Items>(layout: createLayout(), showsTopBlur: true)
-        view.register(cellClass: VerticalMediaListCell.self)
-        view.register(cellClass: UnavailableInfoCell.self)
-        view.refreshControl = refreshController
-        view.delegate = self
-        view.backgroundColor = CMColor.cmBackground
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
+    init() { super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil) }
 
-    // MARK: - LIFECYCLE
-    init(listType: AccountListTypes) {
-        self.listType = listType
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: coder)
     }
     
+    // MARK: - LIFECYCLE
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        downloadView.show()
-        configureDataSource()
         presenter?.viewDidLoad()
+        downloadView.show()
+        dataSource = self
+        delegate = self
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -91,119 +60,65 @@ final class UserListDetailsScreenVC: UIViewController {
         self.navigationController?.navigationBar.isHidden = true
     }
     
-    // MARK: - PRIVATE FUNC
-    private func configureDataSource() {
-        collectionView.configureDataSource { collectionView, indexPath, itemIdentifier in
-            switch itemIdentifier {
-            case .mediaList(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? VerticalMediaListCell
-                cell?.configure(viewModel: vm)
-                return cell
-            case .notFound(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? UnavailableInfoCell
-                cell?.configure(viewModel: vm)
-                return cell
-            }
-        }
-    }
-    
-    private func createLayout() -> UICollectionViewCompositionalLayout {
-        UICollectionViewCompositionalLayout { sectionIndex, env in
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(100)))
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: item.layoutSize, subitems: [item])
-            let section = NSCollectionLayoutSection(group: group)
-            section.contentInsets = .init(top: UIConstants.topInset, leading: 10, bottom: 10, trailing: 10)
-            return section
-        }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.topDecorLayer.frame = CGRect(
+            x: 0, y: 0,
+            width: view.bounds.width,
+            height: UIConstants.topInset
+        )
     }
     
     private func setupUI() {
+        view.layer.addSublayer(topDecorLayer)
         view.backgroundColor = CMColor.cmBackground
-        view.addSubview(collectionView)
-        collectionView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
         
         view.addSubview(downloadView)
         downloadView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
     }
-    
-    // MARK: - OBJC
-    @objc private func didCallRefresh() {
-        presenter?.didCallRefresh()
-    }
 }
 
-extension UserListDetailsScreenVC: UICollectionViewDelegate {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if isScrollLocked {
-            scrollView.setContentOffset(previousOffset, animated: false)
-            return
-        }
-        
-        collectionView.showBlur(scrollView)
-        
-        if (presenter?.media.count ?? 0) > 20 {
-            let offsetY = scrollView.contentOffset.y
-            let contentHeight = scrollView.contentSize.height
-            let height = scrollView.frame.size.height
-            let distanceFromBottom = offsetY + height - contentHeight
-            
-            if let cell = collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? VerticalMediaListCell {
-                let progress = min(distanceFromBottom / 100.0, 1.0)
-                UIView.animate(withDuration: 0.15) {
-                    cell.setLoadingAlpha(progress)
-                }
-            }
-        }
+extension UserListDetailsScreenVC: UIPageViewControllerDataSource, UIPageViewControllerDelegate {
+    func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
+        guard let index = viewControllersList.firstIndex(of: viewController), index > 0 else { return nil }
+        return viewControllersList[index - 1]
     }
-    
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        let offsetY = scrollView.contentOffset.y
-        let contentHeight = scrollView.contentSize.height
-        let height = scrollView.frame.size.height
 
-        let isAtBottom = offsetY + height >= contentHeight - 10
-        isAtBottom ? presenter?.didCallPagination() : ()
+    func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
+        guard let index = viewControllersList.firstIndex(of: viewController), index < viewControllersList.count - 1 else { return nil }
+        return viewControllersList[index + 1]
     }
 }
 
 extension UserListDetailsScreenVC: UserListDetailsScreenViewProtocol {
-    func showPaginatedLoading() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self, let cell = self.collectionView.cellForItem(
-                at: IndexPath(item: 0, section: 0)
-            ) as? VerticalMediaListCell else { return }
-            cell.startPaginatingLoadingAnimation()
+    // MARK: - PROGRAMMATIC
+    func didRecieveMedia(movies: [Movie], series: [TVSeries]) {
+        viewControllersList = []
+        
+        if !movies.isEmpty {
+            let moviesVC = UserListDetailsMediaPageVC(media: movies, mediaType: .movie, presenter: self.presenter)
+            viewControllersList.append(moviesVC)
+        }
+        
+        if !series.isEmpty {
+            let seriesVC = UserListDetailsMediaPageVC(media: series, mediaType: .tvShow, presenter: self.presenter)
+            viewControllersList.append(seriesVC)
+        }
+        
+        if let firstVC = viewControllersList.first {
+            setViewControllers([firstVC], direction: .forward, animated: true)
+        }
+        downloadView.hide {
+            UIView.animate(withDuration: 2) { [weak self] in
+                guard let self = self else { return }
+                self.topDecorLayer.opacity = 1
+            }
         }
     }
     
-    func hidePaginatedLoading() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            guard let cell = self.collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? VerticalMediaListCell else { return }
-            cell.stopPaginatingLoadingAnimation()
-        }
-    }
-    
-    func didReceievePaginatedItems(_ items: [any Media]) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self, let cell = self.collectionView.cellForItem(
-                at: IndexPath(item: 0, section: 0)
-            ) as? VerticalMediaListCell else { return }
-            cell.insertNewItems(items)
-        }
-    }
-    
-    func applySnapshot(sections: [UserListDetailsScreenVC.Sections], itemsBySection: [UserListDetailsScreenVC.Sections : [UserListDetailsScreenVC.Items]]) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
-        }
-    }
-    
+    // MARK: - ERROR HANDLING
     func didRecieveError(_ errorStr: String, goesBack: Bool) {
         let alert = UIAlertController(title: "Oops...", message: errorStr, preferredStyle: .alert)
         let action = UIAlertAction(title: "OK", style: .cancel) { [weak self] _ in

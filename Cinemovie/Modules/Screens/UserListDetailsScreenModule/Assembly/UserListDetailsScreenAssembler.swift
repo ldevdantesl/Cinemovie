@@ -12,7 +12,7 @@ final class UserListDetailsScreenAssembler {
         let interactor = UserListDetailsScreenInteractor(tmdbService: tmdbService)
         let router = UserListDetailsScreenRouter(tmdbService: tmdbService)
         let presenter = UserListDetailsScreenPresenter(listType: listType, interactor: interactor, router: router)
-        let viewController = UserListDetailsScreenVC(listType: listType)
+        let viewController = UserListDetailsScreenVC()
         presenter.view  = viewController
         viewController.presenter = presenter
         interactor.presenter = presenter
