@@ -8,7 +8,8 @@
 import UIKit
 
 protocol WatchlistScreenRouterProtocol {
-    func navigateToList(listType: AccountListTypes)
+    func navigateToAccountList(listType: AccountListTypes)
+    func navigateToUserList(listID: Int)
     func hidePopUp()
     func presentAddNewListPopUp(onAdd: @escaping ((String, String?, Bool) -> Void))
 }
@@ -21,8 +22,13 @@ final class WatchlistScreenRouter: WatchlistScreenRouterProtocol {
         self.tmdbService = tmdbService
     }
     
-    func navigateToList(listType: AccountListTypes) {
-        let vc = UserListDetailsScreenAssembler.assemble(listType: listType, tmdbService: tmdbService)
+    func navigateToAccountList(listType: AccountListTypes) {
+        let vc = AccountListDetailsScreenAssembler.assemble(listType: listType, tmdbService: tmdbService)
+        viewController?.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func navigateToUserList(listID: Int) {
+        let vc = AccountListDetailsScreenAssembler.assemble(listID: listID, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     

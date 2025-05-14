@@ -12,7 +12,8 @@ protocol WatchlistScreenPresenterProtocol: AnyObject {
     
     // MARK: - USER INITIATED
     func didCallRefresh()
-    func didTapList(listType: AccountListTypes)
+    func didTapAccountList(listType: AccountListTypes)
+    func didTapUserList(listID: Int)
     func didTapAddNewList()
     func didTapRemoveList(list: UserList)
     
@@ -133,8 +134,12 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
         }
     }
     
-    func didTapList(listType: AccountListTypes) {
-        router.navigateToList(listType: listType)
+    func didTapAccountList(listType: AccountListTypes) {
+        router.navigateToAccountList(listType: listType)
+    }
+    
+    func didTapUserList(listID: Int) {
+        router.navigateToUserList(listID: listID)
     }
     
     func didTapAddNewList() {
@@ -210,7 +215,7 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
             listType: .watchlist
         ) { [weak self] in
             guard let self = self else { return }
-            self.didTapList(listType: $0)
+            self.didTapAccountList(listType: $0)
         }
         
         let favoriteVM = AccountListCellViewModel(
@@ -218,7 +223,7 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
             listType: .favorite
         ) { [weak self] in
             guard let self = self else { return }
-            self.didTapList(listType: $0)
+            self.didTapAccountList(listType: $0)
         }
         
         let ratedVM = AccountListCellViewModel(
@@ -226,12 +231,14 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
             listType: .rated
         ) { [weak self] in
             guard let self = self else { return }
-            self.didTapList(listType: $0)
+            self.didTapAccountList(listType: $0)
         }
         
         let userLists: [Items] = userCustomLists.map {
             Items.userListVM(
-                UserListCellViewModel(userList: $0, didTapList: nil) { [weak self] in self?.didTapRemoveList(list: $0) }
+                UserListCellViewModel(userList: $0)
+                { [weak self] in self?.didTapUserList(listID: $0.id) } didTapRemoveList:
+                { [weak self] in self?.didTapRemoveList(list: $0) }
             )
         }
         

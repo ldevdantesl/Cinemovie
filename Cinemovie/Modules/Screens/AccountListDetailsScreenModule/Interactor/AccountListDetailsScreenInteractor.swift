@@ -7,25 +7,22 @@
 
 import UIKit
 
-protocol UserListDetailsScreenInteractorProtocol: AnyObject {
-    // MARK: - ACCOUNT INITIAL
+protocol AccountListDetailsScreenInteractorProtocol: AnyObject {
+    // MARK: - INITIAL
     func getInitialListMovies(listType: AccountListTypes)
     func getInitialListSeries(listType: AccountListTypes)
     
-    // MARK: - ACCOUNT PAGINATION
+    // MARK: - PAGINATION
     func getNewPaginatedMoviesForPage(listType: AccountListTypes, page: Int)
     func getNewPaginatedSeriesForPage(listType: AccountListTypes, page: Int)
     
-    // MARK: - ACCOUNT REFRESHING
+    // MARK: - REFRESHING
     func getRefreshingListMovies(listType: AccountListTypes)
     func getRefreshingListSeries(listType: AccountListTypes)
-    
-    // MARK: - USER LIST
-    func getUserListDetails(listID: Int)
 }
 
-final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProtocol {
-    weak var presenter: UserListDetailsScreenPresenterProtocol?
+final class AccountListDetailsScreenInteractor: AccountListDetailsScreenInteractorProtocol {
+    weak var presenter: AccountListDetailsScreenPresenterProtocol?
     private var tmdbService: TMDBService
     
     init(tmdbService: TMDBService) {
@@ -37,9 +34,7 @@ final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProt
         tmdbService.getMoviesInAccountList(listType: listType, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success):
-                self.presenter?.didRecieveMovies(success.movies)
-                self.presenter?.didRecieveTotalPages(forType: .movie, totalPages: success.totalPages)
+            case .success(let success): self.presenter?.didReceiveMedia(success.movies)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }
@@ -49,9 +44,7 @@ final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProt
         tmdbService.getSeriesInAccountList(listType: listType, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success):
-                self.presenter?.didRecieveTVSeries(success.results)
-                self.presenter?.didRecieveTotalPages(forType: .tvShow, totalPages: success.totalPages)
+            case .success(let success): self.presenter?.didReceiveMedia(success.results)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }
@@ -62,7 +55,7 @@ final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProt
         tmdbService.getMoviesInAccountList(listType: listType, page: page) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): self.presenter?.didReceiveNewMovies(success.movies)
+            case .success(let success): self.presenter?.didReceiveNewMedia(success.movies)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }
@@ -72,7 +65,7 @@ final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProt
         tmdbService.getSeriesInAccountList(listType: listType, page: page) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): self.presenter?.didReceiveNewSeries(success.results)
+            case .success(let success): self.presenter?.didReceiveNewMedia(success.results)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }
@@ -83,7 +76,7 @@ final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProt
         tmdbService.getMoviesInAccountList(listType: listType, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): self.presenter?.didReceiveRefreshingMovies(success.movies)
+            case .success(let success): self.presenter?.didReceiveRefreshingMedia(success.movies)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }
@@ -93,18 +86,7 @@ final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProt
         tmdbService.getSeriesInAccountList(listType: listType, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): self.presenter?.didReceiveRefreshingSeries(success.results)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
-            }
-        }
-    }
-    
-    // MARK: - USER LIST
-    func getUserListDetails(listID: Int) {
-        tmdbService.getUserListDetails(listID: listID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): break // self.presenter?.didReceiveMedia(media: success.results)
+            case .success(let success): self.presenter?.didReceiveRefreshingMedia(success.results)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }

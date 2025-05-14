@@ -178,9 +178,9 @@ final class TMDBServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
-    func getUserListDetails(listID: Int, completion: @escaping (Result<UserListDetails, NetworkError>) -> Void) {
+    func getUserListDetails(listID: Int, page: Int, completion: @escaping (Result<UserListDetails, NetworkError>) -> Void) {
         guard let accessToken = accountStore.accessToken else { return }
-        let endpoint = TMDBEndpoints.getUserListDetailsEndpoint(listID: listID, language: userService.userLanguage, page: 1, accessToken: accessToken)
+        let endpoint = TMDBEndpoints.getUserListDetailsEndpoint(listID: listID, language: userService.userLanguage, page: page, accessToken: accessToken)
         handleRequest(endpoint: endpoint, completion: completion)
     }
     

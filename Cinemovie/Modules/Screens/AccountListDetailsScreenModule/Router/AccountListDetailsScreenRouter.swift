@@ -7,14 +7,14 @@
 
 import UIKit
 
-protocol UserListDetailsScreenRouterProtocol {
+protocol AccountListDetailsScreenRouterProtocol {
     func goBack()
     func navigateToMovieDetails(movieId: Int)
     func navigateToTVSeriesDetails(seriesID: Int)
 }
 
-final class UserListDetailsScreenRouter: UserListDetailsScreenRouterProtocol {
-    weak var viewController: UserListDetailsScreenVC?
+final class AccountListDetailsScreenRouter: AccountListDetailsScreenRouterProtocol {
+    weak var viewController: AccountListDetailsScreenVC?
     private let tmdbService: TMDBService
     
     init(tmdbService: TMDBService) {

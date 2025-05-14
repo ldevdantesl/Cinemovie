@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-final class UserListDetailsMediaPageVC: UIViewController {
+final class AccountListDetailsMediaPageVC: UIViewController {
 
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -40,7 +40,7 @@ final class UserListDetailsMediaPageVC: UIViewController {
     lazy var subtitleForSupplementary = "Scroll \(mediaType == .movie ? "right" : "left") to see \(mediaType == .movie ? "TVSeries" : "Movies") if they exist"
     let mediaType: MediaTypes
     private var media: [Media]
-    private weak var presenter: UserListDetailsScreenPresenterProtocol?
+    private weak var presenter: AccountListDetailsScreenPresenterProtocol?
     
     // MARK: - VIEW PROPERTIES
     private let loadingIndicator: UIActivityIndicatorView = {
@@ -73,14 +73,14 @@ final class UserListDetailsMediaPageVC: UIViewController {
     }()
     
     // MARK: - LIFECYCLE
-    init(media: [Media], mediaType: MediaTypes, presenter: UserListDetailsScreenPresenterProtocol?) {
+    init(media: [Media], mediaType: MediaTypes, presenter: AccountListDetailsScreenPresenterProtocol?) {
         self.media = media
         self.mediaType = mediaType
         self.presenter = presenter
         super.init(nibName: nil, bundle: nil)
     }
     
-    init(presenter: UserListDetailsScreenPresenterProtocol?) {
+    init(presenter: AccountListDetailsScreenPresenterProtocol?) {
         self.media = []
         self.mediaType = .movie
         self.presenter = presenter
@@ -105,7 +105,7 @@ final class UserListDetailsMediaPageVC: UIViewController {
             self.collectionView.applySnapshot(sections: [.notFound], itemsBySection: [.notFound : [.unavailableVM(unavailableVM)]])
             return
         }
-        let mediaVMs = self.media.map { UserListDetailsMediaPageVC.Items.posterImageVM(MediaPosterImageCellViewModel(media: $0, didTapMedia: presenter?.didTapAnyMedia) ) }
+        let mediaVMs = self.media.map { AccountListDetailsMediaPageVC.Items.posterImageVM(MediaPosterImageCellViewModel(media: $0, didTapMedia: presenter?.didTapAnyMedia) ) }
         self.collectionView.applySnapshot(sections: [.main], itemsBySection: [.main : mediaVMs])
     }
     
@@ -127,7 +127,7 @@ final class UserListDetailsMediaPageVC: UIViewController {
         if paginating { self.media.append(contentsOf: media) }
         else { self.media = media }
         
-        let mediaVMs = self.media.map { UserListDetailsMediaPageVC.Items.posterImageVM(MediaPosterImageCellViewModel(media: $0, didTapMedia: presenter?.didTapAnyMedia) ) }
+        let mediaVMs = self.media.map { AccountListDetailsMediaPageVC.Items.posterImageVM(MediaPosterImageCellViewModel(media: $0, didTapMedia: presenter?.didTapAnyMedia) ) }
         self.collectionView.applySnapshot(sections: [.main], itemsBySection: [.main : mediaVMs])
     }
     
@@ -238,7 +238,7 @@ final class UserListDetailsMediaPageVC: UIViewController {
     }
 }
 
-extension UserListDetailsMediaPageVC: UICollectionViewDelegate {
+extension AccountListDetailsMediaPageVC: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard self.media.count >= 20 else { return }
         guard !loadingIndicator.isAnimating else {

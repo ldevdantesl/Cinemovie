@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-protocol UserListDetailsScreenViewProtocol: AnyObject {
+protocol AccountListDetailsScreenViewProtocol: AnyObject {
     // MARK: - PROPERTIES
     var downloadView: CMSplashView { get }
     
@@ -20,9 +20,9 @@ protocol UserListDetailsScreenViewProtocol: AnyObject {
     func didRecieveError(_ errorStr: String, goesBack: Bool)
 }
 
-final class UserListDetailsScreenVC: UIPageViewController {
+final class AccountListDetailsScreenVC: UIPageViewController {
     // MARK: - VIPER
-    var presenter: UserListDetailsScreenPresenterProtocol?
+    var presenter: AccountListDetailsScreenPresenterProtocol?
     let downloadView: CMSplashView = {
         let view = CMSplashView(frame: .zero, showsLoadingLabel: true)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -81,7 +81,7 @@ final class UserListDetailsScreenVC: UIPageViewController {
     }
 }
 
-extension UserListDetailsScreenVC: UIPageViewControllerDataSource, UIPageViewControllerDelegate {
+extension AccountListDetailsScreenVC: UIPageViewControllerDataSource, UIPageViewControllerDelegate {
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
         guard let index = viewControllersList.firstIndex(of: viewController), index > 0 else { return nil }
         return viewControllersList[index - 1]
@@ -93,13 +93,15 @@ extension UserListDetailsScreenVC: UIPageViewControllerDataSource, UIPageViewCon
     }
 }
 
-extension UserListDetailsScreenVC: UserListDetailsScreenViewProtocol {
+extension AccountListDetailsScreenVC: AccountListDetailsScreenViewProtocol {
     // MARK: - PROGRAMMATIC
     func didRecieveMedia(movies: [Movie], series: [TVSeries]) {
         viewControllersList = []
         
         defer {
-            setViewControllers(viewControllersList, direction: .forward, animated: true)
+            if let firstVC = viewControllersList.first {
+                setViewControllers([firstVC], direction: .forward, animated: true)
+            }
             downloadView.hide {
                 UIView.animate(withDuration: 2) { [weak self] in
                     guard let self = self else { return }
@@ -109,18 +111,18 @@ extension UserListDetailsScreenVC: UserListDetailsScreenViewProtocol {
         }
         
         guard !movies.isEmpty || !series.isEmpty else {
-            let notFoundVC = UserListDetailsMediaPageVC(media: [], mediaType: .movie, presenter: self.presenter)
+            let notFoundVC = AccountListDetailsMediaPageVC(media: [], mediaType: .movie, presenter: self.presenter)
             viewControllersList.append(notFoundVC)
             return
         }
         
         if !movies.isEmpty {
-            let moviesVC = UserListDetailsMediaPageVC(media: movies, mediaType: .movie, presenter: self.presenter)
+            let moviesVC = AccountListDetailsMediaPageVC(media: movies, mediaType: .movie, presenter: self.presenter)
             viewControllersList.append(moviesVC)
         }
         
         if !series.isEmpty {
-            let seriesVC = UserListDetailsMediaPageVC(media: series, mediaType: .tvShow, presenter: self.presenter)
+            let seriesVC = AccountListDetailsMediaPageVC(media: series, mediaType: .tvShow, presenter: self.presenter)
             viewControllersList.append(seriesVC)
         }
     }
@@ -128,7 +130,7 @@ extension UserListDetailsScreenVC: UserListDetailsScreenViewProtocol {
     func didRecieveNewMedia(mediaType: MediaTypes, media: [any Media], paginating: Bool) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            guard let currentVC = viewControllers?.first as? UserListDetailsMediaPageVC else { return }
+            guard let currentVC = viewControllers?.first as? AccountListDetailsMediaPageVC else { return }
             guard currentVC.mediaType == mediaType else { return }
             currentVC.applySnapshotWithNewMedia(media, paginating: paginating)
         }
