@@ -23,6 +23,7 @@ protocol WatchlistScreenInteractorProtocol: AnyObject {
     // MARK: - CUSTOM LIST
     func createNewList(listName: String, listDescription: String?, isPublic: Bool)
     func getCustomLists(refreshing: Bool)
+    func removeCustomList(list: UserList)
 }
 
 final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
@@ -112,6 +113,16 @@ final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
             guard let self = self else { return }
             switch result {
             case .success(let success): self.presenter?.didReceieveCustomLists(lists: success.results, refreshing: refreshing)
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func removeCustomList(list: UserList) {
+        tmdbService.removeUserList(listID: list.id) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success: self.presenter?.didRemoveList()
             case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }

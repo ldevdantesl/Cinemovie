@@ -10,18 +10,18 @@ import Foundation
 struct UserList: APIResponse {
     let accountID: String
     let adult: Int
-    let averageRating: Int
+    let averageRating: Double
     let backdropPath: String?
     let createdAt: String
     let description: String?
     let featured: Int
     let id: Int
     let iso3166_1: String?
-    let iso639_1: String?
+    let iso639_1: String
     let name: String
     let numberOfItems: Int
     let posterPath: String?
-    let resultPublic: Int
+    let isPublic: Int
     let revenue: Int
     let runtime: String
     let sortBy: Int
@@ -39,7 +39,7 @@ struct UserList: APIResponse {
         case name
         case numberOfItems = "number_of_items"
         case posterPath = "poster_path"
-        case resultPublic = "public"
+        case isPublic = "public"
         case revenue, runtime
         case sortBy = "sort_by"
         case updatedAt = "updated_at"

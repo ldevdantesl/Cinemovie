@@ -156,8 +156,9 @@ struct TMDBEndpoints {
     }
     
     // MARK: - USER LIST
-    static func getUserListDetailsEndpoint(listID: Int, accessToken: String, queryParams: [String : String] = [:]) -> Endpoint {
-        return Endpoint(baseURL: baseURLV4, bearerToken: accessToken, path: "/list/\(listID)", queryParams: queryParams)
+    static func getUserListDetailsEndpoint(listID: Int, language: String, page: Int, accessToken: String) -> Endpoint {
+        let params = ["language" : language, "page" : page.description]
+        return Endpoint(baseURL: baseURLV4, bearerToken: accessToken, path: "/list/\(listID)", queryParams: params)
     }
     
     static func getUserListsEndpoint(accountID: String, accessToken: String, page: Int) -> Endpoint {
@@ -220,7 +221,7 @@ struct TMDBEndpoints {
     }
     
     static func deleteUserListEndpoint(listID: Int, accessToken: String) -> Endpoint {
-        return Endpoint(baseURL: baseURLV4, bearerToken: accessToken, path: "/\(listID)", method: .DELETE)
+        return Endpoint(baseURL: baseURLV4, bearerToken: accessToken, path: "/list/\(listID)", method: .DELETE)
     }
 
     // MARK: - OTHER

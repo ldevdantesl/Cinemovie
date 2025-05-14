@@ -49,6 +49,8 @@ protocol TMDBService: AnyObject {
     // MARK: - USER LIST
     func createUserList(name: String, description: String?, isPublic: Bool, completion: @escaping (Result<CreateUserListResponse, NetworkError>) -> Void)
     func getUserLists(completion: @escaping (Result<UserListsResponse, NetworkError>) -> Void)
+    func getUserListDetails(listID: Int, completion: @escaping (Result<UserListDetails, NetworkError>) -> Void)
+    func removeUserList(listID: Int, completion: @escaping (Result<RemoveUserListResponse, NetworkError>) -> Void)
     
     // MARK: - OTHER
     func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void)

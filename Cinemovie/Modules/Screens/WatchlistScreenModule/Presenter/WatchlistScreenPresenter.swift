@@ -14,6 +14,7 @@ protocol WatchlistScreenPresenterProtocol: AnyObject {
     func didCallRefresh()
     func didTapList(listType: AccountListTypes)
     func didTapAddNewList()
+    func didTapRemoveList(list: UserList)
     
     // MARK: - WATCHLIST
     func didGetWatchlistMovies(_ movies: [Movie], refreshing: Bool)
@@ -29,6 +30,7 @@ protocol WatchlistScreenPresenterProtocol: AnyObject {
     
     // MARK: - CUSTOM LISTS
     func didReceieveCustomLists(lists: [UserList], refreshing: Bool)
+    func didRemoveList()
     
     // MARK: - PROGRAMMATIC
     func didCreateNewList()
@@ -143,6 +145,10 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
         }
     }
     
+    func didTapRemoveList(list: UserList) {
+        interactor.removeCustomList(list: list)
+    }
+    
     // MARK: - WATCHLIST
     func didGetWatchlistMovies(_ movies: [Movie], refreshing: Bool) {
         self.watchlistMedia.append(contentsOf: movies)
@@ -179,6 +185,7 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
     // MARK: - PROGRAMMATIC
     func didCreateNewList() {
         self.view?.hideDownloadingView()
+        self.didCallRefresh()
         self.router.hidePopUp()
     }
     
@@ -189,6 +196,10 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
     func didReceieveCustomLists(lists: [UserList], refreshing: Bool) {
         self.userCustomLists = lists
         refreshing ? refreshGroup.leave() : downloadGroup.leave()
+    }
+    
+    func didRemoveList() {
+        didCallRefresh()
     }
     
     // MARK: - PRIVATE FUNC
@@ -218,7 +229,11 @@ extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
             self.didTapList(listType: $0)
         }
         
-        let userLists: [Items] = userCustomLists.map { Items.userListVM(UserListCellViewModel(userList: $0, didTapList: nil)) }
+        let userLists: [Items] = userCustomLists.map {
+            Items.userListVM(
+                UserListCellViewModel(userList: $0, didTapList: nil) { [weak self] in self?.didTapRemoveList(list: $0) }
+            )
+        }
         
         self.view?.applySnapshot(
             sections: [.accountLists, .userLists],

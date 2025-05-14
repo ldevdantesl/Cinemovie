@@ -14,6 +14,7 @@ protocol UserListDetailsScreenViewProtocol: AnyObject {
     
     // MARK: - PROGRAMMATIC
     func didRecieveMedia(movies: [Movie], series: [TVSeries])
+    func didRecieveNewMedia(mediaType: MediaTypes, media: [Media], paginating: Bool)
     
     // MARK: - OTHER
     func didRecieveError(_ errorStr: String, goesBack: Bool)
@@ -97,6 +98,22 @@ extension UserListDetailsScreenVC: UserListDetailsScreenViewProtocol {
     func didRecieveMedia(movies: [Movie], series: [TVSeries]) {
         viewControllersList = []
         
+        defer {
+            setViewControllers(viewControllersList, direction: .forward, animated: true)
+            downloadView.hide {
+                UIView.animate(withDuration: 2) { [weak self] in
+                    guard let self = self else { return }
+                    self.topDecorLayer.opacity = 1
+                }
+            }
+        }
+        
+        guard !movies.isEmpty || !series.isEmpty else {
+            let notFoundVC = UserListDetailsMediaPageVC(media: [], mediaType: .movie, presenter: self.presenter)
+            viewControllersList.append(notFoundVC)
+            return
+        }
+        
         if !movies.isEmpty {
             let moviesVC = UserListDetailsMediaPageVC(media: movies, mediaType: .movie, presenter: self.presenter)
             viewControllersList.append(moviesVC)
@@ -106,15 +123,14 @@ extension UserListDetailsScreenVC: UserListDetailsScreenViewProtocol {
             let seriesVC = UserListDetailsMediaPageVC(media: series, mediaType: .tvShow, presenter: self.presenter)
             viewControllersList.append(seriesVC)
         }
-        
-        if let firstVC = viewControllersList.first {
-            setViewControllers([firstVC], direction: .forward, animated: true)
-        }
-        downloadView.hide {
-            UIView.animate(withDuration: 2) { [weak self] in
-                guard let self = self else { return }
-                self.topDecorLayer.opacity = 1
-            }
+    }
+    
+    func didRecieveNewMedia(mediaType: MediaTypes, media: [any Media], paginating: Bool) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            guard let currentVC = viewControllers?.first as? UserListDetailsMediaPageVC else { return }
+            guard currentVC.mediaType == mediaType else { return }
+            currentVC.applySnapshotWithNewMedia(media, paginating: paginating)
         }
     }
     

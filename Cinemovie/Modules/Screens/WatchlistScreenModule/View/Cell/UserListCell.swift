@@ -11,10 +11,12 @@ import SnapKit
 final class UserListCellViewModel: CellViewModelBaseClass {
     let userList: UserList
     let didTapList: ((UserList) -> Void)?
+    let didTapRemoveList: ((UserList) -> Void)?
     
-    init(userList: UserList, didTapList: ((UserList) -> Void)?) {
+    init(userList: UserList, didTapList: ((UserList) -> Void)?, didTapRemoveList: ((UserList) -> Void)? = nil) {
         self.userList = userList
         self.didTapList = didTapList
+        self.didTapRemoveList = didTapRemoveList
         super.init(cellIdentifier: "UserListCell")
     }
 }
@@ -29,6 +31,8 @@ final class UserListCell: ReusableCellBaseClass {
         static let hugeSpacing = 20.0
         static let spacing = 5.0
         static let vSpacing = 10.0
+        
+        static let contextMenuImage = "play.square.stack"
     }
     
     // MARK: - PROPERTIES
@@ -67,6 +71,7 @@ final class UserListCell: ReusableCellBaseClass {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        setupContextMenu()
     }
     
     @available(*, unavailable)
@@ -130,9 +135,31 @@ final class UserListCell: ReusableCellBaseClass {
         }
     }
     
+    private func setupContextMenu() {
+        let interaction = UIContextMenuInteraction(delegate: self)
+        contentView.addInteraction(interaction)
+    }
+    
     // MARK: - OBJC FUNC
     @objc private func didTapAction() {
         guard let userList = viewModel?.userList else { return }
         self.viewModel?.didTapList?(userList)
+    }
+}
+
+extension UserListCell: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        .init(identifier: nil, previewProvider: nil) { [weak self] _ in
+            guard let self = self, let viewModel = self.viewModel else { return nil }
+            let firstElement = UIAction(title: "Remove", image: UIImage(systemName: "trash"), attributes: .destructive) { _ in
+                viewModel.didTapRemoveList?(viewModel.userList)
+            }
+            
+            return UIMenu(
+                title: viewModel.userList.name,
+                image: UIImage(systemName: Constants.contextMenuImage),
+                children: [firstElement]
+            )
+        }
     }
 }

@@ -12,25 +12,62 @@ struct SupplementaryHeaderViewModel {
     let title: String
     let subtitle: String?
     let cellIdentifier: String
-    let buttonImageName: String?
-    let buttonTintColor: UIColor?
-    let didTapButton: (() -> Void)?
+    let leftButtonImageName: String?
+    let leftButtonTintColor: UIColor?
+    let didTapLeftButton: (() -> Void)?
+    let rightButtonImageName: String?
+    let rightButtonTintColor: UIColor?
+    let didTapRightButton: (() -> Void)?
     
     init(title: String, subtitle: String?) {
         self.title = title
         self.subtitle = subtitle
-        self.buttonImageName = nil
-        self.didTapButton = nil
-        self.buttonTintColor = nil
+        self.rightButtonImageName = nil
+        self.rightButtonTintColor = nil
+        self.didTapRightButton = nil
+        
+        self.leftButtonImageName = nil
+        self.leftButtonTintColor = nil
+        self.didTapLeftButton = nil
         self.cellIdentifier = "SupplementaryHeaderCell"
     }
     
-    init(title: String, subtitle: String?, buttonImageName: String, buttonTintColor: UIColor, didTapButton: (() -> Void)?) {
+    init(
+        title: String, subtitle: String?,
+        buttonImageName: String,
+        buttonTintColor: UIColor,
+        didTapButton: (() -> Void)?
+    ) {
         self.title = title
         self.subtitle = subtitle
-        self.didTapButton = didTapButton
-        self.buttonImageName = buttonImageName
-        self.buttonTintColor = buttonTintColor
+        self.didTapRightButton = didTapButton
+        self.rightButtonImageName = buttonImageName
+        self.rightButtonTintColor = buttonTintColor
+        
+        self.didTapLeftButton = nil
+        self.leftButtonImageName = nil
+        self.leftButtonTintColor = nil
+        self.cellIdentifier = "SupplementaryHeaderCell"
+    }
+    
+    init(
+        title: String, subtitle: String?,
+        rightButtonImageName: String? = nil,
+        rightButtonTintColor: UIColor? = nil,
+        didTapRightButton: (() -> Void)? = nil,
+        leftButtonImageName: String? = nil,
+        leftButtonTintColor: UIColor? = nil,
+        didTapLeftButton: (() -> Void)? = nil
+    ) {
+        self.title = title
+        self.subtitle = subtitle
+        self.didTapRightButton = didTapRightButton
+        self.rightButtonImageName = rightButtonImageName
+        self.rightButtonTintColor = rightButtonTintColor
+        
+        self.didTapLeftButton = didTapLeftButton
+        self.leftButtonImageName = leftButtonImageName
+        self.leftButtonTintColor = leftButtonTintColor
         self.cellIdentifier = "SupplementaryHeaderCell"
     }
 }
@@ -39,6 +76,8 @@ final class SupplementaryHeaderCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let buttonSize = 30.0
+        static let spacing = 5.0
+        static let vSpacing = 15.0
     }
     
     // MARK: - PROPERTIES
@@ -63,7 +102,14 @@ final class SupplementaryHeaderCell: ReusableCellBaseClass {
         return label
     }()
     
-    private let headerButton: CMCircularButton = {
+    private let headerRightButton: CMCircularButton = {
+        let button = CMCircularButton()
+        button.isHidden = true
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private let headerLeftButton: CMCircularButton = {
         let button = CMCircularButton()
         button.isHidden = true
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -75,8 +121,10 @@ final class SupplementaryHeaderCell: ReusableCellBaseClass {
         self.viewModel = nil
         self.headerTitleLabel.text = nil
         self.headerSubtitleLabel.text = nil
-        self.headerButton.isHidden = true
-        self.headerButton.clear()
+        self.headerLeftButton.isHidden = true
+        self.headerLeftButton.clear()
+        self.headerRightButton.isHidden = true
+        self.headerRightButton.clear()
     }
     
     // MARK: - LIFECYCLE
@@ -96,31 +144,53 @@ final class SupplementaryHeaderCell: ReusableCellBaseClass {
         self.headerTitleLabel.text = viewModel.title
         self.headerSubtitleLabel.text = viewModel.subtitle
         
-        guard let buttonImageName = viewModel.buttonImageName else { return }
-        let vm = CMCircularButtonViewModel(
-            systemName: buttonImageName, backColor: .clear,
-            foreColor: viewModel.buttonTintColor ?? CMColor.cmLabel,
-            imageSizeByRespectingOuterCircle: 0.9,
-            didTapAction: viewModel.didTapButton
-        )
-        headerButton.configure(viewModel: vm)
-        headerButton.isHidden = false
+        if let rightButtonImageName = viewModel.rightButtonImageName {
+            let vm = CMCircularButtonViewModel(
+                systemName: rightButtonImageName, backColor: .clear,
+                foreColor: viewModel.rightButtonTintColor ?? CMColor.cmLabel,
+                imageSizeByRespectingOuterCircle: 0.9,
+                didTapAction: viewModel.didTapRightButton
+            )
+            headerRightButton.configure(viewModel: vm)
+            headerRightButton.isHidden = false
+        }
+        
+        if let leftButtonImageName = viewModel.leftButtonImageName {
+            let vm = CMCircularButtonViewModel(
+                systemName: leftButtonImageName, backColor: .clear,
+                foreColor: viewModel.leftButtonTintColor ?? CMColor.cmLabel,
+                imageSizeByRespectingOuterCircle: 0.9,
+                didTapAction: viewModel.didTapLeftButton
+            )
+            headerLeftButton.configure(viewModel: vm)
+            headerLeftButton.isHidden = false
+            
+            headerLeftButton.snp.remakeConstraints {
+                $0.leading.equalToSuperview()
+                $0.centerY.equalToSuperview()
+                $0.size.equalTo(Constants.buttonSize)
+            }
+            
+            headerTitleLabel.snp.remakeConstraints {
+                $0.top.equalToSuperview()
+                $0.leading.equalTo(headerLeftButton.snp.trailing).offset(Constants.spacing)
+            }
+            
+            headerSubtitleLabel.snp.remakeConstraints {
+                $0.top.equalTo(headerTitleLabel.snp.bottom)
+                $0.leading.equalTo(headerLeftButton.snp.trailing).offset(Constants.spacing)
+                $0.bottom.equalToSuperview()
+            }
+        }
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
+        contentView.addSubview(headerLeftButton)
         contentView.addSubview(headerTitleLabel)
         headerTitleLabel.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.leading.equalToSuperview()
-        }
-        
-        contentView.addSubview(headerButton)
-        headerButton.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.centerY.equalToSuperview().priority(.low)
-            $0.trailing.equalToSuperview()
-            $0.size.equalTo(Constants.buttonSize)
         }
         
         contentView.addSubview(headerSubtitleLabel)
@@ -128,6 +198,13 @@ final class SupplementaryHeaderCell: ReusableCellBaseClass {
             $0.top.equalTo(headerTitleLabel.snp.bottom)
             $0.leading.equalToSuperview()
             $0.bottom.equalToSuperview()
+        }
+        
+        contentView.addSubview(headerRightButton)
+        headerRightButton.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.trailing.equalToSuperview()
+            $0.size.equalTo(Constants.buttonSize)
         }
     }
 }

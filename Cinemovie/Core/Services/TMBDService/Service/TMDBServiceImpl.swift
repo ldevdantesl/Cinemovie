@@ -178,6 +178,18 @@ final class TMDBServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
+    func getUserListDetails(listID: Int, completion: @escaping (Result<UserListDetails, NetworkError>) -> Void) {
+        guard let accessToken = accountStore.accessToken else { return }
+        let endpoint = TMDBEndpoints.getUserListDetailsEndpoint(listID: listID, language: userService.userLanguage, page: 1, accessToken: accessToken)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    func removeUserList(listID: Int, completion: @escaping (Result<RemoveUserListResponse, NetworkError>) -> Void) {
+        guard let accessToken = accountStore.accessToken else { return }
+        let endpoint = TMDBEndpoints.deleteUserListEndpoint(listID: listID, accessToken: accessToken)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
     func getUserLists(completion: @escaping (Result<UserListsResponse, NetworkError>) -> Void) {
         guard let accessToken = accountStore.accessToken, let accountID = accountStore.accountID else { return }
         let endpoint = TMDBEndpoints.getUserListsEndpoint(accountID: accountID, accessToken: accessToken, page: 1)
