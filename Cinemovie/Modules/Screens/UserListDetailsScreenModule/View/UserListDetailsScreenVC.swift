@@ -1,15 +1,26 @@
 //
-//  UserListDetailsMediaPageVC.swift
-//  Cinemovie
+//  UserListDetailsScreenVC.swift
+//  Super easy dev
 //
-//  Created by Buzurg Rakhimzoda on 11.05.2025.
+//  Created by Buzurg Rakhimzoda on 14.05.2025
 //
 
 import UIKit
 import SnapKit
 
-final class AccountListDetailsMediaPageVC: UIViewController {
+protocol UserListDetailsScreenViewProtocol: AnyObject {
+    // MARK: - OTHER
+    func applySnapshot(sections: [UserListDetailsScreenVC.Sections], itemsBySection: [UserListDetailsScreenVC.Sections : [UserListDetailsScreenVC.Items]])
+    
+    // MARK: - DOWNLOADING
+    func showDownloadingView()
+    func hideDownloadingView()
+    
+    // MARK: - ERROR HANDLING
+    func didReceiveError(_ errorStr: String, goesBack: Bool)
+}
 
+final class UserListDetailsScreenVC: UIViewController {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let spacing = 5.0
@@ -18,6 +29,7 @@ final class AccountListDetailsMediaPageVC: UIViewController {
         static let itemHeight = (itemWidth * 2)
         static let rightArrowImageName = "chevron.right"
         static let leftArrowImageName = "chevron.left"
+        static let topDecorHeight = UIConstants.topInset
     }
     
     // MARK: - SECTIONS
@@ -31,13 +43,26 @@ final class AccountListDetailsMediaPageVC: UIViewController {
         case unavailableVM(UnavailableInfoCellViewModel)
     }
     
+    // MARK: - VIPER
+    var presenter: UserListDetailsScreenPresenterProtocol?
+    
     // MARK: - PROPERTIES
-    lazy var subtitleForSupplementary = "Scroll \(mediaType == .movie ? "right" : "left") to see \(mediaType == .movie ? "TVSeries" : "Movies") if they exist"
-    let mediaType: MediaTypes
-    private var media: [Media]
-    private weak var presenter: AccountListDetailsScreenPresenterProtocol?
+    private var media: [Media] = []
     
     // MARK: - VIEW PROPERTIES
+    private let topDecorLayer: CALayer = {
+        let layer = CALayer()
+        layer.backgroundColor = UIColor.black.cgColor
+        layer.opacity = 0
+        return layer
+    }()
+    
+    let downloadingView: CMSplashView = {
+        let view = CMSplashView(frame: .zero, showsLoadingLabel: true)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     private let loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .medium)
         indicator.color = .white
@@ -67,62 +92,21 @@ final class AccountListDetailsMediaPageVC: UIViewController {
     }()
     
     // MARK: - LIFECYCLE
-    init(media: [Media], mediaType: MediaTypes, presenter: AccountListDetailsScreenPresenterProtocol?) {
-        self.media = media
-        self.mediaType = mediaType
-        self.presenter = presenter
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    init(presenter: AccountListDetailsScreenPresenterProtocol?) {
-        self.media = []
-        self.mediaType = .movie
-        self.presenter = presenter
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         configureDataSource()
-        guard !media.isEmpty else {
-            let unavailableVM = UnavailableInfoCellViewModel(
-                title: "Nothing added",
-                subtitle: "Add any items to the list to see them here.",
-                image: UIImage(named: ImageNames.addMovie.rawValue)
-            )
-            self.collectionView.applySnapshot(sections: [.notFound], itemsBySection: [.notFound : [.unavailableVM(unavailableVM)]])
-            return
-        }
-        let mediaVMs = self.media.map { AccountListDetailsMediaPageVC.Items.posterImageVM(MediaPosterImageCellViewModel(media: $0, didTapMedia: presenter?.didTapAnyMedia) ) }
-        self.collectionView.applySnapshot(sections: [.main], itemsBySection: [.main : mediaVMs])
+        presenter?.viewDidLoad()
+        view.layer.addSublayer(topDecorLayer)
     }
     
-    // MARK: - PUBLIC FUNC
-    public func applySnapshotWithNewMedia(_ media: [Media], paginating: Bool) {
-        defer {
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                if paginating {
-                    self.loadingIndicator.stopAnimating()
-                    self.loadingIndicator.alpha = 0
-                } else {
-                    self.refreshController.endRefreshing()
-                }
-            }
-        }
-        
-        guard !media.isEmpty else { return }
-        if paginating { self.media.append(contentsOf: media) }
-        else { self.media = media }
-        
-        let mediaVMs = self.media.map { AccountListDetailsMediaPageVC.Items.posterImageVM(MediaPosterImageCellViewModel(media: $0, didTapMedia: presenter?.didTapAnyMedia) ) }
-        self.collectionView.applySnapshot(sections: [.main], itemsBySection: [.main : mediaVMs])
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.topDecorLayer.frame = CGRect(
+            x: 0, y: 0,
+            width: view.bounds.width,
+            height: Constants.topDecorHeight
+        )
     }
     
     // MARK: - PRIVATE FUNC
@@ -138,12 +122,17 @@ final class AccountListDetailsMediaPageVC: UIViewController {
             $0.centerX.equalToSuperview()
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-10)
         }
+        
+        view.addSubview(downloadingView)
+        downloadingView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
     }
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
         let config = UICollectionViewCompositionalLayoutConfiguration()
         let headerItem = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(60)),
+            layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)),
             elementKind: UICollectionView.elementKindSectionHeader, alignment: .top
         )
         headerItem.pinToVisibleBounds = true
@@ -197,7 +186,8 @@ final class AccountListDetailsMediaPageVC: UIViewController {
                 ofKind: elementKind, withReuseIdentifier: SupplementaryHeaderCell.identifier, for: indexPath
             ) as? SupplementaryHeaderCell else { return nil }
             let vm = SupplementaryHeaderViewModel(
-                title: mediaType.title, subtitle: subtitleForSupplementary, showsTopShadow: true,
+                title: "Movies & TV Series", subtitle: "List of all added items",
+                showsTopShadow: true,
                 leftButtonImageName: Constants.leftArrowImageName ,
                 leftButtonTintColor: CMColor.cmAccent,
                 didTapLeftButton: self.presenter?.didTapBackButton
@@ -209,11 +199,11 @@ final class AccountListDetailsMediaPageVC: UIViewController {
     
     // MARK: - OBJC FUNC
     @objc private func didCallRefresh() {
-        presenter?.didCallRefresh(for: mediaType)
+        presenter?.didCallRefresh()
     }
 }
 
-extension AccountListDetailsMediaPageVC: UICollectionViewDelegate {
+extension UserListDetailsScreenVC: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard self.media.count >= 20 else { return }
         guard !loadingIndicator.isAnimating else {
@@ -241,7 +231,45 @@ extension AccountListDetailsMediaPageVC: UICollectionViewDelegate {
         
         if offsetY > contentHeight - height - 10 {
             loadingIndicator.startAnimating()
-            presenter?.didCallPagination(for: mediaType)
+            presenter?.didCallPagination()
+        }
+    }
+}
+
+extension UserListDetailsScreenVC: UserListDetailsScreenViewProtocol {
+    func applySnapshot(sections: [Sections], itemsBySection: [Sections : [Items]]) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
+        }
+    }
+    
+    func showDownloadingView() {
+        self.view.bringSubviewToFront(downloadingView)
+        downloadingView.show()
+    }
+    
+    func hideDownloadingView() {
+        downloadingView.hide {
+            UIView.animate(withDuration: 2) { [weak self] in
+                guard let self = self else { return }
+                self.topDecorLayer.opacity = 1
+            }
+        }
+    }
+    
+    // MARK: - ERROR HANDLING
+    func didReceiveError(_ errorStr: String, goesBack: Bool) {
+        let alert = UIAlertController(title: "Oopss...", message: errorStr, preferredStyle: .alert)
+        let action = UIAlertAction(title: "OK", style: .cancel) { [weak self] _ in
+            guard let self = self else { return }
+            goesBack ? self.presenter?.didTapBackButton() : ()
+        }
+        alert.addAction(action)
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.present(alert, animated: true)
         }
     }
 }

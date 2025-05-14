@@ -53,11 +53,16 @@ final class CMSplashView: UIView {
     public func show() {
         self.isHidden = false
         self.alpha = 0
-        UIView.animate(withDuration: Constants.showAniDuration, delay: 0) { [weak self] in
-            guard let self = self else { return }
-            self.alpha = 1
+        
+        DispatchQueue.main.async {
+            UIView.animate(withDuration: Constants.showAniDuration, delay: 0) { [weak self] in
+                guard let self = self else { return }
+                self.alpha = 1
+            }
         }
+        
         self.appLogo.transform = .identity
+        
         DispatchQueue.main.async {
             UIView.animate(withDuration: Constants.aniDuration, delay: 0, options: [.autoreverse, .repeat, .curveEaseInOut]) { [weak self] in
                 guard let self = self else { return }

@@ -28,7 +28,8 @@ final class MyListsScreenRouter: MyListsScreenRouterProtocol {
     }
     
     func navigateToUserList(listID: Int) {
-        
+        let vc = UserListDetailsScreenAssembler.assemble(listID: listID, tmdbService: tmdbService)
+        viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
     func presentAddNewListPopUp(onAdd: @escaping ((String, String?, Bool) -> Void)) {

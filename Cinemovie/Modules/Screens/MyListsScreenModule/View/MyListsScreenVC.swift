@@ -22,7 +22,6 @@ protocol MyListsScreenViewProtocol: AnyObject {
     func showError(errorStr: String)
     
     // MARK: - PROPERTIES
-    var downloadingView: CMSplashView { get }
     var popUpView: PopUPView? { get set }
 }
 
@@ -53,13 +52,14 @@ final class MyListsScreenVC: UIViewController {
     // MARK: - VIPER
     var presenter: MyListsScreenPresenterProtocol?
     var popUpView: PopUPView?
-    let downloadingView: CMSplashView = {
+    
+    // MARK: - VIEW PROPERTIES
+    private let downloadingView: CMSplashView = {
         let view = CMSplashView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
-    // MARK: - VIEW PROPERTIES
     private let topDecorLayer: CALayer = {
         let layer = CALayer()
         layer.backgroundColor = UIColor.black.cgColor
@@ -95,7 +95,6 @@ final class MyListsScreenVC: UIViewController {
         presenter?.viewDidLoad()
         setupUI()
         view.layer.addSublayer(topDecorLayer)
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -104,7 +103,6 @@ final class MyListsScreenVC: UIViewController {
     }
     
     override func viewDidLayoutSubviews() {
-        
         super.viewDidLayoutSubviews()
         self.topDecorLayer.frame = CGRect(
             x: 0, y: 0,
@@ -141,7 +139,8 @@ final class MyListsScreenVC: UIViewController {
             }
         }
         
-        collectionView.setSupplementaryViewProvider { collectionView, elementKind, indexPath in
+        collectionView.setSupplementaryViewProvider { [weak self] collectionView, elementKind, indexPath in
+            guard let self = self else { return nil }
             guard elementKind == SupplementaryKind.headerItem else {
                 return collectionView.dequeueReusableSupplementaryView(ofKind: elementKind, withReuseIdentifier: TopBlurHeaderCell.identifier, for: indexPath) as? TopBlurHeaderCell
             }
@@ -149,6 +148,7 @@ final class MyListsScreenVC: UIViewController {
             guard let cell = collectionView.dequeueReusableSupplementaryView(
                 ofKind: elementKind, withReuseIdentifier: SupplementaryHeaderCell.identifier, for: indexPath
             ) as? SupplementaryHeaderCell else { return nil }
+            
             let section = self.collectionView.snapshot().sectionIdentifiers[indexPath.section]
             switch section {
             case .accountLists:

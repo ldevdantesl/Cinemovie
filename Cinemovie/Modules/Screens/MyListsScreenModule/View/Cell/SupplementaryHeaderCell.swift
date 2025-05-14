@@ -12,6 +12,7 @@ struct SupplementaryHeaderViewModel {
     let title: String
     let subtitle: String?
     let cellIdentifier: String
+    let showsTopShadow: Bool
     let leftButtonImageName: String?
     let leftButtonTintColor: UIColor?
     let didTapLeftButton: (() -> Void)?
@@ -19,9 +20,10 @@ struct SupplementaryHeaderViewModel {
     let rightButtonTintColor: UIColor?
     let didTapRightButton: (() -> Void)?
     
-    init(title: String, subtitle: String?) {
+    init(title: String, subtitle: String?, showsTopShadow: Bool = false) {
         self.title = title
         self.subtitle = subtitle
+        self.showsTopShadow = showsTopShadow
         self.rightButtonImageName = nil
         self.rightButtonTintColor = nil
         self.didTapRightButton = nil
@@ -34,12 +36,14 @@ struct SupplementaryHeaderViewModel {
     
     init(
         title: String, subtitle: String?,
+        showsTopShadow: Bool = false,
         buttonImageName: String,
         buttonTintColor: UIColor,
         didTapButton: (() -> Void)?
     ) {
         self.title = title
         self.subtitle = subtitle
+        self.showsTopShadow = showsTopShadow
         self.didTapRightButton = didTapButton
         self.rightButtonImageName = buttonImageName
         self.rightButtonTintColor = buttonTintColor
@@ -52,6 +56,7 @@ struct SupplementaryHeaderViewModel {
     
     init(
         title: String, subtitle: String?,
+        showsTopShadow: Bool = false,
         rightButtonImageName: String? = nil,
         rightButtonTintColor: UIColor? = nil,
         didTapRightButton: (() -> Void)? = nil,
@@ -61,6 +66,7 @@ struct SupplementaryHeaderViewModel {
     ) {
         self.title = title
         self.subtitle = subtitle
+        self.showsTopShadow = showsTopShadow
         self.didTapRightButton = didTapRightButton
         self.rightButtonImageName = rightButtonImageName
         self.rightButtonTintColor = rightButtonTintColor
@@ -84,6 +90,25 @@ final class SupplementaryHeaderCell: ReusableCellBaseClass {
     private var viewModel: SupplementaryHeaderViewModel?
     
     // MARK: - VIEW PROPERTIES
+    private let blurView: UIVisualEffectView = {
+        let blur = UIBlurEffect(style: .dark)
+        let view = UIVisualEffectView(effect: blur)
+        view.contentView.backgroundColor = .clear
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let shadowLayer: CAGradientLayer = {
+        let layer = CAGradientLayer()
+        layer.colors = [
+            UIColor.black.cgColor,
+            UIColor.clear.cgColor
+        ]
+        layer.startPoint = CGPoint(x: 0.5, y: 0.0)
+        layer.endPoint = CGPoint(x: 0.5, y: 1.0)
+        return layer
+    }()
+    
     private let headerTitleLabel: UILabel = {
         let label = UILabel()
         label.textColor = CMColor.cmLabel
@@ -124,6 +149,7 @@ final class SupplementaryHeaderCell: ReusableCellBaseClass {
         self.headerLeftButton.isHidden = true
         self.headerLeftButton.clear()
         self.headerRightButton.isHidden = true
+        self.blurView.isHidden = true
         self.headerRightButton.clear()
     }
     
@@ -131,6 +157,8 @@ final class SupplementaryHeaderCell: ReusableCellBaseClass {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
     }
     
     @available(*, unavailable)
@@ -138,11 +166,17 @@ final class SupplementaryHeaderCell: ReusableCellBaseClass {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        shadowLayer.frame = blurView.bounds
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: SupplementaryHeaderViewModel) {
         self.viewModel = viewModel
         self.headerTitleLabel.text = viewModel.title
         self.headerSubtitleLabel.text = viewModel.subtitle
+        self.blurView.isHidden = !viewModel.showsTopShadow
         
         if let rightButtonImageName = viewModel.rightButtonImageName {
             let vm = CMCircularButtonViewModel(
@@ -179,13 +213,21 @@ final class SupplementaryHeaderCell: ReusableCellBaseClass {
             headerSubtitleLabel.snp.remakeConstraints {
                 $0.top.equalTo(headerTitleLabel.snp.bottom)
                 $0.leading.equalTo(headerLeftButton.snp.trailing).offset(Constants.spacing)
-                $0.bottom.equalToSuperview()
+                $0.bottom.equalToSuperview().offset(-Constants.spacing)
             }
         }
+        
+        layoutIfNeeded()
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
+        blurView.contentView.layer.insertSublayer(shadowLayer, at: 0)
+        contentView.addSubview(blurView)
+        blurView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
         contentView.addSubview(headerLeftButton)
         contentView.addSubview(headerTitleLabel)
         headerTitleLabel.snp.makeConstraints {
@@ -197,7 +239,7 @@ final class SupplementaryHeaderCell: ReusableCellBaseClass {
         headerSubtitleLabel.snp.makeConstraints {
             $0.top.equalTo(headerTitleLabel.snp.bottom)
             $0.leading.equalToSuperview()
-            $0.bottom.equalToSuperview()
+            $0.bottom.equalToSuperview().offset(-Constants.spacing)
         }
         
         contentView.addSubview(headerRightButton)
