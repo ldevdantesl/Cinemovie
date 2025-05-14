@@ -9,14 +9,14 @@ import SnapKit
 import UIKit
 import SDWebImage
 
-struct HomeScreenHeaderViewModel {
+struct DiscoverScreenHeaderViewModel {
     let headerTitle: String
     let didStartSearching: ((String) -> Void)?
     let didFinishSearching: (() -> Void)?
     let didTapMediaButton: ((_ mediaType: MediaTypes) -> Void)?
 }
 
-final class HomeScreenHeaderView: UIView {
+final class DiscoverScreenHeaderView: UIView {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let aniDuration = 0.25
@@ -32,7 +32,7 @@ final class HomeScreenHeaderView: UIView {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: HomeScreenHeaderViewModel
+    private var viewModel: DiscoverScreenHeaderViewModel
     private var isShowingMovie: Bool = true
     
     // MARK: - VIEW PROPERTIES
@@ -89,7 +89,7 @@ final class HomeScreenHeaderView: UIView {
     }()
     
     // MARK: - LIFECYCLE
-    init(viewModel: HomeScreenHeaderViewModel) {
+    init(viewModel: DiscoverScreenHeaderViewModel) {
         self.viewModel = viewModel
         super.init(frame: .zero)
         self.setupUI()
@@ -101,7 +101,7 @@ final class HomeScreenHeaderView: UIView {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(viewModel: HomeScreenHeaderViewModel) {
+    public func configure(viewModel: DiscoverScreenHeaderViewModel) {
         self.viewModel = viewModel
         headerLabel.text = viewModel.headerTitle
     }
@@ -262,7 +262,7 @@ final class HomeScreenHeaderView: UIView {
     }
 }
 
-extension HomeScreenHeaderView: UITextFieldDelegate {
+extension DiscoverScreenHeaderView: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true

@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol HomeScreenPresenterProtocol: AnyObject {
+protocol DiscoverScreenPresenterProtocol: AnyObject {
     // MARK: - STARTING
     func viewDidLoaded()
     
@@ -34,24 +34,24 @@ protocol HomeScreenPresenterProtocol: AnyObject {
     func didDownloadTrendingPeople(_ people: [Person])
     
     // MARK: - PROPERTIES
-    var visibleSections: [HomeScreenVC.Sections] { get set }
+    var visibleSections: [DiscoverScreenVC.Sections] { get set }
     
     // MARK: - ERROR
     func didRecieveError(_ error: Error)
 }
 
-final class HomeScreenPresenter {
+final class DiscoverScreenPresenter {
     // MARK: - TYPEALIASES
-    typealias Sections = HomeScreenVC.Sections
-    typealias Items = HomeScreenVC.Items
+    typealias Sections = DiscoverScreenVC.Sections
+    typealias Items = DiscoverScreenVC.Items
     
     // MARK: - VIPER
-    weak var view: HomeScreenViewProtocol?
-    var router: HomeScreenRouterProtocol
-    var interactor: HomeScreenInteractorProtocol
+    weak var view: DiscoverScreenViewProtocol?
+    var router: DiscoverScreenRouterProtocol
+    var interactor: DiscoverScreenInteractorProtocol
     
     // MARK: - PUBLIC PROPERTIES
-    public var visibleSections: [HomeScreenVC.Sections] = []
+    public var visibleSections: [DiscoverScreenVC.Sections] = []
 
     // MARK: - PRIVATE PROPERTIES
     private let downloadGroup = DispatchGroup()
@@ -73,13 +73,13 @@ final class HomeScreenPresenter {
     private var currentMoviePage = 1
     private var currentTVSeriesPage = 1
     
-    init(interactor: HomeScreenInteractorProtocol, router: HomeScreenRouterProtocol) {
+    init(interactor: DiscoverScreenInteractorProtocol, router: DiscoverScreenRouterProtocol) {
         self.interactor = interactor
         self.router = router
     }
 }
 
-extension HomeScreenPresenter: HomeScreenPresenterProtocol {
+extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
     
     // MARK: - STARTING
     func viewDidLoaded() {

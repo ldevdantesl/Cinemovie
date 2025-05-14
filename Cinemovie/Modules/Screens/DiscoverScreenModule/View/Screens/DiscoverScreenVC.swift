@@ -8,14 +8,14 @@
 import SnapKit
 import UIKit
 
-protocol HomeScreenViewProtocol: AnyObject {
-    func applySnapshot(sections: [HomeScreenVC.Sections], itemsBySection: [HomeScreenVC.Sections: [HomeScreenVC.Items]])
+protocol DiscoverScreenViewProtocol: AnyObject {
+    func applySnapshot(sections: [DiscoverScreenVC.Sections], itemsBySection: [DiscoverScreenVC.Sections: [DiscoverScreenVC.Items]])
     func didRecieveError(_ errorStr: String)
     
     var downloadingView: CMSplashView { get }
 }
 
-final class HomeScreenVC: UIViewController {
+final class DiscoverScreenVC: UIViewController {
 
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -45,7 +45,7 @@ final class HomeScreenVC: UIViewController {
     }
     
     // MARK: - VIPER
-    var presenter: HomeScreenPresenterProtocol?
+    var presenter: DiscoverScreenPresenterProtocol?
     let downloadingView: CMSplashView = {
         let view = CMSplashView(frame: .zero)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -58,7 +58,7 @@ final class HomeScreenVC: UIViewController {
     
     // MARK: - VIEW PROPERTIES
     private lazy var collectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<HomeScreenVC.Sections, HomeScreenVC.Items>(layout: createLayout(), showsTopBlur: false)
+        let view = DiffableCollectionView<DiscoverScreenVC.Sections, DiscoverScreenVC.Items>(layout: createLayout(), showsTopBlur: false)
         view.register(cellClass: FeaturedMediaCell.self)
         view.register(cellClass: MediaListCell.self)
         view.register(cellClass: TrendingPeopleCell.self)
@@ -71,12 +71,12 @@ final class HomeScreenVC: UIViewController {
         return view
     }()
     
-    private lazy var headerView: HomeScreenHeaderView = {
-        let vm = HomeScreenHeaderViewModel(
+    private lazy var headerView: DiscoverScreenHeaderView = {
+        let vm = DiscoverScreenHeaderViewModel(
             headerTitle: "Discover", didStartSearching: presenter?.didStartSearching,
             didFinishSearching: presenter?.didFinishSearching, didTapMediaButton: presenter?.didChangeMediaType
         )
-        let view = HomeScreenHeaderView(viewModel: vm)
+        let view = DiscoverScreenHeaderView(viewModel: vm)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -190,7 +190,7 @@ final class HomeScreenVC: UIViewController {
     }
 }
 
-extension HomeScreenVC: UICollectionViewDelegate {
+extension DiscoverScreenVC: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         view.endEditing(true)
         let contentOffsetY = scrollView.contentOffset.y + scrollView.adjustedContentInset.top
@@ -217,7 +217,7 @@ extension HomeScreenVC: UICollectionViewDelegate {
     }
 }
 
-extension HomeScreenVC: HomeScreenViewProtocol {
+extension DiscoverScreenVC: DiscoverScreenViewProtocol {
     func applySnapshot(sections: [Sections], itemsBySection: [Sections : [Items]]) {
         DispatchQueue.main.async {
             self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)

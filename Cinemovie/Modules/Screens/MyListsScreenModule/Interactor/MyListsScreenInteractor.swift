@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol WatchlistScreenInteractorProtocol: AnyObject {
+protocol MyListsScreenInteractorProtocol: AnyObject {
     // MARK: - WATCHLIST
     func getWatchlistMovies(refreshing: Bool)
     func getWatchlistTVSeries(refreshing: Bool)
@@ -26,8 +26,8 @@ protocol WatchlistScreenInteractorProtocol: AnyObject {
     func removeCustomList(list: UserList)
 }
 
-final class WatchlistScreenInteractor: WatchlistScreenInteractorProtocol {
-    weak var presenter: WatchlistScreenPresenterProtocol?
+final class MyListsScreenInteractor: MyListsScreenInteractorProtocol {
+    weak var presenter: MyListsScreenPresenterProtocol?
     private let tmdbService: TMDBService
     
     init(tmdbService: TMDBService) {

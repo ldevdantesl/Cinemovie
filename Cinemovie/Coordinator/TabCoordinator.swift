@@ -27,8 +27,8 @@ final class TabCoordinator: Coordinator {
     }
 
     func start() {
-        let homeCoordinator = HomeCoordinator(tmdbService: tmdbService)
-        let watchlistCoordinator = WatchlistCoordinator(tmdbService: tmdbService)
+        let homeCoordinator = DiscoverCoordinator(tmdbService: tmdbService)
+        let watchlistCoordinator = MyListsCoordinator(tmdbService: tmdbService)
         let settingsCoordinator = SettingsCoordinator(authService: authService, appCoordinator: appCoordinator)
 
         homeCoordinator.start()

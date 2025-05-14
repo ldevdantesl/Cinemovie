@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class WatchlistCoordinator: Coordinator {
+final class MyListsCoordinator: Coordinator {
     let navigationController: UINavigationController = UINavigationController()
     
     private let tmdbService: TMDBService
@@ -17,10 +17,10 @@ final class WatchlistCoordinator: Coordinator {
     }
     
     func start() {
-        let watchlistModule = WatchlistScreenAssembler.assemble(tmdbService: tmdbService)
+        let watchlistModule = MyListsScreenAssembler.assemble(tmdbService: tmdbService)
         watchlistModule.tabBarItem = UITabBarItem(
-            title: "Watchlist",
-            image: UIImage(systemName: "bookmark.fill"),
+            title: "My Lists",
+            image: UIImage(systemName: "film.stack"),
             tag: 1
         )
         self.navigationController.viewControllers = [watchlistModule]

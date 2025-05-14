@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol HomeScreenInteractorProtocol: AnyObject {
+protocol DiscoverScreenInteractorProtocol: AnyObject {
     // MARK: - MOVIES
     func downloadMovieList(listType: MovieListType)
     
@@ -22,8 +22,8 @@ protocol HomeScreenInteractorProtocol: AnyObject {
     func downloadSearchResultsForTVSeries(query: String, untilPage: Int)
 }
 
-final class HomeScreenInteractor: HomeScreenInteractorProtocol {
-    weak var presenter: HomeScreenPresenterProtocol?
+final class DiscoverScreenInteractor: DiscoverScreenInteractorProtocol {
+    weak var presenter: DiscoverScreenPresenterProtocol?
     private let tmdbService: TMDBService
     
     init(tmdbService: TMDBService) {

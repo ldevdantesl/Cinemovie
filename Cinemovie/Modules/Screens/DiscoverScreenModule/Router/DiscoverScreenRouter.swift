@@ -7,14 +7,14 @@
 
 import UIKit
 
-protocol HomeScreenRouterProtocol {
+protocol DiscoverScreenRouterProtocol {
     func navigateToMovieDetails(movieID: Int)
     func navigateToTVSeriesDetails(seriesID: Int)
     func navigateToPersonDetails(personID: Int)
 }
 
-final class HomeScreenRouter: HomeScreenRouterProtocol {
-    weak var viewController: HomeScreenVC?
+final class DiscoverScreenRouter: DiscoverScreenRouterProtocol {
+    weak var viewController: DiscoverScreenVC?
     
     private let tmdbService: TMDBService
     

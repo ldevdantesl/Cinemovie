@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-final class HomeCoordinator: Coordinator {
+final class DiscoverCoordinator: Coordinator {
     let navigationController: UINavigationController = UINavigationController()
     
     private let tmdbService: TMDBService
@@ -18,10 +18,10 @@ final class HomeCoordinator: Coordinator {
     }
     
     func start() {
-        let homeModule = HomeScreenAssembler.assemble(tmdbService: tmdbService)
+        let homeModule = DiscoverScreenAssembler.assemble(tmdbService: tmdbService)
         homeModule.tabBarItem = UITabBarItem(
-            title: "Home",
-            image: UIImage(systemName: "mail.stack"),
+            title: "Discover",
+            image: UIImage(systemName: "binoculars.fill"),
             tag: 0
         )
         self.navigationController.viewControllers = [homeModule]

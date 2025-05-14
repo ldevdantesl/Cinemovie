@@ -8,10 +8,10 @@
 import UIKit
 import SnapKit
 
-protocol WatchlistScreenViewProtocol: AnyObject {
+protocol MyListsScreenViewProtocol: AnyObject {
     // MARK: - FUNCTIONS
     func didRecieveError(_ description: String)
-    func applySnapshot(sections: [WatchlistScreenVC.Sections], itemsBySection: [WatchlistScreenVC.Sections : [WatchlistScreenVC.Items]])
+    func applySnapshot(sections: [MyListsScreenVC.Sections], itemsBySection: [MyListsScreenVC.Sections : [MyListsScreenVC.Items]])
     func refreshCompleted()
     
     // MARK: - LOADING
@@ -26,7 +26,7 @@ protocol WatchlistScreenViewProtocol: AnyObject {
     var popUpView: PopUPView? { get set }
 }
 
-final class WatchlistScreenVC: UIViewController {
+final class MyListsScreenVC: UIViewController {
 
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -51,7 +51,7 @@ final class WatchlistScreenVC: UIViewController {
     }
     
     // MARK: - VIPER
-    var presenter: WatchlistScreenPresenterProtocol?
+    var presenter: MyListsScreenPresenterProtocol?
     var popUpView: PopUPView?
     let downloadingView: CMSplashView = {
         let view = CMSplashView()
@@ -76,7 +76,7 @@ final class WatchlistScreenVC: UIViewController {
     }()
     
     private lazy var collectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<WatchlistScreenVC.Sections, WatchlistScreenVC.Items>(layout: createLayout(), ignoresTopSafeArea: false, showsTopBlur: false)
+        let view = DiffableCollectionView<MyListsScreenVC.Sections, MyListsScreenVC.Items>(layout: createLayout(), ignoresTopSafeArea: false, showsTopBlur: false)
         view.delegate = self
         view.refreshControl = refreshControler
         view.register(cellClass: AccountListCell.self)
@@ -202,9 +202,9 @@ final class WatchlistScreenVC: UIViewController {
     }
 }
 
-extension WatchlistScreenVC: UICollectionViewDelegate { }
+extension MyListsScreenVC: UICollectionViewDelegate { }
 
-extension WatchlistScreenVC: WatchlistScreenViewProtocol {
+extension MyListsScreenVC: MyListsScreenViewProtocol {
     // MARK: - ERROR HANDLING
     func didRecieveError(_ description: String) {
         let alert = UIAlertController(

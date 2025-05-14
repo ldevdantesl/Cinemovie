@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol WatchlistScreenPresenterProtocol: AnyObject {
+protocol MyListsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
     
     // MARK: - USER INITIATED
@@ -40,19 +40,19 @@ protocol WatchlistScreenPresenterProtocol: AnyObject {
     func didRecieveError(_ error: Error)
     
     // MARK: - PROPERTIES
-    var visibleSections: [WatchlistScreenVC.Sections] { get set }
+    var visibleSections: [MyListsScreenVC.Sections] { get set }
 }
 
-final class WatchlistScreenPresenter {
+final class MyListsScreenPresenter {
     // MARK: - TYPEALIASES
-    typealias Sections = WatchlistScreenVC.Sections
-    typealias Items = WatchlistScreenVC.Items
+    typealias Sections = MyListsScreenVC.Sections
+    typealias Items = MyListsScreenVC.Items
     
     // MARK: - VIPER
-    weak var view: WatchlistScreenViewProtocol?
-    var router: WatchlistScreenRouterProtocol
-    var interactor: WatchlistScreenInteractorProtocol
-    var visibleSections: [WatchlistScreenVC.Sections] = []
+    weak var view: MyListsScreenViewProtocol?
+    var router: MyListsScreenRouterProtocol
+    var interactor: MyListsScreenInteractorProtocol
+    var visibleSections: [MyListsScreenVC.Sections] = []
         
     // MARK: - PRIVATE PROPERTIES
     private let downloadGroup = DispatchGroup()
@@ -63,13 +63,13 @@ final class WatchlistScreenPresenter {
     private var ratedMedia: [Media] = []
     private var userCustomLists: [UserList] = []
     
-    init(interactor: WatchlistScreenInteractorProtocol, router: WatchlistScreenRouterProtocol) {
+    init(interactor: MyListsScreenInteractorProtocol, router: MyListsScreenRouterProtocol) {
         self.interactor = interactor
         self.router = router
     }
 }
 
-extension WatchlistScreenPresenter: WatchlistScreenPresenterProtocol {
+extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
     func viewDidLoad() {
         self.view?.showDownloadingView()
         
