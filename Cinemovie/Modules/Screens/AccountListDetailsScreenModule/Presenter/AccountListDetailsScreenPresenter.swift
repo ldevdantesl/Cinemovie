@@ -22,6 +22,9 @@ protocol AccountListDetailsScreenPresenterProtocol: AnyObject {
     
     // MARK: - ERROR
     func didRecieveError(_ error: Error)
+    
+    // MARK: - PROPERTIES
+    var listType: AccountListTypes { get }
 }
 
 final class AccountListDetailsScreenPresenter {
@@ -29,7 +32,7 @@ final class AccountListDetailsScreenPresenter {
     var router: AccountListDetailsScreenRouterProtocol
     var interactor: AccountListDetailsScreenInteractorProtocol
     
-    private var listType: AccountListTypes
+    let listType: AccountListTypes
     private let downloadGroup = DispatchGroup()
     
     private var movieCurrentPage: Int = 1

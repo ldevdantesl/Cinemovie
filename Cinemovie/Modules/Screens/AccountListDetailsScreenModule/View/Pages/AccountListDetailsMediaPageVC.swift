@@ -197,7 +197,7 @@ final class AccountListDetailsMediaPageVC: UIViewController {
                 ofKind: elementKind, withReuseIdentifier: SupplementaryHeaderCell.identifier, for: indexPath
             ) as? SupplementaryHeaderCell else { return nil }
             let vm = SupplementaryHeaderViewModel(
-                title: mediaType.title, subtitle: subtitleForSupplementary, showsTopShadow: true,
+                title: "\(self.presenter?.listType.title ?? "") \(mediaType.title)", subtitle: subtitleForSupplementary, showsTopShadow: true,
                 leftButtonImageName: Constants.leftArrowImageName ,
                 leftButtonTintColor: CMColor.cmAccent,
                 didTapLeftButton: self.presenter?.didTapBackButton

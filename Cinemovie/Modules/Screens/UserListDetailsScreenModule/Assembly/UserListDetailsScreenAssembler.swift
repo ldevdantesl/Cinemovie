@@ -8,10 +8,10 @@
 import UIKit
 
 final class UserListDetailsScreenAssembler {
-    static func assemble(listID: Int, tmdbService: TMDBService) -> UserListDetailsScreenVC {
+    static func assemble(userList: UserList, tmdbService: TMDBService) -> UserListDetailsScreenVC {
         let interactor = UserListDetailsScreenInteractor(tmdbService: tmdbService)
         let router = UserListDetailsScreenRouter(tmdbService: tmdbService)
-        let presenter = UserListDetailsScreenPresenter(listID: listID, interactor: interactor, router: router)
+        let presenter = UserListDetailsScreenPresenter(userList: userList, interactor: interactor, router: router)
         let viewController = UserListDetailsScreenVC()
         presenter.view  = viewController
         viewController.presenter = presenter

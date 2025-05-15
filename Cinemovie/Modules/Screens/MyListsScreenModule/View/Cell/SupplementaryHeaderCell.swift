@@ -8,10 +8,9 @@
 import UIKit
 import SnapKit
 
-struct SupplementaryHeaderViewModel {
+final class SupplementaryHeaderViewModel: CellViewModelBaseClass {
     let title: String
     let subtitle: String?
-    let cellIdentifier: String
     let showsTopShadow: Bool
     let leftButtonImageName: String?
     let leftButtonTintColor: UIColor?
@@ -31,7 +30,7 @@ struct SupplementaryHeaderViewModel {
         self.leftButtonImageName = nil
         self.leftButtonTintColor = nil
         self.didTapLeftButton = nil
-        self.cellIdentifier = "SupplementaryHeaderCell"
+        super.init(cellIdentifier: "SupplementaryHeaderCell")
     }
     
     init(
@@ -51,7 +50,7 @@ struct SupplementaryHeaderViewModel {
         self.didTapLeftButton = nil
         self.leftButtonImageName = nil
         self.leftButtonTintColor = nil
-        self.cellIdentifier = "SupplementaryHeaderCell"
+        super.init(cellIdentifier: "SupplementaryHeaderCell")
     }
     
     init(
@@ -74,7 +73,7 @@ struct SupplementaryHeaderViewModel {
         self.didTapLeftButton = didTapLeftButton
         self.leftButtonImageName = leftButtonImageName
         self.leftButtonTintColor = leftButtonTintColor
-        self.cellIdentifier = "SupplementaryHeaderCell"
+        super.init(cellIdentifier: "SupplementaryHeaderCell")
     }
 }
 

@@ -9,7 +9,7 @@ import UIKit
 
 protocol MyListsScreenRouterProtocol {
     func navigateToAccountList(listType: AccountListTypes)
-    func navigateToUserList(listID: Int)
+    func navigateToUserList(userList: UserList)
     func hidePopUp()
     func presentAddNewListPopUp(onAdd: @escaping ((String, String?, Bool) -> Void))
 }
@@ -27,8 +27,8 @@ final class MyListsScreenRouter: MyListsScreenRouterProtocol {
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
-    func navigateToUserList(listID: Int) {
-        let vc = UserListDetailsScreenAssembler.assemble(listID: listID, tmdbService: tmdbService)
+    func navigateToUserList(userList: UserList) {
+        let vc = UserListDetailsScreenAssembler.assemble(userList: userList, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     

@@ -15,6 +15,7 @@ protocol UserListDetailsScreenViewProtocol: AnyObject {
     // MARK: - DOWNLOADING
     func showDownloadingView()
     func hideDownloadingView()
+    func stopRefreshing()
     
     // MARK: - ERROR HANDLING
     func didReceiveError(_ errorStr: String, goesBack: Bool)
@@ -46,9 +47,6 @@ final class UserListDetailsScreenVC: UIViewController {
     // MARK: - VIPER
     var presenter: UserListDetailsScreenPresenterProtocol?
     
-    // MARK: - PROPERTIES
-    private var media: [Media] = []
-    
     // MARK: - VIEW PROPERTIES
     private let topDecorLayer: CALayer = {
         let layer = CALayer()
@@ -57,7 +55,7 @@ final class UserListDetailsScreenVC: UIViewController {
         return layer
     }()
     
-    let downloadingView: CMSplashView = {
+    private let downloadingView: CMSplashView = {
         let view = CMSplashView(frame: .zero, showsLoadingLabel: true)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -186,7 +184,7 @@ final class UserListDetailsScreenVC: UIViewController {
                 ofKind: elementKind, withReuseIdentifier: SupplementaryHeaderCell.identifier, for: indexPath
             ) as? SupplementaryHeaderCell else { return nil }
             let vm = SupplementaryHeaderViewModel(
-                title: "Movies & TV Series", subtitle: "List of all added items",
+                title: self.presenter?.userList.name ?? "List", subtitle: "Movies & TV Series of the list",
                 showsTopShadow: true,
                 leftButtonImageName: Constants.leftArrowImageName ,
                 leftButtonTintColor: CMColor.cmAccent,
@@ -205,7 +203,7 @@ final class UserListDetailsScreenVC: UIViewController {
 
 extension UserListDetailsScreenVC: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard self.media.count >= 20 else { return }
+        guard let presenter = presenter, presenter.media.count >= 20 else { return }
         guard !loadingIndicator.isAnimating else {
             loadingIndicator.alpha = 1
             return
@@ -224,14 +222,14 @@ extension UserListDetailsScreenVC: UICollectionViewDelegate {
     }
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        guard self.media.count >= 20 else { return }
+        guard let presenter = presenter, presenter.media.count >= 20 else { return }
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         let height = scrollView.frame.size.height
         
         if offsetY > contentHeight - height - 10 {
             loadingIndicator.startAnimating()
-            presenter?.didCallPagination()
+            presenter.didCallPagination()
         }
     }
 }
@@ -255,6 +253,13 @@ extension UserListDetailsScreenVC: UserListDetailsScreenViewProtocol {
                 guard let self = self else { return }
                 self.topDecorLayer.opacity = 1
             }
+        }
+    }
+    
+    func stopRefreshing() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.refreshController.endRefreshing()
         }
     }
     

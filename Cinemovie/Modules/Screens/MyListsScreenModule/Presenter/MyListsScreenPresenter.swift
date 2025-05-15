@@ -13,7 +13,7 @@ protocol MyListsScreenPresenterProtocol: AnyObject {
     // MARK: - USER INITIATED
     func didCallRefresh()
     func didTapAccountList(listType: AccountListTypes)
-    func didTapUserList(listID: Int)
+    func didTapUserList(userList: UserList)
     func didTapAddNewList()
     func didTapRemoveList(list: UserList)
     
@@ -138,8 +138,8 @@ extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
         router.navigateToAccountList(listType: listType)
     }
     
-    func didTapUserList(listID: Int) {
-        router.navigateToUserList(listID: listID)
+    func didTapUserList(userList: UserList) {
+        router.navigateToUserList(userList: userList)
     }
     
     func didTapAddNewList() {
@@ -237,7 +237,7 @@ extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
         let userLists: [Items] = userCustomLists.map {
             Items.userListVM(
                 UserListCellViewModel(userList: $0)
-                { [weak self] in self?.didTapUserList(listID: $0.id) } didTapRemoveList:
+                { [weak self] in self?.didTapUserList(userList: $0) } didTapRemoveList:
                 { [weak self] in self?.didTapRemoveList(list: $0) }
             )
         }
