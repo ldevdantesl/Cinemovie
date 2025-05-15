@@ -20,6 +20,8 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didTapToSubDetails(sendedBy view: UIView, message: String)
     func didTapAddToWatchlist(adding: Bool)
     func didTapFavoriteButton(adding: Bool)
+    func didTapAddToList()
+    func didTapUserList(userList: UserList)
     
     // MARK: - PROGRAMMATIC
     func didGetMovieDetails(_ details: MovieDetails)
@@ -29,6 +31,7 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didGetMovieReviews(_ reviews: [Review])
     func didGetMovieBelongsToCollectionDetails(_ details: BelongsToCollectionDetails)
     func didGetMovieAccountStates(_ accountStates: MediaAccountStates)
+    func didGetUserLists(_ userLists: [UserList])
     
     // MARK: - USER INITIATED
     func didAddToWatchlist(_ message: String)
@@ -56,6 +59,7 @@ final class MovieDetailsScreenPresenter {
     private var movieReviews: [Review] = []
     private var movieRecommends: [Movie] = []
     private var belongsToCollectionDetails: BelongsToCollectionDetails?
+    private var userLists: [UserList] = []
     private var movieAccountStates: MediaAccountStates = .empty
 
     init(movieID: Int, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
@@ -86,6 +90,9 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         
         dispatchGroup.enter()
         interactor.getMovieAccountStates(movieID: movieID)
+        
+        dispatchGroup.enter()
+        interactor.getUserLists()
         
         dispatchGroup.notify(queue: .main) { [weak self] in
             guard let self = self, let details = self.movieDetails else { return }
@@ -142,6 +149,14 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         interactor.addOrRemoveInFavorites(movieID: movieID, adding: adding)
     }
     
+    func didTapAddToList() {
+        router.presentAddToListModal(movieID: movieID, lists: userLists)
+    }
+    
+    func didTapUserList(userList: UserList) {
+        
+    }
+    
     // MARK: - PROGRAMMATIC
     func didGetMovieReviews(_ reviews: [Review]) {
         movieReviews = reviews
@@ -188,6 +203,11 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
 
     func didGetMovieAccountStates(_ accountStates: MediaAccountStates) {
         self.movieAccountStates = accountStates
+        dispatchGroup.leave()
+    }
+    
+    func didGetUserLists(_ userLists: [UserList]) {
+        self.userLists = userLists
         dispatchGroup.leave()
     }
     

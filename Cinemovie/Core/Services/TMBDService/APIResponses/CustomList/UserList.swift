@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct UserList: APIResponse {
+struct UserList: APIResponse, Hashable {
     let accountID: String
     let adult: Int
     let averageRating: Double

@@ -196,6 +196,18 @@ final class TMDBServiceImpl: TMDBService {
         handleRequest(endpoint: endpoint, completion: completion)
     }
     
+    func getItemStatusInUserList(listID: Int, mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<ItemStatusInUserListResponse, NetworkError>) -> Void) {
+        guard let accessToken = accountStore.accessToken else { return }
+        let endpoint = TMDBEndpoints.userListItemStatusEndpoint(listID: listID, mediaID: mediaID, mediaType: mediaType, accessToken: accessToken)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
+    func addOrRemoveMediaInUserList(listID: Int, mediaID: Int, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddOrRemoveMediaUserListResponse, NetworkError>) -> Void) {
+        guard let accessToken = accountStore.accessToken else { return }
+        let endpoint = TMDBEndpoints.addOrRemoveItemInUserListEndpoint(listID: listID, mediaID: mediaID, mediaType: mediaType, accessToken: accessToken, adding: adding)
+        handleRequest(endpoint: endpoint, completion: completion)
+    }
+    
     // MARK: - OTHER
     func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void) {
         let endpoint = TMDBEndpoints.getBelongsToCollectionDetailsEndpoint(collectionID: collectionID, queryParams: queryParams)

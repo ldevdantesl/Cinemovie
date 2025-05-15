@@ -52,6 +52,9 @@ protocol TMDBService: AnyObject {
     func getUserListDetails(listID: Int, page: Int, completion: @escaping (Result<UserListDetails, NetworkError>) -> Void)
     func removeUserList(listID: Int, completion: @escaping (Result<RemoveUserListResponse, NetworkError>) -> Void)
     
+    func getItemStatusInUserList(listID: Int, mediaID: Int, mediaType: MediaTypes, completion: @escaping (Result<ItemStatusInUserListResponse, NetworkError>) -> Void)
+    func addOrRemoveMediaInUserList(listID: Int, mediaID: Int, mediaType: MediaTypes, adding: Bool, completion: @escaping (Result<AddOrRemoveMediaUserListResponse, NetworkError>) -> Void)
+    
     // MARK: - OTHER
     func getBelongsToCollectionDetails(collectionID: Int, completion: @escaping (Result<BelongsToCollectionDetails, NetworkError>) -> Void)
     func getTrendingPeople(for timeWindow: TrendingTimeWindow, completion: @escaping (Result<PeopleListAPIResponse, NetworkError>) -> Void)

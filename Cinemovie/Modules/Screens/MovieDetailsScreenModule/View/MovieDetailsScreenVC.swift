@@ -243,7 +243,11 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
             didTapIMDB: presenter?.didTapIMDBImage, didTapSubDetails: presenter?.didTapToSubDetails
         )
         
-        let watchlistVM = WatchlistButtonCellViewModel(isWatchlisted: accountStates.watchlist, didTapAction: presenter?.didTapAddToWatchlist)
+        let watchlistVM = WatchlistButtonCellViewModel(
+            isWatchlisted: accountStates.watchlist,
+            didTapAction: presenter?.didTapAddToWatchlist,
+            didTapAddToList: presenter?.didTapAddToList
+        )
         
         var sectionsAndTheirItems: [(sections: (Sections), items: [Items])] = [
             (Sections.backdropImage, [.backdropImage(backdropVM)]),

@@ -19,6 +19,7 @@ protocol MovieDetailsScreenRouterProtocol {
     func presentShareView(movie: MovieDetails)
     func showActorPopUp(actor: Cast)
     func showTooltipView(sendedBy view: UIView, message: String)
+    func presentAddToListModal(movieID: Int, lists: [UserList])
 }
 
 final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
@@ -95,6 +96,19 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
         }
         viewController?.activeTooltipWorkItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: workItem)
+    }
+    
+    func presentAddToListModal(movieID: Int, lists: [UserList]) {
+        let vc = AddToListModalAssembler.assemble(itemID: movieID, mediaType: .movie, tmdbService: tmdbService)
+        vc.modalPresentationStyle = .pageSheet
+    
+        if let sheet = vc.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+            sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+        }
+        
+        viewController?.present(vc, animated: true)
     }
     
     // MARK: - PRIVATE FUNC

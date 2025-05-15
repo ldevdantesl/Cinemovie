@@ -210,7 +210,7 @@ struct TMDBEndpoints {
     
     static func userListItemStatusEndpoint(listID: Int, mediaID: Int, mediaType: MediaTypes, accessToken: String) -> Endpoint {
         let queryParams: [String : String] = [
-            "mediaID" : mediaID.description,
+            "media_id" : mediaID.description,
             "media_type" : mediaType.rawValue
         ]
         return Endpoint(baseURL: baseURLV4, bearerToken: accessToken, path: "/list/\(listID)/item_status", queryParams: queryParams)

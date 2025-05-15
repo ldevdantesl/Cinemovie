@@ -11,10 +11,12 @@ import SnapKit
 final class WatchlistButtonCellViewModel: CellViewModelBaseClass {
     var isWatchlisted: Bool
     let didTapAction: ((Bool) -> Void)?
+    let didTapAddToList: (() -> Void)?
     
-    init(isWatchlisted: Bool, didTapAction: ((Bool) -> Void)?) {
+    init(isWatchlisted: Bool, didTapAction: ((Bool) -> Void)?, didTapAddToList: (() -> Void)? = nil) {
         self.isWatchlisted = isWatchlisted
         self.didTapAction = didTapAction
+        self.didTapAddToList = didTapAddToList
         super.init(cellIdentifier: "WatchlistButtonCell")
     }
 }
@@ -26,6 +28,8 @@ final class WatchlistButtonCell: ReusableCellBaseClass {
         static let cellHeight = 40.0
         static let cornerRadius = 15.0
         static let addedImageName = "checkmark"
+        
+        static let spacing = 5.0
     }
     
     // MARK: - PROPERTIES
@@ -33,6 +37,12 @@ final class WatchlistButtonCell: ReusableCellBaseClass {
     
     // MARK: - VIEW PROPERTIES
     private let longButton: CMButton = {
+        let button = CMButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private let addToListButton: CMButton = {
         let button = CMButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -68,6 +78,15 @@ final class WatchlistButtonCell: ReusableCellBaseClass {
         )
         longButton.configure(viewModel: vm)
         
+        let addToListButtonVM =  CMButtonViewModel(
+            text: "List", foreColor: CMColor.cmDivider,
+            font: CMFont.font(size: .body, fontName: .avenirBold),
+            image: UIImage(systemName: Constants.imageName),
+            backColor: CMColor.cmLabel, cornerRadius: Constants.cornerRadius,
+            didTapAction: viewModel.didTapAddToList
+        )
+        addToListButton.configure(viewModel: addToListButtonVM)
+        
         self.layoutIfNeeded()
     }
     
@@ -75,7 +94,16 @@ final class WatchlistButtonCell: ReusableCellBaseClass {
     private func setupUI() {
         addSubview(longButton)
         longButton.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.top.bottom.equalToSuperview()
+            $0.leading.equalToSuperview()
+            $0.width.equalToSuperview().multipliedBy(0.49)
+        }
+        
+        addSubview(addToListButton)
+        addToListButton.snp.makeConstraints {
+            $0.top.bottom.equalToSuperview()
+            $0.trailing.equalToSuperview()
+            $0.width.equalToSuperview().multipliedBy(0.49)
         }
     }
     

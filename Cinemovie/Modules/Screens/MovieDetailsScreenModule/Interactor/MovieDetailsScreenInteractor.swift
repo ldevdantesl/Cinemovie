@@ -14,6 +14,7 @@ protocol MovieDetailsScreenInteractorProtocol: AnyObject {
     func getMovieReviews(movieID: Int)
     func getBelongsToCollectionDetails(collectionID: Int)
     func getMovieAccountStates(movieID: Int)
+    func getUserLists()
     
     // MARK: - USER INITIATED
     func addOrRemoveInWatchlist(movieID: Int, adding: Bool)
@@ -95,6 +96,16 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
             switch result {
             case .success(let success): self.presenter?.didGetMovieAccountStates(success)
             case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription, goesBack: false)
+            }
+        }
+    }
+    
+    func getUserLists() {
+        tmdbService.getUserLists { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didGetUserLists(success.results)
+            case .failure: self.presenter?.didGetUserLists([])
             }
         }
     }
