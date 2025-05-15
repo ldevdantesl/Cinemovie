@@ -19,7 +19,7 @@ protocol MovieDetailsScreenRouterProtocol {
     func presentShareView(movie: MovieDetails)
     func showActorPopUp(actor: Cast)
     func showTooltipView(sendedBy view: UIView, message: String)
-    func presentAddToListModal(movieID: Int, lists: [UserList])
+    func presentAddToListModal(movieID: Int)
 }
 
 final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
@@ -98,7 +98,7 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
         DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: workItem)
     }
     
-    func presentAddToListModal(movieID: Int, lists: [UserList]) {
+    func presentAddToListModal(movieID: Int) {
         let vc = AddToListModalAssembler.assemble(itemID: movieID, mediaType: .movie, tmdbService: tmdbService)
         vc.modalPresentationStyle = .pageSheet
     

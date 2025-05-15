@@ -16,6 +16,7 @@ protocol TVSeriesDetailsScreenInteractorProtocol: AnyObject {
     func getTVSeriesRecommendations(seriesID: Int)
     func getTVSeasonDetails(seriesID: Int, seasonNumber: Int)
     func getTVSeriesAccountStates(seriesID: Int)
+    func getUserLists()
     
     // MARK: - USER INITIATED
     func addOrRemoveInWatchlist(seriesID: Int, adding: Bool)
@@ -96,6 +97,16 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
             switch result {
             case .success(let success): presenter?.didGetTVSeriesAccountStates(success)
             case .failure(let failure): presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func getUserLists() {
+        tmdbService.getUserLists { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didGetUserLists(success.results)
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }
     }

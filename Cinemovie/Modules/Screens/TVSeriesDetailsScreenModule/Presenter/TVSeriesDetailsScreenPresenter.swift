@@ -22,6 +22,7 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
     func didTapWatchlistButton(adding: Bool)
     func didSelectActor(_ actor: Cast)
     func didSelectSeason(_ season: TVSeason)
+    func didTapAddToList()
     
     // MARK: - PROGRAMMATIC
     func didGetTVSeriesDetails(_ details: TVSeriesDetails)
@@ -31,6 +32,8 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
     func didGetTVSeriesRecommends(_ series: [TVSeries])
     func didGetTVSeasonDetails(_ details: TVSeasonDetails)
     func didGetTVSeriesAccountStates(_ accountStates: MediaAccountStates)
+    func didGetUserLists(_ userLists: [UserList])
+    
     func didAddOrRemoveFromWatchlist(message: String)
     func didAddOrRemoveFromFavorites(message: String)
     
@@ -52,6 +55,7 @@ final class TVSeriesDetailsScreenPresenter {
     private var seriesRecommends: [TVSeries] = []
     private var seriesSimilars: [TVSeries] = []
     private var seriesReviews: [Review] = []
+    private var userLists: [UserList] = []
     private var seriesAccountStates: MediaAccountStates = .empty
 
     init(seriesID: Int, interactor: TVSeriesDetailsScreenInteractorProtocol, router: TVSeriesDetailsScreenRouterProtocol) {
@@ -79,6 +83,9 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
         
         downloadGroup.enter()
         interactor.getTVSeriesAccountStates(seriesID: seriesID)
+        
+        downloadGroup.enter()
+        interactor.getUserLists()
         
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self, let details = self.seriesDetails else { return }
@@ -144,6 +151,10 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
         print("Successfully done operation: \(message)")
     }
     
+    func didTapAddToList() {
+        router.presentAddToListModal(seriesID: seriesID)
+    }
+    
     // MARK: - PROGRAMMATIC
     func didGetTVSeriesCast(_ cast: [Cast], crew: [Cast]) {
         self.seriesCast = cast
@@ -177,6 +188,11 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
 
     func didGetTVSeriesAccountStates(_ accountStates: MediaAccountStates) {
         self.seriesAccountStates = accountStates
+        downloadGroup.leave()
+    }
+    
+    func didGetUserLists(_ userLists: [UserList]) {
+        self.userLists = userLists
         downloadGroup.leave()
     }
     

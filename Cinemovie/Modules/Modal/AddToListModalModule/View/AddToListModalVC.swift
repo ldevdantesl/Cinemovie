@@ -10,7 +10,7 @@ import SnapKit
 
 protocol AddToListModalViewProtocol: AnyObject {
     func showLoadingView()
-    func hideLoadingView(completion: (() -> Void)?)
+    func hideLoadingView()
     
     func didReceiveError(_ errorStr: String)
     func reloadData()
@@ -72,8 +72,8 @@ extension AddToListModalVC: AddToListModalViewProtocol {
         downloadingView.show()
     }
     
-    func hideLoadingView(completion: (() -> Void)? = nil) {
-        downloadingView.hide(completion: completion)
+    func hideLoadingView() {
+        downloadingView.hide()
     }
     
     func reloadData() {
@@ -113,8 +113,8 @@ extension AddToListModalVC: UICollectionViewDelegate, UICollectionViewDataSource
             return cell
         } else {
             guard let presenter = self.presenter else { return UICollectionViewCell() }
-            let list = Array(presenter.listAndStatus.keys)[indexPath.item - 1]
-            let isAdded = presenter.listAndStatus[list] ?? false
+            let list = presenter.listAndStatus[indexPath.item - 1].list
+            let isAdded = presenter.listAndStatus[indexPath.item - 1].isInList
             guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: AddToListItemCell.identifier, for: indexPath
             ) as? AddToListItemCell else { return UICollectionViewCell() }

@@ -261,7 +261,12 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
             didTapView: presenter?.didTapTooltipView, didTapHomepage: presenter?.didTapHomepage
         )
         
-        let watchlistVm = WatchlistButtonCellViewModel(isWatchlisted: accountStates.watchlist, didTapAction: presenter?.didTapWatchlistButton)
+        let watchlistVm = WatchlistButtonCellViewModel(
+            isWatchlisted: accountStates.watchlist,
+            didTapAction: presenter?.didTapWatchlistButton,
+            didTapAddToList: presenter?.didTapAddToList
+        )
+        
         var sectionsAndTheirItems: [(section: Sections, items: [Items])] = [
             (.backdropImage, [.backdropImage(backdropVM)]),
             (.titleAndTagline, [.titleAndTagline(titleVM)]),

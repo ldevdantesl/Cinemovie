@@ -21,7 +21,6 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didTapAddToWatchlist(adding: Bool)
     func didTapFavoriteButton(adding: Bool)
     func didTapAddToList()
-    func didTapUserList(userList: UserList)
     
     // MARK: - PROGRAMMATIC
     func didGetMovieDetails(_ details: MovieDetails)
@@ -150,11 +149,7 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     }
     
     func didTapAddToList() {
-        router.presentAddToListModal(movieID: movieID, lists: userLists)
-    }
-    
-    func didTapUserList(userList: UserList) {
-        
+        router.presentAddToListModal(movieID: movieID)
     }
     
     // MARK: - PROGRAMMATIC

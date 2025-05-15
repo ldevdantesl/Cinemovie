@@ -18,6 +18,7 @@ protocol TVSeriesDetailsScreenRouterProtocol {
     func presentShareView(details: TVSeriesDetails)
     func showActorPopUp(actor: Cast)
     func showSeasonPopUp(seasonDetails: TVSeasonDetails)
+    func presentAddToListModal(seriesID: Int)
     
     // MARK: - ROUTE
     func openHomepage(homepage: String)
@@ -112,6 +113,18 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     
         viewController?.activeTooltipWorkItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: workItem)
+    }
+    
+    func presentAddToListModal(seriesID: Int) {
+        let vc = AddToListModalAssembler.assemble(itemID: seriesID, mediaType: .tvShow, tmdbService: tmdbService)
+        vc.modalPresentationStyle = .pageSheet
+    
+        if let sheet = vc.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+            sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+        }
+        viewController?.present(vc, animated: true)
     }
     
     // MARK: - ROUTE

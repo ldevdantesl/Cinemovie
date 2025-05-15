@@ -10,8 +10,8 @@ import UIKit
 protocol AddToListModalPresenterProtocol: AnyObject {
     func viewDidLoad()
     
-    func didReceiveLists(lists: [UserList], refreshing: Bool)
-    func didReceiveItemStatusInList(listID: Int, status: Bool, refreshing: Bool)
+    func didReceiveLists(lists: [UserList])
+    func didReceiveItemStatusInList(listID: Int, status: Bool)
     func didTapAddToList(userList: UserList)
     func didAddOrRemoveFromList()
     
@@ -19,17 +19,16 @@ protocol AddToListModalPresenterProtocol: AnyObject {
     func didReceiveError(_ error: Error)
     
     // MARK: - PROPERTIES
-    var listAndStatus: [UserList : Bool] { get }
+    var listAndStatus: [UserListStatus] { get }
 }
 
 final class AddToListModalPresenter {
     weak var view: AddToListModalViewProtocol?
     var router: AddToListModalRouterProtocol
     var interactor: AddToListModalInteractorProtocol
-    var listAndStatus: [UserList : Bool] = [:]
+    var listAndStatus: [UserListStatus] = []
     
     private let downloadGroup = DispatchGroup()
-    private let refreshGroup = DispatchGroup()
     private let itemID: Int
     private let mediaType: MediaTypes
 
@@ -51,45 +50,47 @@ extension AddToListModalPresenter: AddToListModalPresenterProtocol {
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
             self.view?.reloadData()
-            self.view?.hideLoadingView(completion: nil)
+            self.view?.hideLoadingView()
         }
     }
     
-    func didReceiveLists(lists: [UserList], refreshing: Bool) {
-        self.listAndStatus.removeAll()
-        lists.forEach {
-            listAndStatus[$0] = false
-            refreshing ? refreshGroup.enter() : downloadGroup.enter()
-            interactor.getItemStatusInList(listID: $0.id, itemID: itemID, mediaType: mediaType, refreshing: refreshing)
+    func didReceiveLists(lists: [UserList]) {
+        self.listAndStatus = lists.map {
+            downloadGroup.enter()
+            interactor.getItemStatusInList(listID: $0.id, itemID: itemID, mediaType: mediaType, refreshing: false)
+            return UserListStatus(list: $0, isInList: false)
         }
-        refreshing ? refreshGroup.leave() : downloadGroup.leave()
+        downloadGroup.leave()
     }
     
-    func didReceiveItemStatusInList(listID: Int, status: Bool, refreshing: Bool) {
-        if let list = listAndStatus.keys.first(where: { $0.id == listID }) {
-            listAndStatus[list] = status
-        }
-        refreshing ? refreshGroup.leave() : downloadGroup.leave()
+    func didReceiveItemStatusInList(listID: Int, status: Bool) {
+        guard let index = listAndStatus.firstIndex(where: { $0.list.id == listID }) else { downloadGroup.leave(); return }
+        listAndStatus[index].isInList = status
+        downloadGroup.leave()
     }
     
     func didAddOrRemoveFromList() {
-        refreshGroup.enter()
-        self.interactor.refreshLists()
-        refreshGroup.notify(queue: .main) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
             guard let self = self else { return }
-            self.view?.reloadData()
-            self.view?.hideLoadingView(completion: nil)
+            self.downloadGroup.enter()
+            self.interactor.getUserLists()
+            
+            self.downloadGroup.notify(queue: .main) { [weak self] in
+                guard let self = self else { return }
+                self.view?.reloadData()
+                self.view?.hideLoadingView()
+            }
         }
     }
     
     func didTapAddToList(userList: UserList) {
-        guard let status = listAndStatus[userList] else { return }
+        guard let index = listAndStatus.firstIndex(where: { $0.list.id == userList.id }) else { return }
+        let status = listAndStatus[index].isInList
         self.view?.showLoadingView()
-        if status {
-            interactor.removeMediaFromList(listID: userList.id, mediaID: itemID, mediaType: mediaType)
-        } else {
-            interactor.addMediaToList(listID: userList.id, mediaID: itemID, mediaType: mediaType)
-        }
+        
+        status ?
+        interactor.removeMediaFromList(listID: userList.id, mediaID: itemID, mediaType: mediaType) :
+        interactor.addMediaToList(listID: userList.id, mediaID: itemID, mediaType: mediaType)
     }
     
     // MARK: - ERROR HANDLING

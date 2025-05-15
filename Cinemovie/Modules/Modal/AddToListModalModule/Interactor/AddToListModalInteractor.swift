@@ -9,7 +9,6 @@ import UIKit
 
 protocol AddToListModalInteractorProtocol: AnyObject {
     func getUserLists()
-    func refreshLists()
     func getItemStatusInList(listID: Int, itemID: Int, mediaType: MediaTypes, refreshing: Bool)
     func addMediaToList(listID: Int, mediaID: Int, mediaType: MediaTypes)
     func removeMediaFromList(listID: Int, mediaID: Int, mediaType: MediaTypes)
@@ -27,17 +26,7 @@ final class AddToListModalInteractor: AddToListModalInteractorProtocol {
         tmdbService.getUserLists { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): self.presenter?.didReceiveLists(lists: success.results, refreshing: false)
-            case .failure(let failure): self.presenter?.didReceiveError(failure)
-            }
-        }
-    }
-    
-    func refreshLists() {
-        tmdbService.getUserLists { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didReceiveLists(lists: success.results, refreshing: true)
+            case .success(let success): self.presenter?.didReceiveLists(lists: success.results)
             case .failure(let failure): self.presenter?.didReceiveError(failure)
             }
         }
@@ -47,8 +36,8 @@ final class AddToListModalInteractor: AddToListModalInteractorProtocol {
         tmdbService.getItemStatusInUserList(listID: listID, mediaID: itemID, mediaType: mediaType) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success: self.presenter?.didReceiveItemStatusInList(listID: listID, status: true, refreshing: refreshing)
-            case .failure: self.presenter?.didReceiveItemStatusInList(listID: listID, status: false, refreshing: refreshing)
+            case .success: self.presenter?.didReceiveItemStatusInList(listID: listID, status: true)
+            case .failure: self.presenter?.didReceiveItemStatusInList(listID: listID, status: false)
             }
         }
     }

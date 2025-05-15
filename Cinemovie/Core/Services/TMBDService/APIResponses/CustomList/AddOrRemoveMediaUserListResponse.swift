@@ -17,11 +17,12 @@ struct AddOrRemoveMediaUserListResponse: APIResponse {
         let mediaType: String
         let mediaId: Int
         let success: Bool
+        let error: [String]?
         
         enum CodingKeys: String, CodingKey {
             case mediaType = "media_type"
             case mediaId = "media_id"
-            case success
+            case success, error
         }
     }
     
