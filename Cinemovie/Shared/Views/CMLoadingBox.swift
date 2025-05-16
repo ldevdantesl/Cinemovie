@@ -37,7 +37,7 @@ final class CMLoadingBox: UIView {
     
     private let stateLabel: UILabel = {
         let label = UILabel()
-        label.font = CMFont.font(size: .body, fontName: .avenirMedium)
+        label.font = CMFont.font(size: .body, fontName: .avenirBold)
         label.text = "Loading..."
         label.numberOfLines = 1
         label.textColor = CMColor.cmLabel
@@ -49,7 +49,7 @@ final class CMLoadingBox: UIView {
         label.font = CMFont.font(size: .caption, fontName: .avenirMedium)
         label.text = "Preparing your experience..."
         label.numberOfLines = 1
-        label.textColor = CMColor.cmLabel
+        label.textColor = CMColor.cmSublabel
         return label
     }()
     
@@ -137,15 +137,15 @@ final class CMLoadingBox: UIView {
         
         containerView.addSubview(stateLabel)
         stateLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(Constants.spacing)
-            $0.leading.equalTo(stateImageView.snp.trailing).offset(Constants.spacing)
+            $0.centerY.equalToSuperview().offset(-Constants.hSpacing)
+            $0.leading.equalTo(stateImageView.snp.trailing).offset(Constants.hSpacing)
             $0.trailing.equalToSuperview().offset(-Constants.spacing)
         }
         
         containerView.addSubview(messageLabel)
         messageLabel.snp.makeConstraints {
-            $0.top.equalTo(stateLabel.snp.bottom).offset(Constants.spacing)
-            $0.leading.equalTo(stateImageView.snp.trailing).offset(Constants.spacing)
+            $0.top.equalTo(stateLabel.snp.bottom)
+            $0.leading.equalTo(stateImageView.snp.trailing).offset(Constants.hSpacing)
             $0.trailing.equalToSuperview().offset(-Constants.spacing)
         }
     }
