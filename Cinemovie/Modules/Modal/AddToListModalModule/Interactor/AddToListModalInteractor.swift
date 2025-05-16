@@ -46,8 +46,8 @@ final class AddToListModalInteractor: AddToListModalInteractorProtocol {
         tmdbService.addOrRemoveMediaInUserList(listID: listID, mediaID: mediaID, mediaType: mediaType, adding: true) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success: self.presenter?.didAddOrRemoveFromList()
-            case .failure(let failure): self.presenter?.didReceiveError(failure)
+            case .success: self.presenter?.didAddOrRemoveFromList(added: true)
+            case .failure(let failure): self.presenter?.didReceieveErrorInBox(failure)
             }
         }
     }
@@ -56,8 +56,8 @@ final class AddToListModalInteractor: AddToListModalInteractorProtocol {
         tmdbService.addOrRemoveMediaInUserList(listID: listID, mediaID: mediaID, mediaType: mediaType, adding: false) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success: self.presenter?.didAddOrRemoveFromList()
-            case .failure(let failure): self.presenter?.didReceiveError(failure)
+            case .success: self.presenter?.didAddOrRemoveFromList(added: false)
+            case .failure(let failure): self.presenter?.didReceieveErrorInBox(failure)
             }
         }
     }

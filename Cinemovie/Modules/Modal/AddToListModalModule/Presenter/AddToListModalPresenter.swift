@@ -13,10 +13,11 @@ protocol AddToListModalPresenterProtocol: AnyObject {
     func didReceiveLists(lists: [UserList])
     func didReceiveItemStatusInList(listID: Int, status: Bool)
     func didTapAddToList(userList: UserList)
-    func didAddOrRemoveFromList()
+    func didAddOrRemoveFromList(added: Bool)
     
     // MARK: - ERROR HANDLING
     func didReceiveError(_ error: Error)
+    func didReceieveErrorInBox(_ error: Error)
     
     // MARK: - PROPERTIES
     var listAndStatus: [UserListStatus] { get }
@@ -69,14 +70,17 @@ extension AddToListModalPresenter: AddToListModalPresenterProtocol {
         downloadGroup.leave()
     }
     
-    func didAddOrRemoveFromList() {
-        self.view?.hideLoadingView(completion: router.goBack)
+    func didAddOrRemoveFromList(added: Bool) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+            guard let self = self else { return }
+            self.router.dismissLoadBox(success: true, message: "Successfully \(added ? "added to" : "removed from") list")
+        }
     }
     
     func didTapAddToList(userList: UserList) {
         guard let index = listAndStatus.firstIndex(where: { $0.list.id == userList.id }) else { return }
         let status = listAndStatus[index].isInList
-        self.view?.showLoadingView()
+        self.router.showLoadingBox()
         
         status ?
         interactor.removeMediaFromList(listID: userList.id, mediaID: itemID, mediaType: mediaType) :
@@ -86,5 +90,12 @@ extension AddToListModalPresenter: AddToListModalPresenterProtocol {
     // MARK: - ERROR HANDLING
     func didReceiveError(_ error: any Error) {
         self.view?.didReceiveError(error.localizedDescription)
+    }
+    
+    func didReceieveErrorInBox(_ error: any Error) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+            guard let self = self else { return }
+            self.router.dismissLoadBox(success: false, message: error.localizedDescription)
+        }
     }
 }

@@ -14,6 +14,9 @@ protocol AddToListModalViewProtocol: AnyObject {
     
     func didReceiveError(_ errorStr: String)
     func reloadData()
+    
+    // MARK: - PROPERTIES
+    var loadingBox: CMLoadingBox? { get set }
 }
 
 
@@ -26,6 +29,7 @@ final class AddToListModalVC: UIViewController {
     
     // MARK: - PROPERTIES
     var presenter: AddToListModalPresenterProtocol?
+    var loadingBox: CMLoadingBox?
     
     // MARK: - VIEW PROPERTIES
     private let downloadingView = CMSplashView()
