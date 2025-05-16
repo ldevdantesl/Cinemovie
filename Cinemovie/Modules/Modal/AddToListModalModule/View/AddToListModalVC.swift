@@ -10,7 +10,7 @@ import SnapKit
 
 protocol AddToListModalViewProtocol: AnyObject {
     func showLoadingView()
-    func hideLoadingView()
+    func hideLoadingView(completion: (() -> Void)?)
     
     func didReceiveError(_ errorStr: String)
     func reloadData()
@@ -72,8 +72,8 @@ extension AddToListModalVC: AddToListModalViewProtocol {
         downloadingView.show()
     }
     
-    func hideLoadingView() {
-        downloadingView.hide()
+    func hideLoadingView(completion: (() -> Void)?) {
+        downloadingView.hide(completion: completion)
     }
     
     func reloadData() {

@@ -17,6 +17,7 @@ protocol UserListDetailsScreenPresenterProtocol: AnyObject {
     
     // MARK: - PROGRAMMATIC
     func didReceiveListDetails(_ details: UserListDetails)
+    func didReceivePaginatedListDetails(_ details: UserListDetails)
     func didReceiveNewMedia(_ media: [AnyMedia])
     func didReceieveRefreshingMedia(_ media: [AnyMedia])
     
@@ -107,6 +108,26 @@ extension UserListDetailsScreenPresenter: UserListDetailsScreenPresenterProtocol
             sections: [.main],
             itemsBySection: [.main : vms]
         )
+    }
+    
+    func didReceivePaginatedListDetails(_ details: UserListDetails) {
+        defer {
+            self.view?.hidePaginationLoadingIndicator()
+        }
+        
+        self.userListDetails = details
+        guard !details.results.isEmpty else { return }
+        
+        let newMedia = AnyMedia.toMedia(from: details.results)
+        self.media.append(contentsOf: newMedia)
+        let vms = self.media.map {
+            Items.posterImageVM(MediaPosterImageCellViewModel(media: $0) { [weak self] in self?.didTapMedia(media: $0)})
+        }
+        self.view?.applySnapshot(
+            sections: [.main],
+            itemsBySection: [.main : vms]
+        )
+        self.currentPage += 1
     }
     
     func didReceiveNewMedia(_ media: [AnyMedia]) {

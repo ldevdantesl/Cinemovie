@@ -35,7 +35,7 @@ final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProt
         tmdbService.getUserListDetails(listID: listID, page: page) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): self.presenter?.didReceiveListDetails(success)
+            case .success(let success): self.presenter?.didReceivePaginatedListDetails(success)
             case .failure(let failure): self.presenter?.didReceiveError(failure)
             }
         }

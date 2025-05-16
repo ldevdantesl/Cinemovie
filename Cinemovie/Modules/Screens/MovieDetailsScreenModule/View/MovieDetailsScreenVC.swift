@@ -245,6 +245,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         
         let watchlistVM = WatchlistButtonCellViewModel(
             isWatchlisted: accountStates.watchlist,
+            showsAddToListButton: (presenter?.userLists.count ?? 0) > 0,
             didTapAction: presenter?.didTapAddToWatchlist,
             didTapAddToList: presenter?.didTapAddToList
         )

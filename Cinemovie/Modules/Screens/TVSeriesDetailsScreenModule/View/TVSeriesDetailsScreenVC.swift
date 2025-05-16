@@ -263,6 +263,7 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
         
         let watchlistVm = WatchlistButtonCellViewModel(
             isWatchlisted: accountStates.watchlist,
+            showsAddToListButton: (presenter?.userLists.count ?? 0) > 0,
             didTapAction: presenter?.didTapWatchlistButton,
             didTapAddToList: presenter?.didTapAddToList
         )

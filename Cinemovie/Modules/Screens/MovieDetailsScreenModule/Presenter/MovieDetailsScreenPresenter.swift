@@ -38,6 +38,9 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     
     // MARK: - ERROR
     func didRecieveError(_ error: String, goesBack: Bool)
+    
+    // MARK: - PROPERTIES
+    var userLists: [UserList] { get }
 }
 
 final class MovieDetailsScreenPresenter {
@@ -58,7 +61,7 @@ final class MovieDetailsScreenPresenter {
     private var movieReviews: [Review] = []
     private var movieRecommends: [Movie] = []
     private var belongsToCollectionDetails: BelongsToCollectionDetails?
-    private var userLists: [UserList] = []
+    var userLists: [UserList] = []
     private var movieAccountStates: MediaAccountStates = .empty
 
     init(movieID: Int, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {

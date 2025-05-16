@@ -50,7 +50,7 @@ extension AddToListModalPresenter: AddToListModalPresenterProtocol {
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
             self.view?.reloadData()
-            self.view?.hideLoadingView()
+            self.view?.hideLoadingView(completion: nil)
         }
     }
     
@@ -70,17 +70,7 @@ extension AddToListModalPresenter: AddToListModalPresenterProtocol {
     }
     
     func didAddOrRemoveFromList() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-            guard let self = self else { return }
-            self.downloadGroup.enter()
-            self.interactor.getUserLists()
-            
-            self.downloadGroup.notify(queue: .main) { [weak self] in
-                guard let self = self else { return }
-                self.view?.reloadData()
-                self.view?.hideLoadingView()
-            }
-        }
+        self.view?.hideLoadingView(completion: router.goBack)
     }
     
     func didTapAddToList(userList: UserList) {

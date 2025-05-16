@@ -11,10 +11,12 @@ import SnapKit
 final class WatchlistButtonCellViewModel: CellViewModelBaseClass {
     var isWatchlisted: Bool
     let didTapAction: ((Bool) -> Void)?
+    let showsAddToListButton: Bool
     let didTapAddToList: (() -> Void)?
     
-    init(isWatchlisted: Bool, didTapAction: ((Bool) -> Void)?, didTapAddToList: (() -> Void)? = nil) {
+    init(isWatchlisted: Bool, showsAddToListButton: Bool, didTapAction: ((Bool) -> Void)?, didTapAddToList: (() -> Void)? = nil) {
         self.isWatchlisted = isWatchlisted
+        self.showsAddToListButton = showsAddToListButton
         self.didTapAction = didTapAction
         self.didTapAddToList = didTapAddToList
         super.init(cellIdentifier: "WatchlistButtonCell")
@@ -47,6 +49,14 @@ final class WatchlistButtonCell: ReusableCellBaseClass {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
+    
+    private let buttonStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.spacing = Constants.spacing
+        stack.distribution = .fill
+        return stack
+    }()
 
     // MARK: - LIFECYCLE
     override init(frame: CGRect) {
@@ -65,6 +75,11 @@ final class WatchlistButtonCell: ReusableCellBaseClass {
         return layoutAttributes
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        buttonStack.clear()
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: WatchlistButtonCellViewModel) {
         self.viewModel = viewModel
@@ -77,33 +92,28 @@ final class WatchlistButtonCell: ReusableCellBaseClass {
             cornerRadius: Constants.cornerRadius, didTapAction: self.didTapAction
         )
         longButton.configure(viewModel: vm)
+        buttonStack.addArrangedSubview(longButton)
         
-        let addToListButtonVM =  CMButtonViewModel(
-            text: "List", foreColor: CMColor.cmDivider,
-            font: CMFont.font(size: .body, fontName: .avenirBold),
-            image: UIImage(systemName: Constants.imageName),
-            backColor: CMColor.cmLabel, cornerRadius: Constants.cornerRadius,
-            didTapAction: viewModel.didTapAddToList
-        )
-        addToListButton.configure(viewModel: addToListButtonVM)
+        if viewModel.showsAddToListButton {
+            let addToListButtonVM =  CMButtonViewModel(
+                text: "List", foreColor: CMColor.cmDivider,
+                font: CMFont.font(size: .body, fontName: .avenirBold),
+                image: UIImage(systemName: Constants.imageName),
+                backColor: CMColor.cmLabel, cornerRadius: Constants.cornerRadius,
+                didTapAction: viewModel.didTapAddToList
+            )
+            addToListButton.configure(viewModel: addToListButtonVM)
+            buttonStack.addArrangedSubview(addToListButton)
+        }
         
         self.layoutIfNeeded()
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
-        addSubview(longButton)
-        longButton.snp.makeConstraints {
-            $0.top.bottom.equalToSuperview()
-            $0.leading.equalToSuperview()
-            $0.width.equalToSuperview().multipliedBy(0.49)
-        }
-        
-        addSubview(addToListButton)
-        addToListButton.snp.makeConstraints {
-            $0.top.bottom.equalToSuperview()
-            $0.trailing.equalToSuperview()
-            $0.width.equalToSuperview().multipliedBy(0.49)
+        addSubview(buttonStack)
+        buttonStack.snp.makeConstraints {
+            $0.edges.equalToSuperview()
         }
     }
     

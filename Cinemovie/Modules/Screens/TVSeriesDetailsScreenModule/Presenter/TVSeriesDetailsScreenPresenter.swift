@@ -39,6 +39,9 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
     
     // MARK: - ERROR HANDLING
     func didRecieveError(_ error: Error)
+    
+    // MARK: - PROPERTIES
+    var userLists: [UserList] { get }
 }
 
 final class TVSeriesDetailsScreenPresenter {
@@ -55,7 +58,7 @@ final class TVSeriesDetailsScreenPresenter {
     private var seriesRecommends: [TVSeries] = []
     private var seriesSimilars: [TVSeries] = []
     private var seriesReviews: [Review] = []
-    private var userLists: [UserList] = []
+    var userLists: [UserList] = []
     private var seriesAccountStates: MediaAccountStates = .empty
 
     init(seriesID: Int, interactor: TVSeriesDetailsScreenInteractorProtocol, router: TVSeriesDetailsScreenRouterProtocol) {

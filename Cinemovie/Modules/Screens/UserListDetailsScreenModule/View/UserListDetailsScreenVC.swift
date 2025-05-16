@@ -15,6 +15,8 @@ protocol UserListDetailsScreenViewProtocol: AnyObject {
     // MARK: - DOWNLOADING
     func showDownloadingView()
     func hideDownloadingView()
+    func hidePaginationLoadingIndicator()
+    
     func stopRefreshing()
     
     // MARK: - ERROR HANDLING
@@ -184,7 +186,8 @@ final class UserListDetailsScreenVC: UIViewController {
                 ofKind: elementKind, withReuseIdentifier: SupplementaryHeaderCell.identifier, for: indexPath
             ) as? SupplementaryHeaderCell else { return nil }
             let vm = SupplementaryHeaderViewModel(
-                title: self.presenter?.userList.name ?? "List", subtitle: "Movies & TV Series of the list",
+                title: self.presenter?.userList.name ?? "List",
+                subtitle: "Movies & TV Series of the list",
                 showsTopShadow: true,
                 leftButtonImageName: Constants.leftArrowImageName ,
                 leftButtonTintColor: CMColor.cmAccent,
@@ -253,6 +256,13 @@ extension UserListDetailsScreenVC: UserListDetailsScreenViewProtocol {
                 guard let self = self else { return }
                 self.topDecorLayer.opacity = 1
             }
+        }
+    }
+    
+    func hidePaginationLoadingIndicator() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.loadingIndicator.stopAnimating()
         }
     }
     
