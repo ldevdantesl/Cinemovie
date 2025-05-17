@@ -71,10 +71,7 @@ extension AddToListModalPresenter: AddToListModalPresenterProtocol {
     }
     
     func didAddOrRemoveFromList(added: Bool) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-            guard let self = self else { return }
-            self.router.dismissLoadBox(success: true, message: "Successfully \(added ? "added to" : "removed from") list")
-        }
+        self.router.dismissLoadBox(success: true, message: "Successfully \(added ? "added to" : "removed from") list")
     }
     
     func didTapAddToList(userList: UserList) {

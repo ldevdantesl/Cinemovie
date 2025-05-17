@@ -145,7 +145,7 @@ extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
     func didTapAddNewList() {
         router.presentAddNewListPopUp { [weak self] listName, listDescription, isPublic in
             guard let self = self else { return }
-            self.view?.showDownloadingView()
+            self.router.showLoadingBox()
             self.interactor.createNewList(listName: listName, listDescription: listDescription, isPublic: isPublic)
         }
     }
@@ -189,9 +189,8 @@ extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
     
     // MARK: - PROGRAMMATIC
     func didCreateNewList() {
-        self.view?.hideDownloadingView()
+        self.router.hideLoadingBox(success: true, message: "Successfully added new list")
         self.didCallRefresh()
-        self.router.hidePopUp()
     }
     
     func didRecieveError(_ error: any Error) {

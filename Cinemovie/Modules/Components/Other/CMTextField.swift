@@ -80,7 +80,13 @@ final class CMTextField: UITextField {
     // MARK: - PRIVATE FUNC
     private func setup() {
         self.returnKeyType = viewModel.returnKeyType
-        self.placeholder = viewModel.placeholder
+        self.placeholder = nil
+        if let placeholder = viewModel.placeholder {
+            self.attributedPlaceholder = NSAttributedString(
+                string: placeholder,
+                attributes: [.foregroundColor: CMColor.cmPlaceholderLabel]
+            )
+        }
         self.textColor = viewModel.textColor
         self.font = viewModel.font
         self.backgroundColor = viewModel.backgroundColor

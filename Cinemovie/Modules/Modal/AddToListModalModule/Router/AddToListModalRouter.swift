@@ -27,6 +27,11 @@ final class AddToListModalRouter: AddToListModalRouterProtocol {
     }
     
     func dismissLoadBox(success: Bool, message: String) {
-        viewController?.loadingBox?.changeState(success: success, message: message) { [weak self] in self?.goBack() }
+        viewController?.loadingBox?.changeState(success: success, message: message, delay: 2) { [weak self] in
+            guard let self = self else { return }
+            self.goBack()
+            self.viewController?.loadingBox?.removeFromSuperview()
+            self.viewController?.loadingBox = nil
+        }
     }
 }

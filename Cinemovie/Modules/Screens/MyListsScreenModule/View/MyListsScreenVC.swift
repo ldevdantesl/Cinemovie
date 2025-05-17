@@ -23,6 +23,7 @@ protocol MyListsScreenViewProtocol: AnyObject {
     
     // MARK: - PROPERTIES
     var popUpView: PopUPView? { get set }
+    var loadingBox: CMLoadingBox? { get set }
 }
 
 final class MyListsScreenVC: UIViewController {
@@ -52,6 +53,7 @@ final class MyListsScreenVC: UIViewController {
     // MARK: - VIPER
     var presenter: MyListsScreenPresenterProtocol?
     var popUpView: PopUPView?
+    var loadingBox: CMLoadingBox?
     
     // MARK: - VIEW PROPERTIES
     private let downloadingView: CMSplashView = {

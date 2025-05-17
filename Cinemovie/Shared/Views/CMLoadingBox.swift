@@ -74,10 +74,14 @@ final class CMLoadingBox: UIView {
     }
     
     // MARK: - PUBLIC FUNC
-    public func load(in superView: UIView) {
+    public func load(in superView: UIView, message: String? = nil) {
         superView.addSubview(self)
         self.snp.makeConstraints { $0.edges.equalToSuperview() }
         self.alpha = 0
+        
+        if let message = message {
+            self.messageLabel.text = message
+        }
 
         self.addSubview(containerView)
         containerView.snp.makeConstraints {
@@ -103,11 +107,10 @@ final class CMLoadingBox: UIView {
         animateImageView()
     }
     
-    public func changeState(success: Bool, message: String, onCompletion: (() -> Void)? = nil) {
-        stopImageViewAnimation()
-        
-        DispatchQueue.main.async { [weak self] in
+    public func changeState(success: Bool, message: String, delay: TimeInterval = 0, onCompletion: (() -> Void)? = nil) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self = self else { return }
+            self.stopImageViewAnimation()
             UIView.transition(with: self.containerView, duration: 0.3, options: .transitionCrossDissolve) { [weak self] in
                 guard let self = self else { return }
                 self.stateImageView.image = UIImage(named: success ? ImageNames.completed.rawValue : ImageNames.error.rawValue)
@@ -117,11 +120,11 @@ final class CMLoadingBox: UIView {
                 self.stateLabel.text = success ? "Successfully completed" : "Something went wrong"
                 self.messageLabel.text = message
             }
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-            guard let self = self else { return }
-            self.hide(onCompletion: onCompletion)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                guard let self = self else { return }
+                self.hide(onCompletion: onCompletion)
+            }
         }
     }
     
