@@ -104,7 +104,7 @@ final class AccountListCell: ReusableCellBaseClass {
         self.viewModel = nil
         self.stackSubtitleLabel.text = nil
         self.stackTitleLabel.text = nil
-        self.posterStackView.subviews.forEach { $0.removeFromSuperview() }
+        self.posterStackView.clearSubviews()
     }
     
     override func layoutSubviews() {

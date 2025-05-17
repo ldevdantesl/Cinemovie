@@ -9,11 +9,11 @@ import UIKit
 import SnapKit
 
 final class UserListCellViewModel: CellViewModelBaseClass {
-    let userList: UserList
-    let didTapList: ((UserList) -> Void)?
-    let didTapRemoveList: ((UserList) -> Void)?
+    let userList: UserListDetails
+    let didTapList: ((UserListDetails) -> Void)?
+    let didTapRemoveList: ((UserListDetails) -> Void)?
     
-    init(userList: UserList, didTapList: ((UserList) -> Void)?, didTapRemoveList: ((UserList) -> Void)? = nil) {
+    init(userList: UserListDetails, didTapList: ((UserListDetails) -> Void)?, didTapRemoveList: ((UserListDetails) -> Void)? = nil) {
         self.userList = userList
         self.didTapList = didTapList
         self.didTapRemoveList = didTapRemoveList
@@ -24,8 +24,10 @@ final class UserListCellViewModel: CellViewModelBaseClass {
 final class UserListCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
-        static let notFoundImageName = "plus"
-        static let notFoundImagePointSize = 25.0
+        static let plusImageName = "plus"
+        static let plusPointSize = 30.0
+        static let notFoundImageName = "questionmark"
+        static let notFoundPointSize = 20.0
         static let posterBorderWidth = 0.5
         static let posterCornerRadius = 10.0
         static let hugeSpacing = 20.0
@@ -39,11 +41,20 @@ final class UserListCell: ReusableCellBaseClass {
     private var viewModel: UserListCellViewModel?
 
     // MARK: - VIEW PROPERTIES
-    private let posterImageView: AsyncImageView = {
-        let view = AsyncImageView()
+    private lazy var posterStackView: UIView = {
+        let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.setCornerRadius(Constants.posterCornerRadius)
-        view.setBorder(width: Constants.posterBorderWidth, borderColor: CMColor.cmLabel)
+        return view
+    }()
+    
+    private let plusPosterView: UIImageView = {
+        let view = UIImageView()
+        view.backgroundColor = CMColor.cmSecondaryBackground
+        view.contentMode = .center
+        view.clipsToBounds = true
+        view.image = UIImage(systemName: Constants.plusImageName)
+        view.preferredSymbolConfiguration = .init(pointSize: Constants.plusPointSize, weight: .bold)
+        view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
@@ -91,39 +102,39 @@ final class UserListCell: ReusableCellBaseClass {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        self.posterImageView.reset()
         self.viewModel = nil
         self.listTitleLabel.text = nil
         self.listSubtitleLabel.text = nil
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        self.plusPosterView.layer.cornerRadius = Constants.posterCornerRadius
+        self.plusPosterView.layer.borderColor = CMColor.cmLabel.cgColor
+        self.plusPosterView.layer.borderWidth = Constants.posterBorderWidth
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: UserListCellViewModel) {
         self.viewModel = viewModel
-        self.posterImageView.setAsyncImage(
-            path: viewModel.userList.posterPath, size: .original,
-            notFoundImageSystemName: Constants.notFoundImageName,
-            notFoundPointSize: Constants.notFoundImagePointSize,
-            notFoundTintColor: CMColor.cmSystem
-        )
         self.listTitleLabel.text = viewModel.userList.name
         self.listSubtitleLabel.text = viewModel.userList.description
+        self.stackPosters(items: AnyMedia.toMedia(from: viewModel.userList.results))
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
         contentView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapAction)))
-        contentView.addSubview(posterImageView)
-        posterImageView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(Constants.vSpacing)
-            $0.centerX.equalToSuperview()
-            $0.width.equalToSuperview().multipliedBy(0.8)
-            $0.height.equalTo(posterImageView.snp.width).multipliedBy(1.5).priority(.high)
+        contentView.addSubview(posterStackView)
+        posterStackView.snp.makeConstraints {
+            $0.top.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(15)
+            $0.height.equalTo(posterStackView.snp.width).multipliedBy(1.5).priority(.high)
         }
         
         contentView.addSubview(listTitleLabel)
         listTitleLabel.snp.makeConstraints {
-            $0.top.equalTo(posterImageView.snp.bottom).offset(Constants.hugeSpacing)
+            $0.top.equalTo(posterStackView.snp.bottom).offset(Constants.hugeSpacing)
             $0.horizontalEdges.equalToSuperview()
         }
         
@@ -138,6 +149,44 @@ final class UserListCell: ReusableCellBaseClass {
     private func setupContextMenu() {
         let interaction = UIContextMenuInteraction(delegate: self)
         contentView.addInteraction(interaction)
+    }
+    
+    private func stackPosters(items: [Media]) {
+        posterStackView.subviews.forEach { $0.removeFromSuperview() }
+        guard !items.isEmpty else {
+            posterStackView.addSubview(plusPosterView)
+            plusPosterView.snp.makeConstraints {
+                $0.center.equalToSuperview()
+                $0.width.equalToSuperview()
+                $0.height.equalTo(plusPosterView.snp.width).multipliedBy(1.5)
+            }
+            return
+        }
+
+        let postersToShow = items.prefix(3)
+        let baseOffset = 15.0
+        let count = postersToShow.count
+        let totalOffset = Double(count - 1) * baseOffset
+
+        for (index, item) in postersToShow.enumerated() {
+            let imageView = AsyncImageView()
+            imageView.setBorder(width: Constants.posterBorderWidth, borderColor: CMColor.cmLabel)
+            imageView.setCornerRadius(Constants.posterCornerRadius)
+            imageView.setAsyncImage(
+                path: item.posterPath, size: .w1280,
+                notFoundImageSystemName: Constants.notFoundImageName,
+                notFoundPointSize: Constants.notFoundPointSize
+            )
+            posterStackView.addSubview(imageView)
+            let centerOffset = (Double(index) * baseOffset - totalOffset / 2)
+
+            imageView.snp.makeConstraints {
+                $0.centerY.equalToSuperview()
+                $0.centerX.equalToSuperview().offset(centerOffset)
+                $0.width.equalToSuperview()
+                $0.height.equalTo(imageView.snp.width).multipliedBy(1.5)
+            }
+        }
     }
     
     // MARK: - OBJC FUNC

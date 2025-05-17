@@ -181,12 +181,12 @@ final class UserListDetailsScreenVC: UIViewController {
         }
         
         collectionView.setSupplementaryViewProvider { [weak self] collectionView, elementKind, indexPath in
-            guard let self = self else { return nil }
+            guard let self = self, let presenter = self.presenter else { return nil }
             guard let cell = collectionView.dequeueReusableSupplementaryView(
                 ofKind: elementKind, withReuseIdentifier: SupplementaryHeaderCell.identifier, for: indexPath
             ) as? SupplementaryHeaderCell else { return nil }
             let vm = SupplementaryHeaderViewModel(
-                title: self.presenter?.userList.name ?? "List",
+                title: presenter.getListName(),
                 subtitle: "Movies & TV Series of the list",
                 showsTopShadow: true,
                 leftButtonImageName: Constants.leftArrowImageName ,

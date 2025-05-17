@@ -19,4 +19,16 @@ final class UserListDetailsScreenAssembler {
         router.viewController = viewController
         return viewController
     }
+    
+    static func assemble(userListDetails: UserListDetails, tmdbService: TMDBService) -> UserListDetailsScreenVC {
+        let interactor = UserListDetailsScreenInteractor(tmdbService: tmdbService)
+        let router = UserListDetailsScreenRouter(tmdbService: tmdbService)
+        let presenter = UserListDetailsScreenPresenter(userListDetails: userListDetails, interactor: interactor, router: router)
+        let viewController = UserListDetailsScreenVC()
+        presenter.view  = viewController
+        viewController.presenter = presenter
+        interactor.presenter = presenter
+        router.viewController = viewController
+        return viewController
+    }
 }

@@ -13,9 +13,9 @@ protocol MyListsScreenPresenterProtocol: AnyObject {
     // MARK: - USER INITIATED
     func didCallRefresh()
     func didTapAccountList(listType: AccountListTypes)
-    func didTapUserList(userList: UserList)
+    func didTapUserList(userListDetails: UserListDetails)
     func didTapAddNewList()
-    func didTapRemoveList(list: UserList)
+    func didTapRemoveList(list: UserListDetails)
     
     // MARK: - WATCHLIST
     func didGetWatchlistMovies(_ movies: [Movie])
@@ -31,6 +31,7 @@ protocol MyListsScreenPresenterProtocol: AnyObject {
     
     // MARK: - USER LISTS
     func didReceieveUserLists(lists: [UserList])
+    func didReceiveUserListDetails(_ details: UserListDetails)
     func didRemoveList()
     
     // MARK: - PROGRAMMATIC
@@ -60,7 +61,7 @@ final class MyListsScreenPresenter {
     private var watchlistMedia: [Media] = []
     private var favoriteMedia: [Media] = []
     private var ratedMedia: [Media] = []
-    private var userLists: [UserList] = []
+    private var userListDetails: [UserListDetails] = []
     
     init(interactor: MyListsScreenInteractorProtocol, router: MyListsScreenRouterProtocol) {
         self.interactor = interactor
@@ -82,7 +83,7 @@ extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
         self.watchlistMedia = []
         self.favoriteMedia = []
         self.ratedMedia = []
-        self.userLists = []
+        self.userListDetails = []
         
         downloadGroup.enter()
         interactor.getFavoriteMovies()
@@ -120,19 +121,23 @@ extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
         router.navigateToAccountList(listType: listType)
     }
     
-    func didTapUserList(userList: UserList) {
-        router.navigateToUserList(userList: userList)
+    func didTapUserList(userListDetails: UserListDetails) {
+        router.navigateToUserList(userListDetails: userListDetails)
     }
     
     func didTapAddNewList() {
         router.presentAddNewListPopUp { [weak self] listName, listDescription, isPublic in
             guard let self = self else { return }
             self.router.showLoadingBox()
-            self.interactor.createNewList(listName: listName, listDescription: listDescription, isPublic: isPublic)
+            if self.userListDetails.count >= 5 {
+                self.router.hideLoadingBox(success: false, message: "Can't add more than 5 lists")
+            } else {
+                self.interactor.createNewList(listName: listName, listDescription: listDescription, isPublic: isPublic)
+            }
         }
     }
     
-    func didTapRemoveList(list: UserList) {
+    func didTapRemoveList(list: UserListDetails) {
         interactor.removeUserList(list: list)
     }
     
@@ -169,23 +174,34 @@ extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
         downloadGroup.leave()
     }
     
+    // MARK: - USER LIST
+    func didReceieveUserLists(lists: [UserList]) {
+        lists.forEach {
+            downloadGroup.enter()
+            interactor.getUserListDetails(list: $0)
+        }
+        downloadGroup.leave()
+    }
+    
+    func didReceiveUserListDetails(_ details: UserListDetails) {
+        self.userListDetails.append(details)
+        downloadGroup.leave()
+    }
+    
     // MARK: - PROGRAMMATIC
     func didCreateNewList() {
         self.router.hideLoadingBox(success: true, message: "Successfully added new list")
         self.didCallRefresh()
     }
     
-    func didRecieveError(_ error: any Error) {
-        self.view?.showError(errorStr: error.localizedDescription)
-    }
-    
-    func didReceieveUserLists(lists: [UserList]) {
-        self.userLists = lists
-        downloadGroup.leave()
-    }
-    
     func didRemoveList() {
         didCallRefresh()
+    }
+    
+    // MARK: - ERROR HANDLING
+    func didRecieveError(_ error: any Error) {
+        self.view?.showError(errorStr: error.localizedDescription)
+        downloadGroup.leave()
     }
     
     // MARK: - PRIVATE FUNC
@@ -216,10 +232,10 @@ extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
             self.didTapAccountList(listType: $0)
         }
         
-        let userLists: [Items] = self.userLists.map {
+        let userLists: [Items] = self.userListDetails.map {
             Items.userListVM(
                 UserListCellViewModel(userList: $0)
-                { [weak self] in self?.didTapUserList(userList: $0) } didTapRemoveList:
+                { [weak self] in self?.didTapUserList(userListDetails: $0) } didTapRemoveList:
                 { [weak self] in self?.didTapRemoveList(list: $0) }
             )
         }

@@ -22,7 +22,7 @@ final class AddToListModalRouter: AddToListModalRouterProtocol {
     func showLoadingBox() {
         guard let view = viewController?.view else { return }
         let box = CMLoadingBox()
-        box.load(in: view)
+        box.load(in: view, message: "Adding To the list...")
         viewController?.loadingBox = box
     }
     

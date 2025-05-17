@@ -9,7 +9,7 @@ import UIKit
 
 protocol MyListsScreenRouterProtocol {
     func navigateToAccountList(listType: AccountListTypes)
-    func navigateToUserList(userList: UserList)
+    func navigateToUserList(userListDetails: UserListDetails)
     func showLoadingBox()
     
     func hideLoadingBox(success: Bool, message: String)
@@ -30,8 +30,8 @@ final class MyListsScreenRouter: MyListsScreenRouterProtocol {
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
-    func navigateToUserList(userList: UserList) {
-        let vc = UserListDetailsScreenAssembler.assemble(userList: userList, tmdbService: tmdbService)
+    func navigateToUserList(userListDetails: UserListDetails) {
+        let vc = UserListDetailsScreenAssembler.assemble(userListDetails: userListDetails, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     

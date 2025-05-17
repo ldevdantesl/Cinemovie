@@ -23,7 +23,8 @@ protocol MyListsScreenInteractorProtocol: AnyObject {
     // MARK: - USER LIST
     func createNewList(listName: String, listDescription: String?, isPublic: Bool)
     func getUserLists()
-    func removeUserList(list: UserList)
+    func getUserListDetails(list: UserList)
+    func removeUserList(list: UserListDetails)
 }
 
 final class MyListsScreenInteractor: MyListsScreenInteractorProtocol {
@@ -97,7 +98,7 @@ final class MyListsScreenInteractor: MyListsScreenInteractorProtocol {
         }
     }
     
-    // MARK: - CUSTOM
+    // MARK: - USER LIST
     func createNewList(listName: String, listDescription: String?, isPublic: Bool) {
         tmdbService.createUserList(name: listName, description: listDescription, isPublic: isPublic) { [weak self] result in
             guard let self = self else { return }
@@ -118,11 +119,21 @@ final class MyListsScreenInteractor: MyListsScreenInteractorProtocol {
         }
     }
     
-    func removeUserList(list: UserList) {
+    func removeUserList(list: UserListDetails) {
         tmdbService.removeUserList(listID: list.id) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success: self.presenter?.didRemoveList()
+            case .failure(let failure): self.presenter?.didRecieveError(failure)
+            }
+        }
+    }
+    
+    func getUserListDetails(list: UserList) {
+        tmdbService.getUserListDetails(listID: list.id, page: 1) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let success): self.presenter?.didReceiveUserListDetails(success)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }

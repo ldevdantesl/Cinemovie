@@ -20,13 +20,13 @@ protocol UserListDetailsScreenPresenterProtocol: AnyObject {
     func didReceivePaginatedListDetails(_ details: UserListDetails)
     func didReceiveNewMedia(_ media: [AnyMedia])
     func didReceieveRefreshingMedia(_ media: [AnyMedia])
+    func getListName() -> String
     
     // MARK: - ERROR HANDLING
     func didReceiveError(_ error: Error)
     
     // MARK: - PROPERTIES
     var media: [Media] { get }
-    var userList: UserList { get }
 }
 
 final class UserListDetailsScreenPresenter {
@@ -38,14 +38,24 @@ final class UserListDetailsScreenPresenter {
     var router: UserListDetailsScreenRouterProtocol
     var interactor: UserListDetailsScreenInteractorProtocol
     var media: [Media] = []
-    let userList: UserList
     
+    private var listID: Int
+    private var userList: UserList?
     private var userListDetails: UserListDetails?
     private var currentPage: Int = 1
 
     init(userList: UserList, interactor: UserListDetailsScreenInteractorProtocol, router: UserListDetailsScreenRouterProtocol) {
         print("List ID: \(userList.id)")
         self.userList = userList
+        self.listID = userList.id
+        self.interactor = interactor
+        self.router = router
+    }
+    
+    init(userListDetails: UserListDetails, interactor: UserListDetailsScreenInteractorProtocol, router: UserListDetailsScreenRouterProtocol) {
+        print("List ID: \(userListDetails.id)")
+        self.listID = userListDetails.id
+        self.userListDetails = userListDetails
         self.interactor = interactor
         self.router = router
     }
@@ -54,16 +64,20 @@ final class UserListDetailsScreenPresenter {
 extension UserListDetailsScreenPresenter: UserListDetailsScreenPresenterProtocol {
     func viewDidLoad() {
         self.view?.showDownloadingView()
-        interactor.getListDetails(listID: userList.id)
+        if let userListDetails = userListDetails {
+            self.didReceiveListDetails(userListDetails)
+        } else {
+            interactor.getListDetails(listID: listID)
+        }
     }
     
     // MARK: - USER INITIATED
     func didCallRefresh() {
-        interactor.refreshListDetails(listID: userList.id)
+        interactor.refreshListDetails(listID: listID)
     }
     
     func didCallPagination() {
-        interactor.getNewPageListDetails(listID: userList.id, page: currentPage + 1)
+        interactor.getNewPageListDetails(listID: listID, page: currentPage + 1)
     }
     
     func didTapBackButton() {
@@ -178,6 +192,16 @@ extension UserListDetailsScreenPresenter: UserListDetailsScreenPresenterProtocol
             sections: [.main],
             itemsBySection: [.main : mediaItems]
         )
+    }
+    
+    func getListName() -> String {
+        if let userList = userList {
+            return userList.name
+        } else if let userListDetails = userListDetails{
+            return userListDetails.name
+        } else {
+            return "List"
+        }
     }
     
     // MARK: - ERROR HANDLING
