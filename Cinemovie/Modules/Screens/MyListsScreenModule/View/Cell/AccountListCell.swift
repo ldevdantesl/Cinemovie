@@ -41,10 +41,20 @@ final class AccountListCell: ReusableCellBaseClass {
     private var viewModel: AccountListCellViewModel?
     
     // MARK: - VIEW PROPERTIES
-    private lazy var posterStackView: UIView = {
+    private let posterStackView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
+    }()
+    
+    private let numberOfItemsLabel: PaddedLabel = {
+        let label = PaddedLabel()
+        label.font = CMFont.font(size: .tiny, fontName: .avenirBold)
+        label.textColor = CMColor.cmLabel
+        label.clipsToBounds = true
+        label.textInsets = .init(top: 5, left: 10, bottom: 5, right: 10)
+        label.backgroundColor = CMColor.cmSecondaryBackground.withAlphaComponent(0.8)
+        return label
     }()
     
     private let stackTitleLabel: UILabel = {
@@ -109,14 +119,17 @@ final class AccountListCell: ReusableCellBaseClass {
     
     override func layoutSubviews() {
         super.layoutSubviews()
+        self.numberOfItemsLabel.layer.cornerRadius = Constants.posterCornerRadius
         self.plusPosterView.layer.cornerRadius = Constants.posterCornerRadius
         self.plusPosterView.layer.borderColor = CMColor.cmLabel.cgColor
         self.plusPosterView.layer.borderWidth = Constants.posterBorderWidth
+        
     }
     
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: AccountListCellViewModel) {
         self.viewModel = viewModel
+        self.numberOfItemsLabel.text = "\(viewModel.media.count >= 20 ? "20+" : "\(viewModel.media.count)") items"
         self.stackTitleLabel.text = viewModel.listType?.title
         self.stackSubtitleLabel.text = viewModel.listType?.subtitle
         self.stackPosters(items: viewModel.media)
@@ -180,6 +193,14 @@ final class AccountListCell: ReusableCellBaseClass {
                 $0.centerX.equalToSuperview().offset(centerOffset)
                 $0.width.equalToSuperview()
                 $0.height.equalTo(imageView.snp.width).multipliedBy(1.5)
+            }
+            
+            if index == postersToShow.count - 1 {
+                imageView.addSubview(numberOfItemsLabel)
+                numberOfItemsLabel.snp.makeConstraints {
+                    $0.top.equalToSuperview().offset(Constants.spacing)
+                    $0.trailing.equalToSuperview().offset(-Constants.spacing)
+                }
             }
         }
     }

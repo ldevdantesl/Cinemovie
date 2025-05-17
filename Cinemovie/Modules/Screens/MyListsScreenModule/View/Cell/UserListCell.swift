@@ -41,10 +41,20 @@ final class UserListCell: ReusableCellBaseClass {
     private var viewModel: UserListCellViewModel?
 
     // MARK: - VIEW PROPERTIES
-    private lazy var posterStackView: UIView = {
+    private let posterStackView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
+    }()
+    
+    private let numberOfItemsLabel: PaddedLabel = {
+        let label = PaddedLabel()
+        label.font = CMFont.font(size: .tiny, fontName: .avenirBold)
+        label.textColor = CMColor.cmLabel
+        label.clipsToBounds = true
+        label.textInsets = .init(top: 5, left: 10, bottom: 5, right: 10)
+        label.backgroundColor = CMColor.cmSecondaryBackground.withAlphaComponent(0.8)
+        return label
     }()
     
     private let plusPosterView: UIImageView = {
@@ -109,6 +119,7 @@ final class UserListCell: ReusableCellBaseClass {
     
     override func layoutSubviews() {
         super.layoutSubviews()
+        self.numberOfItemsLabel.layer.cornerRadius = Constants.posterCornerRadius
         self.plusPosterView.layer.cornerRadius = Constants.posterCornerRadius
         self.plusPosterView.layer.borderColor = CMColor.cmLabel.cgColor
         self.plusPosterView.layer.borderWidth = Constants.posterBorderWidth
@@ -117,6 +128,7 @@ final class UserListCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: UserListCellViewModel) {
         self.viewModel = viewModel
+        self.numberOfItemsLabel.text = "\(viewModel.userList.itemCount >= 20 ? "20+" : "\(viewModel.userList.itemCount)") items"
         self.listTitleLabel.text = viewModel.userList.name
         self.listSubtitleLabel.text = viewModel.userList.description
         self.stackPosters(items: AnyMedia.toMedia(from: viewModel.userList.results))
@@ -179,12 +191,20 @@ final class UserListCell: ReusableCellBaseClass {
             )
             posterStackView.addSubview(imageView)
             let centerOffset = (Double(index) * baseOffset - totalOffset / 2)
-
+            
             imageView.snp.makeConstraints {
                 $0.centerY.equalToSuperview()
                 $0.centerX.equalToSuperview().offset(centerOffset)
                 $0.width.equalToSuperview()
                 $0.height.equalTo(imageView.snp.width).multipliedBy(1.5)
+            }
+            
+            if index == postersToShow.count - 1{
+                imageView.addSubview(numberOfItemsLabel)
+                numberOfItemsLabel.snp.makeConstraints {
+                    $0.top.equalToSuperview().offset(Constants.spacing)
+                    $0.trailing.equalToSuperview().offset(-Constants.spacing)
+                }
             }
         }
     }
