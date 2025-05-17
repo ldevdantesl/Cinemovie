@@ -8,7 +8,7 @@
 import UIKit
 
 protocol MyListsScreenPresenterProtocol: AnyObject {
-    func viewDidLoad()
+    func viewDidLoad(refreshing: Bool)
     
     // MARK: - USER INITIATED
     func didCallRefresh()
@@ -18,19 +18,19 @@ protocol MyListsScreenPresenterProtocol: AnyObject {
     func didTapRemoveList(list: UserList)
     
     // MARK: - WATCHLIST
-    func didGetWatchlistMovies(_ movies: [Movie], refreshing: Bool)
-    func didGetWatchlistTVSeries(_ series: [TVSeries], refreshing: Bool)
+    func didGetWatchlistMovies(_ movies: [Movie])
+    func didGetWatchlistTVSeries(_ series: [TVSeries])
     
     // MARK: - FAVORITE
-    func didGetFavoriteMovies(_ movies: [Movie], refreshing: Bool)
-    func didGetFavoriteTVSeries(_ series: [TVSeries], refreshing: Bool)
+    func didGetFavoriteMovies(_ movies: [Movie])
+    func didGetFavoriteTVSeries(_ series: [TVSeries])
     
     // MARK: - RATED
-    func didGetRatedMovies(_ movies: [Movie], refreshing: Bool)
-    func didGetRatedTVSeries(_ series: [TVSeries], refreshing: Bool)
+    func didGetRatedMovies(_ movies: [Movie])
+    func didGetRatedTVSeries(_ series: [TVSeries])
     
-    // MARK: - CUSTOM LISTS
-    func didReceieveCustomLists(lists: [UserList], refreshing: Bool)
+    // MARK: - USER LISTS
+    func didReceieveUserLists(lists: [UserList])
     func didRemoveList()
     
     // MARK: - PROGRAMMATIC
@@ -53,85 +53,67 @@ final class MyListsScreenPresenter {
     var router: MyListsScreenRouterProtocol
     var interactor: MyListsScreenInteractorProtocol
     var visibleSections: [MyListsScreenVC.Sections] = []
-        
+    
     // MARK: - PRIVATE PROPERTIES
     private let downloadGroup = DispatchGroup()
-    private let refreshGroup = DispatchGroup()
     
     private var watchlistMedia: [Media] = []
     private var favoriteMedia: [Media] = []
     private var ratedMedia: [Media] = []
-    private var userCustomLists: [UserList] = []
+    private var userLists: [UserList] = []
     
     init(interactor: MyListsScreenInteractorProtocol, router: MyListsScreenRouterProtocol) {
         self.interactor = interactor
         self.router = router
     }
+    
+    // MARK: - PRIVATE FUNC
+    private func sortedMedia(media: [Media]) -> [Media] {
+        let movies = media.compactMap { $0 as? Movie }
+        let series = media.compactMap { $0 as? TVSeries }
+        return movies + series
+    }
 }
 
 extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
-    func viewDidLoad() {
-        self.view?.showDownloadingView()
+    func viewDidLoad(refreshing: Bool) {
+        refreshing ? () : self.view?.showDownloadingView()
+        
+        self.watchlistMedia = []
+        self.favoriteMedia = []
+        self.ratedMedia = []
+        self.userLists = []
         
         downloadGroup.enter()
-        interactor.getFavoriteMovies(refreshing: false)
+        interactor.getFavoriteMovies()
         
         downloadGroup.enter()
-        interactor.getFavoriteTVSeries(refreshing: false)
+        interactor.getFavoriteTVSeries()
         
         downloadGroup.enter()
-        interactor.getWatchlistMovies(refreshing: false)
+        interactor.getWatchlistMovies()
         
         downloadGroup.enter()
-        interactor.getWatchlistTVSeries(refreshing: false)
+        interactor.getWatchlistTVSeries()
         
         downloadGroup.enter()
-        interactor.getRatedMovies(refreshing: false)
+        interactor.getRatedMovies()
         
         downloadGroup.enter()
-        interactor.getRatedTVSeries(refreshing: false)
+        interactor.getRatedTVSeries()
         
         downloadGroup.enter()
-        interactor.getCustomLists(refreshing: false)
+        interactor.getUserLists()
         
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
-            self.didGetAllData()
+            self.didGetAllData(refreshing: refreshing)
         }
     }
     
     // MARK: - USER INITIATED
     func didCallRefresh() {
-        self.watchlistMedia = []
-        self.favoriteMedia = []
-        self.ratedMedia = []
-        
-        refreshGroup.enter()
-        interactor.getFavoriteMovies(refreshing: true)
-        
-        refreshGroup.enter()
-        interactor.getFavoriteTVSeries(refreshing: true)
-        
-        refreshGroup.enter()
-        interactor.getWatchlistMovies(refreshing: true)
-        
-        refreshGroup.enter()
-        interactor.getWatchlistTVSeries(refreshing: true)
-        
-        refreshGroup.enter()
-        interactor.getRatedMovies(refreshing: true)
-        
-        refreshGroup.enter()
-        interactor.getRatedTVSeries(refreshing: true)
-        
-        refreshGroup.enter()
-        interactor.getCustomLists(refreshing: true)
-        
-        refreshGroup.notify(queue: .main) { [weak self] in
-            guard let self = self else { return }
-            self.didGetAllData()
-            self.view?.refreshCompleted()
-        }
+        self.viewDidLoad(refreshing: true)
     }
     
     func didTapAccountList(listType: AccountListTypes) {
@@ -151,40 +133,40 @@ extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
     }
     
     func didTapRemoveList(list: UserList) {
-        interactor.removeCustomList(list: list)
+        interactor.removeUserList(list: list)
     }
     
     // MARK: - WATCHLIST
-    func didGetWatchlistMovies(_ movies: [Movie], refreshing: Bool) {
+    func didGetWatchlistMovies(_ movies: [Movie]) {
         self.watchlistMedia.append(contentsOf: movies)
-        refreshing ? refreshGroup.leave() : downloadGroup.leave()
+        downloadGroup.leave()
     }
     
-    func didGetWatchlistTVSeries(_ series: [TVSeries], refreshing: Bool) {
+    func didGetWatchlistTVSeries(_ series: [TVSeries]) {
         self.watchlistMedia.append(contentsOf: series)
-        refreshing ? refreshGroup.leave() : downloadGroup.leave()
+        downloadGroup.leave()
     }
     
     // MARK: - FAVORITE
-    func didGetFavoriteMovies(_ movies: [Movie], refreshing: Bool) {
+    func didGetFavoriteMovies(_ movies: [Movie]) {
         self.favoriteMedia.append(contentsOf: movies)
-        refreshing ? refreshGroup.leave() : downloadGroup.leave()
+        downloadGroup.leave()
     }
     
-    func didGetFavoriteTVSeries(_ series: [TVSeries], refreshing: Bool) {
+    func didGetFavoriteTVSeries(_ series: [TVSeries]) {
         self.favoriteMedia.append(contentsOf: series)
-        refreshing ? refreshGroup.leave() : downloadGroup.leave()
+        downloadGroup.leave()
     }
     
     // MARK: - RATED
-    func didGetRatedMovies(_ movies: [Movie], refreshing: Bool) {
+    func didGetRatedMovies(_ movies: [Movie]) {
         self.ratedMedia.append(contentsOf: movies)
-        refreshing ? refreshGroup.leave() : downloadGroup.leave()
+        downloadGroup.leave()
     }
     
-    func didGetRatedTVSeries(_ series: [TVSeries], refreshing: Bool) {
+    func didGetRatedTVSeries(_ series: [TVSeries]) {
         self.ratedMedia.append(contentsOf: series)
-        refreshing ? refreshGroup.leave() : downloadGroup.leave()
+        downloadGroup.leave()
     }
     
     // MARK: - PROGRAMMATIC
@@ -197,9 +179,9 @@ extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
         self.view?.showError(errorStr: error.localizedDescription)
     }
     
-    func didReceieveCustomLists(lists: [UserList], refreshing: Bool) {
-        self.userCustomLists = lists
-        refreshing ? refreshGroup.leave() : downloadGroup.leave()
+    func didReceieveUserLists(lists: [UserList]) {
+        self.userLists = lists
+        downloadGroup.leave()
     }
     
     func didRemoveList() {
@@ -207,10 +189,11 @@ extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
     }
     
     // MARK: - PRIVATE FUNC
-    private func didGetAllData() {
-        self.view?.hideDownloadingView()
+    private func didGetAllData(refreshing: Bool) {
+        refreshing ? self.view?.refreshCompleted() : self.view?.hideDownloadingView()
+        
         let watchlistVM = AccountListCellViewModel(
-            media: interLeavedMedia(media: watchlistMedia),
+            media: sortedMedia(media: watchlistMedia),
             listType: .watchlist
         ) { [weak self] in
             guard let self = self else { return }
@@ -218,7 +201,7 @@ extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
         }
         
         let favoriteVM = AccountListCellViewModel(
-            media: interLeavedMedia(media: favoriteMedia),
+            media: sortedMedia(media: favoriteMedia),
             listType: .favorite
         ) { [weak self] in
             guard let self = self else { return }
@@ -226,14 +209,14 @@ extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
         }
         
         let ratedVM = AccountListCellViewModel(
-            media: interLeavedMedia(media: ratedMedia),
+            media: sortedMedia(media: ratedMedia),
             listType: .rated
         ) { [weak self] in
             guard let self = self else { return }
             self.didTapAccountList(listType: $0)
         }
         
-        let userLists: [Items] = userCustomLists.map {
+        let userLists: [Items] = self.userLists.map {
             Items.userListVM(
                 UserListCellViewModel(userList: $0)
                 { [weak self] in self?.didTapUserList(userList: $0) } didTapRemoveList:
@@ -252,20 +235,5 @@ extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
                 .userLists : userLists
             ]
         )
-    }
-    
-    private func interLeavedMedia(media: [Media]) -> [Media] {
-        let movies = media.compactMap { $0 as? Movie }
-        let series = media.compactMap { $0 as? TVSeries }
-        
-        var interleaved: [Media] = []
-        let count = max(movies.count, series.count)
-        
-        for i in 0..<count {
-            if i < movies.count { interleaved.append(movies[i]) }
-            if i < series.count { interleaved.append(series[i]) }
-        }
-        
-        return interleaved
     }
 }

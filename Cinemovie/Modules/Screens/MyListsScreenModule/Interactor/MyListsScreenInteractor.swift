@@ -9,21 +9,21 @@ import UIKit
 
 protocol MyListsScreenInteractorProtocol: AnyObject {
     // MARK: - WATCHLIST
-    func getWatchlistMovies(refreshing: Bool)
-    func getWatchlistTVSeries(refreshing: Bool)
+    func getWatchlistMovies()
+    func getWatchlistTVSeries()
     
     // MARK: - FAVORITE
-    func getFavoriteMovies(refreshing: Bool)
-    func getFavoriteTVSeries(refreshing: Bool)
+    func getFavoriteMovies()
+    func getFavoriteTVSeries()
     
     // MARK: - RATED
-    func getRatedMovies(refreshing: Bool)
-    func getRatedTVSeries(refreshing: Bool)
+    func getRatedMovies()
+    func getRatedTVSeries()
     
-    // MARK: - CUSTOM LIST
+    // MARK: - USER LIST
     func createNewList(listName: String, listDescription: String?, isPublic: Bool)
-    func getCustomLists(refreshing: Bool)
-    func removeCustomList(list: UserList)
+    func getUserLists()
+    func removeUserList(list: UserList)
 }
 
 final class MyListsScreenInteractor: MyListsScreenInteractorProtocol {
@@ -35,64 +35,64 @@ final class MyListsScreenInteractor: MyListsScreenInteractorProtocol {
     }
     
     // MARK: - WATCHLIST
-    func getWatchlistMovies(refreshing: Bool) {
+    func getWatchlistMovies() {
         tmdbService.getMoviesInAccountList(listType: .watchlist, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): presenter?.didGetWatchlistMovies(success.movies, refreshing: refreshing)
-            case .failure: presenter?.didGetWatchlistMovies([], refreshing: refreshing)
+            case .success(let success): presenter?.didGetWatchlistMovies(success.movies)
+            case .failure: presenter?.didGetWatchlistMovies([])
             }
         }
     }
     
-    func getWatchlistTVSeries(refreshing: Bool) {
+    func getWatchlistTVSeries() {
         tmdbService.getSeriesInAccountList(listType: .watchlist, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): presenter?.didGetWatchlistTVSeries(success.results, refreshing: refreshing)
-            case .failure: presenter?.didGetWatchlistTVSeries([], refreshing: refreshing)
+            case .success(let success): presenter?.didGetWatchlistTVSeries(success.results)
+            case .failure: presenter?.didGetWatchlistTVSeries([])
             }
         }
     }
     
     // MARK: - FAVORITE
-    func getFavoriteMovies(refreshing: Bool) {
+    func getFavoriteMovies() {
         tmdbService.getMoviesInAccountList(listType: .favorite, page: 1){ [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): presenter?.didGetFavoriteMovies(success.movies, refreshing: refreshing)
-            case .failure: presenter?.didGetFavoriteMovies([], refreshing: refreshing)
+            case .success(let success): presenter?.didGetFavoriteMovies(success.movies)
+            case .failure: presenter?.didGetFavoriteMovies([])
             }
         }
     }
     
-    func getFavoriteTVSeries(refreshing: Bool) {
+    func getFavoriteTVSeries() {
         tmdbService.getSeriesInAccountList(listType: .favorite, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): presenter?.didGetFavoriteTVSeries(success.results, refreshing: refreshing)
-            case .failure: presenter?.didGetFavoriteTVSeries([], refreshing: refreshing)
+            case .success(let success): presenter?.didGetFavoriteTVSeries(success.results)
+            case .failure: presenter?.didGetFavoriteTVSeries([])
             }
         }
     }
     
     // MARK: - RATED
-    func getRatedMovies(refreshing: Bool) {
+    func getRatedMovies() {
         tmdbService.getMoviesInAccountList(listType: .rated, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): presenter?.didGetRatedMovies(success.movies, refreshing: refreshing)
-            case .failure: presenter?.didGetRatedMovies([], refreshing: refreshing)
+            case .success(let success): presenter?.didGetRatedMovies(success.movies)
+            case .failure: presenter?.didGetRatedMovies([])
             }
         }
     }
     
-    func getRatedTVSeries(refreshing: Bool) {
+    func getRatedTVSeries() {
         tmdbService.getSeriesInAccountList(listType: .rated, page: 1) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): presenter?.didGetRatedTVSeries(success.results, refreshing: refreshing)
-            case .failure: presenter?.didGetRatedTVSeries([], refreshing: refreshing)
+            case .success(let success): presenter?.didGetRatedTVSeries(success.results)
+            case .failure: presenter?.didGetRatedTVSeries([])
             }
         }
     }
@@ -108,17 +108,17 @@ final class MyListsScreenInteractor: MyListsScreenInteractorProtocol {
         }
     }
     
-    func getCustomLists(refreshing: Bool) {
+    func getUserLists() {
         tmdbService.getUserLists { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let success): self.presenter?.didReceieveCustomLists(lists: success.results, refreshing: refreshing)
+            case .success(let success): self.presenter?.didReceieveUserLists(lists: success.results)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
             }
         }
     }
     
-    func removeCustomList(list: UserList) {
+    func removeUserList(list: UserList) {
         tmdbService.removeUserList(listID: list.id) { [weak self] result in
             guard let self = self else { return }
             switch result {

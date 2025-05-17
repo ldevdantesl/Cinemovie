@@ -94,7 +94,7 @@ final class MyListsScreenVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureDataSource()
-        presenter?.viewDidLoad()
+        presenter?.viewDidLoad(refreshing: false)
         setupUI()
         view.layer.addSublayer(topDecorLayer)
     }
