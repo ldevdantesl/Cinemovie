@@ -36,7 +36,7 @@ final class DiscoverScreenVC: UIViewController {
 
     // MARK: - ITEM
     enum Items: Hashable {
-        case featured(FeaturedMediaCellViewModel)
+        case featured(OneFeaturedMediaCellViewModel)
         case mediaListCell(MediaListCellViewModel)
         case trendingPeopleCell(TrendingPeopleCellViewModel)
         case searchCell(MediaSearchCellViewModel)
@@ -65,6 +65,7 @@ final class DiscoverScreenVC: UIViewController {
         view.register(cellClass: MediaSearchCell.self)
         view.register(cellClass: VerticalMediaListCell.self)
         view.register(cellClass: UnavailableInfoCell.self)
+        view.register(cellClass: OneFeaturedMediaCell.self)
         view.delegate = self
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
@@ -137,8 +138,8 @@ final class DiscoverScreenVC: UIViewController {
         collectionView.configureDataSource { collectionView, indexPath, homeItem in
             switch homeItem {
             case .featured(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? FeaturedMediaCell
-                cell?.configure(with: vm)
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? OneFeaturedMediaCell
+                cell?.configure(viewModel: vm)
                 return cell
                 
             case .mediaListCell(let vm):
@@ -176,7 +177,8 @@ final class DiscoverScreenVC: UIViewController {
             let edgeInsets: NSDirectionalEdgeInsets
             
             switch homeSection {
-            case .featured, .search, .recentlyViewed: edgeInsets = NSDirectionalEdgeInsets(top: Constants.headerViewHeight, leading: 10, bottom: 10, trailing: 10)
+            case .featured: edgeInsets = NSDirectionalEdgeInsets(top: .zero, leading: .zero, bottom: 10, trailing: .zero)
+            case .search, .recentlyViewed: edgeInsets = NSDirectionalEdgeInsets(top: Constants.headerViewHeight, leading: 10, bottom: 10, trailing: 10)
             case .notFound: edgeInsets = NSDirectionalEdgeInsets(top: UIConstants.screenHeight / 3, leading: 10, bottom: 10, trailing: 10)
             default: edgeInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
             }

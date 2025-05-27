@@ -15,6 +15,7 @@ final class AsyncImageView: UIImageView {
     private var cornerRadius: CGFloat = 0
     private var borderWidth: CGFloat = 0
     private var borderColor: UIColor?
+    private var maskedCorners: CACornerMask = []
     
     // MARK: - VIEW PROPERTIES
     private let loadingIndicator: UIActivityIndicatorView = {
@@ -44,6 +45,8 @@ final class AsyncImageView: UIImageView {
     override func layoutSubviews() {
         super.layoutSubviews()
         self.layer.cornerRadius = cornerRadius
+        self.layer.maskedCorners = maskedCorners
+        self.layer.masksToBounds = true
         self.layer.borderColor = borderColor?.cgColor
         self.layer.borderWidth = borderWidth
     }
@@ -78,7 +81,20 @@ final class AsyncImageView: UIImageView {
     
     public func setCornerRadius(_ radius: CGFloat) {
         self.cornerRadius = radius
-        self.layoutIfNeeded()
+        self.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        self.setNeedsLayout()
+    }
+
+    public func setCornerRadiusForTopOnly(_ radius: CGFloat) {
+        self.cornerRadius = radius
+        self.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        self.setNeedsLayout()
+    }
+
+    public func setCornerRadiusForBottomOnly(_ radius: CGFloat) {
+        self.cornerRadius = radius
+        self.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        self.setNeedsLayout()
     }
     
     public func setBorder(width: CGFloat?, borderColor: UIColor?) {

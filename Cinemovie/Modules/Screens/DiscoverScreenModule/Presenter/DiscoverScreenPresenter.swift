@@ -127,7 +127,8 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
         
         switch mediaType {
         case .movie:
-            let featuredVM = FeaturedMediaCellViewModel(media: self.movieLists.flatMap { $0.movies }) { [weak self] in
+            guard let media = self.movieLists.flatMap(\.movies).randomElement() else { return }
+            let featuredVM = OneFeaturedMediaCellViewModel(media: media) { [weak self] in
                 guard let self = self else { return }
                 self.didTapMedia($0)
             }
@@ -140,7 +141,8 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
             sectionsAndItems.append(contentsOf: movieSections)
             
         case .tvShow:
-            let featuredVM = FeaturedMediaCellViewModel(media: self.seriesLists.flatMap { $0.series }) { [weak self] in
+            guard let media = self.movieLists.flatMap(\.movies).randomElement() else { return }
+            let featuredVM = OneFeaturedMediaCellViewModel(media: media) { [weak self] in
                 guard let self = self else { return }
                 self.didTapMedia($0)
             }
