@@ -81,14 +81,15 @@ final class ActorPopupView: PopUPView {
     private lazy var actorDetailsButton: CMButton = {
         let vm = CMButtonViewModel(
             text: "Additional Details", foreColor: .cmLabel,
-            font: CMFont.font(size: .body, fontName: .avenirDemiBold), image: nil,
-            backColor: CMColor.cmSuccess, cornerRadius: Constants.buttonCornerRadius
+            font: CMFont.font(size: .body, fontName: .avenirDemiBold),
+            backColor: CMColor.cmSuccess
         ) { [weak self] in
             guard let self = self else { return }
             self.viewModel.didTapActorDetails?(viewModel.actor.creditID)
         }
         
         let button = CMButton(viewModel: vm)
+        button.setCornerRadius(Constants.buttonCornerRadius)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()

@@ -26,10 +26,10 @@ final class SettingsScreenVC: UIViewController {
         let vm = CMButtonViewModel(
             text: "Log Out", foreColor: CMColor.cmButton,
             font: CMFont.font(size: .body, fontName: .avenirDemiBold),
-            backColor: CMColor.cmError, cornerRadius: Constants.buttonCornerRadius,
-            didTapAction: presenter?.didPressLogoutButton
+            backColor: CMColor.cmError, didTapAction: presenter?.didPressLogoutButton
         )
         let button = CMButton(viewModel: vm)
+        button.setCornerRadius(Constants.buttonCornerRadius)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()

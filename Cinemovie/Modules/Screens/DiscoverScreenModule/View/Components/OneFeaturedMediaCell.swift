@@ -104,7 +104,7 @@ final class OneFeaturedMediaCell: ReusableCellBaseClass {
         self.imageView.setAction(target: self, action: #selector(didTapFeaturedMedia))
         self.mediaNameLabel.text = viewModel.media.title
         if let movie = viewModel.media as? Movie {
-            self.mediaExtrasLabel.text = "\(CMDateFormatter.formatToYearOnly(dateString: movie.releaseDate)) • \(GenreHelper.shared.getMovieGenreNamesFromIDs(Array(movie.genreIDS.prefix(upTo: 2))).joined(separator: ", "))"
+            self.mediaExtrasLabel.text = "\(CMDateFormatter.formatToYearOnly(dateString: movie.releaseDate)) • \(GenreHelper.shared.getMovieGenreNamesFromIDs(Array(movie.genreIDS.prefix(2))).joined(separator: ", "))"
         } else if let series = viewModel.media as? TVSeries {
             self.mediaExtrasLabel.text = "\(CMDateFormatter.formatToYearOnly(dateString: series.firstAirDate)) • \(GenreHelper.shared.getMovieGenreNamesFromIDs(Array(series.genreIDS.prefix(2))).joined(separator: ", "))"
         }

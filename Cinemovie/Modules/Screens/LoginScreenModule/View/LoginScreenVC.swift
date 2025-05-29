@@ -63,10 +63,11 @@ final class LoginScreenVC: UIViewController {
         let vm = CMButtonViewModel(
             text: "Login with TMDB", foreColor: CMColor.cmButton,
             font: CMFont.font(size: .body, fontName: .avenirDemiBold),
-            backColor: CMColor.cmPrimary, cornerRadius: Constants.buttonCornerRadius,
+            backColor: CMColor.cmPrimary,
             didTapAction: presenter?.didPressLoginWithTMDB
         )
         let button = CMButton(viewModel: vm)
+        button.setCornerRadius(Constants.buttonCornerRadius)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -75,10 +76,11 @@ final class LoginScreenVC: UIViewController {
         let vm = CMButtonViewModel(
             text: "Continue as Guest", foreColor: CMColor.cmButton,
             font: CMFont.font(size: .body, fontName: .avenirDemiBold),
-            backColor: CMColor.cmAccent, cornerRadius: Constants.buttonCornerRadius,
+            backColor: CMColor.cmAccent,
             didTapAction: presenter?.didPressLoginAsGuest
         )
         let button = CMButton(viewModel: vm)
+        button.setCornerRadius(Constants.buttonCornerRadius)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()

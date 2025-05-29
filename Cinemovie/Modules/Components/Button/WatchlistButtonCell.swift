@@ -40,12 +40,14 @@ final class WatchlistButtonCell: ReusableCellBaseClass {
     // MARK: - VIEW PROPERTIES
     private let longButton: CMButton = {
         let button = CMButton()
+        button.setCornerRadius(Constants.cornerRadius)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
     private let addToListButton: CMButton = {
         let button = CMButton()
+        button.setCornerRadius(Constants.cornerRadius)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -89,7 +91,7 @@ final class WatchlistButtonCell: ReusableCellBaseClass {
             font: CMFont.font(size: .body, fontName: .avenirBold),
             image: UIImage(systemName: !viewModel.isWatchlisted ?  Constants.imageName : Constants.addedImageName),
             backColor: !viewModel.isWatchlisted ? CMColor.cmLabel : CMColor.cmSuccess,
-            cornerRadius: Constants.cornerRadius, didTapAction: self.didTapAction
+            didTapAction: self.didTapAction
         )
         longButton.configure(viewModel: vm)
         buttonStack.addArrangedSubview(longButton)
@@ -99,7 +101,7 @@ final class WatchlistButtonCell: ReusableCellBaseClass {
                 text: "List", foreColor: CMColor.cmDivider,
                 font: CMFont.font(size: .body, fontName: .avenirBold),
                 image: UIImage(systemName: Constants.imageName),
-                backColor: CMColor.cmLabel, cornerRadius: Constants.cornerRadius,
+                backColor: CMColor.cmLabel,
                 didTapAction: viewModel.didTapAddToList
             )
             addToListButton.configure(viewModel: addToListButtonVM)
@@ -126,7 +128,7 @@ final class WatchlistButtonCell: ReusableCellBaseClass {
             font: CMFont.font(size: .body, fontName: .avenirBold),
             image: UIImage(systemName: viewModel.isWatchlisted ?  Constants.imageName : Constants.addedImageName),
             backColor: viewModel.isWatchlisted ? CMColor.cmLabel : CMColor.cmSuccess,
-            cornerRadius: Constants.cornerRadius, didTapAction: self.didTapAction
+            didTapAction: self.didTapAction
         )
         longButton.reconfigure(viewModel: vm)
         

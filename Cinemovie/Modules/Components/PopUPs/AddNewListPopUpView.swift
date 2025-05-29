@@ -107,9 +107,10 @@ final class AddNewListPopUpView: PopUPView {
             text: "Add", foreColor: CMColor.cmLabel,
             font: CMFont.font(size: .subtitle, fontName: .avenirBold),
             image: UIImage(systemName: Constants.addButtonName),
-            backColor: CMColor.cmSystem, cornerRadius: Constants.addButtonCornerRadius
+            backColor: CMColor.cmSystem
         )
         let button = CMButton(viewModel: vm)
+        button.setCornerRadius(Constants.addButtonCornerRadius)
         button.addTarget(self, action: #selector(didTapAddButton), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button

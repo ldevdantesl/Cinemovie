@@ -58,7 +58,7 @@ final class DiscoverScreenVC: UIViewController {
     
     // MARK: - VIEW PROPERTIES
     private lazy var collectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<DiscoverScreenVC.Sections, DiscoverScreenVC.Items>(layout: createLayout(), showsTopBlur: false)
+        let view = DiffableCollectionView<DiscoverScreenVC.Sections, DiscoverScreenVC.Items>(layout: createLayout(), showsTopBlur: true)
         view.register(cellClass: FeaturedMediaCell.self)
         view.register(cellClass: MediaListCell.self)
         view.register(cellClass: TrendingPeopleCell.self)
@@ -73,10 +73,7 @@ final class DiscoverScreenVC: UIViewController {
     }()
     
     private lazy var headerView: DiscoverScreenHeaderView = {
-        let vm = DiscoverScreenHeaderViewModel(
-            headerTitle: "Discover", didStartSearching: presenter?.didStartSearching,
-            didFinishSearching: presenter?.didFinishSearching, didTapMediaButton: presenter?.didChangeMediaType
-        )
+        let vm = DiscoverScreenHeaderViewModel(didTapSearchButton: nil, didTapMediaButton: presenter?.didChangeMediaType)
         let view = DiscoverScreenHeaderView(viewModel: vm)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -200,28 +197,7 @@ final class DiscoverScreenVC: UIViewController {
 
 extension DiscoverScreenVC: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        view.endEditing(true)
-        let contentOffsetY = scrollView.contentOffset.y + scrollView.adjustedContentInset.top
-        
-        if contentOffsetY >= 5 && !isBlurToHeaderVisible {
-            isBlurToHeaderVisible = true
-            headerView.addBlur()
-        }
-        
-        if contentOffsetY < 5 && isBlurToHeaderVisible {
-            isBlurToHeaderVisible = false
-            headerView.removeBlur()
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if let featuredCell = cell as? FeaturedMediaCell {
-            featuredCell.stopTimer()
-        }
-        
-        if let searchCell = cell as? MediaSearchCell {
-            searchCell.cleanUp()
-        }
+        collectionView.showBlur(scrollView)
     }
 }
 

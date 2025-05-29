@@ -8,23 +8,17 @@
 import UIKit
 
 public struct CMButtonViewModel {
-    public var text: String
+    public var text: String?
     public var foreColor: UIColor
     public var font: UIFont
     public var image: UIImage?
     public var backColor: UIColor
-    public var cornerRadius: CGFloat
-    public var borderColor: UIColor?
-    public var borderWidth: CGFloat?
-    
     public var didTapAction: (() -> Void)?
     
     init(
-        text: String, foreColor: UIColor = CMColor.cmLabel,
+        text: String? = nil, foreColor: UIColor = CMColor.cmLabel,
         font: UIFont, image: UIImage? = nil,
         backColor: UIColor = CMColor.cmSecondary,
-        cornerRadius: CGFloat = 8,
-        borderColor: UIColor? = nil, borderWidth: CGFloat? = nil,
         didTapAction: (() -> Void)? = nil
     ) {
         self.text = text
@@ -32,9 +26,6 @@ public struct CMButtonViewModel {
         self.font = font
         self.image = image
         self.backColor = backColor
-        self.cornerRadius = cornerRadius
-        self.borderColor = borderColor
-        self.borderWidth = borderWidth
         self.didTapAction = didTapAction
     }
 }
@@ -43,6 +34,9 @@ final class CMButton: UIButton {
 
     // MARK: - PROPERTIES
     private(set) var viewModel: CMButtonViewModel?
+    private(set) var buttonCornerRadius: CGFloat = 0
+    private(set) var buttonBorderColor: UIColor?
+    private(set) var buttonBorderWidth: CGFloat?
     
     // MARK: - LIFECYCLE
     override init(frame: CGRect) {
@@ -62,11 +56,9 @@ final class CMButton: UIButton {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        guard let viewModel = viewModel else { return }
-        self.layer.cornerRadius = viewModel.cornerRadius
-        self.clipsToBounds = true
-        self.layer.borderColor = (viewModel.borderColor ?? .clear).cgColor
-        self.layer.borderWidth = viewModel.borderWidth ?? 0
+        self.layer.cornerRadius = buttonCornerRadius
+        self.layer.borderColor = buttonBorderColor?.cgColor
+        self.layer.borderWidth = buttonBorderWidth ?? 0
     }
     
     // MARK: - PUBLIC FUNC
@@ -83,6 +75,17 @@ final class CMButton: UIButton {
         }
     }
     
+    public func setCornerRadius(_ radius: CGFloat) {
+        self.buttonCornerRadius = radius
+        self.clipsToBounds = true
+        layoutIfNeeded()
+    }
+    
+    public func setBorder(borderWidth: CGFloat, borderColor: UIColor) {
+        self.buttonBorderColor = borderColor
+        self.buttonBorderWidth = borderWidth
+    }
+    
     // MARK: - PRIVATE FUNC
     private func setup() {
         guard let viewModel = viewModel else { return }
@@ -92,7 +95,7 @@ final class CMButton: UIButton {
         self.removeTarget(self, action: #selector(didTapButton), for: .touchUpInside)
         
         let attrTitle = NSAttributedString(
-            string: viewModel.text,
+            string: viewModel.text ?? "",
             attributes: [
                 .font : viewModel.font,
                 .foregroundColor : viewModel.foreColor
