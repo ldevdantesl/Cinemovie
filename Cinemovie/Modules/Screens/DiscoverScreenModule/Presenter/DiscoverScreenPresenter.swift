@@ -60,6 +60,7 @@ final class DiscoverScreenPresenter {
     
     private var movieLists: [(listType: MovieListType, movies: [Movie])] = []
     private var seriesLists: [(listType: TVSeriesListType, series: [TVSeries])] = []
+    private var featuredMedia: Media?
     
     private var trendingPeople: [Person] = []
     
@@ -124,11 +125,11 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
     
     func didChangeMediaType(_ mediaType: MediaTypes) {
         var sectionsAndItems: [(section: Sections, items: [Items])] = []
-        
         switch mediaType {
         case .movie:
-            guard let media = self.movieLists.flatMap(\.movies).randomElement() else { return }
-            let featuredVM = OneFeaturedMediaCellViewModel(media: media) { [weak self] in
+            guard let featuredMedia = self.movieLists.first(where: { $0.listType == .popular })?.movies.randomElement() else { return }
+            self.featuredMedia = featuredMedia
+            let featuredVM = OneFeaturedMediaCellViewModel(media: featuredMedia) { [weak self] in
                 guard let self = self else { return }
                 self.didTapMedia($0)
             }
@@ -141,8 +142,9 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
             sectionsAndItems.append(contentsOf: movieSections)
             
         case .tvShow:
-            guard let media = self.movieLists.flatMap(\.movies).randomElement() else { return }
-            let featuredVM = OneFeaturedMediaCellViewModel(media: media) { [weak self] in
+            guard let featuredMedia = self.seriesLists.first(where: { $0.listType == .popular })?.series.randomElement() else { return }
+            self.featuredMedia = featuredMedia
+            let featuredVM = OneFeaturedMediaCellViewModel(media: featuredMedia) { [weak self] in
                 guard let self = self else { return }
                 self.didTapMedia($0)
             }

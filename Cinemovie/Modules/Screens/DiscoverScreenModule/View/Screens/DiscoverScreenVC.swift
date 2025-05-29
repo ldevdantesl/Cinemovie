@@ -19,7 +19,7 @@ final class DiscoverScreenVC: UIViewController {
 
     // MARK: - CONSTANTS
     fileprivate enum Constants {
-        static let featuredMovieHeight = UIConstants.screenHeight * 0.55
+        static let featuredMovieHeight = UIConstants.screenHeight * 0.7
         static let headerViewHeight = 75.0 + UIConstants.topInset
     }
     
@@ -175,15 +175,21 @@ final class DiscoverScreenVC: UIViewController {
             guard let self = self else { return nil }
             let homeSection = presenter?.visibleSections[sectionIndex] ?? Sections.featured
             let edgeInsets: NSDirectionalEdgeInsets
+            let heightDimension: NSCollectionLayoutDimension
             
             switch homeSection {
-            case .featured: edgeInsets = NSDirectionalEdgeInsets(top: .zero, leading: .zero, bottom: 10, trailing: .zero)
+            case .featured: edgeInsets = .zero
             case .search, .recentlyViewed: edgeInsets = NSDirectionalEdgeInsets(top: Constants.headerViewHeight, leading: 10, bottom: 10, trailing: 10)
             case .notFound: edgeInsets = NSDirectionalEdgeInsets(top: UIConstants.screenHeight / 3, leading: 10, bottom: 10, trailing: 10)
             default: edgeInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
             }
             
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(Constants.featuredMovieHeight)))
+            switch homeSection {
+            case .featured: heightDimension = .absolute(Constants.featuredMovieHeight)
+            default: heightDimension = .estimated(Constants.featuredMovieHeight)
+            }
+            
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: heightDimension))
             let group = NSCollectionLayoutGroup.vertical(layoutSize: item.layoutSize, subitems: [item])
             let section = NSCollectionLayoutSection(group: group)
             section.contentInsets = edgeInsets

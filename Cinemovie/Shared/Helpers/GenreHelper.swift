@@ -21,7 +21,20 @@ final class GenreHelper {
         self.tvSeriesGenres = Bundle.main.decode(FileNames.jsonTVGenres)
     }
     
-    // MARK: - PUBLIC FUNC
+    // MARK: - NAMES
+    public func getMovieGenreNamesFromIDs(_ ids: [Int]) -> [String] {
+        return ids.compactMap { id in
+            movieGenres.genres.first(where: { $0.id == id })?.name
+        }
+    }
+    
+    public func getSeriesGenreNamesFromIDs(_ ids: [Int]) -> [String] {
+        return ids.compactMap { id in
+            tvSeriesGenres.genres.first(where: { $0.id == id })?.name
+        }
+    }
+    
+    // MARK: - IDS
     public func getMoviesGenreIDsSeparatedByComma(genres: [MovieGenreName]) -> String {
         let ids = genres.compactMap { name in
             movieGenres.genres.first(where: { $0.name == name.rawValue })?.id

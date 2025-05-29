@@ -106,6 +106,10 @@ final class AsyncImageView: UIImageView {
     public func makeCircular() {
         self.layoutIfNeeded()
         self.cornerRadius = min(self.bounds.width, self.bounds.height) / 2
+        self.maskedCorners = [
+            .layerMinXMinYCorner, .layerMaxXMinYCorner,
+            .layerMinXMaxYCorner, .layerMaxXMaxYCorner
+        ]
         self.setNeedsLayout()
         self.layoutIfNeeded()
     }
