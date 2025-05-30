@@ -101,7 +101,7 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
     }()
     
     private lazy var gridCollectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<Int, MediaPosterImageCellViewModel>(layout: createLayout())
+        let view = DiffableCollectionView<Int, MediaPosterImageCellViewModel>(layout: createLayout(), ignoresTopSafeArea: false)
         view.isScrollEnabled = false
         view.backgroundColor = CMColor.cmBackground
         view.register(cellClass: MediaPosterImageCell.self)

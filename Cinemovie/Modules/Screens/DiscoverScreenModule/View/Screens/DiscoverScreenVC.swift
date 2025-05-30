@@ -58,7 +58,7 @@ final class DiscoverScreenVC: UIViewController {
     
     // MARK: - VIEW PROPERTIES
     private lazy var collectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<DiscoverScreenVC.Sections, DiscoverScreenVC.Items>(layout: createLayout(), showsTopBlur: true)
+        let view = DiffableCollectionView<DiscoverScreenVC.Sections, DiscoverScreenVC.Items>(layout: createLayout())
         view.register(cellClass: FeaturedMediaCell.self)
         view.register(cellClass: MediaListCell.self)
         view.register(cellClass: TrendingPeopleCell.self)
@@ -195,11 +195,7 @@ final class DiscoverScreenVC: UIViewController {
     }
 }
 
-extension DiscoverScreenVC: UICollectionViewDelegate {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        collectionView.showBlur(scrollView)
-    }
-}
+extension DiscoverScreenVC: UICollectionViewDelegate { }
 
 extension DiscoverScreenVC: DiscoverScreenViewProtocol {
     func applySnapshot(sections: [Sections], itemsBySection: [Sections : [Items]]) {

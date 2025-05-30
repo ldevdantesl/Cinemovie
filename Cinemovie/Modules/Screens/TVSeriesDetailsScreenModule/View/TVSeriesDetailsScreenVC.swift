@@ -71,7 +71,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
     }()
     
     private lazy var collectionView: DiffableCollectionView = {
-        let cv = DiffableCollectionView<Sections, Items>(layout: createLayout(), showsTopBlur: true)
+        let cv = DiffableCollectionView<Sections, Items>(layout: createLayout())
         cv.contentInsetAdjustmentBehavior = .never
         cv.backgroundColor = CMColor.cmBackground
         cv.layer.zPosition = 0
@@ -210,7 +210,6 @@ final class TVSeriesDetailsScreenVC: UIViewController {
 
 extension TVSeriesDetailsScreenVC: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        collectionView.showBlur(scrollView)
         guard let cell = collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? BackdropImageCell else { return }
         let offsetY = scrollView.contentOffset.y
         offsetY <= 0 ? cell.scaleImage(to: offsetY) : cell.resetScale()

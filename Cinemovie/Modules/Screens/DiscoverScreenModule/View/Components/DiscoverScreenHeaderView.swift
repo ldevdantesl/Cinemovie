@@ -77,13 +77,13 @@ final class DiscoverScreenHeaderView: UIView {
         
         addSubview(mediaButton)
         mediaButton.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(UIConstants.topInset - 10)
+            $0.top.equalToSuperview().offset(UIConstants.topInset)
             $0.leading.equalToSuperview().offset(Constants.biggerSpacing)
         }
         
         addSubview(searchButton)
         searchButton.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(UIConstants.topInset - 10)
+            $0.top.equalToSuperview().offset(UIConstants.topInset)
             $0.trailing.equalToSuperview().offset(-Constants.biggerSpacing)
             $0.size.equalTo(Constants.buttonSize)
         }

@@ -60,9 +60,9 @@ final class BackdropImageCell: ReusableCellBaseClass {
         
         static let backdropImageSize: CGFloat = 20
         static let imageNotFoundName = "questionmark.circle"
-        static let cellHeight = UIConstants.screenWidth * 0.65
-        static let favoriteButtonName = "bookmark"
-        static let favoriteButtonTappedName = "bookmark.fill"
+        static let cellHeight = UIConstants.screenWidth * 0.8
+        static let favoriteButtonName = "heart"
+        static let favoriteButtonTappedName = "heart.fill"
         static let favoriteButtonBottomOffset = 20.0
         
         static let hSpacing = 10.0

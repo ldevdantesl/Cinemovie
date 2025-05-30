@@ -23,6 +23,7 @@ final class PersonDetailsScreenVC: UIViewController {
         static let collectionViewSpacing = 10.0
         static let aniDuration = 1.0
         static let defaultCellHeight = 100.0
+        static let backdropBottomOffset = -50
     }
     
     // MARK: - SECTIONS
@@ -53,7 +54,7 @@ final class PersonDetailsScreenVC: UIViewController {
     
     // MARK: - VIEW PROPERTIES
     private lazy var collectionView: DiffableCollectionView = {
-        let cv = DiffableCollectionView<Sections, Items>(layout: createLayout(), showsTopBlur: true)
+        let cv = DiffableCollectionView<Sections, Items>(layout: createLayout())
         cv.layer.zPosition = 0
         cv.register(cellClass: PersonImagesCell.self)
         cv.register(cellClass: PersonInfoCell.self)
@@ -105,8 +106,6 @@ final class PersonDetailsScreenVC: UIViewController {
     private func createLayout() -> UICollectionViewCompositionalLayout {
         UICollectionViewCompositionalLayout { [weak self] sectionIndex, env in
             guard let self = self, let presenter = self.presenter else { return nil }
-            
-            
             let detailsSection = presenter.visibleSections[sectionIndex]
             let edgeInsets: NSDirectionalEdgeInsets
             let containsImages = presenter.visibleSections.contains(.images)
@@ -160,7 +159,6 @@ final class PersonDetailsScreenVC: UIViewController {
 
 extension PersonDetailsScreenVC: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        collectionView.showBlur(scrollView)
         guard let cell = collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? PersonImagesCell else { return }
         let offsetY = scrollView.contentOffset.y
         cell.setTopContraint(offsetY: offsetY)

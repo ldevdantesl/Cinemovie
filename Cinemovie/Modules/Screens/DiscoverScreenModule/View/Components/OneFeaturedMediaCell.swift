@@ -58,7 +58,7 @@ final class OneFeaturedMediaCell: ReusableCellBaseClass {
     
     private let mediaExtrasLabel: UILabel = {
         let label = UILabel()
-        label.font = CMFont.font(size: .body, fontName: .avenirDemiBoldItalic)
+        label.font = CMFont.font(size: .footnote, fontName: .avenirDemiBoldItalic)
         label.textColor = CMColor.cmSublabel
         return label
     }()

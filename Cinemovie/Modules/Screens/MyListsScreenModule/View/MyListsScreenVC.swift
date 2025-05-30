@@ -78,7 +78,7 @@ final class MyListsScreenVC: UIViewController {
     }()
     
     private lazy var collectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<MyListsScreenVC.Sections, MyListsScreenVC.Items>(layout: createLayout(), ignoresTopSafeArea: false, showsTopBlur: false)
+        let view = DiffableCollectionView<MyListsScreenVC.Sections, MyListsScreenVC.Items>(layout: createLayout(), ignoresTopSafeArea: false)
         view.delegate = self
         view.refreshControl = refreshControler
         view.register(cellClass: AccountListCell.self)

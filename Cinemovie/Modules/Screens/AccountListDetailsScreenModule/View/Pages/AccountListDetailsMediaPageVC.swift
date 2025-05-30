@@ -56,7 +56,7 @@ final class AccountListDetailsMediaPageVC: UIViewController {
     }()
     
     private lazy var collectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<Sections, Items>(layout: createLayout(), ignoresTopSafeArea: false, showsTopBlur: false)
+        let view = DiffableCollectionView<Sections, Items>(layout: createLayout(), ignoresTopSafeArea: false)
         view.backgroundColor = CMColor.cmBackground
         view.refreshControl = refreshController
         view.delegate = self
