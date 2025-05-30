@@ -11,8 +11,8 @@ import UIKit
 protocol DiscoverScreenViewProtocol: AnyObject {
     func applySnapshot(sections: [DiscoverScreenVC.Sections], itemsBySection: [DiscoverScreenVC.Sections: [DiscoverScreenVC.Items]])
     func didRecieveError(_ errorStr: String)
-    
-    var downloadingView: CMSplashView { get }
+    func showDownloadingView()
+    func hideDownloadingView()
 }
 
 final class DiscoverScreenVC: UIViewController {
@@ -26,11 +26,9 @@ final class DiscoverScreenVC: UIViewController {
     // MARK: - SECTION
     enum Sections: Hashable {
         case featured
-        case search
         case movieList(MovieListType)
         case seriesList(TVSeriesListType)
         case trendingPeople
-        case recentlyViewed
         case notFound
     }
 
@@ -39,22 +37,11 @@ final class DiscoverScreenVC: UIViewController {
         case featured(OneFeaturedMediaCellViewModel)
         case mediaListCell(MediaListCellViewModel)
         case trendingPeopleCell(TrendingPeopleCellViewModel)
-        case searchCell(MediaSearchCellViewModel)
         case notFoundCell(UnavailableInfoCellViewModel)
-        case verticalMediaListCell(VerticalMediaListCellViewModel)
     }
     
     // MARK: - VIPER
     var presenter: DiscoverScreenPresenterProtocol?
-    let downloadingView: CMSplashView = {
-        let view = CMSplashView(frame: .zero)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
-    // MARK: - PROPERTIES
-    private var headerViewHeightConstraint: Constraint?
-    private var isBlurToHeaderVisible: Bool = false
     
     // MARK: - VIEW PROPERTIES
     private lazy var collectionView: DiffableCollectionView = {
@@ -66,14 +53,22 @@ final class DiscoverScreenVC: UIViewController {
         view.register(cellClass: VerticalMediaListCell.self)
         view.register(cellClass: UnavailableInfoCell.self)
         view.register(cellClass: OneFeaturedMediaCell.self)
-        view.delegate = self
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
         return view
     }()
     
+    private let downloadingView: CMSplashView = {
+        let view = CMSplashView(frame: .zero)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     private lazy var headerView: DiscoverScreenHeaderView = {
-        let vm = DiscoverScreenHeaderViewModel(didTapSearchButton: nil, didTapMediaButton: presenter?.didChangeMediaType)
+        let vm = DiscoverScreenHeaderViewModel (
+            didTapSearchButton: presenter?.didTapSearch,
+            didTapMediaButton: presenter?.didChangeMediaType
+        )
         let view = DiscoverScreenHeaderView(viewModel: vm)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -83,9 +78,8 @@ final class DiscoverScreenVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        presenter?.viewDidLoaded()
         configureDataSource()
-        self.downloadingView.show()
+        presenter?.viewDidLoaded()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -149,18 +143,8 @@ final class DiscoverScreenVC: UIViewController {
                 cell?.configure(viewModel: vm)
                 return cell
                 
-            case .searchCell(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? MediaSearchCell
-                cell?.configure(viewModel: vm)
-                return cell
-                
             case .notFoundCell(let vm):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? UnavailableInfoCell
-                cell?.configure(viewModel: vm)
-                return cell
-                
-            case .verticalMediaListCell(let vm):
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? VerticalMediaListCell
                 cell?.configure(viewModel: vm)
                 return cell
             }
@@ -176,7 +160,6 @@ final class DiscoverScreenVC: UIViewController {
             
             switch homeSection {
             case .featured: edgeInsets = .zero
-            case .search, .recentlyViewed: edgeInsets = NSDirectionalEdgeInsets(top: Constants.headerViewHeight, leading: 10, bottom: 10, trailing: 10)
             case .notFound: edgeInsets = NSDirectionalEdgeInsets(top: UIConstants.screenHeight / 3, leading: 10, bottom: 10, trailing: 10)
             default: edgeInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
             }
@@ -195,12 +178,24 @@ final class DiscoverScreenVC: UIViewController {
     }
 }
 
-extension DiscoverScreenVC: UICollectionViewDelegate { }
-
 extension DiscoverScreenVC: DiscoverScreenViewProtocol {
     func applySnapshot(sections: [Sections], itemsBySection: [Sections : [Items]]) {
         DispatchQueue.main.async {
             self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
+        }
+    }
+    
+    func showDownloadingView() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.downloadingView.show()
+        }
+    }
+    
+    func hideDownloadingView() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.downloadingView.hide()
         }
     }
     

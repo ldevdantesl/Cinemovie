@@ -16,10 +16,6 @@ protocol DiscoverScreenInteractorProtocol: AnyObject {
     
     // MARK: - TRENDING
     func downloadTrendingPeople(timeWindow: TrendingTimeWindow)
-    
-    // MARK: - SEARCH
-    func downloadSearchResultsForMovies(query: String, untilPage: Int)
-    func downloadSearchResultsForTVSeries(query: String, untilPage: Int)
 }
 
 final class DiscoverScreenInteractor: DiscoverScreenInteractorProtocol {
@@ -59,27 +55,6 @@ final class DiscoverScreenInteractor: DiscoverScreenInteractorProtocol {
             switch result {
             case .success(let success): self.presenter?.didDownloadTrendingPeople(success.results)
             case .failure(let failure): self.presenter?.didRecieveError(failure)
-            }
-        }
-    }
-    
-    // MARK: - SEARCH
-    func downloadSearchResultsForMovies(query: String, untilPage: Int) {
-        tmdbService.getMovieSearchResults(query: query, untilPage: untilPage) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didRecieveMovieSearchResults(success)
-            case .failure: self.presenter?.didRecieveMovieSearchResults([])
-            }
-        }
-    }
-    
-    func downloadSearchResultsForTVSeries(query: String, untilPage: Int) {
-        tmdbService.getTVSeriesSearchResults(query: query, untilPage: untilPage) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didRecieveTVSeriesSearchResults(success)
-            case .failure: self.presenter?.didRecieveTVSeriesSearchResults([])
             }
         }
     }
