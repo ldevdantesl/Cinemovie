@@ -146,7 +146,7 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
     }
     
     func didTapSearch() {
-        
+        router.navigateToSearch()
     }
 
     // MARK: - MOVIES

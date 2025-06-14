@@ -7,9 +7,16 @@
 
 import Foundation
 
-enum AnyMedia: Decodable {
+enum AnyMedia: Codable {
     case movie(Movie)
     case tvSeries(TVSeries)
+    
+    var asMedia: Media {
+        switch self {
+        case .movie(let m): return m
+        case .tvSeries(let t): return t
+        }
+    }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
@@ -28,6 +35,16 @@ enum AnyMedia: Decodable {
             AnyMedia.self,
             DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Unknown Media type")
         )
+    }
+    
+    init(_ media: Media) {
+        if let movie = media as? Movie {
+            self = .movie(movie)
+        } else if let tv = media as? TVSeries {
+            self = .tvSeries(tv)
+        } else {
+            fatalError("Unsupported Media type")
+        }
     }
     
     static func toMedia(from anyMediaList: [AnyMedia]) -> [Media] {

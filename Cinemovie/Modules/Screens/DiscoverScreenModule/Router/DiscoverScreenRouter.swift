@@ -11,6 +11,7 @@ protocol DiscoverScreenRouterProtocol {
     func navigateToMovieDetails(movieID: Int)
     func navigateToTVSeriesDetails(seriesID: Int)
     func navigateToPersonDetails(personID: Int)
+    func navigateToSearch()
 }
 
 final class DiscoverScreenRouter: DiscoverScreenRouterProtocol {
@@ -34,6 +35,11 @@ final class DiscoverScreenRouter: DiscoverScreenRouterProtocol {
     
     func navigateToPersonDetails(personID: Int) {
         let newVC = PersonDetailsScreenAssembler.assemble(personID: personID, tmdbService: tmdbService)
+        viewController?.navigationController?.pushViewController(newVC, animated: true)
+    }
+    
+    func navigateToSearch() {
+        let newVC = SearchScreenAssembler.assemble(tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(newVC, animated: true)
     }
 }

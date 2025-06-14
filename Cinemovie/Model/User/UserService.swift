@@ -9,6 +9,8 @@ import Foundation
 
 protocol UserService: AnyObject {
     var userLanguage: String { get }
+    var recentlyViewedMedia: [Media] { get }
+    var recentlySearchedKeywords: [String] { get }
     
     func changeLanguage(to language: String)
 }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Movie: APIResponse, Media, Hashable {
+struct Movie: APIResponse, Encodable, Media, Hashable {
     let id: Int
     let title: String
     let voteAverage: Double?
