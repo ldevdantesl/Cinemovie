@@ -33,7 +33,7 @@ final class SearchScreenVC: UIViewController {
     
     // MARK: - VIEW PROPERTIES
     private lazy var collectionView = {
-        let view = DiffableCollectionView<Sections, Items>(layout: createLayout(), ignoresTopSafeArea: true)
+        let view = DiffableCollectionView<Sections, Items>(layout: createLayout(), ignoresTopSafeArea: false)
         view.register(cellClass: SearchScreenHeaderCell.self)
         view.register(cellClass: VerticalMediaListCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -70,9 +70,9 @@ final class SearchScreenVC: UIViewController {
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
         return UICollectionViewCompositionalLayout { sectionIndex, env in
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .estimated(100), heightDimension: .estimated(100)))
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(100)))
             let group = NSCollectionLayoutGroup.horizontal(
-                layoutSize: .init(widthDimension: .estimated(100),
+                layoutSize: .init(widthDimension: .fractionalWidth(1),
                 heightDimension: .estimated(100)),
                 subitems: [item]
             )

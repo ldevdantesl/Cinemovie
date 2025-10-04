@@ -22,6 +22,8 @@ final class SearchScreenHeaderCell: ReusableCellBaseClass {
     fileprivate enum Constants {
         static let hSpacing = 10.0
         static let vSpacing = 10.0
+        static let spacing = 5.0
+        static let searchBarCornerRadius = 25.0
     }
     
     // MARK: - PROPERTIES
@@ -35,6 +37,17 @@ final class SearchScreenHeaderCell: ReusableCellBaseClass {
         label.font = CMFont.font(size: .body, fontName: .avenirBoldItalic)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
+    }()
+
+    private lazy var searchBar: UITextField = {
+        let view = UITextField()
+        view.placeholder = "Search"
+        view.delegate = self
+        view.backgroundColor = CMColor.cmSecondary
+        view.layoutMargins = .init(top: 0, left: 10, bottom: 0, right: 10)
+        view.returnKeyType = .go
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
     
     // MARK: - LIFECYCLE
@@ -58,6 +71,12 @@ final class SearchScreenHeaderCell: ReusableCellBaseClass {
         return layoutAttributes
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        searchBar.layer.cornerRadius = Constants.searchBarCornerRadius
+        searchBar.layer.borderColor = CMColor.cmBorder.cgColor
+    }
+    
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: SearchScreenHeaderCellViewModel) {
         self.viewModel = viewModel
@@ -70,5 +89,18 @@ final class SearchScreenHeaderCell: ReusableCellBaseClass {
             $0.top.equalToSuperview().offset(Constants.vSpacing)
             $0.horizontalEdges.equalToSuperview().inset(Constants.hSpacing)
         }
+        
+        contentView.addSubview(searchBar)
+        searchBar.snp.makeConstraints {
+            $0.top.equalTo(headerTextLabel.snp.bottom).offset(Constants.spacing)
+            $0.horizontalEdges.equalToSuperview().inset(Constants.hSpacing)
+            $0.height.equalTo(50)
+        }
+    }
+}
+
+extension SearchScreenHeaderCell: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        return true
     }
 }
