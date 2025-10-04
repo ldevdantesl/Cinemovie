@@ -180,7 +180,8 @@ final class DiscoverScreenVC: UIViewController {
 
 extension DiscoverScreenVC: DiscoverScreenViewProtocol {
     func applySnapshot(sections: [Sections], itemsBySection: [Sections : [Items]]) {
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
             self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
         }
     }

@@ -123,7 +123,6 @@ final class AccountListCell: ReusableCellBaseClass {
         self.plusPosterView.layer.cornerRadius = Constants.posterCornerRadius
         self.plusPosterView.layer.borderColor = CMColor.cmLabel.cgColor
         self.plusPosterView.layer.borderWidth = Constants.posterBorderWidth
-        
     }
     
     // MARK: - PUBLIC FUNC
