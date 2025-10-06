@@ -10,9 +10,11 @@ import SnapKit
 
 final class SearchScreenHeaderCellViewModel: CellViewModelBaseClass {
     let didTapSearch: (() -> Void)?
+    let didTapBackButton: (() -> Void)?
     
-    init(didTapSearch: (() -> Void)?) {
+    init(didTapSearch: (() -> Void)?, didTapBackButton: (() -> Void)?) {
         self.didTapSearch = didTapSearch
+        self.didTapBackButton = didTapBackButton
         super.init(cellIdentifier: "SearchScreenHeaderCell")
     }
 }
@@ -24,6 +26,8 @@ final class SearchScreenHeaderCell: ReusableCellBaseClass {
         static let vSpacing = 10.0
         static let spacing = 5.0
         static let searchBarCornerRadius = 25.0
+        static let searchBarBorderWidth = 0.5
+        static let backButtonSize = 35.0
     }
     
     // MARK: - PROPERTIES
@@ -34,20 +38,26 @@ final class SearchScreenHeaderCell: ReusableCellBaseClass {
         let label = UILabel()
         label.text = "Search"
         label.textColor = CMColor.cmLabel
-        label.font = CMFont.font(size: .body, fontName: .avenirBoldItalic)
+        label.font = CMFont.font(size: .title, fontName: .avenirBoldItalic)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    
+    private lazy var backButton: CMCircularButton = {
+        let button = CMCircularButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
 
-    private lazy var searchBar: UITextField = {
-        let view = UITextField()
-        view.placeholder = "Search"
-        view.delegate = self
-        view.backgroundColor = CMColor.cmSecondary
-        view.layoutMargins = .init(top: 0, left: 10, bottom: 0, right: 10)
-        view.returnKeyType = .go
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
+    private lazy var searchBar: UISearchTextField = {
+        let search = UISearchTextField()
+        search.backgroundColor = CMColor.cmSecondaryBackground
+        search.placeholder = "Search"
+        search.clipsToBounds = true
+        search.returnKeyType = .go
+        search.delegate = self
+        search.translatesAutoresizingMaskIntoConstraints = false
+        return search
     }()
     
     // MARK: - LIFECYCLE
@@ -74,33 +84,53 @@ final class SearchScreenHeaderCell: ReusableCellBaseClass {
     override func layoutSubviews() {
         super.layoutSubviews()
         searchBar.layer.cornerRadius = Constants.searchBarCornerRadius
-        searchBar.layer.borderColor = CMColor.cmBorder.cgColor
+        searchBar.layer.borderColor = CMColor.cmPlaceholderLabel.cgColor
+        searchBar.layer.borderWidth = Constants.searchBarBorderWidth
     }
     
     // MARK: - PUBLIC FUNC
     public func configure(viewModel: SearchScreenHeaderCellViewModel) {
         self.viewModel = viewModel
+        let backButtonVM = CMCircularButtonViewModel(
+            systemName: "chevron.left",
+            backColor: CMColor.cmSecondaryBackground,
+            foreColor: CMColor.cmAccent,
+            didTapAction: viewModel.didTapBackButton
+        )
+        backButton.configure(viewModel: backButtonVM)
     }
     
     // MARK: - PRIVATE FUNC
     private func setupUI() {
+        contentView.addSubview(backButton)
+        backButton.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(Constants.vSpacing)
+            $0.leading.equalToSuperview().offset(Constants.hSpacing)
+            $0.size.equalTo(Constants.backButtonSize)
+        }
+        
         contentView.addSubview(headerTextLabel)
         headerTextLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(Constants.vSpacing)
-            $0.horizontalEdges.equalToSuperview().inset(Constants.hSpacing)
+            $0.centerY.equalTo(backButton.snp.centerY)
+            $0.leading.equalTo(backButton.snp.trailing).offset(Constants.hSpacing)
+            $0.trailing.equalToSuperview().offset(-Constants.hSpacing)
         }
         
         contentView.addSubview(searchBar)
         searchBar.snp.makeConstraints {
-            $0.top.equalTo(headerTextLabel.snp.bottom).offset(Constants.spacing)
+            $0.top.equalTo(backButton.snp.bottom).offset(Constants.spacing)
             $0.horizontalEdges.equalToSuperview().inset(Constants.hSpacing)
             $0.height.equalTo(50)
+            $0.bottom.equalToSuperview()
         }
     }
 }
 
-extension SearchScreenHeaderCell: UITextFieldDelegate {
+extension SearchScreenHeaderCell: UITextFieldDelegate, UISearchTextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
         return true
     }
+    
+    
 }

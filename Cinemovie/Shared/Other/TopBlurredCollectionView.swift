@@ -12,8 +12,8 @@ class TopBlurredCollectionView: UICollectionView, UICollectionViewDelegate {
     private var fadeLayer: CAGradientLayer?
     private var showsFade: Bool
 
-    init(layout: UICollectionViewLayout, ignoresTopSafeArea: Bool = true) {
-        self.showsFade = ignoresTopSafeArea
+    init(layout: UICollectionViewLayout, ignoresTopSafeArea: Bool = true, showsTopFade: Bool) {
+        self.showsFade = showsTopFade
         super.init(frame: .zero, collectionViewLayout: layout)
         self.contentInsetAdjustmentBehavior = ignoresTopSafeArea ? .never : .always
     }

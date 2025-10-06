@@ -42,7 +42,7 @@ final class SearchScreenVC: UIViewController {
     }()
     
     // MARK: - PRIVATE PROPERTIES
-    private lazy var loadingView = CMSplashView()
+    private lazy var loadingView = CMSplashView(frame: .zero, showsLoadingLabel: true)
     
     // MARK: - VIPER
     var presenter: SearchScreenPresenterProtocol?
@@ -50,14 +50,9 @@ final class SearchScreenVC: UIViewController {
     // MARK: - LIFECYCLE
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
-        presenter?.viewDidLoaded()
         configureDataSource()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        presenter?.viewWillAppear()
+        presenter?.viewDidLoaded()
+        setupUI()
     }
     
     // MARK: - PRIVATE METHODS
@@ -72,8 +67,7 @@ final class SearchScreenVC: UIViewController {
         return UICollectionViewCompositionalLayout { sectionIndex, env in
             let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(100)))
             let group = NSCollectionLayoutGroup.horizontal(
-                layoutSize: .init(widthDimension: .fractionalWidth(1),
-                heightDimension: .estimated(100)),
+                layoutSize: item.layoutSize,
                 subitems: [item]
             )
             let section = NSCollectionLayoutSection(group: group)

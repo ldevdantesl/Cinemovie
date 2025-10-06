@@ -5,9 +5,16 @@
 //  Created by Buzurg Rakhimzoda on 13.06.2025
 //
 
+import UIKit
+
 protocol SearchScreenRouterProtocol {
+    func popBack()
 }
 
 final class SearchScreenRouter: SearchScreenRouterProtocol {
     weak var viewController: SearchScreenVC?
+    
+    func popBack() {
+        viewController?.navigationController?.popViewController(animated: true)
+    }
 }
