@@ -38,7 +38,7 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     }
     
     func navigateToAnotherTVSeries(series: TVSeries) {
-        let newSeriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, tmdbService: tmdbService)
+        let newSeriesDetails = TVSeriesDetailsScreenAssembler.assemble(series: series, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(newSeriesDetails, animated: true)
     }
     
@@ -48,7 +48,7 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     }
     
     func navigateToMovie(movie: Movie) {
-        let movieDetailsVC = MovieDetailsScreenAssembler.assemble(movieID: movie.id, tmdbService: tmdbService)
+        let movieDetailsVC = MovieDetailsScreenAssembler.assemble(movie: movie, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(movieDetailsVC, animated: true)
     }
     

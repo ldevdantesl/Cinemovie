@@ -112,8 +112,8 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
     
     func didTapMedia(media: any Media) {
         switch media {
-        case let movie as Movie: router.navigateToMovie(movieID: movie.id)
-        case let series as TVSeries: router.navigateToSeries(seriesID: series.id)
+        case let movie as Movie: router.navigateToMovie(movie: movie)
+        case let series as TVSeries: router.navigateToSeries(series: series)
         default: break
         }
     }

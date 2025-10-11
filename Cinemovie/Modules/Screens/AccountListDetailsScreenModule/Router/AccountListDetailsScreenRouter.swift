@@ -9,8 +9,8 @@ import UIKit
 
 protocol AccountListDetailsScreenRouterProtocol {
     func goBack()
-    func navigateToMovieDetails(movieId: Int)
-    func navigateToTVSeriesDetails(seriesID: Int)
+    func navigateToMovieDetails(movie: Movie)
+    func navigateToTVSeriesDetails(series: TVSeries)
 }
 
 final class AccountListDetailsScreenRouter: AccountListDetailsScreenRouterProtocol {
@@ -25,13 +25,13 @@ final class AccountListDetailsScreenRouter: AccountListDetailsScreenRouterProtoc
         viewController?.navigationController?.popViewController(animated: true)
     }
     
-    func navigateToMovieDetails(movieId: Int) {
-        let vc = MovieDetailsScreenAssembler.assemble(movieID: movieId, tmdbService: tmdbService)
+    func navigateToMovieDetails(movie: Movie) {
+        let vc = MovieDetailsScreenAssembler.assemble(movie: movie, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
-    func navigateToTVSeriesDetails(seriesID: Int) {
-        let vc = TVSeriesDetailsScreenAssembler.assemble(seriesID: seriesID, tmdbService: tmdbService)
+    func navigateToTVSeriesDetails(series: TVSeries) {
+        let vc = TVSeriesDetailsScreenAssembler.assemble(series: series, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
 }

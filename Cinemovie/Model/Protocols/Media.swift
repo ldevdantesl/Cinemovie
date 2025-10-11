@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol Media {
+protocol Media: Codable {
     var id: Int { get }
     var adult: Bool? { get }
     var backdropPath: String? { get }

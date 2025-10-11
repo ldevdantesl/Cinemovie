@@ -10,8 +10,8 @@ import UIKit
 protocol PersonDetailsScreenRouterProtocol {
     func goBack()
     func openSource(sourceID: String, sourceType: SourceTypes)
-    func navigateToMovie(movieID: Int)
-    func navigateToSeries(seriesID: Int)
+    func navigateToMovie(movie: Movie)
+    func navigateToSeries(series: TVSeries)
 }
 
 final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
@@ -26,8 +26,8 @@ final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
         viewController?.navigationController?.popViewController(animated: true)
     }
     
-    func navigateToMovie(movieID: Int) {
-        let movieDetailsVC = MovieDetailsScreenAssembler.assemble(movieID: movieID, tmdbService: tmdbService)
+    func navigateToMovie(movie: Movie) {
+        let movieDetailsVC = MovieDetailsScreenAssembler.assemble(movie: movie, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(movieDetailsVC, animated: true)
     }
     
@@ -45,8 +45,8 @@ final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
         AppOpener.openURL(url)
     }
     
-    func navigateToSeries(seriesID: Int) {
-        let seriesVC = TVSeriesDetailsScreenAssembler.assemble(seriesID: seriesID, tmdbService: tmdbService)
+    func navigateToSeries(series: TVSeries) {
+        let seriesVC = TVSeriesDetailsScreenAssembler.assemble(series: series, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(seriesVC, animated: true)
     }
 }

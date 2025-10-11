@@ -32,12 +32,12 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
     
     // MARK: - NAVIGATE
     func navigateToSeries(series: TVSeries) {
-        let seriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, tmdbService: tmdbService)
+        let seriesDetails = TVSeriesDetailsScreenAssembler.assemble(series: series, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(seriesDetails, animated: true)
     }
     
     func navigateToAnotherMovie(movie: Movie) {
-        let newMovieDetails = MovieDetailsScreenAssembler.assemble(movieID: movie.id, tmdbService: tmdbService)
+        let newMovieDetails = MovieDetailsScreenAssembler.assemble(movie: movie, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(newMovieDetails, animated: true)
     }
     

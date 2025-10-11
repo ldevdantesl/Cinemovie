@@ -126,11 +126,10 @@ final class SearchScreenHeaderCell: ReusableCellBaseClass {
     }
 }
 
-extension SearchScreenHeaderCell: UITextFieldDelegate, UISearchTextFieldDelegate {
+extension SearchScreenHeaderCell: UISearchTextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
+        self.viewModel?.didTapSearch?()
         return true
     }
-    
-    
 }

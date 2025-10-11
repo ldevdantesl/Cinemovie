@@ -9,6 +9,7 @@ import UIKit
 
 protocol SearchScreenRouterProtocol {
     func popBack()
+    func pushToMedia(media: Media)
 }
 
 final class SearchScreenRouter: SearchScreenRouterProtocol {
@@ -16,5 +17,9 @@ final class SearchScreenRouter: SearchScreenRouterProtocol {
     
     func popBack() {
         viewController?.navigationController?.popViewController(animated: true)
+    }
+    
+    func pushToMedia(media: any Media) {
+        print("Media id: \(media.id)")
     }
 }

@@ -7,7 +7,11 @@
 
 import UIKit
 
-protocol SearchScreenInteractorProtocol: AnyObject { }
+protocol SearchScreenInteractorProtocol: AnyObject {
+    func getRecentMedia()
+    func getRecentSearches()
+    func getRecentKeywords()
+}
 
 final class SearchScreenInteractor: SearchScreenInteractorProtocol {
     weak var presenter: SearchScreenPresenterProtocol?
@@ -15,5 +19,17 @@ final class SearchScreenInteractor: SearchScreenInteractorProtocol {
     
     init(tmdbService: TMDBService) {
         self.tmdbService = tmdbService
+    }
+    
+    func getRecentMedia() {
+        
+    }
+    
+    func getRecentKeywords() {
+        
+    }
+    
+    func getRecentSearches() {
+        
     }
 }

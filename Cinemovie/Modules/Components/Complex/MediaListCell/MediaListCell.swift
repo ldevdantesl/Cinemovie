@@ -57,6 +57,7 @@ final class MediaListCell: ReusableCellBaseClass {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumInteritemSpacing = 10
+        layout.sectionInset = .init(top: 0, left: 10, bottom: 0, right: 10)
         layout.itemSize = CGSize(width: Constants.itemWidth, height: Constants.itemHeight)
         
         let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -109,13 +110,13 @@ final class MediaListCell: ReusableCellBaseClass {
         contentView.addSubview(titleLabel)
         titleLabel.snp.makeConstraints {
             $0.top.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(10.0)
         }
         
         contentView.addSubview(subtitleLabel)
         subtitleLabel.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(Constants.spacing)
-            $0.horizontalEdges.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(10.0)
         }
         
         contentView.addSubview(collectionView)

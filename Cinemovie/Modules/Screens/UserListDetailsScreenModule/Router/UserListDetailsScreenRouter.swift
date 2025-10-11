@@ -27,12 +27,12 @@ final class UserListDetailsScreenRouter: UserListDetailsScreenRouterProtocol {
     }
     
     func navigateToMovie(movie: Movie) {
-        let vc = MovieDetailsScreenAssembler.assemble(movieID: movie.id, tmdbService: tmdbService)
+        let vc = MovieDetailsScreenAssembler.assemble(movie: movie, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
     func navigateToSeries(series: TVSeries) {
-        let vc = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, tmdbService: tmdbService)
+        let vc = TVSeriesDetailsScreenAssembler.assemble(series: series, tmdbService: tmdbService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
 }

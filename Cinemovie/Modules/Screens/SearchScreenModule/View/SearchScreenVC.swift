@@ -9,10 +9,15 @@ import UIKit
 import SnapKit
 
 protocol SearchScreenViewProtocol: AnyObject {
+    // MARK: - LOAD
     func applySnapshot(sections: [SearchScreenVC.Sections], itemsBySection: [SearchScreenVC.Sections: [SearchScreenVC.Items]])
-    func didRecieveError(_ errorStr: String)
+    
+    // MARK: - LOADING
     func showLoadingView()
     func hideLoadingView()
+    
+    // MARK: - ERROR
+    func didRecieveError(_ errorStr: String)
 }
 
 final class SearchScreenVC: UIViewController {
@@ -22,7 +27,8 @@ final class SearchScreenVC: UIViewController {
     
     // MARK: - SECTIONS
     enum Sections: Hashable {
-        case main
+        case searchBar
+        case media
     }
     
     // MARK: - ITEMS
@@ -64,14 +70,24 @@ final class SearchScreenVC: UIViewController {
     }
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
-        return UICollectionViewCompositionalLayout { sectionIndex, env in
+        return UICollectionViewCompositionalLayout { [weak self] sectionIndex, env in
+            guard let self = self, let presenter = self.presenter else { return nil }
+            let currentSection = presenter.visibleSections[sectionIndex]
+            let edgeInsets: NSDirectionalEdgeInsets
+            
+            switch currentSection {
+            case .media: edgeInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
+            default: edgeInsets = .zero
+            }
+            
             let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(100)))
             let group = NSCollectionLayoutGroup.horizontal(
                 layoutSize: item.layoutSize,
                 subitems: [item]
             )
-            let section = NSCollectionLayoutSection(group: group)
-            return section
+            let layoutSection = NSCollectionLayoutSection(group: group)
+            layoutSection.contentInsets = edgeInsets
+            return layoutSection
         }
     }
     
@@ -113,7 +129,8 @@ extension SearchScreenVC: SearchScreenViewProtocol {
             self.loadingView.hide()
         }
     }
-    
+ 
+    // MARK: - ERROR
     func didRecieveError(_ errorStr: String) {
         let alert = UIAlertController(
             title: "Oops..",

@@ -92,8 +92,8 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
     // MARK: - USER INITIATED
     func didTapMedia(_ media: any Media) {
         switch media {
-        case is Movie: router.navigateToMovieDetails(movieID: media.id)
-        case is TVSeries: router.navigateToTVSeriesDetails(seriesID: media.id)
+        case let movie as Movie: router.navigateToMovieDetails(movie: movie)
+        case let series as TVSeries: router.navigateToTVSeriesDetails(series: series)
         default: fatalError("Media not supported")
         }
     }

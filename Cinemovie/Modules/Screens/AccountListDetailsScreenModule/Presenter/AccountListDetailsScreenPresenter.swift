@@ -69,8 +69,8 @@ extension AccountListDetailsScreenPresenter: AccountListDetailsScreenPresenterPr
     
     func didTapAnyMedia(media: any Media) {
         switch media {
-        case let movie as Movie: router.navigateToMovieDetails(movieId: movie.id)
-        case let series as TVSeries: router.navigateToTVSeriesDetails(seriesID: series.id)
+        case let movie as Movie: router.navigateToMovieDetails(movie: movie)
+        case let series as TVSeries: router.navigateToTVSeriesDetails(series: series)
         default: break
         }
     }
