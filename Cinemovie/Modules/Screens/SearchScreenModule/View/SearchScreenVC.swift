@@ -61,6 +61,10 @@ final class SearchScreenVC: UIViewController {
         setupUI()
     }
     
+    deinit {
+        print("SearchScreen is Deinited")
+    }
+    
     // MARK: - PRIVATE METHODS
     private func setupUI() {
         view.addSubview(collectionView)

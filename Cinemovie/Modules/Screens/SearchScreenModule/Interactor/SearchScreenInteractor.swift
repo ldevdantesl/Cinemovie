@@ -8,7 +8,6 @@
 import UIKit
 
 protocol SearchScreenInteractorProtocol: AnyObject {
-    func getRecentMedia()
     func getRecentSearches()
     func getRecentKeywords()
 }
@@ -21,9 +20,6 @@ final class SearchScreenInteractor: SearchScreenInteractorProtocol {
         self.tmdbService = tmdbService
     }
     
-    func getRecentMedia() {
-        
-    }
     
     func getRecentKeywords() {
         

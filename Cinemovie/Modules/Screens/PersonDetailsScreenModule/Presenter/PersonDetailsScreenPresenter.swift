@@ -53,6 +53,7 @@ final class PersonDetailsScreenPresenter {
     private var personImages: [TMDBImage] = []
 
     init(creditID: String, interactor: PersonDetailsScreenInteractorProtocol, router: PersonDetailsScreenRouterProtocol) {
+        print("Credit ID: ", creditID)
         self.creditID = creditID
         self.personID = nil
         self.interactor = interactor
@@ -102,7 +103,6 @@ extension PersonDetailsScreenPresenter: PersonDetailsScreenPresenterProtocol {
     
     // MARK: - USER INITIATED
     func didTapBackButton() {
-        print("Presenter Did Tap backbutton called")
         router.goBack()
     }
     

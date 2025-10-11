@@ -10,7 +10,7 @@ import UIKit
 final class SearchScreenAssembler {
     static func assemble(tmdbService: TMDBService) -> SearchScreenVC {
         let interactor = SearchScreenInteractor(tmdbService: tmdbService)
-        let router = SearchScreenRouter()
+        let router = SearchScreenRouter(tmdbService: tmdbService)
         let presenter = SearchScreenPresenter(interactor: interactor, router: router)
         let viewController = SearchScreenVC()
         presenter.view  = viewController

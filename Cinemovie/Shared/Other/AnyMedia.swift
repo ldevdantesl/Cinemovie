@@ -17,23 +17,54 @@ enum AnyMedia: Codable {
         case .tvSeries(let t): return t
         }
     }
+    
+    private enum CodingKeys: String, CodingKey {
+        case type, value
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .movie(let movie):
+            try container.encode("movie", forKey: .type)
+            try container.encode(movie, forKey: .value)
+        case .tvSeries(let tv):
+            try container.encode("tv", forKey: .type)
+            try container.encode(tv, forKey: .value)
+        }
+    }
 
     init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-
-        if let movie = try? container.decode(Movie.self) {
+        if let keyed = try? decoder.container(keyedBy: CodingKeys.self),
+           let type = try? keyed.decode(String.self, forKey: .type) {
+            switch type {
+            case "movie":
+                let movie = try keyed.decode(Movie.self, forKey: .value)
+                self = .movie(movie)
+                return
+            case "tv":
+                let tv = try keyed.decode(TVSeries.self, forKey: .value)
+                self = .tvSeries(tv)
+                return
+            default:
+                break
+            }
+        }
+        
+        let single = try decoder.singleValueContainer()
+        if let movie = try? single.decode(Movie.self) {
             self = .movie(movie)
             return
         }
-
-        if let tv = try? container.decode(TVSeries.self) {
+        if let tv = try? single.decode(TVSeries.self) {
             self = .tvSeries(tv)
             return
         }
-
+        
         throw DecodingError.typeMismatch(
             AnyMedia.self,
-            DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Unknown Media type")
+            .init(codingPath: decoder.codingPath,
+                  debugDescription: "Unknown Media type")
         )
     }
     
