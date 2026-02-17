@@ -1,0 +1,320 @@
+//
+//  MediaTabsCell.swift
+//  Cinemovie
+//
+//  Created by Buzurg Rakhimzoda on 27.03.2025.
+//
+
+import UIKit
+import SnapKit
+
+final class MediaExtrasCellViewModel: CellViewModelBaseClass {
+    let seasons: [TVSeason]
+    let collectionDetails: BelongsToCollectionDetails?
+    let recommended: [Media]
+    let videos: [Video]
+    let reviews: [Review]
+    let didTapMedia: ((Media) -> Void)?
+    let didTapSeason: ((TVSeason) -> Void)?
+    
+    init(
+        collectionDetails: BelongsToCollectionDetails?,
+        recommended: [Media], videos: [Video], reviews: [Review],
+        didTapMedia: ((Media) -> Void)?
+    ) {
+        self.seasons = []
+        self.collectionDetails = collectionDetails
+        self.recommended = recommended
+        self.videos = videos
+        self.reviews = reviews
+        self.didTapMedia = didTapMedia
+        self.didTapSeason = nil
+        super.init(cellIdentifier: "MediaExtrasCell")
+    }
+    
+    init(
+        seasons: [TVSeason], recommended: [Media],
+        videos: [Video], reviews: [Review],
+        didTapMedia: ((Media) -> Void)?, didTapSeason: ((TVSeason) -> Void)?
+    ) {
+        self.seasons = seasons
+        self.collectionDetails = nil
+        self.recommended = recommended
+        self.videos = videos
+        self.reviews = reviews
+        self.didTapMedia = didTapMedia
+        self.didTapSeason = didTapSeason
+        super.init(cellIdentifier: "MediaExtrasCell")
+    }
+}
+
+
+final class MediaExtrasCell: ReusableCellBaseClass {
+    // MARK: - TYPEALIAS
+    typealias CellVMs = CellViewModelBaseClass & CellWithHeightProtocol
+    
+    // MARK: - OTHER
+    private enum Tabs: CaseIterable {
+        case seasons
+        case collection
+        case recommendations
+        case trailers
+        case reviews
+        case network
+        case none
+        
+        var title: String {
+            switch self {
+            case .network: "Network"
+            case .seasons: "Seasons"
+            case .collection: "Collection"
+            case .recommendations: "Recommends"
+            case .trailers: "Trailers"
+            case .reviews: "Reviews"
+            case .none: ""
+            }
+        }
+    }
+    
+    // MARK: - CONSTANTS
+    fileprivate enum Constants {
+        static let itemSpacing = 30.0
+        static let smallSpacing = 5.0
+        static let spacing = 10.0
+        static let tabsHeight = 50.0
+        static let dividerHeight = 2.0
+        static let dividerCornerRadius = 5.0
+        static let defaultCellHeight = 120.0
+    }
+    
+    // MARK: - PROPERTIES
+    private var viewModel: MediaExtrasCellViewModel?
+    private var items: [Tabs : CellVMs] = [:]
+    private var selectedTab: Tabs = .none
+    private var visibleTabs: [Tabs] {
+        return Tabs.allCases.filter { items[$0] != nil }
+    }
+    private var heightChangeWorkItem: DispatchWorkItem?
+    
+    // MARK: - VIEW PROPERTIES
+    private lazy var tabsCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.minimumInteritemSpacing = Constants.itemSpacing
+        layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+        layout.itemSize = UICollectionViewFlowLayout.automaticSize
+        
+        let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        view.backgroundColor = CMColor.cmBackground
+        view.showsHorizontalScrollIndicator = false
+        view.delegate = self
+        view.dataSource = self
+        view.register(TabItemCell.self, forCellWithReuseIdentifier: TabItemCell.identifier)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let dividerView: UIView = {
+        let divider = UIView()
+        divider.backgroundColor = CMColor.cmDivider
+        divider.clipsToBounds = true
+        divider.translatesAutoresizingMaskIntoConstraints = false
+        return divider
+    }()
+    
+    private lazy var contentCollectionView: UICollectionView = {
+        let view = UICollectionView(frame:.zero, collectionViewLayout: createContentCollectionLayout())
+        view.isPagingEnabled = true
+        view.showsHorizontalScrollIndicator = false
+        view.delegate = self
+        view.dataSource = self
+        view.backgroundColor = CMColor.cmBackground
+        view.register(cellClass: SimilarTabContentCell.self)
+        view.register(cellClass: TrailersTabContentCell.self)
+        view.register(cellClass: BelongsToCollectionTabContentCell.self)
+        view.register(cellClass: ReviewsTabContentCell.self)
+        view.register(cellClass: VerticalMediaListCell.self)
+        view.register(cellClass: SeasonsTabContentCell.self)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    // MARK: - LIFECYCLE
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        tabsCollectionView.layoutIfNeeded()
+        contentCollectionView.layoutIfNeeded()
+        dividerView.layer.cornerRadius = Constants.dividerCornerRadius
+    }
+    
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        layoutIfNeeded()
+        contentCollectionView.layoutIfNeeded()
+        
+        guard let contentVM = items[selectedTab]  else {
+            layoutAttributes.frame.size.height = Constants.tabsHeight + Constants.spacing + Constants.defaultCellHeight
+            return layoutAttributes
+        }
+        
+        let totalHeight = Constants.tabsHeight + Constants.spacing + contentVM.cellHeight + Constants.spacing
+        layoutAttributes.frame.size.height = totalHeight
+        return layoutAttributes
+    }
+    
+    // MARK: - PUBLIC FUNC
+    public func configure(viewModel: MediaExtrasCellViewModel) {
+        self.viewModel = viewModel
+        
+        if !viewModel.seasons.isEmpty {
+            let seasonsVM = SeasonsTabContentCellViewModel(seasons: viewModel.seasons, onSeasonTap: viewModel.didTapSeason)
+            self.items[.seasons] = seasonsVM
+        }
+        
+        if let collectionDetails = viewModel.collectionDetails, collectionDetails.backdropPath != nil {
+            let belongsVM = BelongsToCollectionTabContentCellViewModel(collectionDetails: collectionDetails, onItemTapped: viewModel.didTapMedia) { [weak self] in
+                guard let self = self else { return }
+                self.onHeightChangedRequest()
+            }
+            self.items[.collection] = belongsVM
+        }
+        
+        let recommendedMedia = Array(viewModel.recommended.prefix(9))
+        if !recommendedMedia.isEmpty {
+            let recommendedVM = VerticalMediaListCellViewModel(media: recommendedMedia, didTapAnyMedia: viewModel.didTapMedia)
+            self.items[.recommendations] = recommendedVM
+        }
+        
+        let trailersMedia = viewModel.videos.filter { $0.type == .trailer }
+        if !trailersMedia.isEmpty {
+            let trailersVM = TrailersTabContentCellViewModel(trailers: trailersMedia)
+            self.items[.trailers] = trailersVM
+        }
+        
+        if !viewModel.reviews.isEmpty {
+            let reviewsVM = ReviewsTabContentCellViewModel(reviews: viewModel.reviews) { [weak self] in
+                guard let self = self else { return }
+                self.onHeightChangedRequest()
+            }
+            self.items[.reviews] = reviewsVM
+        }
+        
+        guard let firstTab = items.keys.first else { return }
+        DispatchQueue.main.async {
+            self.selectedTab = firstTab
+            self.switchTabs(to: firstTab, animated: false)
+            self.contentCollectionView.reloadData()
+            self.contentCollectionView.performBatchUpdates(nil)
+            self.invalidateIntrinsicContentSize()
+            self.layoutIfNeeded()
+        }
+    }
+    
+    // MARK: - PRIVATE FUNC
+    private func setupUI() {
+        addSubview(tabsCollectionView)
+        tabsCollectionView.snp.makeConstraints {
+            $0.top.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(Constants.tabsHeight).priority(.required)
+        }
+        
+        addSubview(dividerView)
+        dividerView.snp.makeConstraints {
+            $0.top.equalTo(tabsCollectionView.snp.bottom)
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(Constants.dividerHeight)
+        }
+        
+        addSubview(contentCollectionView)
+        contentCollectionView.snp.makeConstraints {
+            $0.top.equalTo(dividerView.snp.bottom).offset(Constants.spacing)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview()
+        }
+    }
+    
+    private func createContentCollectionLayout() -> UICollectionViewCompositionalLayout {
+        UICollectionViewCompositionalLayout { [weak self] sectionIndex, environment in
+            guard let self = self else { return nil }
+            let vm = self.items[selectedTab]
+            let cellHeight = vm?.cellHeight
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(cellHeight ?? Constants.defaultCellHeight)))
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: item.layoutSize, subitems: [item])
+            let section = NSCollectionLayoutSection(group: group)
+
+            section.orthogonalScrollingBehavior = .groupPagingCentered
+            section.interGroupSpacing = Constants.spacing
+            section.visibleItemsInvalidationHandler = { [weak self] _, offset, environment in
+                guard let self = self else { return }
+                let page = Int(round(offset.x / environment.container.contentSize.width))
+                guard page < visibleTabs.count, let tab = visibleTabs[safe: page], tab != self.selectedTab else { return }
+                self.selectedTab = tab
+                self.tabsCollectionView.reloadData()
+                self.contentCollectionView.invalidateIntrinsicContentSize()
+                self.invalidateIntrinsicContentSize()
+            }
+            return section
+        }
+    }
+    
+    private func switchTabs(to tab: Tabs, animated: Bool = true) {
+        guard tab != selectedTab else { return }
+        selectedTab = tab
+        tabsCollectionView.reloadData()
+
+        guard let index = visibleTabs.firstIndex(of: tab) else { return }
+        contentCollectionView.scrollToItem(at: IndexPath(item: index, section: 0), at: .centeredHorizontally, animated: animated)
+    }
+    
+    private func onHeightChangedRequest() {
+        self.contentCollectionView.invalidateIntrinsicContentSize()
+        self.invalidateIntrinsicContentSize()
+        self.layoutIfNeeded()
+    }
+}
+
+extension MediaExtrasCell: UICollectionViewDataSource, UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return items.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard collectionView == tabsCollectionView else { return }
+        let tab = visibleTabs[indexPath.row]
+        switchTabs(to: tab)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard collectionView == contentCollectionView else {
+            let tab = visibleTabs[indexPath.row]
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TabItemCell.identifier, for: indexPath) as? TabItemCell else { return UICollectionViewCell() }
+            let vm = TabItemCellViewModel(text: tab.title, isSelected: tab == selectedTab, isCapsuled: false)
+            cell.configure(viewModel: vm)
+            return cell
+        }
+        
+        let tab = visibleTabs[indexPath.row]
+        guard let viewModel = items[tab] else { return UICollectionViewCell() }
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: viewModel.cellIdentifier, for: indexPath)
+        
+        switch viewModel {
+        case let vm as TrailersTabContentCellViewModel: (cell as? TrailersTabContentCell)?.configure(viewModel: vm)
+        case let vm as BelongsToCollectionTabContentCellViewModel: (cell as? BelongsToCollectionTabContentCell)?.configure(viewModel: vm)
+        case let vm as ReviewsTabContentCellViewModel: (cell as? ReviewsTabContentCell)?.configure(viewModel: vm)
+        case let vm as VerticalMediaListCellViewModel: (cell as? VerticalMediaListCell)?.configure(viewModel: vm)
+        case let vm as SeasonsTabContentCellViewModel: (cell as? SeasonsTabContentCell)?.configure(viewModel: vm)
+        default: break
+        }
+        
+        return cell
+    }
+}

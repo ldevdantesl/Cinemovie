@@ -6,8 +6,23 @@
 //
 
 protocol SettingsScreenInteractorProtocol: AnyObject {
+    func logout()
+    func showSessionID()
 }
 
 final class SettingsScreenInteractor: SettingsScreenInteractorProtocol {
     weak var presenter: SettingsScreenPresenterProtocol?
+    weak var authService: AuthService?
+    
+    init(authService: AuthService?) {
+        self.authService = authService
+    }
+    
+    func showSessionID() {
+        print("Yup")
+    }
+    
+    func logout() {
+        authService?.logout()
+    }
 }

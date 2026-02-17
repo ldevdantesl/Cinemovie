@@ -6,8 +6,18 @@
 //
 
 protocol SettingsScreenRouterProtocol {
+    func navigateBackToLogin()
 }
 
 final class SettingsScreenRouter: SettingsScreenRouterProtocol {
     weak var viewController: SettingsScreenVC?
+    weak var appCoordinator: AppCoordinator?
+    
+    init(appCoordinator: AppCoordinator?) {
+        self.appCoordinator = appCoordinator
+    }
+    
+    func navigateBackToLogin() {
+        appCoordinator?.showLoginPage()
+    }
 }

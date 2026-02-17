@@ -10,6 +10,9 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    private var appCoordinator: AppCoordinator?
+    
+    private let diContainer: DIContainer = DIContainer()
 
     func scene(
         _ scene: UIScene,
@@ -19,42 +22,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
         window?.windowScene = windowScene
-        window?.rootViewController = UINavigationController(rootViewController: SplashScreenAssembler.assemble())
-        window?.makeKeyAndVisible()
+        
+        self.appCoordinator = AppCoordinator(
+            window: window,
+            authService: diContainer.authService,
+            tmdbService: diContainer.tmdbService
+        )
+        appCoordinator?.start()
     }
+    
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let url = URLContexts.first?.url else { return }
 
-    // MARK: - PRIVATE FUNCTIONS
-    private func setupTabBar() -> UITabBarController {
-        let tabbar = UITabBarController()
-        
-        let homeVC = HomeScreenAssembler.assemble()
-        homeVC.tabBarItem = UITabBarItem(
-            title: "Home",
-            image: UIImage(systemName: "mail.stack"),
-            tag: 0
-        )
-        
-        let searchVC = SearchScreenAssembler.assemble()
-        searchVC.tabBarItem = UITabBarItem(
-            title: "Search",
-            image: UIImage(systemName: "magnifyingglass"),
-            tag: 1
-        )
-        
-        let settingsVC = SettingsScreenAssembler.assemble()
-        settingsVC.tabBarItem = UITabBarItem(
-            title: "Settings",
-            image: UIImage(systemName: "gearshape"),
-            tag: 2
-        )
-        
-        tabbar.viewControllers = [
-            UINavigationController(rootViewController: homeVC),
-            UINavigationController(rootViewController: searchVC),
-            UINavigationController(rootViewController: settingsVC)
-        ]
-        
-        return tabbar
+        if url.scheme == "cinemovie" {
+            NotificationCenter.default.post(name: Notification.Name(ConstantKeys.OAUTH_CALLBACK.rawValue), object: url)
+        }
     }
 }
 

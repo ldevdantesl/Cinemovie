@@ -5,7 +5,12 @@
 //  Created by Buzurg Rakhimzoda on 30.01.2025
 //
 
+import UIKit
+
 protocol SettingsScreenPresenterProtocol: AnyObject {
+    // MARK: - START
+    func didPressLogoutButton()
+    func viewDidLoaded()
 }
 
 final class SettingsScreenPresenter {
@@ -20,4 +25,15 @@ final class SettingsScreenPresenter {
 }
 
 extension SettingsScreenPresenter: SettingsScreenPresenterProtocol {
+    // MARK: - STARTING
+    func didPressLogoutButton() {
+        interactor.logout()
+        DispatchQueue.main.async { [weak self] in
+            self?.router.navigateBackToLogin()
+        }
+    }
+    
+    func viewDidLoaded() {
+        interactor.showSessionID()
+    }
 }
