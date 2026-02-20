@@ -19,7 +19,7 @@ protocol TVSeriesDetailsScreenViewProtocol: AnyObject {
         _ details: TVSeriesDetails, cast: [Cast],
         crew: [Cast], videos: [Video],
         reviews: [Review], recommends: [TVSeries],
-        accountStates: MediaAccountStates
+        accountStates: MediaAccountStatesAPIResponse
     )
 }
 
@@ -241,7 +241,7 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
         _ details: TVSeriesDetails, cast: [Cast],
         crew: [Cast], videos: [Video],
         reviews: [Review], recommends: [TVSeries],
-        accountStates: MediaAccountStates
+        accountStates: MediaAccountStatesAPIResponse
     ) {
         self.downloadView.hide()
         

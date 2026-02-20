@@ -12,7 +12,7 @@ protocol DiscoverScreenPresenterProtocol: AnyObject {
     func viewDidLoaded()
     
     // MARK: - USER INITIATED
-    func didTapMedia(_ media: Media)
+    func didTapMedia(_ media: MediaProtocol)
     func didTapPerson(_ person: Person)
     func didChangeMediaType(_ mediaType: MediaTypes)
     func didTapSearch()
@@ -90,7 +90,7 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
     }
     
     // MARK: - USER INITIATED
-    func didTapMedia(_ media: any Media) {
+    func didTapMedia(_ media: any MediaProtocol) {
         switch media {
         case is Movie: router.navigateToMovieDetails(movieID: media.id)
         case is TVSeries: router.navigateToTVSeriesDetails(seriesID: media.id)
@@ -174,7 +174,7 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
     }
     
     // MARK: - PRIVATE FUNC
-    private func generateListSections<T: MediaListType, M: Media>(
+    private func generateListSections<T: MediaListType, M: MediaProtocol>(
         from lists: [(listType: T, media: [M])],
         sectionBuilder: (T) -> Sections
     ) -> [(section: Sections, items: [Items])] {

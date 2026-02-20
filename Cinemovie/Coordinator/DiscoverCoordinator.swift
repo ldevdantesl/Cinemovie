@@ -8,13 +8,13 @@
 import Foundation
 import UIKit
 
-final class DiscoverCoordinator: Coordinator {
+final class DiscoverCoordinator: CoordinatorProtocol {
     let navigationController: UINavigationController = UINavigationController()
     
-    private let tmdbService: TMDBService
+    private let networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     func start() {

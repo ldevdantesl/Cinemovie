@@ -12,7 +12,7 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
     
     // MARK: - USER INITIATED
-    func didTapMedia(media: Media)
+    func didTapMedia(media: MediaProtocol)
     func didTapShareButton()
     func didTapRateButton()
     func didTapBackButton()
@@ -31,7 +31,7 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
     func didGetTVSeriesReviews(_ reviews: [Review])
     func didGetTVSeriesRecommends(_ series: [TVSeries])
     func didGetTVSeasonDetails(_ details: TVSeasonDetails)
-    func didGetTVSeriesAccountStates(_ accountStates: MediaAccountStates)
+    func didGetTVSeriesAccountStates(_ accountStates: MediaAccountStatesAPIResponse)
     func didGetUserLists(_ userLists: [UserList])
     
     func didAddOrRemoveFromWatchlist(message: String)
@@ -59,7 +59,7 @@ final class TVSeriesDetailsScreenPresenter {
     private var seriesSimilars: [TVSeries] = []
     private var seriesReviews: [Review] = []
     var userLists: [UserList] = []
-    private var seriesAccountStates: MediaAccountStates = .empty
+    private var seriesAccountStates: MediaAccountStatesAPIResponse = .empty
 
     init(seriesID: Int, interactor: TVSeriesDetailsScreenInteractorProtocol, router: TVSeriesDetailsScreenRouterProtocol) {
         self.seriesID = seriesID
@@ -101,7 +101,7 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
     }
     
     // MARK: - USER INITIATED
-    func didTapMedia(media: Media) {
+    func didTapMedia(media: MediaProtocol) {
         switch media {
         case let movie as Movie: router.navigateToMovie(movie: movie)
         case let series as TVSeries: router.navigateToAnotherTVSeries(series: series)
@@ -189,7 +189,7 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
         router.showSeasonPopUp(seasonDetails: details)
     }
 
-    func didGetTVSeriesAccountStates(_ accountStates: MediaAccountStates) {
+    func didGetTVSeriesAccountStates(_ accountStates: MediaAccountStatesAPIResponse) {
         self.seriesAccountStates = accountStates
         downloadGroup.leave()
     }

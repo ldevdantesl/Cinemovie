@@ -58,9 +58,9 @@ final class MyListsScreenPresenter {
     // MARK: - PRIVATE PROPERTIES
     private let downloadGroup = DispatchGroup()
     
-    private var watchlistMedia: [Media] = []
-    private var favoriteMedia: [Media] = []
-    private var ratedMedia: [Media] = []
+    private var watchlistMedia: [MediaProtocol] = []
+    private var favoriteMedia: [MediaProtocol] = []
+    private var ratedMedia: [MediaProtocol] = []
     private var userListDetails: [UserListDetails] = []
     
     init(interactor: MyListsScreenInteractorProtocol, router: MyListsScreenRouterProtocol) {
@@ -69,7 +69,7 @@ final class MyListsScreenPresenter {
     }
     
     // MARK: - PRIVATE FUNC
-    private func sortedMedia(media: [Media]) -> [Media] {
+    private func sortedMedia(media: [MediaProtocol]) -> [MediaProtocol] {
         let movies = media.compactMap { $0 as? Movie }
         let series = media.compactMap { $0 as? TVSeries }
         return movies + series

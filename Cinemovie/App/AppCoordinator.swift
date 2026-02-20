@@ -11,13 +11,13 @@ import UIKit
 final class AppCoordinator: Coordinator {
     private let window: UIWindow?
 
-    private let authService: AuthService
-    private let tmdbService: TMDBService
+    private let authContext: AuthContextProtocol
+    private let networkService: NetworkServiceProtocol
     
-    init(window: UIWindow?, authService: AuthService, tmdbService: TMDBService) {
+    init(window: UIWindow?, authService: AuthContextProtocol, networkService: NetworkServiceProtocol) {
         self.window = window
-        self.authService = authService
-        self.tmdbService = tmdbService
+        self.authContext = authService
+        self.networkService = networkService
     }
     
     func start() {
@@ -31,7 +31,7 @@ final class AppCoordinator: Coordinator {
     }
     
     private func checkAuthentication() {
-        authService.isLoggedIn ? showMainApp() : showLoginPage()
+        authContext.isLoggedIn ? showMainApp() : showLoginPage()
     }
     
     func showMainApp() {

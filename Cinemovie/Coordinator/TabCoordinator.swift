@@ -8,28 +8,28 @@
 import Foundation
 import UIKit
 
-final class TabCoordinator: Coordinator {
+final class TabCoordinator: CoordinatorProtocol {
     var tabBarController: UITabBarController
 
-    private let authService: AuthService
-    private let tmdbService: TMDBService
+    private let authContext: AuthContextProtocol
+    private let networkService: NetworkServiceProtocol
     weak var appCoordinator: AppCoordinator?
 
     init(
-        authService: AuthService,
-        tmdbService: TMDBService,
+        authContext: AuthContextProtocol,
+        networkService: NetworkServiceProtocol,
         appCoordinator: AppCoordinator?
     ) {
         self.tabBarController = UITabBarController()
-        self.authService = authService
-        self.tmdbService = tmdbService
+        self.authContext = authContext
+        self.networkService = networkService
         self.appCoordinator = appCoordinator
     }
 
     func start() {
-        let homeCoordinator = DiscoverCoordinator(tmdbService: tmdbService)
-        let watchlistCoordinator = MyListsCoordinator(tmdbService: tmdbService)
-        let settingsCoordinator = SettingsCoordinator(authService: authService, appCoordinator: appCoordinator)
+        let homeCoordinator = DiscoverCoordinator(networkService: networkService)
+        let watchlistCoordinator = MyListsCoordinator(networkService: networkService)
+        let settingsCoordinator = SettingsCoordinator(authContext: authContext, appCoordinator: appCoordinator)
 
         homeCoordinator.start()
         watchlistCoordinator.start()

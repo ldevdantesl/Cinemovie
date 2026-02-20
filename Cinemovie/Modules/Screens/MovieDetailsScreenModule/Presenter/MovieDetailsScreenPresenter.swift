@@ -11,7 +11,7 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
 
     // MARK: - USER INITIATED
-    func didTapMedia(media: Media)
+    func didTapMedia(media: MediaProtocol)
     func didTapIMDBImage()
     func didTapShareButton()
     func didTapRateButton()
@@ -29,7 +29,7 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didGetMovieVideos(videos: [Video])
     func didGetMovieReviews(_ reviews: [Review])
     func didGetMovieBelongsToCollectionDetails(_ details: BelongsToCollectionDetails)
-    func didGetMovieAccountStates(_ accountStates: MediaAccountStates)
+    func didGetMovieAccountStates(_ accountStates: MediaAccountStatesAPIResponse)
     func didGetUserLists(_ userLists: [UserList])
     
     // MARK: - USER INITIATED
@@ -62,7 +62,7 @@ final class MovieDetailsScreenPresenter {
     private var movieRecommends: [Movie] = []
     private var belongsToCollectionDetails: BelongsToCollectionDetails?
     var userLists: [UserList] = []
-    private var movieAccountStates: MediaAccountStates = .empty
+    private var movieAccountStates: MediaAccountStatesAPIResponse = .empty
 
     init(movieID: Int, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
         self.movieID = movieID
@@ -109,7 +109,7 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     }
     
     // MARK: - USER INITIATED
-    func didTapMedia(media: Media) {
+    func didTapMedia(media: MediaProtocol) {
         switch media {
         case let movie as Movie: router.navigateToAnotherMovie(movie: movie)
         case let series as TVSeries: router.navigateToSeries(series: series)
@@ -199,7 +199,7 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         print("Successfully added to favorite: \(message)")
     }
 
-    func didGetMovieAccountStates(_ accountStates: MediaAccountStates) {
+    func didGetMovieAccountStates(_ accountStates: MediaAccountStatesAPIResponse) {
         self.movieAccountStates = accountStates
         dispatchGroup.leave()
     }

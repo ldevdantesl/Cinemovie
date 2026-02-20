@@ -8,17 +8,22 @@
 import Foundation
 
 final class DIContainer {
-    let userService: UserService
-    let accountStore: AccountStore
-    let networkService: NetworkService
-    let authService: AuthService
-    let tmdbService: TMDBService
+    let userService: CMUserService
+    let accountStore: CMAccountStore
+    let networkService: CMNetworkService
+    let errorService: CMErrorService
     
     init() {
-        self.userService = UserServiceImpl()
-        self.accountStore = AccountStoreImpl()
-        self.networkService = NetworkServiceImpl()
-        self.authService = AuthServiceV4Impl(accountStore: accountStore, networkService: networkService)
-        self.tmdbService = TMDBServiceImpl(accountStore: accountStore, networkService: networkService, userService: userService)
+        let logger = CMNetworkLogger()
+        let userService = CMUserService()
+        let keychainService = CMKeychainService()
+        let config = APIConfiguration(userService: userService)
+        let httpClient = HTTPClient(logger: logger)
+        let authContext = CMAccountStore(keychainService: keychainService)
+        
+        self.userService = userService
+        self.accountStore = authContext
+        self.networkService = CMNetworkService(httpClient: httpClient, config: config, authContext: authContext)
+        self.errorService = CMErrorService()
     }
 }

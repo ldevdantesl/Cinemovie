@@ -11,14 +11,14 @@ protocol AccountListDetailsScreenPresenterProtocol: AnyObject {
     
     // MARK: - USER INITIATED
     func didTapBackButton()
-    func didTapAnyMedia(media: Media)
+    func didTapAnyMedia(media: MediaProtocol)
     func didCallPagination(for mediaType: MediaTypes)
     func didCallRefresh(for mediaType: MediaTypes)
     
     // MARK: - PROGRAMMATIC
-    func didReceiveMedia(_ media: [Media])
-    func didReceiveNewMedia(_ media: [Media])
-    func didReceiveRefreshingMedia(_ media: [Media])
+    func didReceiveMedia(_ media: [MediaProtocol])
+    func didReceiveNewMedia(_ media: [MediaProtocol])
+    func didReceiveRefreshingMedia(_ media: [MediaProtocol])
     
     // MARK: - ERROR
     func didRecieveError(_ error: Error)
@@ -67,7 +67,7 @@ extension AccountListDetailsScreenPresenter: AccountListDetailsScreenPresenterPr
         router.goBack()
     }
     
-    func didTapAnyMedia(media: any Media) {
+    func didTapAnyMedia(media: any MediaProtocol) {
         switch media {
         case let movie as Movie: router.navigateToMovieDetails(movieId: movie.id)
         case let series as TVSeries: router.navigateToTVSeriesDetails(seriesID: series.id)
@@ -88,7 +88,7 @@ extension AccountListDetailsScreenPresenter: AccountListDetailsScreenPresenterPr
     }
     
     // MARK: - INITIAL
-    func didReceiveMedia(_ media: [any Media]) {
+    func didReceiveMedia(_ media: [any MediaProtocol]) {
         guard !media.isEmpty else { downloadGroup.leave(); return }
         if let movies = media as? [Movie] {
             self.movies = movies
@@ -99,7 +99,7 @@ extension AccountListDetailsScreenPresenter: AccountListDetailsScreenPresenterPr
     }
     
     // MARK: - PAGINATED
-    func didReceiveNewMedia(_ media: [any Media]) {
+    func didReceiveNewMedia(_ media: [any MediaProtocol]) {
         if let movies = media as? [Movie] {
             self.movies.append(contentsOf: movies)
             self.view?.didRecieveNewMedia(mediaType: .movie, media: movies, paginating: true)
@@ -112,7 +112,7 @@ extension AccountListDetailsScreenPresenter: AccountListDetailsScreenPresenterPr
     }
     
     // MARK: - REFRESHING
-    func didReceiveRefreshingMedia(_ media: [any Media]) {
+    func didReceiveRefreshingMedia(_ media: [any MediaProtocol]) {
         if let movies = media as? [Movie] {
             self.movies = movies
             self.view?.didRecieveNewMedia(mediaType: .movie, media: movies, paginating: false)

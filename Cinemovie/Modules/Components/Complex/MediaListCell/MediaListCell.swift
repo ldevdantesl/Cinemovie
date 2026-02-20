@@ -11,10 +11,10 @@ import SnapKit
 final class MediaListCellViewModel: CellViewModelBaseClass {
     let listName: String
     let listSubtitle: String?
-    let mediaItems: [Media]
-    let didTapMediaItem: ((Media) -> Void)?
+    let mediaItems: [MediaProtocol]
+    let didTapMediaItem: ((MediaProtocol) -> Void)?
     
-    init(mediaItems: [Media], listName: String, listSubtitle: String? = nil, didTapMediaItem: ((Media) -> Void)? = nil) {
+    init(mediaItems: [MediaProtocol], listName: String, listSubtitle: String? = nil, didTapMediaItem: ((MediaProtocol) -> Void)? = nil) {
         self.mediaItems = mediaItems
         self.listName = listName
         self.listSubtitle = listSubtitle
@@ -34,7 +34,7 @@ final class MediaListCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: MediaListCellViewModel?
-    private var items: [Media] = []
+    private var items: [MediaProtocol] = []
     
     // MARK: - VIEW PROPERTIES
     private let titleLabel: UILabel = {

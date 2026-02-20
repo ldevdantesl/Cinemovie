@@ -21,7 +21,7 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
         cast: [Cast], crew: [Cast],
         recommended: [Movie], reviews: [Review],
         belongsToCollectionDetails: BelongsToCollectionDetails?,
-        accountStates: MediaAccountStates
+        accountStates: MediaAccountStatesAPIResponse
     )
     
     // MARK: - ERROR HANDLING
@@ -225,7 +225,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         cast: [Cast], crew: [Cast],
         recommended: [Movie], reviews: [Review],
         belongsToCollectionDetails: BelongsToCollectionDetails?,
-        accountStates: MediaAccountStates
+        accountStates: MediaAccountStatesAPIResponse
     ) {
         self.downloadingView.hide()
         let backdropVM = BackdropImageCellViewModel(

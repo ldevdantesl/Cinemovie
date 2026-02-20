@@ -8,15 +8,15 @@
 import Foundation
 import UIKit
 
-final class SettingsCoordinator: Coordinator {
+final class SettingsCoordinator: CoordinatorProtocol {
     var navigationController: UINavigationController
 
-    private let authService: AuthService
+    private let authContext: AuthContextProtocol
     weak var appCoordinator: AppCoordinator?
     
-    init(authService: AuthService, appCoordinator: AppCoordinator?) {
+    init(authContext: AuthContextProtocol, appCoordinator: AppCoordinator?) {
         self.navigationController = UINavigationController()
-        self.authService = authService
+        self.authContext = authContext
         self.appCoordinator = appCoordinator
     }
     
