@@ -11,17 +11,17 @@ import UIKit
 final class SettingsCoordinator: CoordinatorProtocol {
     var navigationController: UINavigationController
 
-    private let authContext: AuthContextProtocol
+    private let networkService: NetworkServiceProtocol
     weak var appCoordinator: AppCoordinator?
     
-    init(authContext: AuthContextProtocol, appCoordinator: AppCoordinator?) {
+    init(networkService: NetworkServiceProtocol, appCoordinator: AppCoordinator?) {
         self.navigationController = UINavigationController()
-        self.authContext = authContext
+        self.networkService = networkService
         self.appCoordinator = appCoordinator
     }
     
     func start() {
-        let settingsModule = SettingsScreenAssembler.assemble(authService: authService, appCoordinator: appCoordinator)
+        let settingsModule = SettingsScreenAssembler.assemble(networkService: networkService, appCoordinator: appCoordinator)
         settingsModule.tabBarItem = UITabBarItem(
             title: "Settings",
             image: UIImage(systemName: "gearshape"),

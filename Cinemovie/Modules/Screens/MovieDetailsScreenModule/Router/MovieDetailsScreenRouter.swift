@@ -24,25 +24,25 @@ protocol MovieDetailsScreenRouterProtocol {
 
 final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
     weak var viewController: MovieDetailsScreenVC?
-    private let tmdbService: TMDBService
+    private let networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     // MARK: - NAVIGATE
     func navigateToSeries(series: TVSeries) {
-        let seriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, tmdbService: tmdbService)
+        let seriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, networkService: networkService)
         viewController?.navigationController?.pushViewController(seriesDetails, animated: true)
     }
     
     func navigateToAnotherMovie(movie: Movie) {
-        let newMovieDetails = MovieDetailsScreenAssembler.assemble(movieID: movie.id, tmdbService: tmdbService)
+        let newMovieDetails = MovieDetailsScreenAssembler.assemble(movieID: movie.id, networkService: networkService)
         viewController?.navigationController?.pushViewController(newMovieDetails, animated: true)
     }
     
     func navigateToPersonDetails(creditID: String) {
-        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, tmdbService: tmdbService)
+        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, networkService: networkService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -99,7 +99,7 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
     }
     
     func presentAddToListModal(movieID: Int) {
-        let vc = AddToListModalAssembler.assemble(itemID: movieID, mediaType: .movie, tmdbService: tmdbService)
+        let vc = AddToListModalAssembler.assemble(itemID: movieID, mediaType: .movie, networkService: networkService)
         vc.modalPresentationStyle = .pageSheet
     
         if let sheet = vc.sheetPresentationController {

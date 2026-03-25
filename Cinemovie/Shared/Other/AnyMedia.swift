@@ -18,6 +18,10 @@ enum AnyMedia: Decodable, MediaProtocol {
         }
     }
     
+    static func toMedia(from media: [AnyMedia]) -> [MediaProtocol] {
+        return media.map { $0.wrapped }
+    }
+    
     var id: Int { wrapped.id }
      
     var adult: Bool? { wrapped.adult }

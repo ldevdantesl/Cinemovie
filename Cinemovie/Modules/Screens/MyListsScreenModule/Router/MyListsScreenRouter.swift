@@ -19,19 +19,19 @@ protocol MyListsScreenRouterProtocol {
 
 final class MyListsScreenRouter: MyListsScreenRouterProtocol {
     weak var viewController: MyListsScreenVC?
-    private let tmdbService: TMDBService
+    private let networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     func navigateToAccountList(listType: AccountListTypes) {
-        let vc = AccountListDetailsScreenAssembler.assemble(listType: listType, tmdbService: tmdbService)
+        let vc = AccountListDetailsScreenAssembler.assemble(listType: listType, networkService: networkService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
     func navigateToUserList(userListDetails: UserListDetails) {
-        let vc = UserListDetailsScreenAssembler.assemble(userListDetails: userListDetails, tmdbService: tmdbService)
+        let vc = UserListDetailsScreenAssembler.assemble(userListDetails: userListDetails, networkService: networkService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     

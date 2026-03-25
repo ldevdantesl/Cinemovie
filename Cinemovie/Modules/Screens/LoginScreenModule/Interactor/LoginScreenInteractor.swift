@@ -15,101 +15,59 @@ protocol LoginScreenInteractorProtocol: AnyObject {
     // MARK: - AUTHENTICATION
     func exchangeRequestTokenForSession(_ token: String)
     func getSessionIDUsingAccessToken(accessToken: String)
-    func exchangeRequestTokenForAccessToken()
-    
-    // MARK: - OTHER
-    func storeAccountID()
 }
 
 final class LoginScreenInteractor: LoginScreenInteractorProtocol {
     weak var presenter: LoginScreenPresenterProtocol?
-    private let authService: AuthService
+    private let networkService: NetworkServiceProtocol
     
-    private var requestToken: String?
-    
-    init(authService: AuthService) {
-        self.authService = authService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     // MARK: - LOGIN
     func loginAsGuest() {
-        authService.loginAsGuest { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success:
-                self.presenter?.didFinishLogingAsGuest()
-            case .failure(let error):
+        Task {
+            do {
+                let sessionID = try await networkService.auth.loginAsGuest()
+                self.presenter?.didFinishLoging(sessionID: sessionID.guestSessionId)
+            } catch {
                 self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func loginWithTMDB() {
-        if let authServiceV3 = authService as? AuthServiceV3 {
-            authServiceV3.createRequestToken { [weak self] result in
-                guard let self = self else { return }
-                switch result {
-                case .success(let token):
-                    self.requestToken = token
-                    self.presenter?.openOAuthURLWithToken(token: token)
-                case .failure(let error): self.presenter?.didRecieveError(error)
-                }
-            }
-        } else if let authServiceV4 = authService as? AuthServiceV4 {
-            authServiceV4.createRequestToken { [weak self] result in
-                guard let self = self else { return }
-                switch result {
-                case .success(let success):
-                    self.requestToken = success.requestToken
-                    self.presenter?.openOAuthURLWithTokenV4(requestToken: success.requestToken)
-                case .failure(let failure): self.presenter?.didRecieveError(failure)
-                }
+        Task {
+            do {
+                let result = try await networkService.auth.createRequestToken()
+                self.presenter?.openOAuthURLWithToken(token: result.requestToken)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     // MARK: - AUTHENTICATION
     func exchangeRequestTokenForSession(_ token: String) {
-        guard let authServiceV3 = authService as? AuthServiceV3 else { return }
-        authServiceV3.exchangeRequestToSession(token: token) { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case .success: self.presenter?.didLogInWithOAuthUsingV3()
-            case .failure(let error): self.presenter?.didRecieveError(error)
-            }
-        }
-    }
-    
-    func exchangeRequestTokenForAccessToken() {
-        guard let authServiceV4 = authService as? AuthServiceV4, let requestToken = requestToken else { return }
-        authServiceV4.exchangeRequestToAccessToken(token: requestToken) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didReceiveAccessToken(accessToken: success.accessToken)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let sessionID = try await networkService.auth.exchangeRequestToAccessToken(token: token)
+                self.presenter?.didLogInWithOAuth(sessionID: sessionID.accessToken)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getSessionIDUsingAccessToken(accessToken: String) {
-        guard let authServiceV4 = authService as? AuthServiceV4 else { return }
-        authServiceV4.getSessionIDUsingAccessToken(token: accessToken) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success: self.presenter?.didLogInWithOAuthUsingV4()
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let sessionID = try await networkService.auth.getSessionIDUsingAccessToken(token: accessToken)
+                self.presenter?.didFinishLoging(sessionID: sessionID.sessionId)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
-        }
-    }
-    
-    // MARK: - OTHER
-    func storeAccountID() {
-        guard let authServiceV3 = authService as? AuthServiceV3 else { return }
-        authServiceV3.storeAccountIDIntoAccountStore { [weak self] in
-            guard let self = self else { return }
-            $0 ? self.presenter?.didStoreAccountID() : ()
-            print("Account ID \($0 ? "successfully" : "has not been") stored")
         }
     }
 }

@@ -15,10 +15,10 @@ protocol AccountListDetailsScreenRouterProtocol {
 
 final class AccountListDetailsScreenRouter: AccountListDetailsScreenRouterProtocol {
     weak var viewController: AccountListDetailsScreenVC?
-    private let tmdbService: TMDBService
+    private let networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     func goBack() {
@@ -26,12 +26,12 @@ final class AccountListDetailsScreenRouter: AccountListDetailsScreenRouterProtoc
     }
     
     func navigateToMovieDetails(movieId: Int) {
-        let vc = MovieDetailsScreenAssembler.assemble(movieID: movieId, tmdbService: tmdbService)
+        let vc = MovieDetailsScreenAssembler.assemble(movieID: movieId, networkService: networkService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
     func navigateToTVSeriesDetails(seriesID: Int) {
-        let vc = TVSeriesDetailsScreenAssembler.assemble(seriesID: seriesID, tmdbService: tmdbService)
+        let vc = TVSeriesDetailsScreenAssembler.assemble(seriesID: seriesID, networkService: networkService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
 }

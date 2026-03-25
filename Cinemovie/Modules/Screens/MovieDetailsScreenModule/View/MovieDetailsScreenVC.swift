@@ -298,6 +298,7 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
     
     // MARK: - ERROR HANDLING
     func didRecieveError(_ errorStr: String, goesBack: Bool) {
+        guard presentedViewController == nil else { return }
         let alert = UIAlertController(
             title: "Oops..",
             message: errorStr,
@@ -310,8 +311,6 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         }
         
         alert.addAction(action)
-        DispatchQueue.main.async {
-            self.present(alert, animated: true, completion: nil)
-        }
+        self.present(alert, animated: true, completion: nil)
     }
 }

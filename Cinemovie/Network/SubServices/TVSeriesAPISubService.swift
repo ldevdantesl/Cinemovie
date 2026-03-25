@@ -9,7 +9,7 @@ import Foundation
 
 protocol TVSeriesAPISubServiceProtocol {
     func getDetails(seriesID: Int) async throws -> TVSeriesDetails
-    func getAccountState(seriesID: Int, sessionID: String) async throws -> MediaAccountStatesAPIResponse
+    func getAccountState(seriesID: Int) async throws -> MediaAccountStatesAPIResponse
     func getCast(seriesID: Int) async throws -> CastAPIResponse<Cast>
     func getVideos(seriesID: Int) async throws -> MediaVideosAPIResponse
     func getReviews(seriesID: Int) async throws -> MediaReviewsAPIResponse
@@ -23,21 +23,24 @@ protocol TVSeriesAPISubServiceProtocol {
 final class TVSeriesAPISubService: TVSeriesAPISubServiceProtocol {
     private let httpClient: HTTPClientProtocol
     private let config: APIConfigurationProtocol
+    private let authContext: AuthContextProtocol
     private var queryParams: [String : String] {
         ["language" : config.language]
     }
     
-    init(httpClient: HTTPClientProtocol, config: APIConfigurationProtocol) {
+    init(httpClient: HTTPClientProtocol, config: APIConfigurationProtocol, authContext: AuthContextProtocol) {
         self.httpClient = httpClient
         self.config = config
+        self.authContext = authContext
     }
     
     func getDetails(seriesID: Int) async throws -> TVSeriesDetails {
         try await httpClient.request(TVSeriesEndpoints.details(seriesID: seriesID, queryParams: queryParams))
     }
     
-    func getAccountState(seriesID: Int, sessionID: String) async throws -> MediaAccountStatesAPIResponse {
-        try await httpClient.request(TVSeriesEndpoints.accountState(seriesID: seriesID, sessionID: sessionID))
+    func getAccountState(seriesID: Int) async throws -> MediaAccountStatesAPIResponse {
+        guard let sessionID = authContext.sessionID else { throw APIError.unauthorized }
+        return try await httpClient.request(TVSeriesEndpoints.accountState(seriesID: seriesID, sessionID: sessionID))
     }
     
     func getCast(seriesID: Int) async throws -> CastAPIResponse<Cast> {
@@ -54,17 +57,17 @@ final class TVSeriesAPISubService: TVSeriesAPISubServiceProtocol {
     
     func getSimilar(seriesID: Int) async throws -> [TVSeries] {
         let response: PaginatedAPIResponse<TVSeries> = try await httpClient.request(TVSeriesEndpoints.similar(seriesID: seriesID, queryParams: queryParams))
-        return response.result
+        return response.results
     }
     
     func getRecommendations(seriesID: Int) async throws -> [TVSeries] {
         let response: PaginatedAPIResponse<TVSeries> = try await httpClient.request(TVSeriesEndpoints.recommendations(seriesID: seriesID, queryParams: queryParams))
-        return response.result
+        return response.results
     }
     
     func getTrending(timeWindow: TrendingTimeWindow) async throws -> [TVSeries] {
         let response: PaginatedAPIResponse<TVSeries> = try await httpClient.request(TVSeriesEndpoints.trending(timeWindow: timeWindow, queryParams: queryParams))
-        return response.result
+        return response.results
     }
     
     func getSeasonDetails(seriesID: Int, seasonNumber: Int) async throws -> TVSeasonDetails {
@@ -73,6 +76,6 @@ final class TVSeriesAPISubService: TVSeriesAPISubServiceProtocol {
     
     func getList(listType: TVSeriesListType) async throws -> [TVSeries] {
         let response: PaginatedAPIResponse<TVSeries> = try await httpClient.request(TVSeriesEndpoints.list(listType: listType, extraParams: queryParams))
-        return response.result
+        return response.results
     }
 }

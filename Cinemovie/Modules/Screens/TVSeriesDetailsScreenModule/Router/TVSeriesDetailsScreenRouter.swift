@@ -26,10 +26,10 @@ protocol TVSeriesDetailsScreenRouterProtocol {
 
 final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     weak var viewController: TVSeriesDetailsScreenVC?
-    private let tmdbService: TMDBService
+    private let networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     // MARK: - NAVIGATION
@@ -38,17 +38,17 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     }
     
     func navigateToAnotherTVSeries(series: TVSeries) {
-        let newSeriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, tmdbService: tmdbService)
+        let newSeriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, networkService: networkService)
         viewController?.navigationController?.pushViewController(newSeriesDetails, animated: true)
     }
     
     func navigateToPersonDetails(creditID: String) {
-        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, tmdbService: tmdbService)
+        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, networkService: networkService)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
     func navigateToMovie(movie: Movie) {
-        let movieDetailsVC = MovieDetailsScreenAssembler.assemble(movieID: movie.id, tmdbService: tmdbService)
+        let movieDetailsVC = MovieDetailsScreenAssembler.assemble(movieID: movie.id, networkService: networkService)
         viewController?.navigationController?.pushViewController(movieDetailsVC, animated: true)
     }
     
@@ -116,7 +116,7 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     }
     
     func presentAddToListModal(seriesID: Int) {
-        let vc = AddToListModalAssembler.assemble(itemID: seriesID, mediaType: .tvShow, tmdbService: tmdbService)
+        let vc = AddToListModalAssembler.assemble(itemID: seriesID, mediaType: .tvShow, networkService: networkService)
         vc.modalPresentationStyle = .pageSheet
     
         if let sheet = vc.sheetPresentationController {

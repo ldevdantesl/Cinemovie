@@ -15,7 +15,7 @@ protocol AuthenticationAPISubServiceProtocol {
     
     @discardableResult
     func loginAsGuest() async throws -> GuestSessionResponse
-    func logout(accessToken: String) async throws
+    func logout() async throws
     
 }
 
@@ -48,7 +48,8 @@ final class AuthenticationAPISubService: AuthenticationAPISubServiceProtocol {
         try await httpClient.request(AuthEndpoints.loginAsGuest)
     }
     
-    func logout(accessToken: String) async throws {
+    func logout() async throws {
+        guard let accessToken = authContext.accessToken else { throw APIError.unauthorized }
         try await httpClient.request(AuthEndpoints.logout(accessToken: accessToken))
     }
 }

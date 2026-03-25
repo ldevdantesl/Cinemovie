@@ -60,6 +60,14 @@ final class HTTPClient: HTTPClientProtocol {
         } catch let error as APIError {
             let duration = CFAbsoluteTimeGetCurrent() - startTime
             logger?.logError(error, duration: duration)
+            
+            if case .statusCode(let code, let data) = error,
+               let data = data,
+               let body = String(data: data, encoding: .utf8) {
+                print("❌ Response body [\(code)]: \(body)")
+            }
+        
+            
             throw error
         } catch let error as URLError {
             let duration = CFAbsoluteTimeGetCurrent() - startTime
@@ -79,6 +87,11 @@ final class HTTPClient: HTTPClientProtocol {
         do {
             return try decoder.decode(T.self, from: data)
         } catch {
+            if let body = String(data: data, encoding: .utf8) {
+                print("🔴 Decoding failed for \(T.self): \(error)")
+                print("🔴 Raw JSON: \(body)")
+            }
+
             throw APIError.decodingFailed(error)
         }
 
@@ -92,8 +105,14 @@ final class HTTPClient: HTTPClientProtocol {
             throw APIError.invalidURL
         }
         
-        if let queryItems = endpoint.queryItems, !queryItems.isEmpty {
-            components.queryItems = queryItems
+        var allQueryItems = endpoint.queryItems ?? []
+
+        if case .apiKey(let key) = endpoint.auth {
+            allQueryItems.append(URLQueryItem(name: "api_key", value: key))
+        }
+
+        if !allQueryItems.isEmpty {
+            components.queryItems = allQueryItems
         }
         
         guard let url = components.url else {
@@ -103,6 +122,10 @@ final class HTTPClient: HTTPClientProtocol {
         var request = URLRequest(url: url)
         request.httpMethod = endpoint.method.rawValue
         request.timeoutInterval = timeout
+        
+        if case .bearer(let token) = endpoint.auth {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
         
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")

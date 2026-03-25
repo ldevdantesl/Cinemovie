@@ -16,24 +16,24 @@ protocol DiscoverScreenRouterProtocol {
 final class DiscoverScreenRouter: DiscoverScreenRouterProtocol {
     weak var viewController: DiscoverScreenVC?
     
-    private let tmdbService: TMDBService
+    private let networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     func navigateToMovieDetails(movieID: Int) {
-        let movieDetails = MovieDetailsScreenAssembler.assemble(movieID: movieID, tmdbService: tmdbService)
+        let movieDetails = MovieDetailsScreenAssembler.assemble(movieID: movieID, networkService: networkService)
         viewController?.navigationController?.pushViewController(movieDetails, animated: true)
     }
     
     func navigateToTVSeriesDetails(seriesID: Int) {
-        let seriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: seriesID, tmdbService: tmdbService)
+        let seriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: seriesID, networkService: networkService)
         viewController?.navigationController?.pushViewController(seriesDetails, animated: true)
     }
     
     func navigateToPersonDetails(personID: Int) {
-        let newVC = PersonDetailsScreenAssembler.assemble(personID: personID, tmdbService: tmdbService)
+        let newVC = PersonDetailsScreenAssembler.assemble(personID: personID, networkService: networkService)
         viewController?.navigationController?.pushViewController(newVC, animated: true)
     }
 }

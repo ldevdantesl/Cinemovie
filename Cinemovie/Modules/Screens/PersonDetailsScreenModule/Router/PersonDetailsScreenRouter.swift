@@ -16,10 +16,10 @@ protocol PersonDetailsScreenRouterProtocol {
 
 final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
     weak var viewController: PersonDetailsScreenVC?
-    private let tmdbService: TMDBService
+    private let networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     func goBack() {
@@ -27,7 +27,7 @@ final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
     }
     
     func navigateToMovie(movieID: Int) {
-        let movieDetailsVC = MovieDetailsScreenAssembler.assemble(movieID: movieID, tmdbService: tmdbService)
+        let movieDetailsVC = MovieDetailsScreenAssembler.assemble(movieID: movieID, networkService: networkService)
         viewController?.navigationController?.pushViewController(movieDetailsVC, animated: true)
     }
     
@@ -46,7 +46,7 @@ final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
     }
     
     func navigateToSeries(seriesID: Int) {
-        let seriesVC = TVSeriesDetailsScreenAssembler.assemble(seriesID: seriesID, tmdbService: tmdbService)
+        let seriesVC = TVSeriesDetailsScreenAssembler.assemble(seriesID: seriesID, networkService: networkService)
         viewController?.navigationController?.pushViewController(seriesVC, animated: true)
     }
 }

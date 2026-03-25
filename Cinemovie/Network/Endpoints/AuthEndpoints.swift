@@ -14,6 +14,19 @@ enum AuthEndpoints: Endpoint {
     case getSessionIDUsingAccessToken(accessToken: String)
     case loginAsGuest
     
+    var baseURL: String {
+        switch self {
+        case .createRequestToken, .requestAccessToken, .logout:
+            return CONSTANTS.baseURLV4String
+        default:
+            return CONSTANTS.baseURLString
+        }
+    }
+    
+    var auth: EndpointAuth {
+        return .bearer(CONSTANTS.apiReadAcessToken)
+    }
+    
     var path: String {
         switch self {
         case .createRequestToken: return "/auth/request_token"
@@ -27,9 +40,11 @@ enum AuthEndpoints: Endpoint {
     var method: HTTPMethod {
         switch self {
         case .logout: return .delete
+        case .loginAsGuest: return .get
         default: return .post
         }
     }
+    
     
     var body: Data? {
         switch self {

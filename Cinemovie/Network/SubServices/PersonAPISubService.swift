@@ -55,6 +55,9 @@ final class PersonAPISubService: PersonAPISubServiceProtocol {
     }
     
     func trending(timeWindow: TrendingTimeWindow) async throws -> [Person] {
-        try await httpClient.request(PersonEndpoints.trending(timeWindow: timeWindow, queryParams: queryParams))
+        let response: PaginatedAPIResponse<Person> = try await httpClient.request(
+            PersonEndpoints.trending(timeWindow: timeWindow, queryParams: queryParams)
+        )
+        return response.results
     }
 }

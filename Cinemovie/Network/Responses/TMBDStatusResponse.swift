@@ -14,7 +14,7 @@ struct TMDBStatusResponse: Decodable {
     let statusMessage: String?
 
     enum CodingKeys: String, CodingKey {
-        case success
+        case success, id
         case statusCode = "status_code"
         case statusMessage = "status_message"
     }

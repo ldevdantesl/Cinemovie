@@ -44,26 +44,26 @@ final class UserListAPISubService: UserListAPISubServiceProtocol {
     func getUserLists(page: Int) async throws -> [UserList] {
         guard let accountID = authContext.accountID, let accessToken = authContext.accessToken else { throw APIError.unauthorized }
         let response: PaginatedAPIResponse<UserList> = try await httpClient.request(UserListEndpoints.getUserLists(accountID: accountID, accessToken: accessToken, page: page))
-        return response.result
+        return response.results
     }
     
     func getUserListDetails(listID: Int, page: Int) async throws -> UserListDetails {
-        guard let accountID = authContext.accountID, let accessToken = authContext.accessToken else { throw APIError.unauthorized }
+        guard let accessToken = authContext.accessToken else { throw APIError.unauthorized }
         return try await httpClient.request(UserListEndpoints.getUserListDetails(accessToken: accessToken, listID: listID, extraParams: queryParams, page: page))
     }
     
     func createUserList(name: String, description: String?, isPublic: Bool) async throws -> TMDBStatusResponse {
-        guard let accountID = authContext.accountID, let accessToken = authContext.accessToken else { throw APIError.unauthorized }
+        guard let accessToken = authContext.accessToken else { throw APIError.unauthorized }
         return try await httpClient.request(UserListEndpoints.createUserList(accessToken: accessToken, name: name, description: description, queryParams: queryParams, isPublic: isPublic))
     }
     
     func addMediaInUserList(listID: Int, mediaID: Int, mediaType: MediaTypes) async throws -> AddOrRemoveMediaUserListResponse {
-        guard let accountID = authContext.accountID, let accessToken = authContext.accessToken else { throw APIError.unauthorized }
+        guard let accessToken = authContext.accessToken else { throw APIError.unauthorized }
         return try await httpClient.request(UserListEndpoints.addMediaInUserList(accessToken: accessToken, listID: listID, mediaID: mediaID, mediaType: mediaType))
     }
     
     func removeMediaInUserList(listID: Int, mediaID: Int, mediaType: MediaTypes) async throws -> AddOrRemoveMediaUserListResponse {
-        guard let accountID = authContext.accountID, let accessToken = authContext.accessToken else { throw APIError.unauthorized }
+        guard let accessToken = authContext.accessToken else { throw APIError.unauthorized }
         return try await httpClient.request(UserListEndpoints.removeMediaInUserList(accessToken: accessToken, listID: listID, mediaID: mediaID, mediaType: mediaType))
     }
     
@@ -73,7 +73,7 @@ final class UserListAPISubService: UserListAPISubServiceProtocol {
     }
     
     func getItemStatusInUserList(listID: Int, mediaID: Int, mediaType: MediaTypes) async throws -> ItemStatusInUserListResponse {
-        guard let accountID = authContext.accountID, let accessToken = authContext.accessToken else { throw APIError.unauthorized }
+        guard let accessToken = authContext.accessToken else { throw APIError.unauthorized }
         return try await httpClient.request(UserListEndpoints.getItemStatusInUserList(accessToken: accessToken, listID: listID, mediaID: mediaID, mediaType: mediaType))
     }
 }

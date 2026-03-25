@@ -15,38 +15,41 @@ protocol UserListDetailsScreenInteractorProtocol: AnyObject {
 
 final class UserListDetailsScreenInteractor: UserListDetailsScreenInteractorProtocol {
     weak var presenter: UserListDetailsScreenPresenterProtocol?
-    private let tmdbService: TMDBService
+    private let networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     func getListDetails(listID: Int) {
-        tmdbService.getUserListDetails(listID: listID, page: 1) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didReceiveListDetails(success)
-            case .failure(let failure): self.presenter?.didReceiveError(failure)
+        Task {
+            do {
+                let result = try await networkService.userList.getUserListDetails(listID: listID, page: 1)
+                self.presenter?.didReceiveListDetails(result)
+            } catch {
+                self.presenter?.didReceiveError(error)
             }
         }
     }
     
     func getNewPageListDetails(listID: Int, page: Int) {
-        tmdbService.getUserListDetails(listID: listID, page: page) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didReceivePaginatedListDetails(success)
-            case .failure(let failure): self.presenter?.didReceiveError(failure)
+        Task {
+            do {
+                let result = try await networkService.userList.getUserListDetails(listID: listID, page: page)
+                self.presenter?.didReceiveListDetails(result)
+            } catch {
+                self.presenter?.didReceiveError(error)
             }
         }
     }
     
     func refreshListDetails(listID: Int) {
-        tmdbService.getUserListDetails(listID: listID, page: 1) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didReceieveRefreshingMedia(success.results)
-            case .failure(let failure): self.presenter?.didReceiveError(failure)
+        Task {
+            do {
+                let result = try await networkService.userList.getUserListDetails(listID: listID, page: 1)
+                self.presenter?.didReceiveListDetails(result)
+            } catch {
+                self.presenter?.didReceiveError(error)
             }
         }
     }

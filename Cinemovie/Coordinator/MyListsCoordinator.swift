@@ -17,7 +17,7 @@ final class MyListsCoordinator: CoordinatorProtocol {
     }
     
     func start() {
-        let watchlistModule = MyListsScreenAssembler.assemble(tmdbService: tmdbService)
+        let watchlistModule = MyListsScreenAssembler.assemble(networkService: networkService)
         watchlistModule.tabBarItem = UITabBarItem(
             title: "My Lists",
             image: UIImage(systemName: "film.stack"),

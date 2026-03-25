@@ -25,8 +25,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         self.appCoordinator = AppCoordinator(
             window: window,
-            authService: diContainer.authService,
-            tmdbService: diContainer.tmdbService
+            authService: diContainer.accountStore,
+            accountStore: diContainer.accountStore,
+            networkService: diContainer.networkService
         )
         appCoordinator?.start()
     }

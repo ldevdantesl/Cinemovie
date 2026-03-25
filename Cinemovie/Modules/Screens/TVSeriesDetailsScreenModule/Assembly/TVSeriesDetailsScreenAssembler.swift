@@ -8,9 +8,9 @@
 import UIKit
 
 final class TVSeriesDetailsScreenAssembler {
-    static func assemble(seriesID: Int, tmdbService: TMDBService) -> TVSeriesDetailsScreenVC {
-        let interactor = TVSeriesDetailsScreenInteractor(tmdbService: tmdbService)
-        let router = TVSeriesDetailsScreenRouter(tmdbService: tmdbService)
+    static func assemble(seriesID: Int, networkService: NetworkServiceProtocol) -> TVSeriesDetailsScreenVC {
+        let interactor = TVSeriesDetailsScreenInteractor(networkService: networkService)
+        let router = TVSeriesDetailsScreenRouter(networkService: networkService)
         let presenter = TVSeriesDetailsScreenPresenter(seriesID: seriesID, interactor: interactor, router: router)
         let viewController = TVSeriesDetailsScreenVC()
         presenter.view = viewController

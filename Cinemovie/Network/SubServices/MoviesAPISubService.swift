@@ -10,7 +10,7 @@ import Foundation
 protocol MoviesAPISubServiceProtocol {
     func getMovieDetails(movieID: Int) async throws -> MovieDetails
     func getMovieCast(movieID: Int) async throws -> CastAPIResponse<Cast>
-    func getMovieAccountState(movieID: Int, sessionID: String) async throws -> MediaAccountStatesAPIResponse
+    func getMovieAccountState(movieID: Int) async throws -> MediaAccountStatesAPIResponse
     func getMovieSimilar(movieID: Int) async throws -> [Movie]
     func getMovieRecommendations(movieID: Int) async throws -> [Movie]
     func getMovieReviews(movieID: Int) async throws -> [Review]
@@ -22,13 +22,15 @@ protocol MoviesAPISubServiceProtocol {
 final class MoviesAPISubService: MoviesAPISubServiceProtocol {
     private let httpClient: HTTPClientProtocol
     private let config: APIConfigurationProtocol
+    private let authContext: AuthContextProtocol
     private var queryParams: [String : String] {
         ["language" : config.language]
     }
     
-    init(httpClient: HTTPClientProtocol, config: APIConfigurationProtocol) {
+    init(httpClient: HTTPClientProtocol, config: APIConfigurationProtocol, authContext: AuthContextProtocol) {
         self.httpClient = httpClient
         self.config = config
+        self.authContext = authContext
     }
     
     func getMovieDetails(movieID: Int) async throws -> MovieDetails {
@@ -39,18 +41,19 @@ final class MoviesAPISubService: MoviesAPISubServiceProtocol {
         try await httpClient.request(MovieEndpoints.cast(movieID: movieID, queryParams: queryParams))
     }
     
-    func getMovieAccountState(movieID: Int, sessionID: String) async throws -> MediaAccountStatesAPIResponse {
-        try await httpClient.request(MovieEndpoints.accountState(movieID: movieID, sessionID: sessionID))
+    func getMovieAccountState(movieID: Int) async throws -> MediaAccountStatesAPIResponse {
+        guard let sessionID = authContext.sessionID else { throw APIError.unauthorized }
+        return try await httpClient.request(MovieEndpoints.accountState(movieID: movieID, sessionID: sessionID))
     }
     
     func getMovieSimilar(movieID: Int) async throws -> [Movie] {
         let response: PaginatedAPIResponse<Movie> = try await httpClient.request(MovieEndpoints.similar(movieID: movieID, queryParams: queryParams))
-        return response.result
+        return response.results
     }
     
     func getMovieRecommendations(movieID: Int) async throws -> [Movie] {
         let response: PaginatedAPIResponse<Movie> = try await httpClient.request(MovieEndpoints.recommendations(movieID: movieID, queryParams: queryParams))
-        return response.result
+        return response.results
     }
     
     func getMovieReviews(movieID: Int) async throws -> [Review] {
@@ -65,11 +68,11 @@ final class MoviesAPISubService: MoviesAPISubServiceProtocol {
     
     func getMovieTrending(timeWindow: TrendingTimeWindow) async throws -> [Movie] {
         let response: PaginatedAPIResponse<Movie> =  try await httpClient.request(MovieEndpoints.trending(timeWindow: timeWindow, queryParams: queryParams))
-        return response.result
+        return response.results
     }
     
     func getMovieList(listType: MovieListType) async throws -> [Movie] {
         let response: PaginatedAPIResponse<Movie> =  try await httpClient.request(MovieEndpoints.list(listType: listType, extraParams: queryParams))
-        return response.result
+        return response.results
     }
 }

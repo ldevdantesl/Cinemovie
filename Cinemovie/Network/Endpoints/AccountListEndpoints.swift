@@ -32,7 +32,7 @@ enum AccountListEndpoints: Endpoint {
     
     var queryItems: [URLQueryItem]? {
         switch self {
-        case .getMedia(let accountID, let accessToken, let mediaType, let listType, let page):
+        case .getMedia(_, _, _, _, let page):
             return ["sort_by" : "created_at.desc", "page" : "\(page.description)"].toQueryItems()
         default: return .none
         }
@@ -47,7 +47,7 @@ enum AccountListEndpoints: Endpoint {
                 listType.titleForEndpointsV4 : true
             ]
             return CMJSONSerializer.dataToJSON(json: bodyParam)
-        case .removeMediaInAccountList(let accountID, let accessToken, let mediaID, let listType, let mediaType):
+        case .removeMediaInAccountList(_, _, let mediaID, let listType, let mediaType):
             let bodyParam: [String : Any] = [
                 "media_type" : mediaType.rawValue,
                 "media_id" : mediaID,

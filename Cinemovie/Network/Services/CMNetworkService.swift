@@ -29,9 +29,9 @@ final class CMNetworkService: NetworkServiceProtocol {
     let auth: AuthenticationAPISubServiceProtocol
     
     init(httpClient: HTTPClientProtocol, config: APIConfigurationProtocol, authContext: AuthContextProtocol) {
-        self.movies = MoviesAPISubService(httpClient: httpClient, config: config)
+        self.movies = MoviesAPISubService(httpClient: httpClient, config: config, authContext: authContext)
         self.person = PersonAPISubService(httpClient: httpClient, config: config)
-        self.series = TVSeriesAPISubService(httpClient: httpClient, config: config)
+        self.series = TVSeriesAPISubService(httpClient: httpClient, config: config, authContext: authContext)
         self.accountList = AccountListAPISubService(httpClient: httpClient, authContext: authContext)
         self.userList = UserListAPISubService(httpClient: httpClient, authContext: authContext, config: config)
         self.search = SearchAPISubService(httpClient: httpClient)

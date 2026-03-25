@@ -23,71 +23,77 @@ protocol AccountListDetailsScreenInteractorProtocol: AnyObject {
 
 final class AccountListDetailsScreenInteractor: AccountListDetailsScreenInteractorProtocol {
     weak var presenter: AccountListDetailsScreenPresenterProtocol?
-    private var tmdbService: TMDBService
+    private var networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     // MARK: - ACCOUNT INITIAL
     func getInitialListMovies(listType: AccountListTypes) {
-        tmdbService.getMoviesInAccountList(listType: listType, page: 1) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didReceiveMedia(success.movies)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result: [Movie] = try await networkService.accountList.getMedia(mediaType: .movie, listType: listType, page: 1)
+                self.presenter?.didReceiveMedia(result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getInitialListSeries(listType: AccountListTypes) {
-        tmdbService.getSeriesInAccountList(listType: listType, page: 1) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didReceiveMedia(success.results)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result:[TVSeries] = try await networkService.accountList.getMedia(mediaType: .tvShow, listType: listType, page: 1)
+                self.presenter?.didReceiveMedia(result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     // MARK: - ACCOUNT PAGINATED
     func getNewPaginatedMoviesForPage(listType: AccountListTypes, page: Int) {
-        tmdbService.getMoviesInAccountList(listType: listType, page: page) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didReceiveNewMedia(success.movies)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result: [Movie] = try await networkService.accountList.getMedia(mediaType: .movie, listType: listType, page: page)
+                self.presenter?.didReceiveNewMedia(result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getNewPaginatedSeriesForPage(listType: AccountListTypes, page: Int) {
-        tmdbService.getSeriesInAccountList(listType: listType, page: page) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didReceiveNewMedia(success.results)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result:[TVSeries] = try await networkService.accountList.getMedia(mediaType: .tvShow, listType: listType, page: page)
+                self.presenter?.didReceiveMedia(result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     // MARK: - ACCOUNT REFRESHING
     func getRefreshingListMovies(listType: AccountListTypes) {
-        tmdbService.getMoviesInAccountList(listType: listType, page: 1) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didReceiveRefreshingMedia(success.movies)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result: [Movie] = try await networkService.accountList.getMedia(mediaType: .movie, listType: listType, page: 1)
+                self.presenter?.didReceiveMedia(result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getRefreshingListSeries(listType: AccountListTypes) {
-        tmdbService.getSeriesInAccountList(listType: listType, page: 1) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didReceiveRefreshingMedia(success.results)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result:[TVSeries] = try await networkService.accountList.getMedia(mediaType: .tvShow, listType: listType, page: 1)
+                self.presenter?.didReceiveMedia(result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }

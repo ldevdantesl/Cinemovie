@@ -35,7 +35,7 @@ final class AccountListAPISubService: AccountListAPISubServiceProtocol {
                 mediaType: mediaType, listType: listType, page: page
             )
         )
-        return response.result
+        return response.results
     }
     
     func addMediaInAccountList(mediaID: Int, listType: AccountListTypes, mediaType: MediaTypes) async throws -> TMDBStatusResponse {

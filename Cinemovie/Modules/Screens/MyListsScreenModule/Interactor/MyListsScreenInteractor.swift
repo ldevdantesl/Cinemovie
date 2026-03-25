@@ -29,112 +29,122 @@ protocol MyListsScreenInteractorProtocol: AnyObject {
 
 final class MyListsScreenInteractor: MyListsScreenInteractorProtocol {
     weak var presenter: MyListsScreenPresenterProtocol?
-    private let tmdbService: TMDBService
+    private let networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     // MARK: - WATCHLIST
     func getWatchlistMovies() {
-        tmdbService.getMoviesInAccountList(listType: .watchlist, page: 1) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didGetWatchlistMovies(success.movies)
-            case .failure: presenter?.didGetWatchlistMovies([])
+        Task {
+            do {
+                let result: [Movie] = try await networkService.accountList.getMedia(mediaType: .movie, listType: .watchlist, page: 1)
+                self.presenter?.didGetWatchlistMovies(result)
+            } catch {
+                self.presenter?.didGetWatchlistMovies([])
             }
         }
     }
     
     func getWatchlistTVSeries() {
-        tmdbService.getSeriesInAccountList(listType: .watchlist, page: 1) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didGetWatchlistTVSeries(success.results)
-            case .failure: presenter?.didGetWatchlistTVSeries([])
+        Task {
+            do {
+                let result: [TVSeries] = try await networkService.accountList.getMedia(mediaType: .tvShow, listType: .watchlist, page: 1)
+                self.presenter?.didGetWatchlistTVSeries(result)
+            } catch {
+                self.presenter?.didGetWatchlistTVSeries([])
             }
         }
     }
     
     // MARK: - FAVORITE
     func getFavoriteMovies() {
-        tmdbService.getMoviesInAccountList(listType: .favorite, page: 1){ [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didGetFavoriteMovies(success.movies)
-            case .failure: presenter?.didGetFavoriteMovies([])
+        Task {
+            do {
+                let result: [Movie] = try await networkService.accountList.getMedia(mediaType: .movie, listType: .favorite, page: 1)
+                self.presenter?.didGetFavoriteMovies(result)
+            } catch {
+                self.presenter?.didGetFavoriteMovies([])
             }
         }
     }
     
     func getFavoriteTVSeries() {
-        tmdbService.getSeriesInAccountList(listType: .favorite, page: 1) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didGetFavoriteTVSeries(success.results)
-            case .failure: presenter?.didGetFavoriteTVSeries([])
+        Task {
+            do {
+                let result: [TVSeries] = try await networkService.accountList.getMedia(mediaType: .tvShow, listType: .favorite, page: 1)
+                self.presenter?.didGetFavoriteTVSeries(result)
+            } catch {
+                self.presenter?.didGetFavoriteTVSeries([])
             }
         }
     }
     
     // MARK: - RATED
     func getRatedMovies() {
-        tmdbService.getMoviesInAccountList(listType: .rated, page: 1) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didGetRatedMovies(success.movies)
-            case .failure: presenter?.didGetRatedMovies([])
+        Task {
+            do {
+                let result: [Movie] = try await networkService.accountList.getMedia(mediaType: .movie, listType: .rated, page: 1)
+                self.presenter?.didGetRatedMovies(result)
+            } catch {
+                self.presenter?.didGetRatedMovies([])
             }
         }
     }
     
     func getRatedTVSeries() {
-        tmdbService.getSeriesInAccountList(listType: .rated, page: 1) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didGetRatedTVSeries(success.results)
-            case .failure: presenter?.didGetRatedTVSeries([])
+        Task {
+            do {
+                let result: [TVSeries]  = try await networkService.accountList.getMedia(mediaType: .tvShow, listType: .rated, page: 1)
+                self.presenter?.didGetRatedTVSeries(result)
+            } catch {
+                self.presenter?.didGetRatedTVSeries([])
             }
         }
     }
     
     // MARK: - USER LIST
     func createNewList(listName: String, listDescription: String?, isPublic: Bool) {
-        tmdbService.createUserList(name: listName, description: listDescription, isPublic: isPublic) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success: self.presenter?.didCreateNewList()
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                try await networkService.userList.createUserList(name: listName, description: listDescription, isPublic: isPublic)
+                self.presenter?.didCreateNewList()
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getUserLists() {
-        tmdbService.getUserLists { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didReceieveUserLists(lists: success.results)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.userList.getUserLists(page: 1)
+                self.presenter?.didReceieveUserLists(lists: result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func removeUserList(list: UserListDetails) {
-        tmdbService.removeUserList(listID: list.id) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success: self.presenter?.didRemoveList()
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                try await networkService.userList.removeUserList(listID: list.id)
+                self.presenter?.didRemoveList()
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getUserListDetails(list: UserList) {
-        tmdbService.getUserListDetails(listID: list.id, page: 1) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didReceiveUserListDetails(success)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.userList.getUserListDetails(listID: list.id, page: 1)
+                self.presenter?.didReceiveUserListDetails(result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }

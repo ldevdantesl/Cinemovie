@@ -170,7 +170,9 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
     
     // MARK: - ERROR
     func didRecieveError(_ error: Error) {
-        view?.didRecieveError(error.localizedDescription)
+        DispatchQueue.main.async {
+            self.view?.didRecieveError(error.localizedDescription)
+        }
     }
     
     // MARK: - PRIVATE FUNC

@@ -199,17 +199,11 @@ extension DiscoverScreenVC: DiscoverScreenViewProtocol {
         }
     }
     
-    func didRecieveError(_ errorStr: String) {
-        let alert = UIAlertController(
-            title: "Oops..",
-            message: errorStr,
-            preferredStyle: .alert
-        )
-
-        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
-
-        DispatchQueue.main.async {
-            self.present(alert, animated: true, completion: nil)
-        }
+    func didRecieveError(_ message: String) {
+        guard presentedViewController == nil else { return }
+        
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 }

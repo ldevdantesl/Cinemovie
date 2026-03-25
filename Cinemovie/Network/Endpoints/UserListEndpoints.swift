@@ -72,13 +72,13 @@ enum UserListEndpoints: Endpoint {
     
     var queryItems: [URLQueryItem]? {
         switch self {
-        case .getUserLists(let accountID, let accessToken, let page):
+        case .getUserLists(_, _, let page):
             return ["page" : page.description].toQueryItems()
-        case .getUserListDetails(let accessToken, let listID, let extraParams, let page):
+        case .getUserListDetails(_, _, let extraParams, let page):
             var queryItems = extraParams
             queryItems?["page"] = page.description
             return queryItems?.toQueryItems()
-        case .getItemStatusInUserList(let accessToken, let listID, let mediaID, let mediaType):
+        case .getItemStatusInUserList(_, _, let mediaID, let mediaType):
             return ["media_id" : mediaID.description, "media_type" : mediaType.rawValue].toQueryItems()
         default: return .none
         }

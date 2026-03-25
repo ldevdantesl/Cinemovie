@@ -11,7 +11,7 @@ struct PaginatedAPIResponse<T: Decodable>: Decodable {
     let id: Int?
     let dates: Dates?
     let page: Int?
-    let result: [T]
+    let results: [T]
     let totalPages: Int?
     let totalResults: Int?
 }

@@ -8,8 +8,8 @@
 import UIKit
 
 final class AddToListModalAssembler {
-    static func assemble(itemID: Int, mediaType: MediaTypes, tmdbService: TMDBService) -> AddToListModalVC {
-        let interactor = AddToListModalInteractor(tmdbService: tmdbService)
+    static func assemble(itemID: Int, mediaType: MediaTypes, networkService: NetworkServiceProtocol) -> AddToListModalVC {
+        let interactor = AddToListModalInteractor(networkService: networkService)
         let router = AddToListModalRouter()
         let presenter = AddToListModalPresenter(itemID: itemID, mediaType: mediaType, interactor: interactor, router: router)
         let viewController = AddToListModalVC()

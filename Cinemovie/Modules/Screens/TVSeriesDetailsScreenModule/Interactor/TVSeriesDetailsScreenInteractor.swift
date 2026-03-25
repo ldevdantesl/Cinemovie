@@ -25,109 +25,123 @@ protocol TVSeriesDetailsScreenInteractorProtocol: AnyObject {
 
 final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProtocol {
     weak var presenter: TVSeriesDetailsScreenPresenterProtocol?
-    private let tmdbService: TMDBService
+    private let networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     func getTVSeriesDetails(seriesID: Int) {
-        tmdbService.getTVSeriesDetails(seriesID: seriesID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didGetTVSeriesDetails(success)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.series.getDetails(seriesID: seriesID)
+                self.presenter?.didGetTVSeriesDetails(result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getTVSeriesReviews(seriesID: Int) {
-        tmdbService.getTVSeriesReviews(seriesID: seriesID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didGetTVSeriesReviews(success.results)
-            case .failure(let failure): presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.series.getReviews(seriesID: seriesID)
+                self.presenter?.didGetTVSeriesReviews(result.results)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getTVSeriesRecommendations(seriesID: Int) {
-        tmdbService.getTVSeriesRecommendations(seriesID: seriesID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didGetTVSeriesRecommends(success.results)
-            case .failure(let failure): presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.series.getRecommendations(seriesID: seriesID)
+                self.presenter?.didGetTVSeriesRecommends(result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getTVSeriesCast(seriesID: Int) {
-        tmdbService.getTVSeriesCast(seriesID: seriesID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didGetTVSeriesCast(success.cast, crew: success.crew)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.series.getCast(seriesID: seriesID)
+                self.presenter?.didGetTVSeriesCast(result.cast, crew: result.crew)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getTVSeriesVideos(seriesID: Int) {
-        tmdbService.getTVSeriesVideos(seriesID: seriesID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didGetTVSeriesVideos(success.results)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.series.getVideos(seriesID: seriesID)
+                self.presenter?.didGetTVSeriesVideos(result.results)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getTVSeasonDetails(seriesID: Int, seasonNumber: Int) {
-        tmdbService.getTVSeasonDetails(seriesID: seriesID, seasonNumber: seasonNumber) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let details): self.presenter?.didGetTVSeasonDetails(details)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.series.getSeasonDetails(seriesID: seriesID, seasonNumber: seasonNumber)
+                self.presenter?.didGetTVSeasonDetails(result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getTVSeriesAccountStates(seriesID: Int) {
-        tmdbService.getTVSeriesAccountStates(seriesID: seriesID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didGetTVSeriesAccountStates(success)
-            case .failure(let failure): presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.series.getAccountState(seriesID: seriesID)
+                self.presenter?.didGetTVSeriesAccountStates(result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getUserLists() {
-        tmdbService.getUserLists { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didGetUserLists(success.results)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.userList.getUserLists(page: 1)
+                self.presenter?.didGetUserLists(result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     // MARK: - USER INITIATED
     func addOrRemoveInFavorites(seriesID: Int, adding: Bool) {
-        tmdbService.addOrRemoveMediaInAccountList(mediaID: seriesID, listType: .favorite, mediaType: .tvShow, adding: adding) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didAddOrRemoveFromFavorites(message: success.statusMessage)
-            case .failure(let failure): presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await adding ?
+                networkService.accountList.addMediaInAccountList(mediaID: seriesID, listType: .favorite, mediaType: .tvShow) :
+                networkService.accountList.removeMediaInAccountList(mediaID: seriesID, listType: .favorite, mediaType: .tvShow)
+                self.presenter?.didAddOrRemoveFromFavorites(message: result.statusMessage ?? "")
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func addOrRemoveInWatchlist(seriesID: Int, adding: Bool) {
-        tmdbService.addOrRemoveMediaInAccountList(mediaID: seriesID, listType: .watchlist, mediaType: .tvShow, adding: adding) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didAddOrRemoveFromWatchlist(message: success.statusMessage)
-            case .failure(let failure): presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await adding ?
+                networkService.accountList.addMediaInAccountList(mediaID: seriesID, listType: .watchlist, mediaType: .tvShow) :
+                networkService.accountList.removeMediaInAccountList(mediaID: seriesID, listType: .watchlist, mediaType: .tvShow)
+                self.presenter?.didAddOrRemoveFromWatchlist(message: result.statusMessage ?? "")
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }

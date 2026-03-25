@@ -8,9 +8,9 @@
 import UIKit
 
 final class MovieDetailsScreenAssembler {
-    static func assemble(movieID: Int, tmdbService: TMDBService) -> MovieDetailsScreenVC {
-        let interactor = MovieDetailsScreenInteractor(tmdbService: tmdbService)
-        let router = MovieDetailsScreenRouter(tmdbService: tmdbService)
+    static func assemble(movieID: Int, networkService: NetworkServiceProtocol) -> MovieDetailsScreenVC {
+        let interactor = MovieDetailsScreenInteractor(networkService: networkService)
+        let router = MovieDetailsScreenRouter(networkService: networkService)
         let presenter = MovieDetailsScreenPresenter(movieID: movieID, interactor: interactor, router: router)
         let viewController = MovieDetailsScreenVC()
         presenter.view  = viewController

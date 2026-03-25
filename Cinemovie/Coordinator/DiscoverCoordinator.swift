@@ -18,7 +18,7 @@ final class DiscoverCoordinator: CoordinatorProtocol {
     }
     
     func start() {
-        let homeModule = DiscoverScreenAssembler.assemble(tmdbService: tmdbService)
+        let homeModule = DiscoverScreenAssembler.assemble(networkService: networkService)
         homeModule.tabBarItem = UITabBarItem(
             title: "Discover",
             image: UIImage(systemName: "binoculars.fill"),
