@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 final class DiscoverCoordinator: CoordinatorProtocol {
-    let navigationController: UINavigationController = UINavigationController()
+    lazy var navigationController: UINavigationController = UINavigationController()
     
     private let networkService: NetworkServiceProtocol
     

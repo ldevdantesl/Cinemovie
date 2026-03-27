@@ -36,6 +36,6 @@ final class CMNetworkService: NetworkServiceProtocol {
         self.userList = UserListAPISubService(httpClient: httpClient, authContext: authContext, config: config)
         self.search = SearchAPISubService(httpClient: httpClient)
         self.other = OtherAPISubService(httpClient: httpClient, config: config)
-        self.auth = AuthenticationAPISubService(httpClient: httpClient, authContext: authContext)
+        self.auth = AuthenticationAPISubService(httpClient: httpClient)
     }
 }

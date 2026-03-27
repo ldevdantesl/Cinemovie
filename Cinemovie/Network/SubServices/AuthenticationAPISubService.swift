@@ -8,48 +8,32 @@
 import Foundation
 
 protocol AuthenticationAPISubServiceProtocol {
-    var isLoggedIn: Bool { get }
     func createRequestToken() async throws -> RequestTokenResponse
-    func exchangeRequestToAccessToken(token: String) async throws -> AccessTokenResponse
-    func getSessionIDUsingAccessToken(token: String) async throws -> NewSessionResponse
-    
-    @discardableResult
+    func createSession(requestToken: String) async throws -> NewSessionResponse
     func loginAsGuest() async throws -> GuestSessionResponse
-    func logout() async throws
-    
+    func logout(sessionID: String) async throws
 }
 
 final class AuthenticationAPISubService: AuthenticationAPISubServiceProtocol {
     private let httpClient: HTTPClientProtocol
-    private let authContext: AuthContextProtocol
     
-    var isLoggedIn: Bool {
-        authContext.isLoggedIn
-    }
-    
-    init(httpClient: HTTPClientProtocol, authContext: AuthContextProtocol) {
+    init(httpClient: HTTPClientProtocol) {
         self.httpClient = httpClient
-        self.authContext = authContext
     }
     
     func createRequestToken() async throws -> RequestTokenResponse {
         try await httpClient.request(AuthEndpoints.createRequestToken)
     }
     
-    func exchangeRequestToAccessToken(token: String) async throws -> AccessTokenResponse {
-        try await httpClient.request(AuthEndpoints.requestAccessToken(requestToken: token))
-    }
-    
-    func getSessionIDUsingAccessToken(token: String) async throws -> NewSessionResponse {
-        try await httpClient.request(AuthEndpoints.getSessionIDUsingAccessToken(accessToken: token))
+    func createSession(requestToken: String) async throws -> NewSessionResponse {
+        try await httpClient.request(AuthEndpoints.createSession(requestToken: requestToken))
     }
     
     func loginAsGuest() async throws -> GuestSessionResponse {
         try await httpClient.request(AuthEndpoints.loginAsGuest)
     }
     
-    func logout() async throws {
-        guard let accessToken = authContext.accessToken else { throw APIError.unauthorized }
-        try await httpClient.request(AuthEndpoints.logout(accessToken: accessToken))
+    func logout(sessionID: String) async throws {
+        try await httpClient.request(AuthEndpoints.logOut(sessionID: sessionID))
     }
 }

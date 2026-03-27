@@ -8,7 +8,7 @@
 import UIKit
 
 final class MyListsCoordinator: CoordinatorProtocol {
-    let navigationController: UINavigationController = UINavigationController()
+    lazy var navigationController: UINavigationController = UINavigationController()
     
     private let networkService: NetworkServiceProtocol
     

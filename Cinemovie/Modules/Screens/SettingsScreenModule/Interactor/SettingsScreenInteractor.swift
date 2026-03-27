@@ -12,20 +12,20 @@ protocol SettingsScreenInteractorProtocol: AnyObject {
 
 final class SettingsScreenInteractor: SettingsScreenInteractorProtocol {
     weak var presenter: SettingsScreenPresenterProtocol?
-    private let networkService: NetworkServiceProtocol
+    private let authService: AuthServiceProtocol
     
-    init(networkService: NetworkServiceProtocol) {
-        self.networkService = networkService
+    init(authService: AuthServiceProtocol) {
+        self.authService = authService
     }
     
     func showSessionID() {
-        print("Yup")
+        
     }
     
     func logout() {
         Task {
             do {
-                try await networkService.auth.logout()
+                try await authService.logout()
             } catch {
                 print("Cant log out")
             }

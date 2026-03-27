@@ -9,14 +9,12 @@ import Foundation
 
 struct RequestTokenResponse: Decodable {
     let success: Bool
-    let statusCode: Int
-    let statusMessage: String
+    let expiresAt: String
     let requestToken: String
-
+    
     enum CodingKeys: String, CodingKey {
         case success
-        case statusCode = "status_code"
-        case statusMessage = "status_message"
+        case expiresAt = "expires_at"
         case requestToken = "request_token"
     }
 }

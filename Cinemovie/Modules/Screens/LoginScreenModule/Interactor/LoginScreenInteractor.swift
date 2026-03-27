@@ -8,31 +8,26 @@
 import UIKit
 
 protocol LoginScreenInteractorProtocol: AnyObject {
-    // MARK: - LOGIN
     func loginAsGuest()
     func loginWithTMDB()
-    
-    // MARK: - AUTHENTICATION
-    func exchangeRequestTokenForSession(_ token: String)
-    func getSessionIDUsingAccessToken(accessToken: String)
+    func createSession(requestToken: String)
 }
 
 final class LoginScreenInteractor: LoginScreenInteractorProtocol {
     weak var presenter: LoginScreenPresenterProtocol?
-    private let networkService: NetworkServiceProtocol
+    private let authService: AuthServiceProtocol
     
-    init(networkService: NetworkServiceProtocol) {
-        self.networkService = networkService
+    init(authService: AuthServiceProtocol) {
+        self.authService = authService
     }
     
-    // MARK: - LOGIN
     func loginAsGuest() {
         Task {
             do {
-                let sessionID = try await networkService.auth.loginAsGuest()
-                self.presenter?.didFinishLoging(sessionID: sessionID.guestSessionId)
+                try await authService.loginAsGuest()
+                await MainActor.run { self.presenter?.didFinishLogin() }
             } catch {
-                self.presenter?.didRecieveError(error)
+                await MainActor.run { self.presenter?.didRecieveError(error) }
             }
         }
     }
@@ -40,33 +35,21 @@ final class LoginScreenInteractor: LoginScreenInteractorProtocol {
     func loginWithTMDB() {
         Task {
             do {
-                let result = try await networkService.auth.createRequestToken()
-                self.presenter?.openOAuthURLWithToken(token: result.requestToken)
+                let token = try await authService.createRequestToken()
+                await MainActor.run { self.presenter?.openOAuthURLWithToken(token: token) }
             } catch {
-                self.presenter?.didRecieveError(error)
+                await MainActor.run { self.presenter?.didRecieveError(error) }
             }
         }
     }
     
-    // MARK: - AUTHENTICATION
-    func exchangeRequestTokenForSession(_ token: String) {
+    func createSession(requestToken: String) {
         Task {
             do {
-                let sessionID = try await networkService.auth.exchangeRequestToAccessToken(token: token)
-                self.presenter?.didLogInWithOAuth(sessionID: sessionID.accessToken)
+                try await authService.createSession(requestToken: requestToken)
+                await MainActor.run { self.presenter?.didFinishLogin() }
             } catch {
-                self.presenter?.didRecieveError(error)
-            }
-        }
-    }
-    
-    func getSessionIDUsingAccessToken(accessToken: String) {
-        Task {
-            do {
-                let sessionID = try await networkService.auth.getSessionIDUsingAccessToken(token: accessToken)
-                self.presenter?.didFinishLoging(sessionID: sessionID.sessionId)
-            } catch {
-                self.presenter?.didRecieveError(error)
+                await MainActor.run { self.presenter?.didRecieveError(error) }
             }
         }
     }

@@ -8,24 +8,19 @@
 import Foundation
 
 protocol AccountStoreProtocol: AuthContextProtocol {
-    var sessionID: String? { get set }
-    var accountID: String? { get set }
-    var accessToken: String? { get set }
-    var isLoggedIn: Bool { get }
-    var isGuest: Bool { get }
     func clear()
 }
 
 final class CMAccountStore: AccountStoreProtocol {
+    var isGuest: Bool = false
+    
     private let sessionIDKey = ConstantKeys.SESSION_ID_KEYCHAIN_KEY.rawValue
     private let accountIDKey = ConstantKeys.ACCOUNT_ID_KEYCHAIN_KEY.rawValue
     private let accessTokenKey = ConstantKeys.ACCESS_TOKEN_KEYCHAIN_KEY.rawValue
     
     private let keychainService: KeychainServiceProtocol
     
-    init(keychainService: KeychainServiceProtocol) {
-        self.keychainService = keychainService
-    }
+    var isLoggedIn: Bool { sessionID != nil }
     
     var sessionID: String? {
         get { keychainService.load(forKey: sessionIDKey) }
@@ -59,13 +54,18 @@ final class CMAccountStore: AccountStoreProtocol {
             }
         }
     }
-
-    var isLoggedIn: Bool { sessionID != nil }
-    var isGuest: Bool { sessionID?.count == 32 }
+    
+    init(keychainService: KeychainServiceProtocol) {
+        self.keychainService = keychainService
+    }
 
     func clear() {
         sessionID = nil
         accessToken = nil
         accountID = nil
+    }
+    
+    func clearSession() {
+        clear()
     }
 }

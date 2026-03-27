@@ -8,9 +8,10 @@
 import Foundation
 
 protocol AuthContextProtocol: AnyObject {
-    var sessionID: String? { get }
-    var accountID: String? { get }
-    var accessToken: String? { get }
+    var sessionID: String? { get set }
+    var accountID: String? { get set }
+    var accessToken: String? { get set }
     var isLoggedIn: Bool { get }
-    var isGuest: Bool { get }
+    var isGuest: Bool { get set }
+    func clearSession()
 }

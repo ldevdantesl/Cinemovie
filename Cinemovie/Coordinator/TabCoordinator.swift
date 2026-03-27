@@ -9,18 +9,18 @@ import Foundation
 import UIKit
 
 final class TabCoordinator: CoordinatorProtocol {
-    var tabBarController: UITabBarController = UITabBarController()
+    lazy var tabBarController: UITabBarController = UITabBarController()
 
-    private let authContext: AuthContextProtocol
+    private let authService: AuthServiceProtocol
     private let networkService: NetworkServiceProtocol
     weak var appCoordinator: AppCoordinator?
 
     init(
-        authContext: AuthContextProtocol,
+        authService: AuthServiceProtocol,
         networkService: NetworkServiceProtocol,
         appCoordinator: AppCoordinator?
     ) {
-        self.authContext = authContext
+        self.authService = authService
         self.networkService = networkService
         self.appCoordinator = appCoordinator
     }

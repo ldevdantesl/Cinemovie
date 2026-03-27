@@ -9,13 +9,12 @@ import Foundation
 import UIKit
 
 final class SettingsCoordinator: CoordinatorProtocol {
-    var navigationController: UINavigationController
+    lazy var navigationController: UINavigationController = UINavigationController()
 
     private let networkService: NetworkServiceProtocol
     weak var appCoordinator: AppCoordinator?
     
     init(networkService: NetworkServiceProtocol, appCoordinator: AppCoordinator?) {
-        self.navigationController = UINavigationController()
         self.networkService = networkService
         self.appCoordinator = appCoordinator
     }
