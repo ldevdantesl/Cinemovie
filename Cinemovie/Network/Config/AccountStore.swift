@@ -12,8 +12,6 @@ protocol AccountStoreProtocol: AuthContextProtocol {
 }
 
 final class CMAccountStore: AccountStoreProtocol {
-    var isGuest: Bool = false
-    
     private let sessionIDKey = ConstantKeys.SESSION_ID_KEYCHAIN_KEY.rawValue
     private let accountIDKey = ConstantKeys.ACCOUNT_ID_KEYCHAIN_KEY.rawValue
     private let accessTokenKey = ConstantKeys.ACCESS_TOKEN_KEYCHAIN_KEY.rawValue
@@ -42,6 +40,10 @@ final class CMAccountStore: AccountStoreProtocol {
                 keychainService.delete(forKey: accountIDKey)
             }
         }
+    }
+    
+    var isGuest: Bool {
+        sessionID?.count == 32
     }
 
     var accessToken: String? {

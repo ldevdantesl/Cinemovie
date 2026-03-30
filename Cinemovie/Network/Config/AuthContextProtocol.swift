@@ -12,6 +12,6 @@ protocol AuthContextProtocol: AnyObject {
     var accountID: String? { get set }
     var accessToken: String? { get set }
     var isLoggedIn: Bool { get }
-    var isGuest: Bool { get set }
+    var isGuest: Bool { get }
     func clearSession()
 }
