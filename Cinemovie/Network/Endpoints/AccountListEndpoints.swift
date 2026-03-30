@@ -12,14 +12,30 @@ enum AccountListEndpoints: Endpoint {
     case addMediaInAccountList(accountID: String, accessToken: String, mediaID: Int, listType: AccountListTypes, mediaType: MediaTypes)
     case removeMediaInAccountList(accountID: String, accessToken: String, mediaID: Int, listType: AccountListTypes, mediaType: MediaTypes)
     
+    var baseURL: String {
+        switch self {
+        case .getMedia: return CONSTANTS.baseURLV4String
+        default: return CONSTANTS.baseURLString
+        }
+    }
+    
+    var auth: EndpointAuth {
+        switch self {
+        case .getMedia(_, let accessToken, _, _, _),
+                .addMediaInAccountList(_, let accessToken, _, _, _),
+                .removeMediaInAccountList(_, let accessToken, _, _, _):
+            return .bearer(accessToken)
+        }
+    }
+    
     var path: String {
         switch self {
         case .getMedia(let accountID, _, let mediaType, let listType, _):
             return "/account/\(accountID)/\(mediaType.rawValue)/\(listType.titleForEndpointsV4)"
         case .addMediaInAccountList(let accountID, _, _, let listType, _):
-            return "/account/\(accountID)/\(listType.titleForEndpointsV4)"
+            return "/account/\(accountID)/\(listType.titleForEndpointsV3)"
         case .removeMediaInAccountList(let accountID, _, _, let listType, _):
-            return "/account/\(accountID)/\(listType.titleForEndpointsV4)"
+            return "/account/\(accountID)/\(listType.titleForEndpointsV3)"
         }
     }
     
@@ -55,17 +71,6 @@ enum AccountListEndpoints: Endpoint {
             ]
             return CMJSONSerializer.dataToJSON(json: bodyParam)
         default: return .none
-        }
-    }
-    
-    var auth: EndpointAuth {
-        switch self {
-        case .getMedia(_, let accessToken, _, _, _):
-            return .bearer(accessToken)
-        case .addMediaInAccountList(_, let accessToken, _, _, _):
-            return .bearer(accessToken)
-        case .removeMediaInAccountList(_, let accessToken, _, _, _):
-            return .bearer(accessToken)
         }
     }
 }
