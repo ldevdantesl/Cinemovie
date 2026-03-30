@@ -8,27 +8,21 @@
 import Foundation
 import UIKit
 
-final class TabCoordinator: CoordinatorProtocol {
+final class TabCoordinator {
     lazy var tabBarController: UITabBarController = UITabBarController()
+    
+    private weak var sessionDelegate: SessionDelegate?
+    private let diContainer: DIContainer
 
-    private let authService: AuthServiceProtocol
-    private let networkService: NetworkServiceProtocol
-    weak var appCoordinator: AppCoordinator?
-
-    init(
-        authService: AuthServiceProtocol,
-        networkService: NetworkServiceProtocol,
-        appCoordinator: AppCoordinator?
-    ) {
-        self.authService = authService
-        self.networkService = networkService
-        self.appCoordinator = appCoordinator
+    init(diContainer: DIContainer, sessionDelegate: SessionDelegate?) {
+        self.diContainer = diContainer
+        self.sessionDelegate = sessionDelegate
     }
 
     func start() {
-        let homeCoordinator = DiscoverCoordinator(networkService: networkService)
-        let watchlistCoordinator = MyListsCoordinator(networkService: networkService)
-        let settingsCoordinator = SettingsCoordinator(networkService: networkService, appCoordinator: appCoordinator)
+        let homeCoordinator = DiscoverCoordinator(diContainer: diContainer)
+        let watchlistCoordinator = MyListsCoordinator(diContainer: diContainer)
+        let settingsCoordinator = SettingsCoordinator(diContainer: diContainer, sessionDelegate: sessionDelegate)
 
         homeCoordinator.start()
         watchlistCoordinator.start()

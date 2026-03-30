@@ -19,19 +19,19 @@ protocol MyListsScreenRouterProtocol {
 
 final class MyListsScreenRouter: MyListsScreenRouterProtocol {
     weak var viewController: MyListsScreenVC?
-    private let networkService: NetworkServiceProtocol
+    private let diContainer: DIContainer
     
-    init(networkService: NetworkServiceProtocol) {
-        self.networkService = networkService
+    init(diContainer: DIContainer) {
+        self.diContainer = diContainer
     }
     
     func navigateToAccountList(listType: AccountListTypes) {
-        let vc = AccountListDetailsScreenAssembler.assemble(listType: listType, networkService: networkService)
+        let vc = AccountListDetailsScreenAssembler.assemble(listType: listType, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
     func navigateToUserList(userListDetails: UserListDetails) {
-        let vc = UserListDetailsScreenAssembler.assemble(userListDetails: userListDetails, networkService: networkService)
+        let vc = UserListDetailsScreenAssembler.assemble(userListDetails: userListDetails, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     

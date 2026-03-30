@@ -23,7 +23,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         window?.windowScene = windowScene
         
-        self.appCoordinator = AppCoordinator(window: window, networkService: diContainer.networkService, authService: diContainer.authService)
+        self.appCoordinator = AppCoordinator(window: window, container: diContainer)
         appCoordinator?.start()
     }
     

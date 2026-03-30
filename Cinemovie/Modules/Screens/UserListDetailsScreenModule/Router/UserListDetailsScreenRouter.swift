@@ -16,10 +16,10 @@ protocol UserListDetailsScreenRouterProtocol {
 
 final class UserListDetailsScreenRouter: UserListDetailsScreenRouterProtocol {
     weak var viewController: UserListDetailsScreenVC?
-    private let networkService: NetworkServiceProtocol
+    private let diContainer: DIContainer
     
-    init(networkService: NetworkServiceProtocol) {
-        self.networkService = networkService
+    init(diContainer: DIContainer) {
+        self.diContainer = diContainer
     }
     
     func goBack() {
@@ -27,12 +27,12 @@ final class UserListDetailsScreenRouter: UserListDetailsScreenRouterProtocol {
     }
     
     func navigateToMovie(movie: Movie) {
-        let vc = MovieDetailsScreenAssembler.assemble(movieID: movie.id, networkService: networkService)
+        let vc = MovieDetailsScreenAssembler.assemble(movieID: movie.id, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
     func navigateToSeries(series: TVSeries) {
-        let vc = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, networkService: networkService)
+        let vc = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
 }

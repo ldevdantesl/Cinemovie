@@ -7,17 +7,17 @@
 
 import UIKit
 
-final class MyListsCoordinator: CoordinatorProtocol {
+final class MyListsCoordinator {
     lazy var navigationController: UINavigationController = UINavigationController()
     
-    private let networkService: NetworkServiceProtocol
+    private let diContainer: DIContainer
     
-    init(networkService: NetworkServiceProtocol) {
-        self.networkService = networkService
+    init(diContainer: DIContainer) {
+        self.diContainer = diContainer
     }
     
     func start() {
-        let watchlistModule = MyListsScreenAssembler.assemble(networkService: networkService)
+        let watchlistModule = MyListsScreenAssembler.assemble(diContainer: diContainer)
         watchlistModule.tabBarItem = UITabBarItem(
             title: "My Lists",
             image: UIImage(systemName: "film.stack"),

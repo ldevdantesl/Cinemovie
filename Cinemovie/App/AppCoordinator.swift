@@ -2,20 +2,18 @@
 //  AppCoordinator.swift
 //  Cinemovie
 //
-//  Created by Buzurg Rakhimzoda on 31.01.2025.
-//
 
 import UIKit
 
 final class AppCoordinator {
     private let window: UIWindow?
-    private let networkService: NetworkServiceProtocol
-    private let authService: AuthServiceProtocol
+    private let container: DIContainer
     
-    init(window: UIWindow?, networkService: NetworkServiceProtocol, authService: AuthServiceProtocol) {
+    private var tabCoordinator: TabCoordinator?
+    
+    init(window: UIWindow?, container: DIContainer) {
         self.window = window
-        self.networkService = networkService
-        self.authService = authService
+        self.container = container
     }
     
     func start() {
@@ -29,27 +27,41 @@ final class AppCoordinator {
     }
     
     private func checkAuthentication() {
-        authService.isLoggedIn ? showMainApp() : showLoginPage()
+        container.authService.isLoggedIn ? showMainApp() : showLoginPage()
     }
     
-    func showMainApp() {
-        guard let window = window else { return }
+    private func showMainApp() {
+        guard let window else { return }
         
-        let tabCoordinator = TabCoordinator(authService: authService, networkService: networkService, appCoordinator: self)
+        let tabCoordinator = TabCoordinator(diContainer: container, sessionDelegate: self)
         tabCoordinator.start()
-    
+        self.tabCoordinator = tabCoordinator
+        
         UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve) {
-            self.window?.rootViewController = tabCoordinator.tabBarController
+            window.rootViewController = tabCoordinator.tabBarController
         }
     }
     
-    func showLoginPage() {
-        guard let window = window else { return }
+    private func showLoginPage() {
+        guard let window else { return }
         
-        let loginVC = LoginScreenAssembler.assemble(authService: authService, appCoordinator: self)
+        let loginVC = LoginScreenAssembler.assemble(diContainer: container, sessionDelegate: self)
         
         UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve) {
-            self.window?.rootViewController = loginVC
+            window.rootViewController = loginVC
         }
+    }
+}
+
+// MARK: - SessionEndingDelegate
+extension AppCoordinator: SessionDelegate {
+    func didRequestLogIn() {
+        self.showMainApp()
+    }
+    
+    func didRequestLogOut() {
+        container.authContext.clearSession()
+        tabCoordinator = nil
+        showLoginPage()
     }
 }

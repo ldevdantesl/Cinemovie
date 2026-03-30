@@ -8,9 +8,9 @@
 import UIKit
 
 final class AccountListDetailsScreenAssembler {
-    static func assemble(listType: AccountListTypes, networkService: NetworkServiceProtocol) -> AccountListDetailsScreenVC {
-        let interactor = AccountListDetailsScreenInteractor(networkService: networkService)
-        let router = AccountListDetailsScreenRouter(networkService: networkService)
+    static func assemble(listType: AccountListTypes, diContainer: DIContainer) -> AccountListDetailsScreenVC {
+        let interactor = AccountListDetailsScreenInteractor(networkService: diContainer.networkService)
+        let router = AccountListDetailsScreenRouter(diContainer: diContainer)
         let presenter = AccountListDetailsScreenPresenter(listType: listType, interactor: interactor, router: router)
         let viewController = AccountListDetailsScreenVC()
         presenter.view  = viewController

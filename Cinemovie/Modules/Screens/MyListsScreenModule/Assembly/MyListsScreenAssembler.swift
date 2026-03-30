@@ -8,9 +8,9 @@
 import UIKit
 
 final class MyListsScreenAssembler {
-    static func assemble(networkService: NetworkServiceProtocol) -> MyListsScreenVC {
-        let interactor = MyListsScreenInteractor(networkService: networkService)
-        let router = MyListsScreenRouter(networkService: networkService)
+    static func assemble(diContainer: DIContainer) -> MyListsScreenVC {
+        let interactor = MyListsScreenInteractor(networkService: diContainer.networkService)
+        let router = MyListsScreenRouter(diContainer: diContainer)
         let presenter = MyListsScreenPresenter(interactor: interactor, router: router)
         let viewController = MyListsScreenVC()
         presenter.view = viewController

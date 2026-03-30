@@ -8,9 +8,9 @@
 import UIKit
 
 final class PersonDetailsScreenAssembler {
-    static func assemble(creditID: String, networkService: NetworkServiceProtocol) -> PersonDetailsScreenVC {
-        let interactor = PersonDetailsScreenInteractor(networkService: networkService)
-        let router = PersonDetailsScreenRouter(networkService: networkService)
+    static func assemble(creditID: String, diContainer: DIContainer) -> PersonDetailsScreenVC {
+        let interactor = PersonDetailsScreenInteractor(networkService: diContainer.networkService)
+        let router = PersonDetailsScreenRouter(diContainer: diContainer)
         let presenter = PersonDetailsScreenPresenter(creditID: creditID, interactor: interactor, router: router)
         let viewController = PersonDetailsScreenVC()
         presenter.view  = viewController
@@ -20,9 +20,9 @@ final class PersonDetailsScreenAssembler {
         return viewController
     }
     
-    static func assemble(personID: Int, networkService: NetworkServiceProtocol) -> PersonDetailsScreenVC {
-        let interactor = PersonDetailsScreenInteractor(networkService: networkService)
-        let router = PersonDetailsScreenRouter(networkService: networkService)
+    static func assemble(personID: Int, diContainer: DIContainer) -> PersonDetailsScreenVC {
+        let interactor = PersonDetailsScreenInteractor(networkService: diContainer.networkService)
+        let router = PersonDetailsScreenRouter(diContainer: diContainer)
         let presenter = PersonDetailsScreenPresenter(personID: personID, interactor: interactor, router: router)
         let viewController = PersonDetailsScreenVC()
         presenter.view  = viewController

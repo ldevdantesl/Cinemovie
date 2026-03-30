@@ -7,17 +7,16 @@
 
 import Foundation
 
-protocol AccountStoreProtocol: AuthContextProtocol {
-    func clear()
-}
-
-final class CMAccountStore: AccountStoreProtocol {
+final class CMAccountStore: AuthContextProtocol {
+    // MARK: - CONSTANTS
     private let sessionIDKey = ConstantKeys.SESSION_ID_KEYCHAIN_KEY.rawValue
     private let accountIDKey = ConstantKeys.ACCOUNT_ID_KEYCHAIN_KEY.rawValue
     private let accessTokenKey = ConstantKeys.ACCESS_TOKEN_KEYCHAIN_KEY.rawValue
     
+    // MARK: - INJECTED PROPERTY
     private let keychainService: KeychainServiceProtocol
     
+    // MARK: - COMPUTED PROPERTIES
     var isLoggedIn: Bool { sessionID != nil }
     
     var sessionID: String? {
@@ -57,17 +56,15 @@ final class CMAccountStore: AccountStoreProtocol {
         }
     }
     
+    // MARK: - INIT
     init(keychainService: KeychainServiceProtocol) {
         self.keychainService = keychainService
     }
-
-    func clear() {
+    
+    // MARK: - PUBLIC FUNC
+    func clearSession() {
         sessionID = nil
         accessToken = nil
         accountID = nil
-    }
-    
-    func clearSession() {
-        clear()
     }
 }

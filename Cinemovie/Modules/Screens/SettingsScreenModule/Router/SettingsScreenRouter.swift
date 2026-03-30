@@ -11,13 +11,13 @@ protocol SettingsScreenRouterProtocol {
 
 final class SettingsScreenRouter: SettingsScreenRouterProtocol {
     weak var viewController: SettingsScreenVC?
-    weak var appCoordinator: AppCoordinator?
+    private weak var sessionDelegate: SessionDelegate?
     
-    init(appCoordinator: AppCoordinator?) {
-        self.appCoordinator = appCoordinator
+    init(sessionDelegate: SessionDelegate?) {
+        self.sessionDelegate = sessionDelegate
     }
     
     func navigateBackToLogin() {
-        appCoordinator?.showLoginPage()
+        sessionDelegate?.didRequestLogOut()
     }
 }

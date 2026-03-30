@@ -10,6 +10,7 @@ import Foundation
 final class DIContainer {
     let userService: CMUserService
     let authService: AuthServiceProtocol
+    let authContext: AuthContextProtocol
     let networkService: CMNetworkService
     let errorService: CMErrorService
     
@@ -26,5 +27,6 @@ final class DIContainer {
         self.authService = CMAuthService(networkService: networkService, authContext: authContext)
         self.networkService = networkService
         self.errorService = CMErrorService()
+        self.authContext = CMAccountStore(keychainService: keychainService)
     }
 }

@@ -51,6 +51,7 @@ final class MovieDetailsScreenPresenter {
     
     // MARK: - PROPERTIES
     private let movieID: Int
+    private let authContext: AuthContextProtocol
     private let dispatchGroup = DispatchGroup()
     
     private var movieDetails: MovieDetails?
@@ -64,10 +65,11 @@ final class MovieDetailsScreenPresenter {
     var userLists: [UserList] = []
     private var movieAccountStates: MediaAccountStatesAPIResponse = .empty
 
-    init(movieID: Int, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
+    init(movieID: Int, authContext: AuthContextProtocol, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
         self.movieID = movieID
         self.interactor = interactor
         self.router = router
+        self.authContext = authContext
     }
 }
 
@@ -90,8 +92,10 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         dispatchGroup.enter()
         interactor.getMovieReviews(movieID: movieID)
         
-        dispatchGroup.enter()
-        interactor.getMovieAccountStates(movieID: movieID)
+        if !authContext.isGuest {
+            dispatchGroup.enter()
+            interactor.getMovieAccountStates(movieID: movieID)
+        }
         
         dispatchGroup.enter()
         interactor.getUserLists()

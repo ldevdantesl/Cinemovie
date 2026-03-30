@@ -16,6 +16,23 @@ enum UserListEndpoints: Endpoint {
     case removeUserList(accessToken: String, listID: Int)
     case getItemStatusInUserList(accessToken: String, listID: Int, mediaID: Int, mediaType: MediaTypes)
     
+    var baseURL: String {
+        return CONSTANTS.baseURLV4String
+    }
+    
+    var auth: EndpointAuth {
+        switch self {
+        case .getUserLists(_, let accessToken, _),
+             .getUserListDetails(let accessToken, _, _, _),
+             .createUserList(let accessToken, _, _, _, _),
+             .addMediaInUserList(let accessToken, _, _, _),
+             .removeMediaInUserList(let accessToken, _, _, _),
+             .removeUserList(let accessToken, _),
+             .getItemStatusInUserList(let accessToken, _, _, _):
+            return .bearer(accessToken)
+        }
+    }
+    
     var path: String {
         switch self {
         case .getUserLists(let accountID, _, _):

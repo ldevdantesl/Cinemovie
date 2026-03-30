@@ -31,7 +31,6 @@ final class CMAuthService: AuthServiceProtocol {
     func loginAsGuest() async throws {
         let result = try await networkService.auth.loginAsGuest()
         authContext.sessionID = result.guestSessionId
-        authContext.isGuest = true
     }
     
     func createRequestToken() async throws -> String {
@@ -42,7 +41,6 @@ final class CMAuthService: AuthServiceProtocol {
     func createSession(requestToken: String) async throws {
         let result = try await networkService.auth.createSession(requestToken: requestToken)
         authContext.sessionID = result.sessionId
-        authContext.isGuest = false
     }
     
     func logout() async throws {

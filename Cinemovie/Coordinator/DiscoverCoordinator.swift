@@ -8,17 +8,17 @@
 import Foundation
 import UIKit
 
-final class DiscoverCoordinator: CoordinatorProtocol {
+final class DiscoverCoordinator {
     lazy var navigationController: UINavigationController = UINavigationController()
     
-    private let networkService: NetworkServiceProtocol
+    private let diContainer: DIContainer
     
-    init(networkService: NetworkServiceProtocol) {
-        self.networkService = networkService
+    init(diContainer: DIContainer) {
+        self.diContainer = diContainer
     }
     
     func start() {
-        let homeModule = DiscoverScreenAssembler.assemble(networkService: networkService)
+        let homeModule = DiscoverScreenAssembler.assemble(diContainer: diContainer)
         homeModule.tabBarItem = UITabBarItem(
             title: "Discover",
             image: UIImage(systemName: "binoculars.fill"),

@@ -45,12 +45,17 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
 }
 
 final class TVSeriesDetailsScreenPresenter {
+    // MARK: - VIPER
     weak var view: TVSeriesDetailsScreenViewProtocol?
     var router: TVSeriesDetailsScreenRouterProtocol
     var interactor: TVSeriesDetailsScreenInteractorProtocol
     
-    private var downloadGroup = DispatchGroup()
+    // MARK: - INJECTED PROPERTIES
     private var seriesID: Int
+    private var authContext: AuthContextProtocol
+    
+    // MARK: - PROPERTIES
+    private var downloadGroup = DispatchGroup()
     private var seriesDetails: TVSeriesDetails?
     private var seriesCast: [Cast] = []
     private var seriesCrew: [Cast] = []
@@ -61,10 +66,11 @@ final class TVSeriesDetailsScreenPresenter {
     var userLists: [UserList] = []
     private var seriesAccountStates: MediaAccountStatesAPIResponse = .empty
 
-    init(seriesID: Int, interactor: TVSeriesDetailsScreenInteractorProtocol, router: TVSeriesDetailsScreenRouterProtocol) {
+    init(seriesID: Int, authContext: AuthContextProtocol, interactor: TVSeriesDetailsScreenInteractorProtocol, router: TVSeriesDetailsScreenRouterProtocol) {
         self.seriesID = seriesID
         self.interactor = interactor
         self.router = router
+        self.authContext = authContext
     }
 }
 
@@ -84,11 +90,14 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
         downloadGroup.enter()
         interactor.getTVSeriesRecommendations(seriesID: seriesID)
         
-        downloadGroup.enter()
-        interactor.getTVSeriesAccountStates(seriesID: seriesID)
+        if !authContext.isGuest {
+            downloadGroup.enter()
+            interactor.getTVSeriesAccountStates(seriesID: seriesID)
+            
+            downloadGroup.enter()
+            interactor.getUserLists()
+        }
         
-        downloadGroup.enter()
-        interactor.getUserLists()
         
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self, let details = self.seriesDetails else { return }
@@ -201,6 +210,8 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
     
     // MARK: - ERROR HANDLING
     func didRecieveError(_ error: any Error) {
-        view?.didRecieveError(error.localizedDescription)
+        DispatchQueue.main.async { [weak self] in
+            self?.view?.didRecieveError(error.localizedDescription)
+        }
     }
 }

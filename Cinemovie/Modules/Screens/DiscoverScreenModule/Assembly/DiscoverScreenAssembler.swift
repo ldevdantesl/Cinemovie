@@ -8,9 +8,9 @@
 import UIKit
 
 final class DiscoverScreenAssembler {
-    static func assemble(networkService: NetworkServiceProtocol) -> DiscoverScreenVC {
-        let interactor = DiscoverScreenInteractor(networkService: networkService)
-        let router = DiscoverScreenRouter(networkService: networkService)
+    static func assemble(diContainer: DIContainer) -> DiscoverScreenVC {
+        let interactor = DiscoverScreenInteractor(networkService: diContainer.networkService)
+        let router = DiscoverScreenRouter(diContainer: diContainer)
         let presenter = DiscoverScreenPresenter(interactor: interactor, router: router)
         let viewController = DiscoverScreenVC()
         presenter.view  = viewController

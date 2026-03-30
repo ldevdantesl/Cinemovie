@@ -224,16 +224,13 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
             message: errorStr,
             preferredStyle: .alert
         )
-        
         let action = UIAlertAction(title: "OK", style: .cancel) { [weak self] _ in
             guard let self = self else { return }
             isFirstScreen ? self.dismiss(animated: true) : presenter?.didTapBackButton()
         }
-        
         alert.addAction(action)
-        DispatchQueue.main.async {
-            self.present(alert, animated: true, completion: nil)
-        }
+        
+        self.present(alert, animated: true, completion: nil)
     }
     
     // MARK: - DATA RECIEVING

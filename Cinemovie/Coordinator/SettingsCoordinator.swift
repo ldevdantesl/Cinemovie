@@ -8,19 +8,19 @@
 import Foundation
 import UIKit
 
-final class SettingsCoordinator: CoordinatorProtocol {
+final class SettingsCoordinator {
     lazy var navigationController: UINavigationController = UINavigationController()
 
-    private let networkService: NetworkServiceProtocol
-    weak var appCoordinator: AppCoordinator?
+    private let diContainer: DIContainer
+    private weak var sessionDelegate: SessionDelegate?
     
-    init(networkService: NetworkServiceProtocol, appCoordinator: AppCoordinator?) {
-        self.networkService = networkService
-        self.appCoordinator = appCoordinator
+    init(diContainer: DIContainer, sessionDelegate: SessionDelegate?) {
+        self.diContainer = diContainer
+        self.sessionDelegate = sessionDelegate
     }
     
     func start() {
-        let settingsModule = SettingsScreenAssembler.assemble(networkService: networkService, appCoordinator: appCoordinator)
+        let settingsModule = SettingsScreenAssembler.assemble(diContainer: diContainer, sessionDelegate: sessionDelegate)
         settingsModule.tabBarItem = UITabBarItem(
             title: "Settings",
             image: UIImage(systemName: "gearshape"),
