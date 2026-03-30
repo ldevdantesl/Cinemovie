@@ -42,6 +42,8 @@ final class UserListAPISubService: UserListAPISubServiceProtocol {
     }
     
     func getUserLists(page: Int) async throws -> [UserList] {
+        print("🔑 accountID: \(authContext.accountID ?? "nil")")
+           print("🔑 accessToken: \(authContext.accessToken ?? "nil")")
         guard let accountID = authContext.accountID, let accessToken = authContext.accessToken else { throw APIError.unauthorized }
         let response: PaginatedAPIResponse<UserList> = try await httpClient.request(UserListEndpoints.getUserLists(accountID: accountID, accessToken: accessToken, page: page))
         return response.results

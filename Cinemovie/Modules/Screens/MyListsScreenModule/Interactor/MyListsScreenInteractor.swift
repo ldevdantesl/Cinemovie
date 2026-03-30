@@ -119,9 +119,12 @@ final class MyListsScreenInteractor: MyListsScreenInteractorProtocol {
     func getUserLists() {
         Task {
             do {
+                print("📡 Fetching user lists...")
                 let result = try await networkService.userList.getUserLists(page: 1)
+                print("✅ Got \(result.count) user lists")
                 self.presenter?.didReceieveUserLists(lists: result)
             } catch {
+                print("❌ getUserLists failed: \(error)")
                 self.presenter?.didRecieveError(error)
             }
         }

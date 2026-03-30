@@ -40,15 +40,16 @@ final class AccountListAPISubService: AccountListAPISubServiceProtocol {
     
     func addMediaInAccountList(mediaID: Int, listType: AccountListTypes, mediaType: MediaTypes) async throws -> TMDBStatusResponse {
         guard let accountID = authContext.accountID,
-              let accessToken = authContext.accessToken else { throw APIError.unauthorized }
+              let sessionID = authContext.sessionID else { throw APIError.unauthorized }
         
-        return try await httpClient.request(AccountListEndpoints.addMediaInAccountList(accountID: accountID, accessToken: accessToken, mediaID: mediaID, listType: listType, mediaType: mediaType))
+        
+        return try await httpClient.request(AccountListEndpoints.addMediaInAccountList(accountID: accountID, sessionID: sessionID, mediaID: mediaID, listType: listType, mediaType: mediaType))
     }
     
     func removeMediaInAccountList(mediaID: Int, listType: AccountListTypes, mediaType: MediaTypes) async throws -> TMDBStatusResponse {
         guard let accountID = authContext.accountID,
-              let accessToken = authContext.accessToken else { throw APIError.unauthorized }
+              let sessionID = authContext.sessionID else { throw APIError.unauthorized }
         
-        return try await httpClient.request(AccountListEndpoints.removeMediaInAccountList(accountID: accountID, accessToken: accessToken, mediaID: mediaID, listType: listType, mediaType: mediaType))
+        return try await httpClient.request(AccountListEndpoints.removeMediaInAccountList(accountID: accountID, sessionID: sessionID, mediaID: mediaID, listType: listType, mediaType: mediaType))
     }
 }

@@ -31,9 +31,13 @@ final class DiscoverScreenInteractor: DiscoverScreenInteractorProtocol {
         Task {
             do {
                 let result = try await networkService.movies.getMovieList(listType: listType)
-                self.presenter?.didDownloadMovieList(listType: listType, queryMovies: result)
+                await MainActor.run {
+                    self.presenter?.didDownloadMovieList(listType: listType, queryMovies: result)
+                }
             } catch {
-                self.presenter?.didRecieveError(error)
+                await MainActor.run {
+                    self.presenter?.didRecieveError(error)
+                }
             }
         }
     }
@@ -43,9 +47,13 @@ final class DiscoverScreenInteractor: DiscoverScreenInteractorProtocol {
         Task {
             do {
                 let result = try await networkService.series.getList(listType: listType)
-                self.presenter?.didDownloadSeriesList(listType: listType, querySeries: result)
+                await MainActor.run {
+                    self.presenter?.didDownloadSeriesList(listType: listType, querySeries: result)
+                }
             } catch {
-                self.presenter?.didRecieveError(error)
+                await MainActor.run {
+                    self.presenter?.didRecieveError(error)
+                }
             }
         }
     }
@@ -55,9 +63,13 @@ final class DiscoverScreenInteractor: DiscoverScreenInteractorProtocol {
         Task {
             do {
                 let result = try await networkService.person.trending(timeWindow: timeWindow)
-                self.presenter?.didDownloadTrendingPeople(result)
+                await MainActor.run {
+                    self.presenter?.didDownloadTrendingPeople(result)
+                }
             } catch {
-                self.presenter?.didRecieveError(error)
+                await MainActor.run {
+                    self.presenter?.didRecieveError(error)
+                }
             }
         }
     }

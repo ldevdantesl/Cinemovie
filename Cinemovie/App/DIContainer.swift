@@ -27,6 +27,6 @@ final class DIContainer {
         self.authService = CMAuthService(networkService: networkService, authContext: authContext)
         self.networkService = networkService
         self.errorService = CMErrorService()
-        self.authContext = CMAccountStore(keychainService: keychainService)
+        self.authContext = authContext
     }
 }

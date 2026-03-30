@@ -9,8 +9,8 @@ import Foundation
 
 enum AccountListEndpoints: Endpoint {
     case getMedia(accountID: String, accessToken: String, mediaType: MediaTypes, listType: AccountListTypes, page: Int)
-    case addMediaInAccountList(accountID: String, accessToken: String, mediaID: Int, listType: AccountListTypes, mediaType: MediaTypes)
-    case removeMediaInAccountList(accountID: String, accessToken: String, mediaID: Int, listType: AccountListTypes, mediaType: MediaTypes)
+    case addMediaInAccountList(accountID: String, sessionID: String, mediaID: Int, listType: AccountListTypes, mediaType: MediaTypes)
+    case removeMediaInAccountList(accountID: String, sessionID: String, mediaID: Int, listType: AccountListTypes, mediaType: MediaTypes)
     
     var baseURL: String {
         switch self {
@@ -21,10 +21,10 @@ enum AccountListEndpoints: Endpoint {
     
     var auth: EndpointAuth {
         switch self {
-        case .getMedia(_, let accessToken, _, _, _),
-                .addMediaInAccountList(_, let accessToken, _, _, _),
-                .removeMediaInAccountList(_, let accessToken, _, _, _):
+        case .getMedia(_, let accessToken, _, _, _):
             return .bearer(accessToken)
+        case .addMediaInAccountList, .removeMediaInAccountList:
+            return .bearer(CONSTANTS.apiReadAcessToken)
         }
     }
     
@@ -49,8 +49,13 @@ enum AccountListEndpoints: Endpoint {
     var queryItems: [URLQueryItem]? {
         switch self {
         case .getMedia(_, _, _, _, let page):
-            return ["sort_by" : "created_at.desc", "page" : "\(page.description)"].toQueryItems()
-        default: return .none
+            return ["sort_by": "created_at.desc", "page": page.description].toQueryItems()
+        case .addMediaInAccountList(_, let sessionID, _, _, _),
+             .removeMediaInAccountList(_, let sessionID, _, _, _):
+            return [
+                "api_key": CONSTANTS.apiKey,
+                "session_id": sessionID
+            ].toQueryItems()
         }
     }
     
