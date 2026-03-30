@@ -1,16 +1,17 @@
 //
-//  AuthEndpoints.swift
+//  AuthEndpointsV3.swift
 //  Cinemovie
 //
-//  Created by Buzurg Rakhimzoda on 19.02.2026.
+//  Created by Buzurg Rakhimzoda on 30.03.2026.
 //
 
 import Foundation
 
-enum AuthEndpoints: Endpoint {
+enum AuthEndpointsV3: Endpoint {
     case createRequestToken
     case createSession(requestToken: String)
     case loginAsGuest
+    case getAccountDetails(sessionID: String)
     case logOut(sessionID: String)
     
     var baseURL: String {
@@ -26,15 +27,24 @@ enum AuthEndpoints: Endpoint {
         case .createRequestToken: return "/authentication/token/new"
         case .createSession: return "/authentication/session/new"
         case .loginAsGuest: return "/authentication/guest_session/new"
+        case .getAccountDetails: return "/account"
         case .logOut: return "/authentication/session"
         }
     }
     
     var method: HTTPMethod {
         switch self {
-        case .createRequestToken, .loginAsGuest: return .get
+        case .createRequestToken, .loginAsGuest, .getAccountDetails: return .get
         case .createSession: return .post
         case .logOut: return .delete
+        }
+    }
+    
+    var queryItems: [URLQueryItem]? {
+        switch self {
+        case .getAccountDetails(let sessionID):
+            return [URLQueryItem(name: "session_id", value: sessionID)]
+        default: return nil
         }
     }
     
@@ -43,7 +53,7 @@ enum AuthEndpoints: Endpoint {
         case .createSession(let token):
             return CMJSONSerializer.dataToJSON(json: ["request_token": token])
         case .logOut(let sessionID):
-            return CMJSONSerializer.dataToJSON(json: ["session_id" : sessionID])
+            return CMJSONSerializer.dataToJSON(json: ["session_id": sessionID])
         default: return nil
         }
     }

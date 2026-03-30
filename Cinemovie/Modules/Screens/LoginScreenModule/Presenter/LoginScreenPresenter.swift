@@ -20,6 +20,8 @@ final class LoginScreenPresenter {
     weak var view: LoginScreenViewProtocol?
     var router: LoginScreenRouterProtocol
     var interactor: LoginScreenInteractorProtocol
+    
+    private var pendingRequestToken: String?
 
     init(interactor: LoginScreenInteractorProtocol, router: LoginScreenRouterProtocol) {
         self.interactor = interactor
@@ -41,31 +43,30 @@ extension LoginScreenPresenter: LoginScreenPresenterProtocol {
     }
     
     func openOAuthURLWithToken(token: String) {
-        self.router.openOAuthURLWithToken(token: token)
+        self.pendingRequestToken = token
+        self.router.openOAuthURLWithTokenV4(token: token)
     }
     
     func handleOAuthCallback(url: URL) {
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
-            view?.didReceiveError(errorString: "Invalid OAuth response")
-            return
-        }
-
-        if let token = components.queryItems?.first(where: { $0.name == "request_token" })?.value,
-           let approved = components.queryItems?.first(where: { $0.name == "approved" })?.value {
+        let components = URLComponents(url: url, resolvingAgainstBaseURL: true)
+        
+        if let token = components?.queryItems?.first(where: { $0.name == "request_token" })?.value,
+           let approved = components?.queryItems?.first(where: { $0.name == "approved" })?.value {
             if approved == "true" {
-                interactor.createSession(requestToken: token)
+                interactor.createSessionV3(requestToken: token)
             } else {
                 view?.didReceiveError(errorString: "Access was denied. Please try again.")
             }
+        }
+        else if let requestToken = pendingRequestToken {
+            interactor.completeV4Login(requestToken: requestToken)
+            pendingRequestToken = nil
         } else {
             view?.didReceiveError(errorString: "Could not handle OAuth callback")
         }
     }
 
     func didRecieveError(_ error: any Error) {
-        switch error {
-        case let error as APIError: self.view?.didReceiveError(errorString: error.localizedDescription)
-        default: self.view?.didReceiveError(errorString: "Something went wrong, please try again")
-        }
+        self.view?.didReceiveError(errorString: error.localizedDescription)
     }
 }

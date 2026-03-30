@@ -24,7 +24,7 @@ final class DIContainer {
         let networkService = CMNetworkService(httpClient: httpClient, config: config, authContext: authContext)
         
         self.userService = userService
-        self.authService = CMAuthService(networkService: networkService, authContext: authContext)
+        self.authService = CMAuthService(httpClient: httpClient, authContext: authContext)
         self.networkService = networkService
         self.errorService = CMErrorService()
         self.authContext = authContext
