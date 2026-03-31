@@ -8,10 +8,10 @@
 import UIKit
 
 final class MyListsScreenAssembler {
-    static func assemble(diContainer: DIContainer) -> MyListsScreenVC {
+    static func assemble(diContainer: DIContainer, sessionDelegate: SessionDelegate?) -> MyListsScreenVC {
         let interactor = MyListsScreenInteractor(networkService: diContainer.networkService)
-        let router = MyListsScreenRouter(diContainer: diContainer)
-        let presenter = MyListsScreenPresenter(interactor: interactor, router: router)
+        let router = MyListsScreenRouter(diContainer: diContainer, sessionDelegate: sessionDelegate)
+        let presenter = MyListsScreenPresenter(authContext: diContainer.authContext, interactor: interactor, router: router)
         let viewController = MyListsScreenVC()
         presenter.view = viewController
         viewController.presenter = presenter

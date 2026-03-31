@@ -21,7 +21,7 @@ final class TabCoordinator {
 
     func start() {
         let homeCoordinator = DiscoverCoordinator(diContainer: diContainer)
-        let watchlistCoordinator = MyListsCoordinator(diContainer: diContainer)
+        let watchlistCoordinator = MyListsCoordinator(diContainer: diContainer, sessionDelegate: sessionDelegate)
         let settingsCoordinator = SettingsCoordinator(diContainer: diContainer, sessionDelegate: sessionDelegate)
 
         homeCoordinator.start()

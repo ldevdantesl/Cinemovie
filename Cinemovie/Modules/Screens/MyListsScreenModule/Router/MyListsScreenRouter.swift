@@ -11,6 +11,7 @@ protocol MyListsScreenRouterProtocol {
     func navigateToAccountList(listType: AccountListTypes)
     func navigateToUserList(userListDetails: UserListDetails)
     func showLoadingBox()
+    func navigateToLogin()
     
     func hideLoadingBox(success: Bool, message: String)
     func hidePopUp()
@@ -20,9 +21,11 @@ protocol MyListsScreenRouterProtocol {
 final class MyListsScreenRouter: MyListsScreenRouterProtocol {
     weak var viewController: MyListsScreenVC?
     private let diContainer: DIContainer
+    weak var sessionDelegate: SessionDelegate?
     
-    init(diContainer: DIContainer) {
+    init(diContainer: DIContainer, sessionDelegate: SessionDelegate?) {
         self.diContainer = diContainer
+        self.sessionDelegate = sessionDelegate
     }
     
     func navigateToAccountList(listType: AccountListTypes) {
@@ -33,6 +36,10 @@ final class MyListsScreenRouter: MyListsScreenRouterProtocol {
     func navigateToUserList(userListDetails: UserListDetails) {
         let vc = UserListDetailsScreenAssembler.assemble(userListDetails: userListDetails, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func navigateToLogin() {
+        sessionDelegate?.didRequestLogOut()
     }
     
     func presentAddNewListPopUp(onAdd: @escaping ((String, String?, Bool) -> Void)) {

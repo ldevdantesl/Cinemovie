@@ -11,13 +11,15 @@ final class MyListsCoordinator {
     lazy var navigationController: UINavigationController = UINavigationController()
     
     private let diContainer: DIContainer
+    weak var sessionDelegate: SessionDelegate?
     
-    init(diContainer: DIContainer) {
+    init(diContainer: DIContainer, sessionDelegate: SessionDelegate?) {
         self.diContainer = diContainer
+        self.sessionDelegate = sessionDelegate
     }
     
     func start() {
-        let watchlistModule = MyListsScreenAssembler.assemble(diContainer: diContainer)
+        let watchlistModule = MyListsScreenAssembler.assemble(diContainer: diContainer, sessionDelegate: sessionDelegate)
         watchlistModule.tabBarItem = UITabBarItem(
             title: "My Lists",
             image: UIImage(systemName: "film.stack"),
