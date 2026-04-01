@@ -30,8 +30,8 @@ final class CMStarRatingView: UIView {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(rating: Int) {
-        let normalizedRating = Double(rating) / 2.0
+    public func configure(rating: Double) {
+        let normalizedRating = rating / 2.0
         updateStars(for: normalizedRating)
     }
     

@@ -9,21 +9,22 @@ import UIKit
 
 protocol TVSeriesDetailsScreenInteractorProtocol: AnyObject {
     // MARK: - PROGRAMMATIC
-    func getTVSeriesDetails(seriesID: Int)
-    func getTVSeriesCast(seriesID: Int)
-    func getTVSeriesVideos(seriesID: Int)
-    func getTVSeriesReviews(seriesID: Int)
-    func getTVSeriesRecommendations(seriesID: Int)
-    func getTVSeasonDetails(seriesID: Int, seasonNumber: Int)
-    func getTVSeriesAccountStates(seriesID: Int)
-    func getUserLists()
+    func getTVSeriesDetails(seriesID: Int) async throws -> TVSeriesDetails
+    func getTVSeriesCast(seriesID: Int) async throws -> (cast: [Cast], crew: [Cast])
+    func getTVSeriesVideos(seriesID: Int) async throws -> [Video]
+    func getTVSeriesReviews(seriesID: Int) async throws -> [Review]
+    func getTVSeriesRecommendations(seriesID: Int) async throws -> [TVSeries]
+    func getTVSeriesAccountStates(seriesID: Int) async throws -> MediaAccountStatesAPIResponse
+    func getUserLists() async throws -> [UserList]
     
     // MARK: - USER INITIATED
+    func getTVSeasonDetails(seriesID: Int, seasonNumber: Int)
     func addOrRemoveInWatchlist(seriesID: Int, adding: Bool)
     func addOrRemoveInFavorites(seriesID: Int, adding: Bool)
 }
 
 final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProtocol {
+    
     weak var presenter: TVSeriesDetailsScreenPresenterProtocol?
     private let networkService: NetworkServiceProtocol
     
@@ -31,117 +32,81 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
         self.networkService = networkService
     }
     
-    func getTVSeriesDetails(seriesID: Int) {
-        Task {
-            do {
-                let result = try await networkService.series.getDetails(seriesID: seriesID)
-                self.presenter?.didGetTVSeriesDetails(result)
-            } catch {
-                self.presenter?.didRecieveError(error)
-            }
-        }
+    func getTVSeriesDetails(seriesID: Int) async throws -> TVSeriesDetails {
+        try await networkService.series.getDetails(seriesID: seriesID)
     }
     
-    func getTVSeriesReviews(seriesID: Int) {
-        Task {
-            do {
-                let result = try await networkService.series.getReviews(seriesID: seriesID)
-                self.presenter?.didGetTVSeriesReviews(result.results)
-            } catch {
-                self.presenter?.didRecieveError(error)
-            }
-        }
+    func getTVSeriesCast(seriesID: Int) async throws -> (cast: [Cast], crew: [Cast]) {
+        let result = try await networkService.series.getCast(seriesID: seriesID)
+        return (result.cast, result.crew)
     }
     
-    func getTVSeriesRecommendations(seriesID: Int) {
-        Task {
-            do {
-                let result = try await networkService.series.getRecommendations(seriesID: seriesID)
-                self.presenter?.didGetTVSeriesRecommends(result)
-            } catch {
-                self.presenter?.didRecieveError(error)
-            }
-        }
+    func getTVSeriesVideos(seriesID: Int) async throws -> [Video] {
+        try await networkService.series.getVideos(seriesID: seriesID).results
     }
     
-    func getTVSeriesCast(seriesID: Int) {
-        Task {
-            do {
-                let result = try await networkService.series.getCast(seriesID: seriesID)
-                self.presenter?.didGetTVSeriesCast(result.cast, crew: result.crew)
-            } catch {
-                self.presenter?.didRecieveError(error)
-            }
-        }
+    func getTVSeriesReviews(seriesID: Int) async throws -> [Review] {
+        try await networkService.series.getReviews(seriesID: seriesID).results
     }
     
-    func getTVSeriesVideos(seriesID: Int) {
-        Task {
-            do {
-                let result = try await networkService.series.getVideos(seriesID: seriesID)
-                self.presenter?.didGetTVSeriesVideos(result.results)
-            } catch {
-                self.presenter?.didRecieveError(error)
-            }
-        }
+    func getTVSeriesRecommendations(seriesID: Int) async throws -> [TVSeries] {
+        try await networkService.series.getRecommendations(seriesID: seriesID)
+    }
+
+    func getTVSeriesAccountStates(seriesID: Int) async throws -> MediaAccountStatesAPIResponse {
+        try await networkService.series.getAccountState(seriesID: seriesID)
+    }
+    
+    func getUserLists() async throws -> [UserList] {
+        try await networkService.userList.getUserLists(page: 1)
     }
     
     func getTVSeasonDetails(seriesID: Int, seasonNumber: Int) {
         Task {
             do {
-                let result = try await networkService.series.getSeasonDetails(seriesID: seriesID, seasonNumber: seasonNumber)
-                self.presenter?.didGetTVSeasonDetails(result)
+                let details = try await networkService.series.getSeasonDetails(seriesID: seriesID, seasonNumber: seasonNumber)
+                await MainActor.run {
+                    self.presenter?.didGetTVSeasonDetails(details)
+                }
             } catch {
-                self.presenter?.didRecieveError(error)
+                await MainActor.run {
+                    self.presenter?.didRecieveError(error)
+                }
             }
         }
     }
     
-    func getTVSeriesAccountStates(seriesID: Int) {
-        Task {
-            do {
-                let result = try await networkService.series.getAccountState(seriesID: seriesID)
-                self.presenter?.didGetTVSeriesAccountStates(result)
-            } catch {
-                self.presenter?.didRecieveError(error)
-            }
-        }
-    }
-    
-    func getUserLists() {
-        Task {
-            do {
-                let result = try await networkService.userList.getUserLists(page: 1)
-                self.presenter?.didGetUserLists(result)
-            } catch {
-                self.presenter?.didRecieveError(error)
-            }
-        }
-    }
-    
-    // MARK: - USER INITIATED
-    func addOrRemoveInFavorites(seriesID: Int, adding: Bool) {
-        Task {
-            do {
-                let result = try await adding ?
-                networkService.accountList.addMediaInAccountList(mediaID: seriesID, listType: .favorite, mediaType: .tvShow) :
-                networkService.accountList.removeMediaInAccountList(mediaID: seriesID, listType: .favorite, mediaType: .tvShow)
-                self.presenter?.didAddOrRemoveFromFavorites(message: result.statusMessage ?? "")
-            } catch {
-                self.presenter?.didRecieveError(error)
-            }
-        }
-    }
     
     func addOrRemoveInWatchlist(seriesID: Int, adding: Bool) {
         Task {
             do {
-                let result = try await adding ?
-                networkService.accountList.addMediaInAccountList(mediaID: seriesID, listType: .watchlist, mediaType: .tvShow) :
-                networkService.accountList.removeMediaInAccountList(mediaID: seriesID, listType: .watchlist, mediaType: .tvShow)
-                self.presenter?.didAddOrRemoveFromWatchlist(message: result.statusMessage ?? "")
+                let result = adding ?
+                try await networkService.accountList.addMediaInAccountList(mediaID: seriesID, listType: .watchlist, mediaType: .tvShow):
+                try await networkService.accountList.removeMediaInAccountList(mediaID: seriesID, listType: .watchlist, mediaType: .tvShow)
+                await MainActor.run {
+                    self.presenter?.didAddOrRemoveFromWatchlist(message: result.statusMessage)
+                }
             } catch {
-                self.presenter?.didRecieveError(error)
+                await MainActor.run {
+                    self.presenter?.didRecieveError(error)
+                }
+            }
+        }
+    }
+    
+    func addOrRemoveInFavorites(seriesID: Int, adding: Bool) {
+        Task {
+            do {
+                let result = adding ?
+                try await networkService.accountList.addMediaInAccountList(mediaID: seriesID, listType: .favorite, mediaType: .tvShow) :
+                try await networkService.accountList.removeMediaInAccountList(mediaID: seriesID, listType: .favorite, mediaType: .tvShow)
+                await MainActor.run {
+                    self.presenter?.didAddOrRemoveFromFavorites(message: result.statusMessage)
+                }
+            } catch {
+                await MainActor.run {
+                    self.presenter?.didRecieveError(error)
+                }
             }
         }
     }

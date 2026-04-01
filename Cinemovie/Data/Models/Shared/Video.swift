@@ -25,12 +25,21 @@ struct Video: Decodable, Hashable {
     }
 }
 
-enum VideoType: String, Decodable {
-    case behindTheScenes = "Behind the Scenes"
+enum VideoType: String, Codable {
+    case trailer = "Trailer"
+    case teaser = "Teaser"
     case clip = "Clip"
     case featurette = "Featurette"
-    case teaser = "Teaser"
-    case trailer = "Trailer"
+    case behindTheScenes = "Behind the Scenes"
+    case bloopers = "Bloopers"
+    case openingCredits = "Opening Credits"
+    case unknown
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let value = try container.decode(String.self)
+        self = VideoType(rawValue: value) ?? .unknown
+    }
 }
 
 enum VideoWebsites: String, Decodable {

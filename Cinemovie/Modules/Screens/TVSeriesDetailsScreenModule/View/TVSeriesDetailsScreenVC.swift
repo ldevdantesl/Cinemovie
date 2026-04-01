@@ -15,18 +15,18 @@ protocol TVSeriesDetailsScreenViewProtocol: AnyObject {
     var activePopUpView: PopUPView? { get set }
     
     func didRecieveError(_ errorStr: String)
-    func didGetAllTVSeriesData(
-        _ details: TVSeriesDetails, cast: [Cast],
-        crew: [Cast], videos: [Video],
-        reviews: [Review], recommends: [TVSeries],
-        accountStates: MediaAccountStatesAPIResponse
-    )
+    // MARK: - OTHER
+    func applySnapshot(sections: [TVSeriesDetailsScreenVC.Sections], items: [TVSeriesDetailsScreenVC.Sections : [TVSeriesDetailsScreenVC.Items]])
+    
+    // MARK: - LOADING
+    func showLoading()
+    func hideLoading()
 }
 
 final class TVSeriesDetailsScreenVC: UIViewController {
     
     // MARK: - OTHER
-    fileprivate enum Sections: CaseIterable, Hashable {
+    enum Sections: CaseIterable, Hashable {
         case backdropImage
         case titleAndTagline
         case subDetails
@@ -39,7 +39,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
         case unavailable
     }
     
-    fileprivate enum Items: Hashable {
+    enum Items: Hashable {
         case backdropImage(BackdropImageCellViewModel)
         case titleAndTagline(TitleAndTaglineCellViewModel)
         case subDetails(TVSeriesDetailsSubDetailsViewModel)
@@ -60,7 +60,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
     
     // MARK: - PROPERTIES
     private var viewModels: [CellViewModelBaseClass] = []
-    private var visibleSections: [Sections] = []
+    private var sectionStore: CMDiffableSectionStore = CMDiffableSectionStore<Sections>()
     private lazy var isFirstScreen = navigationController?.viewControllers.count ?? 0 > 1
     
     // MARK: - VIEW PROPERTIES
@@ -134,7 +134,7 @@ final class TVSeriesDetailsScreenVC: UIViewController {
                 let group = NSCollectionLayoutGroup(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1)))
                 return NSCollectionLayoutSection(group: group)
             }
-            let section = self.visibleSections[sectionIndex]
+            let section = self.sectionStore.section(at: sectionIndex)
             let edgeInsets: NSDirectionalEdgeInsets
             switch section {
             case .backdropImage: edgeInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: -10, trailing: 0)
@@ -217,6 +217,20 @@ extension TVSeriesDetailsScreenVC: UICollectionViewDelegate {
 }
 
 extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
+    
+    func applySnapshot(sections: [Sections], items: [Sections : [Items]]) {
+        sectionStore.update(sections)
+        collectionView.applySnapshot(sections: sections, itemsBySection: items)
+    }
+    
+    func showLoading() {
+        downloadView.show()
+    }
+    
+    func hideLoading() {
+        downloadView.hide()
+    }
+    
     // MARK: - ERROR HANDLING
     func didRecieveError(_ errorStr: String) {
         let alert = UIAlertController(
@@ -231,83 +245,5 @@ extension TVSeriesDetailsScreenVC: TVSeriesDetailsScreenViewProtocol {
         alert.addAction(action)
         
         self.present(alert, animated: true, completion: nil)
-    }
-    
-    // MARK: - DATA RECIEVING
-    func didGetAllTVSeriesData(
-        _ details: TVSeriesDetails, cast: [Cast],
-        crew: [Cast], videos: [Video],
-        reviews: [Review], recommends: [TVSeries],
-        accountStates: MediaAccountStatesAPIResponse
-    ) {
-        self.downloadView.hide()
-        
-        let backdropVM = BackdropImageCellViewModel(
-            imagePath: details.backdropPath,
-            size: .w1280, isFavorite: accountStates.favorite,
-            didTapBackButtonAction: presenter?.didTapBackButton,
-            didTapFavorite: presenter?.didTapFavoriteButton
-        )
-        
-        let titleVM = TitleAndTaglineCellViewModel(mediaName: details.name, mediaTagline: details.tagline)
-        let subDetailsVM = TVSeriesDetailsSubDetailsViewModel(
-            firstAirDate: details.firstAirDate, numberOfSeasons: details.numberOfSeasons ?? 0,
-            numberOfEpisodes: details.numberOfEpisodes ?? 0, homepage: details.homepage,
-            status: details.status ?? .ended, nextEpisodeToAir: details.nextEpisodeToAir?.airDate,
-            didTapView: presenter?.didTapTooltipView, didTapHomepage: presenter?.didTapHomepage
-        )
-        
-        let watchlistVm = WatchlistButtonCellViewModel(
-            isWatchlisted: accountStates.watchlist,
-            showsAddToListButton: (presenter?.userLists.count ?? 0) > 0,
-            didTapAction: presenter?.didTapWatchlistButton,
-            didTapAddToList: presenter?.didTapAddToList
-        )
-        
-        var sectionsAndTheirItems: [(section: Sections, items: [Items])] = [
-            (.backdropImage, [.backdropImage(backdropVM)]),
-            (.titleAndTagline, [.titleAndTagline(titleVM)]),
-            (.subDetails, [.subDetails(subDetailsVM)]),
-            (.watchlistButton, [.watchListButton(watchlistVm)])
-        ]
-        
-        if !details.overview.isEmpty {
-            let overviewVM = OverviewCellViewModel(overviewText: details.overview)
-            sectionsAndTheirItems.append((Sections.overview, [.overview(overviewVM)]))
-        }
-        
-        if !cast.isEmpty || !crew.isEmpty {
-            let castVM = CastListCellViewModel(cast: !cast.isEmpty ? cast : crew, didSelectCast: presenter?.didSelectActor)
-            sectionsAndTheirItems.append((Sections.cast, [.cast(castVM)]))
-        }
-        
-        let prodVM = ProductionInfoCellViewModel(companies: details.productionCompanies, countries: details.productionCountries)
-        sectionsAndTheirItems.append((Sections.production, [.production(prodVM)]))
-        
-        let rateVM = RateAndShareCellViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton)
-        sectionsAndTheirItems.append((Sections.rateAndShare, [.rateAndShare(rateVM)]))
-        
-        let seasons = details.seasons.filter { $0.seasonNumber != 0 }
-        if !seasons.isEmpty || !recommends.isEmpty || !videos.isEmpty || !reviews.isEmpty {
-            let extrasVM = MediaExtrasCellViewModel(
-                seasons: seasons, recommended: recommends, videos: videos, reviews: reviews,
-                didTapMedia: presenter?.didTapMedia, didTapSeason: presenter?.didSelectSeason
-            )
-            sectionsAndTheirItems.append((Sections.mediaExtras, [.mediaExtras(extrasVM)]))
-        } else {
-            let unavailableVM = UnavailableInfoCellViewModel(
-                title: "No additional content available",
-                subtitle: "We couldn’t find any related seasons, videos, reviews, or recommendations for this TV Series.",
-                image: UIImage(named: ImageNames.empty2.rawValue)
-            )
-            sectionsAndTheirItems.append((Sections.unavailable, [.unavailable(unavailableVM)]))
-        }
-        
-        self.visibleSections = sectionsAndTheirItems.map { $0.section }
-        
-        self.collectionView.applySnapshot(
-            sections: sectionsAndTheirItems.map { $0.section },
-            itemsBySection: Dictionary(uniqueKeysWithValues: sectionsAndTheirItems)
-        )
     }
 }

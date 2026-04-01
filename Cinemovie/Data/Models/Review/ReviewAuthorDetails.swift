@@ -10,7 +10,7 @@ import Foundation
 struct ReviewAuthorDetails: Decodable, Hashable {
     let name, username: String
     let avatarPath: String?
-    let rating: Int?
+    let rating: Double?
 
     enum CodingKeys: String, CodingKey {
         case name, username, rating
