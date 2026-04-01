@@ -10,14 +10,14 @@ import SnapKit
 import SDWebImage
 
 final class VerticalMediaListCellViewModel: CellViewModelBaseClass, CellWithHeightProtocol {
-    let media: [Media]
+    let media: [MediaProtocol]
     let title: String?
     let subtitle: String?
     let didTapBackButton: (() -> Void)?
-    let didTapAnyMedia: ((Media) -> Void)?
+    let didTapAnyMedia: ((MediaProtocol) -> Void)?
     var cellHeight: CGFloat = 100
     
-    init(media: [Media], didTapAnyMedia: ((Media) -> Void)?) {
+    init(media: [MediaProtocol], didTapAnyMedia: ((MediaProtocol) -> Void)?) {
         self.media = media
         self.didTapAnyMedia = didTapAnyMedia
         self.title = nil
@@ -26,7 +26,7 @@ final class VerticalMediaListCellViewModel: CellViewModelBaseClass, CellWithHeig
         super.init(cellIdentifier: "VerticalMediaListCell")
     }
     
-    init(media: [Media], title: String, subtitle: String? = nil, didTapAnyMedia: ((Media) -> Void)?) {
+    init(media: [MediaProtocol], title: String, subtitle: String? = nil, didTapAnyMedia: ((MediaProtocol) -> Void)?) {
         self.media = media
         self.title = title
         self.subtitle = subtitle
@@ -35,7 +35,7 @@ final class VerticalMediaListCellViewModel: CellViewModelBaseClass, CellWithHeig
         super.init(cellIdentifier: "VerticalMediaListCell")
     }
     
-    init(media: [Media], title: String, subtitle: String? = nil, didTapBackButton: (() -> Void)?, didTapAnyMedia: ((Media) -> Void)?) {
+    init(media: [MediaProtocol], title: String, subtitle: String? = nil, didTapBackButton: (() -> Void)?, didTapAnyMedia: ((MediaProtocol) -> Void)?) {
         self.media = media
         self.title = title
         self.subtitle = subtitle
@@ -63,7 +63,7 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: VerticalMediaListCellViewModel?
-    private var items: [Media] = []
+    private var items: [MediaProtocol] = []
     private var itemVMS: [MediaPosterImageCellViewModel] = []
     private var gridCVTopConstraint: Constraint?
     private var backButtonSizeConstraint: Constraint?
@@ -202,7 +202,7 @@ final class VerticalMediaListCell: ReusableCellBaseClass {
         paginatingLoadingIndicator.alpha = alpha
     }
     
-    public func insertNewItems(_ items: [Media], onCompletion: (() -> Void)? = nil) {
+    public func insertNewItems(_ items: [MediaProtocol], onCompletion: (() -> Void)? = nil) {
         self.items.append(contentsOf: items)
         let newVMs = items.map {
             MediaPosterImageCellViewModel(media: $0) { [weak self] in

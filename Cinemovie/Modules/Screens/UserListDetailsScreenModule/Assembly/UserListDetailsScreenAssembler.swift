@@ -8,9 +8,9 @@
 import UIKit
 
 final class UserListDetailsScreenAssembler {
-    static func assemble(userList: UserList, tmdbService: TMDBService) -> UserListDetailsScreenVC {
-        let interactor = UserListDetailsScreenInteractor(tmdbService: tmdbService)
-        let router = UserListDetailsScreenRouter(tmdbService: tmdbService)
+    static func assemble(userList: UserList, diContainer: DIContainer) -> UserListDetailsScreenVC {
+        let interactor = UserListDetailsScreenInteractor(networkService: diContainer.networkService)
+        let router = UserListDetailsScreenRouter(diContainer: diContainer)
         let presenter = UserListDetailsScreenPresenter(userList: userList, interactor: interactor, router: router)
         let viewController = UserListDetailsScreenVC()
         presenter.view  = viewController
@@ -20,9 +20,9 @@ final class UserListDetailsScreenAssembler {
         return viewController
     }
     
-    static func assemble(userListDetails: UserListDetails, tmdbService: TMDBService) -> UserListDetailsScreenVC {
-        let interactor = UserListDetailsScreenInteractor(tmdbService: tmdbService)
-        let router = UserListDetailsScreenRouter(tmdbService: tmdbService)
+    static func assemble(userListDetails: UserListDetails, diContainer: DIContainer) -> UserListDetailsScreenVC {
+        let interactor = UserListDetailsScreenInteractor(networkService: diContainer.networkService)
+        let router = UserListDetailsScreenRouter(diContainer: diContainer)
         let presenter = UserListDetailsScreenPresenter(userListDetails: userListDetails, interactor: interactor, router: router)
         let viewController = UserListDetailsScreenVC()
         presenter.view  = viewController

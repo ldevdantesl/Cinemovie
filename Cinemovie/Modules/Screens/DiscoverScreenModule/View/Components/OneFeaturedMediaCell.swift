@@ -9,10 +9,10 @@ import UIKit
 import SnapKit
 
 final class OneFeaturedMediaCellViewModel: CellViewModelBaseClass {
-    let media: Media
-    let didTapAction: ((Media) -> Void)?
+    let media: MediaProtocol
+    let didTapAction: ((MediaProtocol) -> Void)?
     
-    init(media: Media, didTapAction: ((Media) -> Void)?) {
+    init(media: MediaProtocol, didTapAction: ((MediaProtocol) -> Void)?) {
         self.media = media
         self.didTapAction = didTapAction
         super.init(cellIdentifier: "OneFeaturedMediaCell")

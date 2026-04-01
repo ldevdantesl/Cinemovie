@@ -32,6 +32,7 @@ final class MyListsScreenVC: UIViewController {
     fileprivate enum Constants {
         static let topDecorHeight = UIConstants.topInset
         static let plusButtonName = "plus"
+        static let emptyReusableIdentifier = "empty"
     }
     
     enum SupplementaryKind {
@@ -43,17 +44,22 @@ final class MyListsScreenVC: UIViewController {
     enum Sections: Hashable {
         case accountLists
         case userLists
+        case unauthorized
     }
     
     enum Items: Hashable {
         case accountListVM(AccountListCellViewModel)
         case userListVM(UserListCellViewModel)
+        case authorizeVM(MyListsAuthenticateCellViewModel)
     }
     
     // MARK: - VIPER
     var presenter: MyListsScreenPresenterProtocol?
     var popUpView: PopUPView?
     var loadingBox: CMLoadingBox?
+    
+    // MARK: - PROPERTIES
+    private let sectionStore = CMDiffableSectionStore<Sections>()
     
     // MARK: - VIEW PROPERTIES
     private let downloadingView: CMSplashView = {
@@ -78,14 +84,15 @@ final class MyListsScreenVC: UIViewController {
     }()
     
     private lazy var collectionView: DiffableCollectionView = {
-        let view = DiffableCollectionView<MyListsScreenVC.Sections, MyListsScreenVC.Items>(layout: createLayout(), ignoresTopSafeArea: false)
-        view.delegate = self
+        let layout = MyListsLayoutFactory.make(sectionStore: self.sectionStore)
+        let view = DiffableCollectionView<MyListsScreenVC.Sections, MyListsScreenVC.Items>(layout: layout, ignoresTopSafeArea: false)
         view.refreshControl = refreshControler
         view.register(cellClass: AccountListCell.self)
         view.register(cellClass: UserListCell.self)
+        view.register(cellClass: MyListsAuthenticateCell.self)
+        view.register(UICollectionReusableView.self, forSupplementaryViewOfKind: SupplementaryKind.headerBlur, withReuseIdentifier: Constants.emptyReusableIdentifier)
         view.register(TopBlurHeaderCell.self, forSupplementaryViewOfKind: SupplementaryKind.headerBlur, withReuseIdentifier: TopBlurHeaderCell.identifier)
         view.register(SupplementaryHeaderCell.self, forSupplementaryViewOfKind: SupplementaryKind.headerItem, withReuseIdentifier: SupplementaryHeaderCell.identifier)
-        view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
         return view
     }()
@@ -134,6 +141,11 @@ final class MyListsScreenVC: UIViewController {
                 cell?.configure(viewModel: vm)
                 return cell
                 
+            case .authorizeVM(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath)
+                (cell as? MyListsAuthenticateCell)?.configure(withVM: vm)
+                return cell
+                
             case .userListVM(let vm):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath) as? UserListCell
                 cell?.configure(viewModel: vm)
@@ -143,6 +155,13 @@ final class MyListsScreenVC: UIViewController {
         
         collectionView.setSupplementaryViewProvider { [weak self] collectionView, elementKind, indexPath in
             guard let self = self else { return nil }
+            
+            let section = sectionStore.section(at: indexPath.section)
+            
+            guard section != .unauthorized else {
+                return collectionView.dequeueReusableSupplementaryView(ofKind: elementKind, withReuseIdentifier: Constants.emptyReusableIdentifier, for: indexPath)
+            }
+            
             guard elementKind == SupplementaryKind.headerItem else {
                 return collectionView.dequeueReusableSupplementaryView(ofKind: elementKind, withReuseIdentifier: TopBlurHeaderCell.identifier, for: indexPath) as? TopBlurHeaderCell
             }
@@ -151,7 +170,6 @@ final class MyListsScreenVC: UIViewController {
                 ofKind: elementKind, withReuseIdentifier: SupplementaryHeaderCell.identifier, for: indexPath
             ) as? SupplementaryHeaderCell else { return nil }
             
-            let section = self.collectionView.snapshot().sectionIdentifiers[indexPath.section]
             switch section {
             case .accountLists:
                 let vm = SupplementaryHeaderViewModel(title: "Account Lists", subtitle: "Default Lists for your account")
@@ -165,37 +183,10 @@ final class MyListsScreenVC: UIViewController {
                     self.presenter?.didTapAddNewList()
                 }
                 cell.configure(viewModel: vm)
+            default: break
             }
             return cell
         }
-    }
-    
-    private func createLayout() -> UICollectionViewCompositionalLayout {
-        let config = UICollectionViewCompositionalLayoutConfiguration()
-        let headerItem = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)),
-            elementKind: SupplementaryKind.headerBlur, alignment: .topLeading
-        )
-        headerItem.pinToVisibleBounds = true
-        headerItem.extendsBoundary = false
-        config.boundarySupplementaryItems = [headerItem]
-        
-        return UICollectionViewCompositionalLayout(sectionProvider: { sectionIndex, env in
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1/2), heightDimension: .estimated(200)))
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(200)), subitem: item, count: 2)
-            group.interItemSpacing = .fixed(20)
-            let section = NSCollectionLayoutSection(group: group)
-            section.interGroupSpacing = 10
-            section.contentInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
-            
-            let headerItem = NSCollectionLayoutBoundarySupplementaryItem(
-                layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)),
-                elementKind: SupplementaryKind.headerItem, alignment: .topLeading
-            )
-            headerItem.pinToVisibleBounds = true
-            section.boundarySupplementaryItems = [headerItem]
-            return section
-        }, configuration: config)
     }
     
     // MARK: - OBJC
@@ -203,8 +194,6 @@ final class MyListsScreenVC: UIViewController {
         presenter?.didCallRefresh()
     }
 }
-
-extension MyListsScreenVC: UICollectionViewDelegate { }
 
 extension MyListsScreenVC: MyListsScreenViewProtocol {
     // MARK: - ERROR HANDLING
@@ -224,6 +213,7 @@ extension MyListsScreenVC: MyListsScreenViewProtocol {
     
     // MARK: - OTHER
     func applySnapshot(sections: [Sections], itemsBySection: [Sections : [Items]]) {
+        sectionStore.update(sections)
         collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
     }
     

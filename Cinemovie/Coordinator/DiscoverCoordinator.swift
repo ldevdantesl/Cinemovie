@@ -8,17 +8,17 @@
 import Foundation
 import UIKit
 
-final class DiscoverCoordinator: Coordinator {
-    let navigationController: UINavigationController = UINavigationController()
+final class DiscoverCoordinator {
+    lazy var navigationController: UINavigationController = UINavigationController()
     
-    private let tmdbService: TMDBService
+    private let diContainer: DIContainer
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(diContainer: DIContainer) {
+        self.diContainer = diContainer
     }
     
     func start() {
-        let homeModule = DiscoverScreenAssembler.assemble(tmdbService: tmdbService)
+        let homeModule = DiscoverScreenAssembler.assemble(diContainer: diContainer)
         homeModule.tabBarItem = UITabBarItem(
             title: "Discover",
             image: UIImage(systemName: "binoculars.fill"),

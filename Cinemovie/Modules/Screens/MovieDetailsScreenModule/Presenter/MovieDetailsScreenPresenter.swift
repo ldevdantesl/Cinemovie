@@ -11,7 +11,7 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func viewDidLoad()
 
     // MARK: - USER INITIATED
-    func didTapMedia(media: Media)
+    func didTapMedia(media: MediaProtocol)
     func didTapIMDBImage()
     func didTapShareButton()
     func didTapRateButton()
@@ -29,7 +29,7 @@ protocol MovieDetailsScreenPresenterProtocol: AnyObject {
     func didGetMovieVideos(videos: [Video])
     func didGetMovieReviews(_ reviews: [Review])
     func didGetMovieBelongsToCollectionDetails(_ details: BelongsToCollectionDetails)
-    func didGetMovieAccountStates(_ accountStates: MediaAccountStates)
+    func didGetMovieAccountStates(_ accountStates: MediaAccountStatesAPIResponse)
     func didGetUserLists(_ userLists: [UserList])
     
     // MARK: - USER INITIATED
@@ -51,6 +51,7 @@ final class MovieDetailsScreenPresenter {
     
     // MARK: - PROPERTIES
     private let movieID: Int
+    private let authContext: AuthContextProtocol
     private let dispatchGroup = DispatchGroup()
     
     private var movieDetails: MovieDetails?
@@ -62,12 +63,89 @@ final class MovieDetailsScreenPresenter {
     private var movieRecommends: [Movie] = []
     private var belongsToCollectionDetails: BelongsToCollectionDetails?
     var userLists: [UserList] = []
-    private var movieAccountStates: MediaAccountStates = .empty
+    private var movieAccountStates: MediaAccountStatesAPIResponse = .empty
 
-    init(movieID: Int, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
+    init(movieID: Int, authContext: AuthContextProtocol, interactor: MovieDetailsScreenInteractorProtocol, router: MovieDetailsScreenRouterProtocol) {
         self.movieID = movieID
         self.interactor = interactor
         self.router = router
+        self.authContext = authContext
+    }
+    
+    private func applySnapshot() {
+        self.view?.hideLoading()
+        guard let movieDetails else { return }
+        let backdropVM = BackdropImageCellViewModel(
+            imagePath: movieDetails.backdropPath,
+            size: .w1280, isFavorite: movieAccountStates.favorite,
+            didTapBackButtonAction: { [weak self] in self?.didTapBackButton() },
+            didTapFavorite: { [weak self] in self?.didTapFavoriteButton(adding: $0) }
+        )
+        
+        let titleVM = TitleAndTaglineCellViewModel(mediaName: movieDetails.title, mediaTagline: movieDetails.tagline)
+        
+        let subDetailsVM = MovieDetailsSubDetailsCellViewModel(
+            year: movieDetails.releaseDate, released: CMDateFormatter.isDatePassed(movieDetails.releaseDate),
+            duration: RuntimeHelper.runtime(movieDetails.runtime), imdbPath: movieDetails.imdbID,
+            didTapIMDB: { [weak self] in self?.didTapIMDBImage() },
+            didTapSubDetails: { [weak self] in self?.didTapToSubDetails(sendedBy: $0, message: $1) }
+        )
+                
+        var sectionsAndTheirItems: [(sections: (MovieDetailsScreenVC.Sections), items: [MovieDetailsScreenVC.Items])] = [
+            (.backdropImage, [.backdropImage(backdropVM)]),
+            (.titleAndTagline, [.titleAndTagline(titleVM)]),
+            (.subDetails, [.subDetails(subDetailsVM)])
+        ]
+
+        if !authContext.isGuest {
+            let watchlistVM = WatchlistButtonCellViewModel(
+                isWatchlisted: movieAccountStates.watchlist,
+                showsAddToListButton: userLists.count > 0,
+                didTapAction: { [weak self] in self?.didTapAddToWatchlist(adding: $0) },
+                didTapAddToList: { [weak self] in self?.didTapAddToList() }
+            )
+            sectionsAndTheirItems.append((.watchlistButton, [.watchListButton(watchlistVM)]))
+        }
+        
+        if !movieDetails.overview.isEmpty {
+            let overviewVM = OverviewCellViewModel(overviewText: movieDetails.overview)
+            sectionsAndTheirItems.append((.overview, [.overview(overviewVM)]))
+        }
+        
+        if !movieCast.isEmpty || !movieCrew.isEmpty {
+            let castVM = CastListCellViewModel(cast: !movieCast.isEmpty ? movieCast : movieCrew) { [weak self] in self?.didSelectActor($0)}
+            sectionsAndTheirItems.append((.cast, [.cast(castVM)]))
+        }
+        
+        let prodVM = ProductionInfoCellViewModel(companies: movieDetails.productionCompanies, countries: movieDetails.productionCountries)
+        sectionsAndTheirItems.append((.production, [.production(prodVM)]))
+        
+        let rateVM = RateAndShareCellViewModel(
+            didTapShareButton: { [weak self] in self?.didTapShareButton() },
+            didTapRateButton: { [weak self] in self?.didTapRateButton() }
+        )
+        sectionsAndTheirItems.append((.rateAndShare, [.rateAndShare(rateVM)]))
+        
+        if belongsToCollectionDetails != nil || !movieRecommends.isEmpty || !movieVideos.isEmpty || !movieReviews.isEmpty {
+            let extrasVM = MediaExtrasCellViewModel(
+                collectionDetails: belongsToCollectionDetails,
+                recommended: movieRecommends, videos: movieVideos,
+                reviews: movieReviews, didTapMedia: { [weak self] in self?.didTapMedia(media: $0) }
+            )
+            sectionsAndTheirItems.append((.mediaExtras, [.mediaExtras(extrasVM)]))
+        } else {
+            let unavailableVM = UnavailableInfoCellViewModel(
+                title: "No additional content available",
+                subtitle: "We couldn’t find any related videos, reviews, or recommendations for this movie.",
+                image: UIImage(named: ImageNames.empty2.rawValue)
+            )
+            sectionsAndTheirItems.append((.unavailable, [.unavailable(unavailableVM)]))
+        }
+        
+        self.view?.applySnapshot(
+            sections: sectionsAndTheirItems.map { $0.sections },
+            items: Dictionary(uniqueKeysWithValues: sectionsAndTheirItems)
+        )
     }
 }
 
@@ -90,26 +168,21 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         dispatchGroup.enter()
         interactor.getMovieReviews(movieID: movieID)
         
-        dispatchGroup.enter()
-        interactor.getMovieAccountStates(movieID: movieID)
+        if !authContext.isGuest {
+            dispatchGroup.enter()
+            interactor.getMovieAccountStates(movieID: movieID)
+        }
         
         dispatchGroup.enter()
         interactor.getUserLists()
         
         dispatchGroup.notify(queue: .main) { [weak self] in
-            guard let self = self, let details = self.movieDetails else { return }
-            self.view?.didDownloadAllData(
-                details: details, videos: movieVideos,
-                cast: movieCast, crew: movieCrew,
-                recommended: movieRecommends, reviews: movieReviews,
-                belongsToCollectionDetails: belongsToCollectionDetails,
-                accountStates: movieAccountStates
-            )
+            self?.applySnapshot()
         }
     }
     
     // MARK: - USER INITIATED
-    func didTapMedia(media: Media) {
+    func didTapMedia(media: MediaProtocol) {
         switch media {
         case let movie as Movie: router.navigateToAnotherMovie(movie: movie)
         case let series as TVSeries: router.navigateToSeries(series: series)
@@ -199,7 +272,7 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
         print("Successfully added to favorite: \(message)")
     }
 
-    func didGetMovieAccountStates(_ accountStates: MediaAccountStates) {
+    func didGetMovieAccountStates(_ accountStates: MediaAccountStatesAPIResponse) {
         self.movieAccountStates = accountStates
         dispatchGroup.leave()
     }
@@ -211,6 +284,8 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
     
     // MARK: - ERROR
     func didRecieveError(_ error: String, goesBack: Bool) {
-        view?.didRecieveError(error, goesBack: goesBack)
+        DispatchQueue.main.async { [weak self] in
+            self?.view?.didRecieveError(error, goesBack: goesBack)
+        }
     }
 }

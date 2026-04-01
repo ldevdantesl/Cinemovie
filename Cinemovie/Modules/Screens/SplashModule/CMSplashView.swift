@@ -51,39 +51,39 @@ final class CMSplashView: UIView {
     
     // MARK: - PUBLIC FUNC
     public func show() {
-        self.isHidden = false
-        self.alpha = 0
-        
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.isHidden = false
+            self.alpha = 0
+            self.appLogo.transform = .identity
+
             UIView.animate(withDuration: Constants.showAniDuration, delay: 0) { [weak self] in
-                guard let self = self else { return }
-                self.alpha = 1
+                self?.alpha = 1
             }
-        }
-        
-        self.appLogo.transform = .identity
-        
-        DispatchQueue.main.async {
+
             UIView.animate(withDuration: Constants.aniDuration, delay: 0, options: [.autoreverse, .repeat, .curveEaseInOut]) { [weak self] in
-                guard let self = self else { return }
-                self.appLogo.transform = CGAffineTransform(translationX: 0, y: Constants.appLogoTranslationY)
+                self?.appLogo.transform = CGAffineTransform(translationX: 0, y: Constants.appLogoTranslationY)
             }
         }
     }
-    
+
     public func hide(completion: (() -> Void)? = nil) {
-        DispatchQueue.main.async {
-            UIView.animate(withDuration: Constants.aniDuration, delay: Constants.aniDuration, options: .showHideTransitionViews) { [weak self] in
-                guard let self = self else { return }
-                self.alpha = 0
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            UIView.animate(
+                withDuration: Constants.aniDuration,
+                delay: Constants.aniDuration,
+                options: .showHideTransitionViews
+            ) { [weak self] in
+                self?.alpha = 0
             } completion: { [weak self] _ in
-                guard let self = self else { return }
-                self.isHidden = true
+                self?.isHidden = true
             }
-            
-            guard let completion else { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + Constants.aniDuration * 0.99) {
-                completion()
+
+            if let completion {
+                DispatchQueue.main.asyncAfter(deadline: .now() + Constants.aniDuration * 0.99) {
+                    completion()
+                }
             }
         }
     }

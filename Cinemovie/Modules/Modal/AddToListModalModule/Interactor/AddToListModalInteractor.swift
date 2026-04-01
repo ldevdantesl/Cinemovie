@@ -16,48 +16,52 @@ protocol AddToListModalInteractorProtocol: AnyObject {
 
 final class AddToListModalInteractor: AddToListModalInteractorProtocol {
     weak var presenter: AddToListModalPresenterProtocol?
-    private var tmdbService: TMDBService
+    private let networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     func getUserLists() {
-        tmdbService.getUserLists { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didReceiveLists(lists: success.results)
-            case .failure(let failure): self.presenter?.didReceiveError(failure)
+        Task {
+            do {
+                let result = try await networkService.userList.getUserLists(page: 1)
+                self.presenter?.didReceiveLists(lists: result)
+            } catch {
+                self.presenter?.didReceiveError(error)
             }
         }
     }
     
     func getItemStatusInList(listID: Int, itemID: Int, mediaType: MediaTypes, refreshing: Bool) {
-        tmdbService.getItemStatusInUserList(listID: listID, mediaID: itemID, mediaType: mediaType) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success: self.presenter?.didReceiveItemStatusInList(listID: listID, status: true)
-            case .failure: self.presenter?.didReceiveItemStatusInList(listID: listID, status: false)
+        Task {
+            do {
+                let _ = try await networkService.userList.getItemStatusInUserList(listID: listID, mediaID: itemID, mediaType: mediaType)
+                self.presenter?.didReceiveItemStatusInList(listID: listID, status: true)
+            } catch {
+                self.presenter?.didReceiveItemStatusInList(listID: listID, status: false)
             }
         }
     }
     
     func addMediaToList(listID: Int, mediaID: Int, mediaType: MediaTypes) {
-        tmdbService.addOrRemoveMediaInUserList(listID: listID, mediaID: mediaID, mediaType: mediaType, adding: true) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success: self.presenter?.didAddOrRemoveFromList(added: true)
-            case .failure(let failure): self.presenter?.didReceieveErrorInBox(failure)
+        Task {
+            do {
+                let _ = try await networkService.userList.addMediaInUserList(listID: listID, mediaID: mediaID, mediaType: mediaType)
+                self.presenter?.didAddOrRemoveFromList(added: true)
+            } catch {
+                self.presenter?.didReceieveErrorInBox(error)
             }
         }
     }
     
     func removeMediaFromList(listID: Int, mediaID: Int, mediaType: MediaTypes) {
-        tmdbService.addOrRemoveMediaInUserList(listID: listID, mediaID: mediaID, mediaType: mediaType, adding: false) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success: self.presenter?.didAddOrRemoveFromList(added: false)
-            case .failure(let failure): self.presenter?.didReceieveErrorInBox(failure)
+        Task {
+            do {
+                let _ = try await networkService.userList.removeMediaInUserList(listID: listID, mediaID: mediaID, mediaType: mediaType)
+                self.presenter?.didAddOrRemoveFromList(added: false)
+            } catch {
+                self.presenter?.didReceieveErrorInBox(error)
             }
         }
     }

@@ -37,6 +37,7 @@ final class CMButton: UIButton {
     private(set) var buttonCornerRadius: CGFloat = 0
     private(set) var buttonBorderColor: UIColor?
     private(set) var buttonBorderWidth: CGFloat?
+    private var onTapAction: (() -> Void)?
     
     // MARK: - LIFECYCLE
     override init(frame: CGRect) {
@@ -45,8 +46,7 @@ final class CMButton: UIButton {
     
     convenience init(viewModel: CMButtonViewModel) {
         self.init(frame: .zero)
-        self.viewModel = viewModel
-        setup()
+        configure(viewModel: viewModel)
     }
     
     @available(*, unavailable)
@@ -86,9 +86,14 @@ final class CMButton: UIButton {
         self.buttonBorderWidth = borderWidth
     }
     
+    public func setAction(action: (() -> Void)?) {
+        self.onTapAction = action
+    }
+    
     // MARK: - PRIVATE FUNC
     private func setup() {
         guard let viewModel = viewModel else { return }
+        self.onTapAction = viewModel.didTapAction ?? self.onTapAction
         self.setTitle(nil, for: .normal)
         self.setImage(nil, for: .normal)
         self.configuration = nil
@@ -121,6 +126,6 @@ final class CMButton: UIButton {
     
     // MARK: - OBJC FUNC
     @objc private func didTapButton() {
-        viewModel?.didTapAction?()
+        self.onTapAction?()
     }
 }

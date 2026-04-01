@@ -12,17 +12,23 @@ protocol SettingsScreenInteractorProtocol: AnyObject {
 
 final class SettingsScreenInteractor: SettingsScreenInteractorProtocol {
     weak var presenter: SettingsScreenPresenterProtocol?
-    weak var authService: AuthService?
+    private let authService: AuthServiceProtocol
     
-    init(authService: AuthService?) {
+    init(authService: AuthServiceProtocol) {
         self.authService = authService
     }
     
     func showSessionID() {
-        print("Yup")
+        
     }
     
     func logout() {
-        authService?.logout()
+        Task {
+            do {
+                try await authService.logout()
+            } catch {
+                print("Cant log out")
+            }
+        }
     }
 }

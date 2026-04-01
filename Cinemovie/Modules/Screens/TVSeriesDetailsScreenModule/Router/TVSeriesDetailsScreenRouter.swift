@@ -26,10 +26,10 @@ protocol TVSeriesDetailsScreenRouterProtocol {
 
 final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     weak var viewController: TVSeriesDetailsScreenVC?
-    private let tmdbService: TMDBService
+    private let diContainer: DIContainer
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(diContainer: DIContainer) {
+        self.diContainer = diContainer
     }
     
     // MARK: - NAVIGATION
@@ -38,17 +38,17 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     }
     
     func navigateToAnotherTVSeries(series: TVSeries) {
-        let newSeriesDetails = TVSeriesDetailsScreenAssembler.assemble(series: series, tmdbService: tmdbService)
+        let newSeriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(newSeriesDetails, animated: true)
     }
     
     func navigateToPersonDetails(creditID: String) {
-        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, tmdbService: tmdbService)
+        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
     func navigateToMovie(movie: Movie) {
-        let movieDetailsVC = MovieDetailsScreenAssembler.assemble(movie: movie, tmdbService: tmdbService)
+        let movieDetailsVC = MovieDetailsScreenAssembler.assemble(movieID: movie.id, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(movieDetailsVC, animated: true)
     }
     
@@ -116,7 +116,7 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     }
     
     func presentAddToListModal(seriesID: Int) {
-        let vc = AddToListModalAssembler.assemble(itemID: seriesID, mediaType: .tvShow, tmdbService: tmdbService)
+        let vc = AddToListModalAssembler.assemble(itemID: seriesID, mediaType: .tvShow, networkService: diContainer.networkService)
         vc.modalPresentationStyle = .pageSheet
     
         if let sheet = vc.sheetPresentationController {

@@ -9,10 +9,10 @@ import SnapKit
 import UIKit
 
 final class MediaPosterImageCellViewModel: CellViewModelBaseClass {
-    let media: Media
-    let didTapMedia: ((Media) -> Void)?
+    let media: MediaProtocol
+    let didTapMedia: ((MediaProtocol) -> Void)?
     
-    init(media: Media, didTapMedia: ((Media) -> Void)? = nil) {
+    init(media: MediaProtocol, didTapMedia: ((MediaProtocol) -> Void)? = nil) {
         self.media = media
         self.didTapMedia = didTapMedia
         super.init(cellIdentifier: "MediaPosterImageCell")

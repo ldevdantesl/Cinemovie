@@ -17,24 +17,24 @@ protocol DiscoverScreenRouterProtocol {
 final class DiscoverScreenRouter: DiscoverScreenRouterProtocol {
     weak var viewController: DiscoverScreenVC?
     
-    private let tmdbService: TMDBService
+    private let diContainer: DIContainer
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(diContainer: DIContainer) {
+        self.diContainer = diContainer
     }
     
-    func navigateToMovieDetails(movie: Movie) {
-        let movieDetails = MovieDetailsScreenAssembler.assemble(movie: movie, tmdbService: tmdbService)
+    func navigateToMovieDetails(movieID: Int) {
+        let movieDetails = MovieDetailsScreenAssembler.assemble(movieID: movieID, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(movieDetails, animated: true)
     }
     
-    func navigateToTVSeriesDetails(series: TVSeries) {
-        let seriesDetails = TVSeriesDetailsScreenAssembler.assemble(series: series, tmdbService: tmdbService)
+    func navigateToTVSeriesDetails(seriesID: Int) {
+        let seriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: seriesID, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(seriesDetails, animated: true)
     }
     
     func navigateToPersonDetails(personID: Int) {
-        let newVC = PersonDetailsScreenAssembler.assemble(personID: personID, tmdbService: tmdbService)
+        let newVC = PersonDetailsScreenAssembler.assemble(personID: personID, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(newVC, animated: true)
     }
     

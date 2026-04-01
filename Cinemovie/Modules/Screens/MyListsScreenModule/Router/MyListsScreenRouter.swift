@@ -11,6 +11,7 @@ protocol MyListsScreenRouterProtocol {
     func navigateToAccountList(listType: AccountListTypes)
     func navigateToUserList(userListDetails: UserListDetails)
     func showLoadingBox()
+    func navigateToLogin()
     
     func hideLoadingBox(success: Bool, message: String)
     func hidePopUp()
@@ -19,20 +20,26 @@ protocol MyListsScreenRouterProtocol {
 
 final class MyListsScreenRouter: MyListsScreenRouterProtocol {
     weak var viewController: MyListsScreenVC?
-    private let tmdbService: TMDBService
+    private let diContainer: DIContainer
+    weak var sessionDelegate: SessionDelegate?
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(diContainer: DIContainer, sessionDelegate: SessionDelegate?) {
+        self.diContainer = diContainer
+        self.sessionDelegate = sessionDelegate
     }
     
     func navigateToAccountList(listType: AccountListTypes) {
-        let vc = AccountListDetailsScreenAssembler.assemble(listType: listType, tmdbService: tmdbService)
+        let vc = AccountListDetailsScreenAssembler.assemble(listType: listType, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
     func navigateToUserList(userListDetails: UserListDetails) {
-        let vc = UserListDetailsScreenAssembler.assemble(userListDetails: userListDetails, tmdbService: tmdbService)
+        let vc = UserListDetailsScreenAssembler.assemble(userListDetails: userListDetails, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func navigateToLogin() {
+        sessionDelegate?.didRequestLogOut()
     }
     
     func presentAddNewListPopUp(onAdd: @escaping ((String, String?, Bool) -> Void)) {

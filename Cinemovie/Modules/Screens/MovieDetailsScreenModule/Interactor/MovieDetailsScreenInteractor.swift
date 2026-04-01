@@ -23,110 +23,124 @@ protocol MovieDetailsScreenInteractorProtocol: AnyObject {
 
 final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
     weak var presenter: MovieDetailsScreenPresenterProtocol?
-    private let tmdbService: TMDBService
+    private let networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     // MARK: - PROGRAMMATIC
     func getMovieDetails(movieID: Int) {
-        tmdbService.getMovieDetails(movieID: movieID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didGetMovieDetails(success)
-            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription, goesBack: true)
+        Task {
+            do {
+                let result = try await networkService.movies.getMovieDetails(movieID: movieID)
+                self.presenter?.didGetMovieDetails(result)
+            } catch {
+                self.presenter?.didRecieveError(error.localizedDescription, goesBack: true)
             }
         }
     }
     
     func getMovieCast(movieID: Int) {
-        tmdbService.getMovieCast(movieID: movieID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didGetMovieCast(cast: success.cast, crew: success.crew)
-            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription, goesBack: false)
+        Task {
+            do {
+                let result = try await networkService.movies.getMovieCast(movieID: movieID)
+                self.presenter?.didGetMovieCast(cast: result.cast, crew: result.crew)
+            } catch {
+                self.presenter?.didRecieveError(error.localizedDescription, goesBack: false)
             }
         }
     }
     
     func getMovieRecommendations(movieID: Int) {
-        tmdbService.getMovieRecommendations(movieID: movieID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didGetMovieRecommendations(queryMovies: success.movies)
-            case .failure(let error): self.presenter?.didRecieveError(error.localizedDescription, goesBack: false)
+        Task {
+            do {
+                let result = try await networkService.movies.getMovieRecommendations(movieID: movieID)
+                self.presenter?.didGetMovieRecommendations(queryMovies: result)
+            } catch {
+                self.presenter?.didRecieveError(error.localizedDescription, goesBack: false)
             }
         }
     }
     
     func getMovieVideos(movieID: Int) {
-        tmdbService.getMovieVideos(movieID: movieID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didGetMovieVideos(videos: success.results)
-            case .failure: self.presenter?.didGetMovieVideos(videos: [])
+        Task {
+            do {
+                let result = try await networkService.movies.getMovieVideos(movieID: movieID)
+                self.presenter?.didGetMovieVideos(videos: result)
+            } catch {
+                self.presenter?.didGetMovieVideos(videos: [])
             }
         }
     }
     
     func getMovieReviews(movieID: Int) {
-        tmdbService.getMovieReviews(movieID: movieID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didGetMovieReviews(success.results)
-            case .failure: presenter?.didGetMovieReviews([])
+        Task {
+            do {
+                let result = try await networkService.movies.getMovieReviews(movieID: movieID)
+                self.presenter?.didGetMovieReviews(result)
+            } catch {
+                self.presenter?.didGetMovieReviews([])
             }
         }
     }
     
     func getBelongsToCollectionDetails(collectionID: Int) {
-        tmdbService.getBelongsToCollectionDetails(collectionID: collectionID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let details): presenter?.didGetMovieBelongsToCollectionDetails(details)
-            case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription, goesBack: false)
+        Task {
+            do {
+                let result = try await networkService.other.collectionDetails(collectionID: collectionID)
+                self.presenter?.didGetMovieBelongsToCollectionDetails(result)
+            } catch {
+                presenter?.didRecieveError(error.localizedDescription, goesBack: false)
             }
         }
     }
     
     func getMovieAccountStates(movieID: Int) {
-        tmdbService.getMovieAccountStates(movieID: movieID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didGetMovieAccountStates(success)
-            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription, goesBack: false)
+        Task {
+            do {
+                let result = try await networkService.movies.getMovieAccountState(movieID: movieID)
+                self.presenter?.didGetMovieAccountStates(result)
+            } catch {
+                presenter?.didRecieveError(error.localizedDescription, goesBack: false)
             }
         }
     }
     
     func getUserLists() {
-        tmdbService.getUserLists { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didGetUserLists(success.results)
-            case .failure: self.presenter?.didGetUserLists([])
+        Task {
+            do {
+                let result = try await networkService.userList.getUserLists(page: 1)
+                self.presenter?.didGetUserLists(result)
+            } catch {
+                self.presenter?.didGetUserLists([])
             }
         }
     }
     
     // MARK: - USER INITIATED
     func addOrRemoveInWatchlist(movieID: Int, adding: Bool) {
-        tmdbService.addOrRemoveMediaInAccountList(mediaID: movieID, listType: .watchlist, mediaType: .movie, adding: adding){ [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didAddToWatchlist(success.statusMessage)
-            case .failure(let failure): presenter?.didRecieveError(failure.localizedDescription, goesBack: false)
+        Task {
+            do {
+                let result = try await adding ?
+                networkService.accountList.addMediaInAccountList(mediaID: movieID, listType: .watchlist, mediaType: .movie) :
+                networkService.accountList.removeMediaInAccountList(mediaID: movieID, listType: .watchlist, mediaType: .movie)
+                self.presenter?.didAddToWatchlist(result.statusMessage ?? "")
+            } catch {
+                presenter?.didRecieveError(error.localizedDescription, goesBack: false)
             }
         }
     }
     
     func addOrRemoveInFavorites(movieID: Int, adding: Bool) {
-        tmdbService.addOrRemoveMediaInAccountList(mediaID: movieID, listType: .favorite, mediaType: .movie, adding: adding) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didAddToFavorite(success.statusMessage)
-            case .failure(let failure): self.presenter?.didRecieveError(failure.localizedDescription, goesBack: false)
+        Task {
+            do {
+                let result = try await adding ?
+                networkService.accountList.addMediaInAccountList(mediaID: movieID, listType: .favorite, mediaType: .movie) :
+                networkService.accountList.removeMediaInAccountList(mediaID: movieID, listType: .favorite, mediaType: .movie)
+                self.presenter?.didAddToWatchlist(result.statusMessage ?? "")
+            } catch {
+                presenter?.didRecieveError(error.localizedDescription, goesBack: false)
             }
         }
     }

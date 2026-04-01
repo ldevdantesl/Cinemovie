@@ -8,11 +8,10 @@
 import UIKit
 
 final class TVSeriesDetailsScreenAssembler {
-    static func assemble(series: TVSeries, tmdbService: TMDBService) -> TVSeriesDetailsScreenVC {
-        RecentMediaHelper.addRecentMedia(media: series)
-        let interactor = TVSeriesDetailsScreenInteractor(tmdbService: tmdbService)
-        let router = TVSeriesDetailsScreenRouter(tmdbService: tmdbService)
-        let presenter = TVSeriesDetailsScreenPresenter(seriesID: series.id, interactor: interactor, router: router)
+    static func assemble(seriesID: Int, diContainer: DIContainer) -> TVSeriesDetailsScreenVC {
+        let interactor = TVSeriesDetailsScreenInteractor(networkService: diContainer.networkService)
+        let router = TVSeriesDetailsScreenRouter(diContainer: diContainer)
+        let presenter = TVSeriesDetailsScreenPresenter(seriesID: seriesID, authContext: diContainer.authContext, interactor: interactor, router: router)
         let viewController = TVSeriesDetailsScreenVC()
         presenter.view = viewController
         viewController.presenter = presenter

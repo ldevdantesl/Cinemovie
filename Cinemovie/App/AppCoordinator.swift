@@ -2,22 +2,18 @@
 //  AppCoordinator.swift
 //  Cinemovie
 //
-//  Created by Buzurg Rakhimzoda on 31.01.2025.
-//
 
-import Foundation
 import UIKit
 
-final class AppCoordinator: Coordinator {
+final class AppCoordinator {
     private let window: UIWindow?
-
-    private let authService: AuthService
-    private let tmdbService: TMDBService
+    private let container: DIContainer
     
-    init(window: UIWindow?, authService: AuthService, tmdbService: TMDBService) {
+    private var tabCoordinator: TabCoordinator?
+    
+    init(window: UIWindow?, container: DIContainer) {
         self.window = window
-        self.authService = authService
-        self.tmdbService = tmdbService
+        self.container = container
     }
     
     func start() {
@@ -31,40 +27,41 @@ final class AppCoordinator: Coordinator {
     }
     
     private func checkAuthentication() {
-        authService.isLoggedIn ? showMainApp() : showLoginPage()
+        container.authService.isLoggedIn ? showMainApp() : showLoginPage()
     }
     
-    func showMainApp() {
-        guard let window = window else {
-            return
-        }
+    private func showMainApp() {
+        guard let window else { return }
         
-        let tabCoordinator = TabCoordinator(authService: authService, tmdbService: tmdbService, appCoordinator: self)
+        let tabCoordinator = TabCoordinator(diContainer: container, sessionDelegate: self)
         tabCoordinator.start()
-    
-        UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve) { [weak self] in
-            guard let self = self else { return }
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                self.window?.rootViewController = tabCoordinator.tabBarController
-            }
-        }
+        self.tabCoordinator = tabCoordinator
         
+        UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve) {
+            window.rootViewController = tabCoordinator.tabBarController
+        }
     }
     
-    func showLoginPage() {
-        guard let window = window else {
-            return
-        }
+    private func showLoginPage() {
+        guard let window else { return }
         
-        let loginVC = LoginScreenAssembler.assemble(authService: authService, appCoordinator: self)
+        let loginVC = LoginScreenAssembler.assemble(diContainer: container, sessionDelegate: self)
         
-        UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve) { [weak self] in
-            guard let self = self else { return }
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                self.window?.rootViewController = loginVC
-            }
+        UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve) {
+            window.rootViewController = loginVC
         }
+    }
+}
+
+// MARK: - SessionEndingDelegate
+extension AppCoordinator: SessionDelegate {
+    func didRequestLogIn() {
+        self.showMainApp()
+    }
+    
+    func didRequestLogOut() {
+        container.authContext.clearSession()
+        tabCoordinator = nil
+        showLoginPage()
     }
 }

@@ -10,7 +10,9 @@ import UIKit
 struct AppOpener {
     static func openURL(_ url: URL) {
         if UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url)
+            DispatchQueue.main.async {
+                UIApplication.shared.open(url)
+            }
         }
     }
 }

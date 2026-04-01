@@ -163,7 +163,7 @@ final class UserListCell: ReusableCellBaseClass {
         contentView.addInteraction(interaction)
     }
     
-    private func stackPosters(items: [Media]) {
+    private func stackPosters(items: [MediaProtocol]) {
         posterStackView.subviews.forEach { $0.removeFromSuperview() }
         guard !items.isEmpty else {
             posterStackView.addSubview(plusPosterView)

@@ -16,13 +16,11 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
     var activePopUpView: ActorPopupView? { get set }
 
     // MARK: - OTHER
-    func didDownloadAllData(
-        details: MovieDetails, videos: [Video],
-        cast: [Cast], crew: [Cast],
-        recommended: [Movie], reviews: [Review],
-        belongsToCollectionDetails: BelongsToCollectionDetails?,
-        accountStates: MediaAccountStates
-    )
+    func applySnapshot(sections: [MovieDetailsScreenVC.Sections], items: [MovieDetailsScreenVC.Sections : [MovieDetailsScreenVC.Items]])
+    
+    // MARK: - LOADING
+    func showLoading()
+    func hideLoading()
     
     // MARK: - ERROR HANDLING
     func didRecieveError(_ errorStr: String, goesBack: Bool)
@@ -31,7 +29,7 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
 final class MovieDetailsScreenVC: UIViewController {
     
     // MARK: - OTHER
-    fileprivate enum Sections: CaseIterable, Hashable {
+    enum Sections: CaseIterable, Hashable {
         case backdropImage
         case titleAndTagline
         case subDetails
@@ -44,7 +42,7 @@ final class MovieDetailsScreenVC: UIViewController {
         case unavailable
     }
     
-    fileprivate enum Items: Hashable {
+    enum Items: Hashable {
         case backdropImage(BackdropImageCellViewModel)
         case titleAndTagline(TitleAndTaglineCellViewModel)
         case subDetails(MovieDetailsSubDetailsCellViewModel)
@@ -65,7 +63,7 @@ final class MovieDetailsScreenVC: UIViewController {
     
     // MARK: - PROPERTIES
     private var viewModels: [CellViewModelBaseClass] = []
-    private var visibleSections: [Sections] = []
+    private var sectionStore = CMDiffableSectionStore<Sections>()
     
     // MARK: - VIEW PROPERTIES
     private let downloadingView: CMSplashView = {
@@ -89,7 +87,6 @@ final class MovieDetailsScreenVC: UIViewController {
         cv.register(cellClass: UnavailableInfoCell.self)
         cv.register(cellClass: MediaExtrasCell.self)
         cv.delegate = self
-        cv.translatesAutoresizingMaskIntoConstraints = false
         return cv
     }()
     
@@ -136,7 +133,7 @@ final class MovieDetailsScreenVC: UIViewController {
                 let group = NSCollectionLayoutGroup(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1)))
                 return NSCollectionLayoutSection(group: group)
             }
-            let section = self.visibleSections[sectionIndex]
+            let section = self.sectionStore.section(at: sectionIndex)
             let edgeInsets: NSDirectionalEdgeInsets
             switch section {
             case .backdropImage: edgeInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: -10, trailing: 0)
@@ -220,84 +217,23 @@ extension MovieDetailsScreenVC: UICollectionViewDelegate {
 }
 
 extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
-    func didDownloadAllData(
-        details: MovieDetails, videos: [Video],
-        cast: [Cast], crew: [Cast],
-        recommended: [Movie], reviews: [Review],
-        belongsToCollectionDetails: BelongsToCollectionDetails?,
-        accountStates: MediaAccountStates
-    ) {
-        self.downloadingView.hide()
-        let backdropVM = BackdropImageCellViewModel(
-            imagePath: details.backdropPath,
-            size: .w1280, isFavorite: accountStates.favorite,
-            didTapBackButtonAction: presenter?.didTapBackButton,
-            didTapFavorite: presenter?.didTapFavoriteButton
-        )
-        
-        let titleVM = TitleAndTaglineCellViewModel(mediaName: details.title, mediaTagline: details.tagline)
-        let subDetailsVM = MovieDetailsSubDetailsCellViewModel(
-            year: details.releaseDate, released: CMDateFormatter.isDatePassed(details.releaseDate),
-            duration: RuntimeHelper.runtime(details.runtime), imdbPath: details.imdbID,
-            didTapIMDB: presenter?.didTapIMDBImage, didTapSubDetails: presenter?.didTapToSubDetails
-        )
-        
-        let watchlistVM = WatchlistButtonCellViewModel(
-            isWatchlisted: accountStates.watchlist,
-            showsAddToListButton: (presenter?.userLists.count ?? 0) > 0,
-            didTapAction: presenter?.didTapAddToWatchlist,
-            didTapAddToList: presenter?.didTapAddToList
-        )
-        
-        var sectionsAndTheirItems: [(sections: (Sections), items: [Items])] = [
-            (Sections.backdropImage, [.backdropImage(backdropVM)]),
-            (Sections.titleAndTagline, [.titleAndTagline(titleVM)]),
-            (Sections.subDetails, [.subDetails(subDetailsVM)]),
-            (Sections.watchlistButton, [.watchListButton(watchlistVM)])
-        ]
-        
-        if !details.overview.isEmpty {
-            let overviewVM = OverviewCellViewModel(overviewText: details.overview)
-            sectionsAndTheirItems.append((Sections.overview, [.overview(overviewVM)]))
-        }
-        
-        if !cast.isEmpty || !crew.isEmpty {
-            let castVM = CastListCellViewModel(cast: !cast.isEmpty ? cast : crew, didSelectCast: presenter?.didSelectActor)
-            sectionsAndTheirItems.append((Sections.cast, [.cast(castVM)]))
-        }
-        
-        let prodVM = ProductionInfoCellViewModel(companies: details.productionCompanies, countries: details.productionCountries)
-        sectionsAndTheirItems.append((Sections.production, [.production(prodVM)]))
-        
-        let rateVM = RateAndShareCellViewModel(didTapShareButton: presenter?.didTapShareButton, didTapRateButton: presenter?.didTapRateButton)
-        sectionsAndTheirItems.append((Sections.rateAndShare, [.rateAndShare(rateVM)]))
-        
-        if belongsToCollectionDetails != nil || !recommended.isEmpty || !videos.isEmpty || !reviews.isEmpty {
-            let extrasVM = MediaExtrasCellViewModel(
-                collectionDetails: belongsToCollectionDetails,
-                recommended: recommended, videos: videos,
-                reviews: reviews, didTapMedia: presenter?.didTapMedia
-            )
-            sectionsAndTheirItems.append((Sections.mediaExtras, [.mediaExtras(extrasVM)]))
-        } else {
-            let unavailableVM = UnavailableInfoCellViewModel(
-                title: "No additional content available",
-                subtitle: "We couldn’t find any related videos, reviews, or recommendations for this movie.",
-                image: UIImage(named: ImageNames.empty2.rawValue)
-            )
-            sectionsAndTheirItems.append((Sections.unavailable, [.unavailable(unavailableVM)]))
-        }
-        
-        self.visibleSections = sectionsAndTheirItems.map { $0.sections }
-        
-        self.collectionView.applySnapshot(
-            sections: visibleSections,
-            itemsBySection: Dictionary(uniqueKeysWithValues: sectionsAndTheirItems)
-        )
+    
+    func applySnapshot(sections: [Sections], items: [Sections : [Items]]) {
+        sectionStore.update(sections)
+        collectionView.applySnapshot(sections: sections, itemsBySection: items)
+    }
+    
+    func showLoading() {
+        downloadingView.show()
+    }
+    
+    func hideLoading() {
+        downloadingView.hide()
     }
     
     // MARK: - ERROR HANDLING
     func didRecieveError(_ errorStr: String, goesBack: Bool) {
+        guard presentedViewController == nil else { return }
         let alert = UIAlertController(
             title: "Oops..",
             message: errorStr,
@@ -310,8 +246,6 @@ extension MovieDetailsScreenVC: MovieDetailsScreenViewProtocol {
         }
         
         alert.addAction(action)
-        DispatchQueue.main.async {
-            self.present(alert, animated: true, completion: nil)
-        }
+        self.present(alert, animated: true, completion: nil)
     }
 }

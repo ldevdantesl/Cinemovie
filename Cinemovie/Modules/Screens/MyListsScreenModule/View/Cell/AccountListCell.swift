@@ -9,11 +9,11 @@ import UIKit
 import SnapKit
 
 final class AccountListCellViewModel: CellViewModelBaseClass {
-    let media: [Media]
+    let media: [MediaProtocol]
     let listType: AccountListTypes?
     let didTapList: ((AccountListTypes) -> Void)?
     
-    init(media: [Media], listType: AccountListTypes?, didTapList: ((AccountListTypes) -> Void)?) {
+    init(media: [MediaProtocol], listType: AccountListTypes?, didTapList: ((AccountListTypes) -> Void)?) {
         self.media = media
         self.didTapList = didTapList
         self.listType = listType
@@ -158,7 +158,7 @@ final class AccountListCell: ReusableCellBaseClass {
         }
     }
     
-    private func stackPosters(items: [Media]) {
+    private func stackPosters(items: [MediaProtocol]) {
         posterStackView.subviews.forEach { $0.removeFromSuperview() }
         guard !items.isEmpty else {
             posterStackView.addSubview(plusPosterView)
