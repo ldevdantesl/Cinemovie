@@ -17,7 +17,6 @@ final class CMUserService: UserServiceProtocol {
     private(set) var userLanguage: String = "en-US"
     private var recentlyViewedMedia: [MediaProtocol] = RecentMediaHelper.getRecentMedia()
     
-    
     private let userLanguageKey = "userLanguageKey"
     private let recentlyViewedMediaKey = "recentlyViewedMediaKey"
     
@@ -30,11 +29,5 @@ final class CMUserService: UserServiceProtocol {
         guard !recentlyViewedMedia.contains(where: { $0.id == media.id }) else { return }
         self.recentlyViewedMedia.append(media)
         CMStorage.save(recentlyViewedMedia.map(AnyMedia.init), key: recentlyViewedMediaKey)
-    }
-    
-    func addToRecentlySearchedKeywords(_ keyword: String) {
-        guard !recentlySearchedKeywords.contains(keyword) else { return }
-        self.recentlySearchedKeywords.append(keyword)
-        CMStorage.save(recentlySearchedKeywords, key: recentlySearchedKeywordsKey)
     }
 }

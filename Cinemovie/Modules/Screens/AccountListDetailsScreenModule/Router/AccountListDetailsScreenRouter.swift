@@ -9,8 +9,8 @@ import UIKit
 
 protocol AccountListDetailsScreenRouterProtocol {
     func goBack()
-    func navigateToMovieDetails(movie: Movie)
-    func navigateToTVSeriesDetails(series: TVSeries)
+    func navigateToMovieDetails(movieId: Int)
+    func navigateToTVSeriesDetails(seriesID: Int)
 }
 
 final class AccountListDetailsScreenRouter: AccountListDetailsScreenRouterProtocol {

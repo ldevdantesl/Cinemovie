@@ -80,5 +80,6 @@ final class MediaPosterImageCell: ReusableCellBaseClass {
     @objc private func didTapMedia() {
         guard let media = viewModel?.media else { return }
         viewModel?.didTapMedia?(media)
+        RecentMediaHelper.addRecentMedia(media: media)
     }
 }

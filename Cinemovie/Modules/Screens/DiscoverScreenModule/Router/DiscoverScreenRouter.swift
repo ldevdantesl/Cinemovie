@@ -8,8 +8,8 @@
 import UIKit
 
 protocol DiscoverScreenRouterProtocol {
-    func navigateToMovieDetails(movie: Movie)
-    func navigateToTVSeriesDetails(series: TVSeries)
+    func navigateToMovieDetails(movieID: Int)
+    func navigateToTVSeriesDetails(seriesID: Int)
     func navigateToPersonDetails(personID: Int)
     func navigateToSearch()
 }
@@ -39,7 +39,7 @@ final class DiscoverScreenRouter: DiscoverScreenRouterProtocol {
     }
     
     func navigateToSearch() {
-        let newVC = SearchScreenAssembler.assemble(tmdbService: tmdbService)
+        let newVC = SearchScreenAssembler.assemble(diContainer: diContainer)
         viewController?.navigationController?.pushViewController(newVC, animated: true)
     }
 }

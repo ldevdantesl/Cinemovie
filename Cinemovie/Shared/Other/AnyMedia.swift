@@ -72,15 +72,19 @@ enum AnyMedia: Codable, MediaProtocol {
     var character: String? { wrapped.character }
     
     init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        if let movie = try? container.decode(Movie.self) {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(String.self, forKey: .type)
+        switch type {
+        case "movie":
+            let movie = try container.decode(Movie.self, forKey: .value)
             self = .movie(movie)
-        } else if let tv = try? container.decode(TVSeries.self) {
+        case "tv":
+            let tv = try container.decode(TVSeries.self, forKey: .value)
             self = .tvSeries(tv)
-        } else {
+        default:
             throw DecodingError.typeMismatch(
                 AnyMedia.self,
-                .init(codingPath: decoder.codingPath, debugDescription: "Unknown media type")
+                .init(codingPath: decoder.codingPath, debugDescription: "Unknown media type: \(type)")
             )
         }
     }

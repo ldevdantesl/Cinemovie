@@ -10,8 +10,8 @@ import UIKit
 protocol PersonDetailsScreenRouterProtocol {
     func goBack()
     func openSource(sourceID: String, sourceType: SourceTypes)
-    func navigateToMovie(movie: Movie)
-    func navigateToSeries(series: TVSeries)
+    func navigateToMovie(movieID: Int)
+    func navigateToSeries(seriesID: Int)
 }
 
 final class PersonDetailsScreenRouter: PersonDetailsScreenRouterProtocol {
