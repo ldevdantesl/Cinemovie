@@ -14,10 +14,10 @@ protocol SearchScreenInteractorProtocol: AnyObject {
 
 final class SearchScreenInteractor: SearchScreenInteractorProtocol {
     weak var presenter: SearchScreenPresenterProtocol?
-    private let tmdbService: TMDBService
+    private let networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     

@@ -9,28 +9,28 @@ import UIKit
 
 protocol SearchScreenRouterProtocol {
     func popBack()
-    func pushToMedia(media: Media)
+    func pushToMedia(media: MediaProtocol)
 }
 
 final class SearchScreenRouter: SearchScreenRouterProtocol {
-    private var tmdbService: TMDBService
     weak var viewController: SearchScreenVC?
+    private let diContainer: DIContainer
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(diContainer: DIContainer) {
+        self.diContainer = diContainer
     }
     
     func popBack() {
         viewController?.navigationController?.popViewController(animated: true)
     }
     
-    func pushToMedia(media: any Media) {
+    func pushToMedia(media: any MediaProtocol) {
         switch media {
         case let movie as Movie:
-            let vc = MovieDetailsScreenAssembler.assemble(movie: movie, tmdbService: tmdbService)
+            let vc = MovieDetailsScreenAssembler.assemble(movieID: movie.id, diContainer: diContainer)
             viewController?.navigationController?.pushViewController(vc, animated: true)
         case let series as TVSeries:
-            let vc = TVSeriesDetailsScreenAssembler.assemble(series: series, tmdbService: tmdbService)
+            let vc = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, diContainer: diContainer)
             viewController?.navigationController?.pushViewController(vc, animated: true)
         default: print("Uknown Media Type")
         }

@@ -15,13 +15,18 @@ protocol UserServiceProtocol {
 
 final class CMUserService: UserServiceProtocol {
     private(set) var userLanguage: String = "en-US"
+    private var recentlyViewedMedia: [MediaProtocol] = RecentMediaHelper.getRecentMedia()
+    
+    
+    private let userLanguageKey = "userLanguageKey"
+    private let recentlyViewedMediaKey = "recentlyViewedMediaKey"
     
     func changeLanguage(to language: String) {
         self.userLanguage = language
         CMStorage.save(language, key: userLanguageKey)
     }
     
-    func addToRecentlyViewedMedia(_ media: Media) {
+    func addToRecentlyViewedMedia(_ media: MediaProtocol) {
         guard !recentlyViewedMedia.contains(where: { $0.id == media.id }) else { return }
         self.recentlyViewedMedia.append(media)
         CMStorage.save(recentlyViewedMedia.map(AnyMedia.init), key: recentlyViewedMediaKey)

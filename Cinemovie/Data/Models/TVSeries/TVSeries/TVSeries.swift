@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TVSeries: Decodable, MediaProtocol, Hashable {
+struct TVSeries: Codable, MediaProtocol, Hashable {
     let adult: Bool?
     let backdropPath: String?
     let genreIDS: [Int]

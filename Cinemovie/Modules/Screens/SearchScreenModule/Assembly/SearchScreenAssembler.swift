@@ -8,9 +8,9 @@
 import UIKit
 
 final class SearchScreenAssembler {
-    static func assemble(tmdbService: TMDBService) -> SearchScreenVC {
-        let interactor = SearchScreenInteractor(tmdbService: tmdbService)
-        let router = SearchScreenRouter(tmdbService: tmdbService)
+    static func assemble(diContainer: DIContainer) -> SearchScreenVC {
+        let interactor = SearchScreenInteractor(networkService: diContainer.networkService)
+        let router = SearchScreenRouter(diContainer: diContainer)
         let presenter = SearchScreenPresenter(interactor: interactor, router: router)
         let viewController = SearchScreenVC()
         presenter.view  = viewController

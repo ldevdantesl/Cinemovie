@@ -7,11 +7,11 @@
 
 import Foundation
 
-enum AnyMedia: Decodable, MediaProtocol {
+enum AnyMedia: Codable, MediaProtocol {
     case movie(Movie)
     case tvSeries(TVSeries)
     
-    var asMedia: Media {
+    var asMedia: MediaProtocol {
         switch self {
         case .movie(let m): return m
         case .tvSeries(let t): return t
@@ -82,6 +82,16 @@ enum AnyMedia: Decodable, MediaProtocol {
                 AnyMedia.self,
                 .init(codingPath: decoder.codingPath, debugDescription: "Unknown media type")
             )
+        }
+    }
+    
+    init(_ media: MediaProtocol) {
+        if let movie = media as? Movie {
+            self = .movie(movie)
+        } else if let tv = media as? TVSeries {
+            self = .tvSeries(tv)
+        } else {
+            fatalError("Unsupported media type: \(type(of: media))")
         }
     }
 }
