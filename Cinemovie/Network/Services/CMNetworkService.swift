@@ -16,6 +16,7 @@ protocol NetworkServiceProtocol {
     var search: SearchAPISubServiceProtocol { get }
     var other: OtherAPISubServiceProtocol { get }
     var auth: AuthenticationAPISubServiceProtocol { get }
+    var account: AccountAPISubServiceProtocol { get }
 }
 
 final class CMNetworkService: NetworkServiceProtocol {
@@ -27,6 +28,7 @@ final class CMNetworkService: NetworkServiceProtocol {
     let search: SearchAPISubServiceProtocol
     let other: OtherAPISubServiceProtocol
     let auth: AuthenticationAPISubServiceProtocol
+    let account: AccountAPISubServiceProtocol
     
     init(httpClient: HTTPClientProtocol, config: APIConfigurationProtocol, authContext: AuthContextProtocol) {
         self.movies = MoviesAPISubService(httpClient: httpClient, config: config, authContext: authContext)
@@ -37,5 +39,6 @@ final class CMNetworkService: NetworkServiceProtocol {
         self.search = SearchAPISubService(httpClient: httpClient)
         self.other = OtherAPISubService(httpClient: httpClient, config: config)
         self.auth = AuthenticationAPISubService(httpClient: httpClient)
+        self.account = AccountAPISubService(httpClient: httpClient)
     }
 }

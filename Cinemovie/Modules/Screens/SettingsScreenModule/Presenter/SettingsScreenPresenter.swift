@@ -9,31 +9,76 @@ import UIKit
 
 protocol SettingsScreenPresenterProtocol: AnyObject {
     // MARK: - START
-    func didPressLogoutButton()
     func viewDidLoaded()
+    
+    func didLogOut()
+    func didReceiveAccountDetails(_ details: AccountDetails?)
+    func didReceiveError(error: Error)
 }
 
 final class SettingsScreenPresenter {
+    // MARK: - VIPER
     weak var view: SettingsScreenViewProtocol?
     var router: SettingsScreenRouterProtocol
     var interactor: SettingsScreenInteractorProtocol
+    
+    // MARK: - INJECTED
+    private let userService: UserServiceProtocol
+    
+    // MARK: - PROPERTIES
+    private var accountDetails: AccountDetails?
 
-    init(interactor: SettingsScreenInteractorProtocol, router: SettingsScreenRouterProtocol) {
+    init(interactor: SettingsScreenInteractorProtocol, router: SettingsScreenRouterProtocol, userService: UserServiceProtocol) {
         self.interactor = interactor
         self.router = router
+        self.userService = userService
+    }
+    
+    private func applySnapshot() {
+        let accountVM = SettingsAccountCellViewModel(accountDetails: accountDetails, didTap: nil)
+        let logOutVM = SettingsLogOutCellViewModel(didTap: { [weak self] in self?.logOut() })
+        let preferencesVM = SettingsPreferencesCellViewModel(
+            userService: userService,
+            didTapLanguage: nil,
+            didToggleNotifications: nil,
+            didTapRegion: nil
+        )
+        view?.applySnapshot(
+            sections: [.header, .account, .body, .footer],
+            items: [
+                .header : [.header],
+                .account : [.account(accountVM)],
+                .body : [.preferences(preferencesVM)],
+                .footer : [.logOut(logOutVM)]
+            ]
+        )
+    }
+    
+    private func logOut() {
+        view?.showLoading()
+        interactor.logout()
     }
 }
 
 extension SettingsScreenPresenter: SettingsScreenPresenterProtocol {
     // MARK: - STARTING
-    func didPressLogoutButton() {
-        interactor.logout()
-        DispatchQueue.main.async { [weak self] in
-            self?.router.navigateBackToLogin()
-        }
+    func viewDidLoaded() {
+        view?.showLoading()
+        interactor.loadAccount()
     }
     
-    func viewDidLoaded() {
-        interactor.showSessionID()
+    func didReceiveAccountDetails(_ details: AccountDetails?) {
+        self.accountDetails = details
+        applySnapshot()
+        view?.hideLoading()
+    }
+    
+    func didLogOut() {
+        view?.hideLoading()
+        router.navigateBackToLogin()
+    }
+    
+    func didReceiveError(error: any Error) {
+        view?.didReceiveError(error.localizedDescription)
     }
 }

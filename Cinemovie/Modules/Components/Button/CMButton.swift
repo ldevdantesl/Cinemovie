@@ -109,8 +109,9 @@ final class CMButton: UIButton {
         
         
         self.setTitleColor(.white, for: .normal)
-        self.backgroundColor = viewModel.backColor
-        self.configuration = .borderedTinted()
+        self.configuration = .borderedProminent()
+        self.configuration?.baseBackgroundColor = viewModel.backColor
+        self.configuration?.baseForegroundColor = viewModel.foreColor
         self.translatesAutoresizingMaskIntoConstraints = false
         self.setAttributedTitle(attrTitle, for: .normal)
         
@@ -118,7 +119,6 @@ final class CMButton: UIButton {
             self.setImage(buttonImage, for: .normal)
             self.configuration?.imagePlacement = .leading
             self.configuration?.imagePadding = 5
-            self.tintColor = viewModel.foreColor
         }
         
         self.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
@@ -126,6 +126,6 @@ final class CMButton: UIButton {
     
     // MARK: - OBJC FUNC
     @objc private func didTapButton() {
-        self.onTapAction?()
+        self.animateTap(onCompletion: self.onTapAction)
     }
 }

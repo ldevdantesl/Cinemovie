@@ -8,13 +8,26 @@
 import Foundation
 import UIKit
 
-public enum CMFontSizes: CGFloat {
-    case title = 24
-    case subtitle = 18
-    case body = 16
-    case caption = 14
-    case footnote = 12
-    case tiny = 10
+enum CMFontSizes {
+    case title
+    case subtitle
+    case body
+    case caption
+    case footnote
+    case tiny
+    case custom(CGFloat)
+    
+    var value: CGFloat {
+        switch self {
+        case .title: return 24
+        case .subtitle: return 18
+        case .body: return 16
+        case .caption: return 14
+        case .footnote: return 12
+        case .tiny: return 10
+        case .custom(let float): return float
+        }
+    }
 }
 
 public enum CMFontNames: String {
@@ -34,10 +47,10 @@ public enum CMFontNames: String {
 
 public struct CMFont {
     static func font(size: CMFontSizes, weight: UIFont.Weight = .regular) -> UIFont {
-        return UIFont.systemFont(ofSize: size.rawValue, weight: weight)
+        return UIFont.systemFont(ofSize: size.value, weight: weight)
     }
     
     static func font(size: CMFontSizes, fontName: CMFontNames) -> UIFont {
-        return UIFont(name: fontName.rawValue, size: size.rawValue) ?? UIFont().withSize(size.rawValue)
+        return UIFont(name: fontName.rawValue, size: size.value) ?? UIFont().withSize(size.value)
     }
 }
