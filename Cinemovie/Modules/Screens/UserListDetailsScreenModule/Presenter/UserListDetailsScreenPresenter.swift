@@ -114,7 +114,7 @@ extension UserListDetailsScreenPresenter: UserListDetailsScreenPresenterProtocol
             return
         }
         
-        self.media = AnyMedia.toMedia(from: details.results)
+        self.media = details.results
         let vms = self.media.map {
             Items.posterImageVM(MediaPosterImageCellViewModel(media: $0) { [weak self] in self?.didTapMedia(media: $0)})
         }
@@ -132,7 +132,7 @@ extension UserListDetailsScreenPresenter: UserListDetailsScreenPresenterProtocol
         self.userListDetails = details
         guard !details.results.isEmpty else { return }
         
-        let newMedia = AnyMedia.toMedia(from: details.results)
+        let newMedia = details.results
         self.media.append(contentsOf: newMedia)
         let vms = self.media.map {
             Items.posterImageVM(MediaPosterImageCellViewModel(media: $0) { [weak self] in self?.didTapMedia(media: $0)})

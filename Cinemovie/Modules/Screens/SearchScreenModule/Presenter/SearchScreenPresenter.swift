@@ -11,8 +11,8 @@ protocol SearchScreenPresenterProtocol: AnyObject {
     // MARK: - STARTING
     func viewDidLoaded()
     
-    // MARK: - PROPERTIES
-    var visibleSections: [SearchScreenVC.Sections] { get set }
+    // MARK: - QUERY
+    func didReceiveSearchResults(_ items: [MediaProtocol])
     
     // MARK: - ERROR
     func didRecieveError(_ error: Error)
@@ -27,30 +27,67 @@ final class SearchScreenPresenter {
     weak var view: SearchScreenViewProtocol?
     var router: SearchScreenRouterProtocol
     var interactor: SearchScreenInteractorProtocol
-    var visibleSections: [SearchScreenVC.Sections] = []
     
     // MARK: - PROPERTIES
-
+    private var searchText: String? = nil
+    private var searchResults: [MediaProtocol] = []
+    private var recents: [MediaProtocol] = RecentMediaHelper.getRecentMedia()
+    
+    // MARK: - PROPERTIES
     init(interactor: SearchScreenInteractorProtocol, router: SearchScreenRouterProtocol) {
         self.interactor = interactor
         self.router = router
+    }
+    
+    // MARK: - PRIVATE FUNC
+    private func applySnapshot() {
+        let headerVM = SearchScreenHeaderCellViewModel(
+            didTapSearch: { [weak self] in self?.didTapSearch($0) },
+            didTapBackButton: { [weak self] in self?.router.popBack() }
+        )
+        
+        let verticalMediaListVM: VerticalMediaListCellViewModel
+        
+        if searchResults.isEmpty {
+            verticalMediaListVM = VerticalMediaListCellViewModel(
+                media: recents, title: "Recent Media",
+                subtitle: "Your recent media",
+                didTapAnyMedia: { [weak self] in self?.router.pushToMedia(media: $0) }
+            )
+        } else {
+            verticalMediaListVM = VerticalMediaListCellViewModel(
+                media: searchResults, title: "Search Results",
+                subtitle: "Results for \(searchText ?? "")",
+                didTapAnyMedia: { [weak self] in self?.router.pushToMedia(media: $0) }
+            )
+        }
+        let sections = [Sections.searchBar, Sections.media]
+        let itemsBySection: [Sections: [Items]] = [.searchBar : [.headerCell(headerVM)], .media : [.mediaCell(verticalMediaListVM)]]
+        self.view?.applySnapshot(sections: sections, itemsBySection: itemsBySection)
+    }
+    
+    private func didTapSearch(_ query: String?) {
+        guard let query = query, !query.isEmpty else {
+            self.searchResults = []
+            applySnapshot()
+            return
+        }
+        self.view?.showLoadingView()
+        self.searchText = query
+        interactor.didSearch(searchText: query)
     }
 }
 
 extension SearchScreenPresenter: SearchScreenPresenterProtocol {
     // MARK: - STARTING
     func viewDidLoaded() {
-        let headerVM = SearchScreenHeaderCellViewModel(didTapSearch: nil, didTapBackButton: router.popBack)
-        let recents = RecentMediaHelper.getRecentMedia()
-        let verticalMediaListVM = VerticalMediaListCellViewModel(
-            media: recents, title: "Recent Media",
-            subtitle: "Your recent media",
-            didTapAnyMedia: router.pushToMedia
-        )
-        let sections = [Sections.searchBar, Sections.media]
-        let itemsBySection: [Sections: [Items]] = [.searchBar : [.headerCell(headerVM)], .media : [.mediaCell(verticalMediaListVM)]]
-        self.visibleSections = sections
-        self.view?.applySnapshot(sections: sections, itemsBySection: itemsBySection)
+        applySnapshot()
+    }
+    
+    func didReceiveSearchResults(_ items: [any MediaProtocol]) {
+        self.searchResults = items
+        applySnapshot()
+        self.view?.hideLoadingView()
     }
     
     // MARK: - ERROR

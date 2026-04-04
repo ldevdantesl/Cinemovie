@@ -21,6 +21,5 @@ public struct RecentMediaHelper {
         allMedia.insert(AnyMedia(media), at: 0)
         if allMedia.count > 22 { allMedia.removeLast(allMedia.count - 50) }
         CMStorage.save(allMedia, key: recentMediaKey)
-        print("Saved data to Storage; MediaID: \(media.id)")
     }
 }

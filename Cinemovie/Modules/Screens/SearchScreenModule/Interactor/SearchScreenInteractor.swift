@@ -8,8 +8,7 @@
 import UIKit
 
 protocol SearchScreenInteractorProtocol: AnyObject {
-    func getRecentSearches()
-    func getRecentKeywords()
+    func didSearch(searchText: String)
 }
 
 final class SearchScreenInteractor: SearchScreenInteractorProtocol {
@@ -21,11 +20,19 @@ final class SearchScreenInteractor: SearchScreenInteractorProtocol {
     }
     
     
-    func getRecentKeywords() {
-        
-    }
-    
-    func getRecentSearches() {
-        
+    func didSearch(searchText: String) {
+        Task {
+            do {
+                let movies = try await networkService.search.getMovieSearchResults(query: searchText, page: 1)
+                let series = try await networkService.search.getTVSeriesSearchResults(query: searchText, page: 1)
+                await MainActor.run {
+                    presenter?.didReceiveSearchResults(movies + series)
+                }
+            } catch {
+                await MainActor.run {
+                    self.presenter?.didRecieveError(error)
+                }
+            }
+        }
     }
 }

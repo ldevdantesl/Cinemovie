@@ -50,7 +50,6 @@ extension AddToListModalPresenter: AddToListModalPresenterProtocol {
         
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
-            self.view?.reloadData()
             self.view?.hideLoadingView(completion: nil)
         }
     }
@@ -65,9 +64,16 @@ extension AddToListModalPresenter: AddToListModalPresenterProtocol {
     }
     
     func didReceiveItemStatusInList(listID: Int, status: Bool) {
-        guard let index = listAndStatus.firstIndex(where: { $0.list.id == listID }) else { downloadGroup.leave(); return }
+        guard let index = listAndStatus.firstIndex(where: { $0.list.id == listID }) else {
+            downloadGroup.leave()
+            return
+        }
         listAndStatus[index].isInList = status
         downloadGroup.leave()
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.view?.reloadData()
+        }
     }
     
     func didAddOrRemoveFromList(added: Bool) {

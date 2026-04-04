@@ -131,7 +131,7 @@ final class UserListCell: ReusableCellBaseClass {
         self.numberOfItemsLabel.text = "\(viewModel.userList.itemCount >= 20 ? "20+" : "\(viewModel.userList.itemCount)") items"
         self.listTitleLabel.text = viewModel.userList.name
         self.listSubtitleLabel.text = viewModel.userList.description
-        self.stackPosters(items: AnyMedia.toMedia(from: viewModel.userList.results))
+        self.stackPosters(items: viewModel.userList.results)
     }
     
     // MARK: - PRIVATE FUNC

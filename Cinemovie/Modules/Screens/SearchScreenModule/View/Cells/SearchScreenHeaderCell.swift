@@ -9,10 +9,10 @@ import UIKit
 import SnapKit
 
 final class SearchScreenHeaderCellViewModel: CellViewModelBaseClass {
-    let didTapSearch: (() -> Void)?
+    let didTapSearch: ((String?) -> Void)?
     let didTapBackButton: (() -> Void)?
     
-    init(didTapSearch: (() -> Void)?, didTapBackButton: (() -> Void)?) {
+    init(didTapSearch: ((String?) -> Void)?, didTapBackButton: (() -> Void)?) {
         self.didTapSearch = didTapSearch
         self.didTapBackButton = didTapBackButton
         super.init(cellIdentifier: "SearchScreenHeaderCell")
@@ -129,7 +129,7 @@ final class SearchScreenHeaderCell: ReusableCellBaseClass {
 extension SearchScreenHeaderCell: UISearchTextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
-        self.viewModel?.didTapSearch?()
+        self.viewModel?.didTapSearch?(textField.text)
         return true
     }
 }

@@ -26,20 +26,22 @@ final class AddToListModalInteractor: AddToListModalInteractorProtocol {
         Task {
             do {
                 let result = try await networkService.userList.getUserLists(page: 1)
-                self.presenter?.didReceiveLists(lists: result)
+                await MainActor.run {
+                    self.presenter?.didReceiveLists(lists: result)
+                }
             } catch {
-                self.presenter?.didReceiveError(error)
+                await MainActor.run {
+                    self.presenter?.didReceiveError(error)
+                }
             }
         }
     }
     
     func getItemStatusInList(listID: Int, itemID: Int, mediaType: MediaTypes, refreshing: Bool) {
         Task {
-            do {
-                let _ = try await networkService.userList.getItemStatusInUserList(listID: listID, mediaID: itemID, mediaType: mediaType)
-                self.presenter?.didReceiveItemStatusInList(listID: listID, status: true)
-            } catch {
-                self.presenter?.didReceiveItemStatusInList(listID: listID, status: false)
+            let status = await networkService.userList.getItemStatusInUserList(listID: listID, mediaID: itemID, mediaType: mediaType)
+            await MainActor.run {
+                self.presenter?.didReceiveItemStatusInList(listID: listID, status: status)
             }
         }
     }
@@ -47,10 +49,14 @@ final class AddToListModalInteractor: AddToListModalInteractorProtocol {
     func addMediaToList(listID: Int, mediaID: Int, mediaType: MediaTypes) {
         Task {
             do {
-                let _ = try await networkService.userList.addMediaInUserList(listID: listID, mediaID: mediaID, mediaType: mediaType)
-                self.presenter?.didAddOrRemoveFromList(added: true)
+                try await networkService.userList.addMediaInUserList(listID: listID, mediaID: mediaID, mediaType: mediaType)
+                await MainActor.run {
+                    self.presenter?.didAddOrRemoveFromList(added: true)
+                }
             } catch {
-                self.presenter?.didReceieveErrorInBox(error)
+                await MainActor.run {
+                    self.presenter?.didReceieveErrorInBox(error)
+                }
             }
         }
     }
@@ -58,10 +64,14 @@ final class AddToListModalInteractor: AddToListModalInteractorProtocol {
     func removeMediaFromList(listID: Int, mediaID: Int, mediaType: MediaTypes) {
         Task {
             do {
-                let _ = try await networkService.userList.removeMediaInUserList(listID: listID, mediaID: mediaID, mediaType: mediaType)
-                self.presenter?.didAddOrRemoveFromList(added: false)
+                try await networkService.userList.removeMediaInUserList(listID: listID, mediaID: mediaID, mediaType: mediaType)
+                await MainActor.run {
+                    self.presenter?.didAddOrRemoveFromList(added: false)
+                }
             } catch {
-                self.presenter?.didReceieveErrorInBox(error)
+                await MainActor.run {
+                    self.presenter?.didReceieveErrorInBox(error)
+                }
             }
         }
     }

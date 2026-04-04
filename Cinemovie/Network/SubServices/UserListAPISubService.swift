@@ -23,7 +23,8 @@ protocol UserListAPISubServiceProtocol {
     @discardableResult
     func removeUserList(listID: Int) async throws -> TMDBStatusResponse
     
-    func getItemStatusInUserList(listID: Int, mediaID: Int, mediaType: MediaTypes) async throws -> ItemStatusInUserListResponse
+    @discardableResult
+    func getItemStatusInUserList(listID: Int, mediaID: Int, mediaType: MediaTypes) async -> Bool
 }
 
 final class UserListAPISubService: UserListAPISubServiceProtocol {
@@ -72,8 +73,23 @@ final class UserListAPISubService: UserListAPISubServiceProtocol {
         return try await httpClient.request(UserListEndpoints.removeUserList(accessToken: accessToken, listID: listID))
     }
     
-    func getItemStatusInUserList(listID: Int, mediaID: Int, mediaType: MediaTypes) async throws -> ItemStatusInUserListResponse {
-        guard let accessToken = authContext.accessToken else { throw APIError.unauthorized }
-        return try await httpClient.request(UserListEndpoints.getItemStatusInUserList(accessToken: accessToken, listID: listID, mediaID: mediaID, mediaType: mediaType))
+    func getItemStatusInUserList(listID: Int, mediaID: Int, mediaType: MediaTypes) async -> Bool {
+        guard let accessToken = authContext.accessToken else { return false }
+        do {
+            let response: ItemStatusInUserListResponse = try await httpClient.request(
+                UserListEndpoints.getItemStatusInUserList(
+                    accessToken: accessToken,
+                    listID: listID,
+                    mediaID: mediaID,
+                    mediaType: mediaType
+                )
+            )
+            return response.success
+        } catch APIError.statusCode(404, _) {
+            return false
+        } catch {
+            print("Unexpected error checking item status: \(error)")
+            return false
+        }
     }
 }

@@ -37,6 +37,9 @@ final class SearchScreenVC: UIViewController {
         case mediaCell(VerticalMediaListCellViewModel)
     }
     
+    // MARK: - PROPERTIES
+    private let sectionStore = CMDiffableSectionStore<Sections>()
+    
     // MARK: - VIEW PROPERTIES
     private lazy var collectionView = {
         let view = DiffableCollectionView<Sections, Items>(layout: createLayout(), ignoresTopSafeArea: false)
@@ -75,8 +78,8 @@ final class SearchScreenVC: UIViewController {
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
         return UICollectionViewCompositionalLayout { [weak self] sectionIndex, env in
-            guard let self = self, let presenter = self.presenter else { return nil }
-            let currentSection = presenter.visibleSections[sectionIndex]
+            guard let self = self else { return nil }
+            let currentSection = sectionStore.section(at: sectionIndex)
             let edgeInsets: NSDirectionalEdgeInsets
             
             switch currentSection {
@@ -114,24 +117,16 @@ final class SearchScreenVC: UIViewController {
 
 extension SearchScreenVC: SearchScreenViewProtocol {
     func applySnapshot(sections: [Sections], itemsBySection: [Sections : [Items]]) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
-        }
+        self.sectionStore.update(sections)
+        self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
     }
     
     func showLoadingView() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.loadingView.show()
-        }
+        self.loadingView.show()
     }
     
     func hideLoadingView() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.loadingView.hide()
-        }
+        self.loadingView.hide()
     }
  
     // MARK: - ERROR

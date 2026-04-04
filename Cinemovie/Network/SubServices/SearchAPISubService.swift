@@ -25,7 +25,7 @@ final class SearchAPISubService: SearchAPISubServiceProtocol {
     }
     
     func getTVSeriesSearchResults(query: String, page: Int) async throws -> [TVSeries] {
-        let response: PaginatedAPIResponse<TVSeries> = try await httpClient.request(SearchEndpoints.getMovieSearchResults(query: query, page: page))
+        let response: PaginatedAPIResponse<TVSeries> = try await httpClient.request(SearchEndpoints.getTVSeriesSearchResults(query: query, page: page))
         return response.results
     }
 }

@@ -14,7 +14,7 @@ enum SearchEndpoints: Endpoint {
     var path: String {
         switch self {
         case .getMovieSearchResults: return "/search/movie"
-        case .getTVSeriesSearchResults: return "search/tv"
+        case .getTVSeriesSearchResults: return "/search/tv"
         }
     }
     
