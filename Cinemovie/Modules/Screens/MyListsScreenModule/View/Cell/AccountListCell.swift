@@ -21,7 +21,7 @@ final class AccountListCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class AccountListCell: ReusableCellBaseClass {
+final class AccountListCell: UICollectionViewCell {
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {

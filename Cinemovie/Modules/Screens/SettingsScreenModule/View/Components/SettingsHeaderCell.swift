@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-final class SettingsHeaderCell: ReusableCellBaseClass {
+final class SettingsHeaderCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants { }
 

@@ -19,7 +19,7 @@ final class SearchScreenHeaderCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class SearchScreenHeaderCell: ReusableCellBaseClass {
+final class SearchScreenHeaderCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let hSpacing = 10.0

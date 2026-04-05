@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-final class SettingsFooterCell: ReusableCellBaseClass {
+final class SettingsFooterCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let appLogoName = ImageNames.appIcon.rawValue

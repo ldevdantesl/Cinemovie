@@ -17,7 +17,7 @@ final class SettingsLogOutCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class SettingsLogOutCell: ReusableCellBaseClass {
+final class SettingsLogOutCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let cornerRadius = 15.0

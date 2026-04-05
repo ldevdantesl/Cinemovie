@@ -19,7 +19,7 @@ final class RateAndShareCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class RateAndShareCell: ReusableCellBaseClass {
+final class RateAndShareCell: UICollectionViewCell {
     typealias ViewModel = RateAndShareCellViewModel
     
     // MARK: - CONSTANTS

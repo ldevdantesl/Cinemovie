@@ -49,7 +49,7 @@ final class MediaExtrasCellViewModel: CellViewModelBaseClass {
 }
 
 
-final class MediaExtrasCell: ReusableCellBaseClass {
+final class MediaExtrasCell: UICollectionViewCell {
     // MARK: - TYPEALIAS
     typealias CellVMs = CellViewModelBaseClass & CellWithHeightProtocol
     

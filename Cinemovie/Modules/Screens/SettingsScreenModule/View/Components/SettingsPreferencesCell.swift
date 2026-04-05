@@ -9,23 +9,40 @@ import UIKit
 import SnapKit
 
 final class SettingsPreferencesCellViewModel: CellViewModelBaseClass {
+    let currentLanguage: String
+    let currentRegion: String
     let userService: UserServiceProtocol
     let didTapLanguage: (() -> Void)?
     let didTapRegion: (() -> Void)?
-    
+
     init(
         userService: UserServiceProtocol,
         didTapLanguage: (() -> Void)? = nil,
         didTapRegion: (() -> Void)? = nil
     ) {
         self.userService = userService
+        self.currentLanguage = userService.userLanguage.englishName
+        self.currentRegion = userService.region.englishName
         self.didTapLanguage = didTapLanguage
         self.didTapRegion = didTapRegion
         super.init(cellIdentifier: SettingsPreferencesCell.identifier)
     }
+
+    override func hash(into hasher: inout Hasher) {
+        hasher.combine(cellIdentifier)
+        hasher.combine(currentLanguage)
+        hasher.combine(currentRegion)
+    }
+
+    func isEqual(_ object: Any?) -> Bool {
+        guard let other = object as? SettingsPreferencesCellViewModel else { return false }
+        return cellIdentifier == other.cellIdentifier &&
+               currentLanguage == other.currentLanguage &&
+               currentRegion == other.currentRegion
+    }
 }
 
-final class SettingsPreferencesCell: ReusableCellBaseClass {
+final class SettingsPreferencesCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let spacing = 10.0

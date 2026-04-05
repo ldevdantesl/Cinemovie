@@ -19,7 +19,7 @@ final class ProductionInfoCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class ProductionInfoCell: ReusableCellBaseClass {
+final class ProductionInfoCell: UICollectionViewCell {
     typealias ViewModel = ProductionInfoCellViewModel
     
     // MARK: - CONSTANTS

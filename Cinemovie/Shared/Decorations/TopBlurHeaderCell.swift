@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-final class TopBlurHeaderCell: ReusableCellBaseClass {
+final class TopBlurHeaderCell: UICollectionViewCell {
     // MARK: - VIEW PROPERTIES
     private let blurView: UIVisualEffectView = {
         let blur = UIBlurEffect(style: .dark)

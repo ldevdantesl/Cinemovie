@@ -19,7 +19,7 @@ final class OneFeaturedMediaCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class OneFeaturedMediaCell: ReusableCellBaseClass {
+final class OneFeaturedMediaCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let notFoundImageSystemName = "questionmark"

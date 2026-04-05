@@ -20,7 +20,7 @@ final class SettingsAccountCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class SettingsAccountCell: ReusableCellBaseClass {
+final class SettingsAccountCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let spacing = 10.0

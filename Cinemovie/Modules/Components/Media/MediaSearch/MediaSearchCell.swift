@@ -23,7 +23,7 @@ final class MediaSearchCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class MediaSearchCell: ReusableCellBaseClass {
+final class MediaSearchCell: UICollectionViewCell {
     // MARK: - TYPEALIAS
     typealias CellVMs = CellViewModelBaseClass & CellWithHeightProtocol
     

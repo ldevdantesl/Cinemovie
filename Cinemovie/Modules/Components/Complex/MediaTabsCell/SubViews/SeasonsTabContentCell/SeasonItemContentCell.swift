@@ -20,7 +20,7 @@ final class SeasonItemContentCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class SeasonItemContentCell: ReusableCellBaseClass {
+final class SeasonItemContentCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let loadingIndicatorSize = 10.0

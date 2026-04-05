@@ -23,7 +23,7 @@ final class TrendingPeopleCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class TrendingPeopleCell: ReusableCellBaseClass {
+final class TrendingPeopleCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let spacing = 5.0

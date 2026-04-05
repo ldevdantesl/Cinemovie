@@ -17,7 +17,7 @@ final class MyListsAuthenticateCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class MyListsAuthenticateCell: ReusableCellBaseClass {
+final class MyListsAuthenticateCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let spacing = 10.0

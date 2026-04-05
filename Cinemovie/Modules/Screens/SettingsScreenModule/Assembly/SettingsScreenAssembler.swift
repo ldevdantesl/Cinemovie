@@ -14,7 +14,7 @@ final class SettingsScreenAssembler {
             networkService: diContainer.networkService,
             authContext: diContainer.authContext
         )
-        let router = SettingsScreenRouter(sessionDelegate: sessionDelegate)
+        let router = SettingsScreenRouter(sessionDelegate: sessionDelegate, diContainer: diContainer)
         let presenter = SettingsScreenPresenter(interactor: interactor, router: router, userService: diContainer.userService)
         let viewController = SettingsScreenVC()
         presenter.view  = viewController

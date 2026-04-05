@@ -10,6 +10,7 @@ import UIKit
 protocol SettingsScreenPresenterProtocol: AnyObject {
     // MARK: - START
     func viewDidLoaded()
+    func reapplySnapshot()
     
     func didLogOut()
     func didReceiveAccountDetails(_ details: AccountDetails?)
@@ -37,7 +38,11 @@ final class SettingsScreenPresenter {
     private func applySnapshot() {
         let accountVM = SettingsAccountCellViewModel(accountDetails: accountDetails, didTap: nil)
         let logOutVM = SettingsLogOutCellViewModel(didTap: { [weak self] in self?.logOut() })
-        let preferencesVM = SettingsPreferencesCellViewModel(userService: userService)
+        let preferencesVM = SettingsPreferencesCellViewModel(
+            userService: userService,
+            didTapLanguage: { [weak self] in self?.router.presentSelectionModal(pickerType: .language) },
+            didTapRegion: { [weak self] in self?.router.presentSelectionModal(pickerType: .region) } 
+        )
         let contentVM = SettingsContentCellViewModel(userService: userService)
         let aboutVM = SettingsAboutCellViewModel(userService: userService)
         
@@ -70,6 +75,10 @@ extension SettingsScreenPresenter: SettingsScreenPresenterProtocol {
     func viewDidLoaded() {
         view?.showLoading()
         interactor.loadAccount()
+    }
+    
+    func reapplySnapshot() {
+        applySnapshot()
     }
     
     func didReceiveAccountDetails(_ details: AccountDetails?) {

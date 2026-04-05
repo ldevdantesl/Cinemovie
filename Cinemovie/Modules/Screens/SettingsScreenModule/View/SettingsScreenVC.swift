@@ -12,6 +12,7 @@ protocol SettingsScreenViewProtocol: AnyObject {
     func applySnapshot(sections: [SettingsScreenVC.Sections], items: [SettingsScreenVC.Sections : [SettingsScreenVC.Items]])
     func showLoading()
     func hideLoading()
+    func reapplySnapshot()
     func didReceiveError(_ errorStr: String)
 }
 
@@ -159,5 +160,9 @@ extension SettingsScreenVC: SettingsScreenViewProtocol {
         alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
         
         self.present(alert, animated: true)
+    }
+    
+    func reapplySnapshot() {
+        self.presenter?.reapplySnapshot()
     }
 }

@@ -23,7 +23,7 @@ final class MediaListCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class MediaListCell: ReusableCellBaseClass {
+final class MediaListCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let spacing = 5.0

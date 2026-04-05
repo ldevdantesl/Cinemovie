@@ -55,6 +55,12 @@ final class DiffableCollectionView<Section: Hashable, Item: Hashable>: TopBlurre
         diffableDataSource.apply(snapshot, animatingDifferences: true)
     }
     
+    public func reconfigureEverything() {
+        var snapshot = diffableDataSource.snapshot()
+        snapshot.reconfigureItems(snapshot.itemIdentifiers)
+        diffableDataSource.apply(snapshot, animatingDifferences: false)
+    }
+    
     public func applySnapshot(snapshot: NSDiffableDataSourceSnapshot<Section, Item>, animatingDifferences: Bool = true, completion: (() -> Void)? = nil) {
         diffableDataSource.apply(snapshot, animatingDifferences: animatingDifferences, completion: completion)
     }
@@ -63,11 +69,11 @@ final class DiffableCollectionView<Section: Hashable, Item: Hashable>: TopBlurre
         return diffableDataSource.snapshot()
     }
     
-    public func registerSupplementaryHeaderItem<Cell: ReusableCellBaseClass>(cellClass: Cell.Type, elementKind: String = UICollectionView.elementKindSectionHeader) {
+    public func registerSupplementaryHeaderItem<Cell: UICollectionViewCell>(cellClass: Cell.Type, elementKind: String = UICollectionView.elementKindSectionHeader) {
         self.register(cellClass.self, forSupplementaryViewOfKind: elementKind, withReuseIdentifier: cellClass.identifier)
     }
     
-    public func registerSupplementaryFooterItem<Cell: ReusableCellBaseClass>(cellClass: Cell.Type) {
+    public func registerSupplementaryFooterItem<Cell: UICollectionViewCell>(cellClass: Cell.Type) {
         self.register(cellClass.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: cellClass.identifier)
     }
 }

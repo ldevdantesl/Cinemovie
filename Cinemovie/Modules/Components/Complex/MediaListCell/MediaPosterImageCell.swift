@@ -19,7 +19,7 @@ final class MediaPosterImageCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class MediaPosterImageCell: ReusableCellBaseClass {
+final class MediaPosterImageCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let cornerRadius = 10.0

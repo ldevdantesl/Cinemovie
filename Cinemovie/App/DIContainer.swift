@@ -25,7 +25,7 @@ final class DIContainer {
         self.userService = userService
         self.authContext = authContext
         self.authService = CMAuthService(httpClient: httpClient, authContext: authContext)
-        self.networkService = CMNetworkService(httpClient: httpClient, config: config, authContext: authContext, userService: userService)
+        self.networkService = CMNetworkService(httpClient: httpClient, config: config, authContext: authContext)
         self.errorService = CMErrorService()
     }
 }

@@ -26,7 +26,7 @@ final class ReviewsTabContentCellViewModel: CellViewModelBaseClass, CellWithHeig
     }
 }
 
-final class ReviewsTabContentCell: ReusableCellBaseClass {
+final class ReviewsTabContentCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let itemEstimatedHeight = 100.0

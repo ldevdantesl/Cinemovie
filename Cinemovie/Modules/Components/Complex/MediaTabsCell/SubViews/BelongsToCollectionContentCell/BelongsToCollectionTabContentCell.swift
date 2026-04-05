@@ -27,7 +27,7 @@ final class BelongsToCollectionTabContentCellViewModel: CellViewModelBaseClass, 
     }
 }
 
-final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
+final class BelongsToCollectionTabContentCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let imageHorizontalEdgePaddings = 10.0

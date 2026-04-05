@@ -21,7 +21,7 @@ final class UnavailableInfoCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class UnavailableInfoCell: ReusableCellBaseClass {
+final class UnavailableInfoCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let spacing = 5.0

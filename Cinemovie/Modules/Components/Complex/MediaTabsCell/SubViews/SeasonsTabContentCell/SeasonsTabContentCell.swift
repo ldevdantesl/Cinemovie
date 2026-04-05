@@ -25,7 +25,7 @@ final class SeasonsTabContentCellViewModel: CellViewModelBaseClass, CellWithHeig
     }
 }
 
-final class SeasonsTabContentCell: ReusableCellBaseClass {
+final class SeasonsTabContentCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let itemSpacing = 10.0

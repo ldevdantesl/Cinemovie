@@ -32,7 +32,7 @@ final class CMNetworkService: NetworkServiceProtocol {
     let account: AccountAPISubServiceProtocol
     let config: ConfigurationAPISubServiceProtocol
     
-    init(httpClient: HTTPClientProtocol, config: APIConfigurationProtocol, authContext: AuthContextProtocol, userService: UserServiceProtocol) {
+    init(httpClient: HTTPClientProtocol, config: APIConfigurationProtocol, authContext: AuthContextProtocol) {
         self.movies = MoviesAPISubService(httpClient: httpClient, config: config, authContext: authContext)
         self.person = PersonAPISubService(httpClient: httpClient, config: config)
         self.series = TVSeriesAPISubService(httpClient: httpClient, config: config, authContext: authContext)
@@ -42,6 +42,6 @@ final class CMNetworkService: NetworkServiceProtocol {
         self.other = OtherAPISubService(httpClient: httpClient, config: config)
         self.auth = AuthenticationAPISubService(httpClient: httpClient)
         self.account = AccountAPISubService(httpClient: httpClient)
-        self.config = ConfigurationAPISubService(httpClient: httpClient, userService: userService)
+        self.config = ConfigurationAPISubService(httpClient: httpClient, config: config)
     }
 }

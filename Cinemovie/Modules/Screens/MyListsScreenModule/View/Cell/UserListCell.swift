@@ -21,7 +21,7 @@ final class UserListCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class UserListCell: ReusableCellBaseClass {
+final class UserListCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let plusImageName = "plus"

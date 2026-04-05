@@ -18,7 +18,7 @@ final class EpisodeItemPopUpCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class EpisodeItemPopUpCell: ReusableCellBaseClass {
+final class EpisodeItemPopUpCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let loadingIndicatorSize = 10.0

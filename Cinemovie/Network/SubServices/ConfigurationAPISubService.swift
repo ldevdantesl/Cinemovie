@@ -14,15 +14,15 @@ protocol ConfigurationAPISubServiceProtocol {
 
 final class ConfigurationAPISubService: ConfigurationAPISubServiceProtocol {
     private let httpClient: HTTPClientProtocol
-    private let userService: UserServiceProtocol
+    private let config: APIConfigurationProtocol
     
-    init(httpClient: HTTPClientProtocol, userService: UserServiceProtocol) {
+    init(httpClient: HTTPClientProtocol, config: APIConfigurationProtocol) {
         self.httpClient = httpClient
-        self.userService = userService
+        self.config = config
     }
     
     func getCountries() async throws -> [ConfigurationCountry] {
-        try await httpClient.request(ConfigurationEndpoints.countries(language: userService.userLanguage.iso_639_1))
+        try await httpClient.request(ConfigurationEndpoints.countries(language: config.language))
     }
     
     func getLanguages() async throws -> [ConfigurationLanguage] {

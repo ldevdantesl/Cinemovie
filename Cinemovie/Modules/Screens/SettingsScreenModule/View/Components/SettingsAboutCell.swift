@@ -28,7 +28,7 @@ final class SettingsAboutCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class SettingsAboutCell: ReusableCellBaseClass {
+final class SettingsAboutCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let spacing = 10.0

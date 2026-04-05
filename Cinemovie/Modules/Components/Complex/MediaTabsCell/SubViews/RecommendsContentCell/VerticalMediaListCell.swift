@@ -49,7 +49,7 @@ final class VerticalMediaListCellViewModel: CellViewModelBaseClass, CellWithHeig
     }
 }
 
-final class VerticalMediaListCell: ReusableCellBaseClass {
+final class VerticalMediaListCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let itemWidth = (UIConstants.screenWidth / 3) - 40

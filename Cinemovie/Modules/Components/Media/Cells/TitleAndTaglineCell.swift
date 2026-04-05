@@ -19,7 +19,7 @@ final class TitleAndTaglineCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class TitleAndTaglineCell: ReusableCellBaseClass {
+final class TitleAndTaglineCell: UICollectionViewCell {
     typealias ViewModel = TitleAndTaglineCellViewModel
     
     // MARK: - CONSTANTS

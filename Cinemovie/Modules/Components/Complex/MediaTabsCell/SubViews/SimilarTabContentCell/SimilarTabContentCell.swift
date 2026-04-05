@@ -24,7 +24,7 @@ final class SimilarTabContentCellViewModel: CellViewModelBaseClass, CellWithHeig
     }
 }
 
-final class SimilarTabContentCell: ReusableCellBaseClass {
+final class SimilarTabContentCell: UICollectionViewCell {
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
