@@ -17,6 +17,7 @@ protocol NetworkServiceProtocol {
     var other: OtherAPISubServiceProtocol { get }
     var auth: AuthenticationAPISubServiceProtocol { get }
     var account: AccountAPISubServiceProtocol { get }
+    var config: ConfigurationAPISubServiceProtocol { get }
 }
 
 final class CMNetworkService: NetworkServiceProtocol {
@@ -29,8 +30,9 @@ final class CMNetworkService: NetworkServiceProtocol {
     let other: OtherAPISubServiceProtocol
     let auth: AuthenticationAPISubServiceProtocol
     let account: AccountAPISubServiceProtocol
+    let config: ConfigurationAPISubServiceProtocol
     
-    init(httpClient: HTTPClientProtocol, config: APIConfigurationProtocol, authContext: AuthContextProtocol) {
+    init(httpClient: HTTPClientProtocol, config: APIConfigurationProtocol, authContext: AuthContextProtocol, userService: UserServiceProtocol) {
         self.movies = MoviesAPISubService(httpClient: httpClient, config: config, authContext: authContext)
         self.person = PersonAPISubService(httpClient: httpClient, config: config)
         self.series = TVSeriesAPISubService(httpClient: httpClient, config: config, authContext: authContext)
@@ -40,5 +42,6 @@ final class CMNetworkService: NetworkServiceProtocol {
         self.other = OtherAPISubService(httpClient: httpClient, config: config)
         self.auth = AuthenticationAPISubService(httpClient: httpClient)
         self.account = AccountAPISubService(httpClient: httpClient)
+        self.config = ConfigurationAPISubService(httpClient: httpClient, userService: userService)
     }
 }

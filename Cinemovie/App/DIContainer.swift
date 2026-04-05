@@ -21,12 +21,11 @@ final class DIContainer {
         let config = APIConfiguration(userService: userService)
         let httpClient = HTTPClient(logger: logger)
         let authContext = CMAccountStore(keychainService: keychainService)
-        let networkService = CMNetworkService(httpClient: httpClient, config: config, authContext: authContext)
         
         self.userService = userService
-        self.authService = CMAuthService(httpClient: httpClient, authContext: authContext)
-        self.networkService = networkService
-        self.errorService = CMErrorService()
         self.authContext = authContext
+        self.authService = CMAuthService(httpClient: httpClient, authContext: authContext)
+        self.networkService = CMNetworkService(httpClient: httpClient, config: config, authContext: authContext, userService: userService)
+        self.errorService = CMErrorService()
     }
 }

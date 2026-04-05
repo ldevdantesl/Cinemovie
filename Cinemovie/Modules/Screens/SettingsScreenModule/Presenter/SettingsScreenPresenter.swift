@@ -37,19 +37,24 @@ final class SettingsScreenPresenter {
     private func applySnapshot() {
         let accountVM = SettingsAccountCellViewModel(accountDetails: accountDetails, didTap: nil)
         let logOutVM = SettingsLogOutCellViewModel(didTap: { [weak self] in self?.logOut() })
-        let preferencesVM = SettingsPreferencesCellViewModel(
-            userService: userService,
-            didTapLanguage: nil,
-            didToggleNotifications: nil,
-            didTapRegion: nil
-        )
+        let preferencesVM = SettingsPreferencesCellViewModel(userService: userService)
+        let contentVM = SettingsContentCellViewModel(userService: userService)
+        let aboutVM = SettingsAboutCellViewModel(userService: userService)
+        
         view?.applySnapshot(
             sections: [.header, .account, .body, .footer],
             items: [
                 .header : [.header],
                 .account : [.account(accountVM)],
-                .body : [.preferences(preferencesVM)],
-                .footer : [.logOut(logOutVM)]
+                .body : [
+                    .preferences(preferencesVM),
+                    .content(contentVM),
+                    .about(aboutVM)
+                ],
+                .footer : [
+                    .logOut(logOutVM),
+                    .footer
+                ]
             ]
         )
     }

@@ -1,5 +1,5 @@
 //
-//  SettingsPreferencesCell.swift
+//  SettingsContentCell.swift
 //  Cinemovie
 //
 //  Created by Buzurg Rakhimzoda on 4.04.2026.
@@ -8,24 +8,21 @@
 import UIKit
 import SnapKit
 
-final class SettingsPreferencesCellViewModel: CellViewModelBaseClass {
+final class SettingsContentCellViewModel: CellViewModelBaseClass {
     let userService: UserServiceProtocol
-    let didTapLanguage: (() -> Void)?
-    let didTapRegion: (() -> Void)?
+    let didTapStreaming: (() -> Void)?
     
     init(
         userService: UserServiceProtocol,
-        didTapLanguage: (() -> Void)? = nil,
-        didTapRegion: (() -> Void)? = nil
+        didTapStreaming: (() -> Void)? = nil,
     ) {
         self.userService = userService
-        self.didTapLanguage = didTapLanguage
-        self.didTapRegion = didTapRegion
-        super.init(cellIdentifier: SettingsPreferencesCell.identifier)
+        self.didTapStreaming = didTapStreaming
+        super.init(cellIdentifier: SettingsContentCell.identifier)
     }
 }
 
-final class SettingsPreferencesCell: ReusableCellBaseClass {
+final class SettingsContentCell: ReusableCellBaseClass {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let spacing = 10.0
@@ -34,12 +31,12 @@ final class SettingsPreferencesCell: ReusableCellBaseClass {
     }
     
     // MARK: - PROPERTIES
-    private var viewModel: SettingsPreferencesCellViewModel?
+    private var viewModel: SettingsContentCellViewModel?
     
     // MARK: - VIEW PROPERTIES
     private let headerLabel: UILabel = {
         let label = UILabel()
-        label.text = "PREFERENCES"
+        label.text = "CONTENT"
         label.textColor = CMColor.cmPlaceholderLabel
         label.font = CMFont.font(size: .caption, fontName: .avenirBold)
         label.adjustsFontSizeToFitWidth = true
@@ -74,31 +71,9 @@ final class SettingsPreferencesCell: ReusableCellBaseClass {
     }
     
     // MARK: - PUBLIC FUNC
-    public func configure(withVM vm: SettingsPreferencesCellViewModel) {
+    public func configure(withVM vm: SettingsContentCellViewModel) {
         self.viewModel = vm
-        
-        let languageButton = makeButton(
-            image: "globe", imageBackColor: .systemBlue,
-            title: "Language",
-            value: vm.userService.userLanguage.name.isEmpty ? vm.userService.userLanguage.englishName : vm.userService.userLanguage.name
-        )
-        
-        languageButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTaplanguageButton)))
-        
-        let notifications = makeToggle()
-        
-        let region = makeButton(
-            image: "globe.americas",
-            imageBackColor: .systemGreen,
-            title: "Region",
-            value: vm.userService.region.nativeName.isEmpty ? vm.userService.region.englishName : vm.userService.region.nativeName,
-            dividerAfter: false
-        )
-        
-        region.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapRegionButton)))
-        
-        [languageButton, notifications, region].forEach { vStack.addArrangedSubview($0) }
-        
+        [makeStreaming(), makeToggle(vm: vm)].forEach { vStack.addArrangedSubview($0) }
         layoutIfNeeded()
     }
     
@@ -106,7 +81,7 @@ final class SettingsPreferencesCell: ReusableCellBaseClass {
     private func setupUI() {
         contentView.addSubview(headerLabel)
         headerLabel.snp.makeConstraints {
-            $0.top.equalToSuperview()
+            $0.top.equalToSuperview().offset(Constants.spacing)
             $0.horizontalEdges.equalToSuperview()
         }
         
@@ -118,36 +93,33 @@ final class SettingsPreferencesCell: ReusableCellBaseClass {
         }
     }
     
-    private func makeButton(
-        image: String, imageBackColor: UIColor,
-        title: String, value: String, dividerAfter: Bool = true
-    ) -> UIView {
+    private func makeStreaming() -> UIView {
         let view = UIView()
         view.backgroundColor = CMColor.cmSecondaryBackground
 
         let iconContainer = UIView()
-        iconContainer.backgroundColor = imageBackColor
+        iconContainer.backgroundColor = UIColor.systemGreen
         iconContainer.layer.cornerRadius = 10
         iconContainer.clipsToBounds = true
 
         let icon = UIImageView()
-        icon.image = UIImage(systemName: image)
+        icon.image = UIImage(systemName: "square.stack.3d.up")
         icon.contentMode = .scaleAspectFit
         icon.tintColor = .white
 
         let label = UILabel()
-        label.text = title
+        label.text = "Streaming Services"
         label.font = CMFont.font(size: .body, fontName: .avenirDemiBold)
         label.numberOfLines = 1
         label.adjustsFontSizeToFitWidth = true
 
-        let valueLabel = UILabel()
-        valueLabel.text = value
-        valueLabel.font = CMFont.font(size: .caption, fontName: .avenirRegular)
-        valueLabel.textColor = .secondaryLabel
-        valueLabel.numberOfLines = 1
-        valueLabel.adjustsFontSizeToFitWidth = true
-        valueLabel.setContentHuggingPriority(.required, for: .horizontal)
+        let subtitle = UILabel()
+        subtitle.text = "Filter by your preferences"
+        subtitle.font = CMFont.font(size: .custom(12), fontName: .avenirRegular)
+        subtitle.textColor = .secondaryLabel
+        subtitle.numberOfLines = 1
+        subtitle.adjustsFontSizeToFitWidth = true
+        subtitle.setContentHuggingPriority(.required, for: .horizontal)
 
         let arrowImage = UIImageView()
         arrowImage.image = UIImage(systemName: "chevron.right")
@@ -156,7 +128,7 @@ final class SettingsPreferencesCell: ReusableCellBaseClass {
     
         view.addSubview(iconContainer)
         view.addSubview(label)
-        view.addSubview(valueLabel)
+        view.addSubview(subtitle)
         view.addSubview(arrowImage)
 
         iconContainer.snp.makeConstraints {
@@ -173,24 +145,21 @@ final class SettingsPreferencesCell: ReusableCellBaseClass {
         }
 
         label.snp.makeConstraints {
-            $0.centerY.equalTo(iconContainer)
+            $0.top.equalTo(iconContainer)
             $0.leading.equalTo(iconContainer.snp.trailing).offset(Constants.spacing)
-            $0.trailing.lessThanOrEqualTo(valueLabel.snp.leading).offset(-Constants.spacing)
+            $0.trailing.lessThanOrEqualTo(arrowImage.snp.leading).offset(-Constants.spacing)
+        }
+        
+        subtitle.snp.makeConstraints {
+            $0.top.equalTo(label.snp.bottom)
+            $0.leading.equalTo(label)
+            $0.bottom.lessThanOrEqualToSuperview().offset(-Constants.spacing)
         }
 
         arrowImage.snp.makeConstraints {
             $0.centerY.equalToSuperview()
             $0.trailing.equalToSuperview().offset(-Constants.vSpacing)
             $0.size.equalTo(12)
-        }
-
-        valueLabel.snp.makeConstraints {
-            $0.centerY.equalToSuperview()
-            $0.trailing.equalTo(arrowImage.snp.leading).offset(-5)
-        }
-        
-        guard dividerAfter else {
-            return view
         }
         
         let divider = UIView()
@@ -203,10 +172,13 @@ final class SettingsPreferencesCell: ReusableCellBaseClass {
             $0.bottom.equalToSuperview()
             $0.height.equalTo(0.5)
         }
+        
+        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapStreamingButton)))
+        
         return view
     }
     
-    private func makeToggle() -> UIView {
+    private func makeToggle(vm: SettingsContentCellViewModel) -> UIView {
         let view = UIView()
         view.backgroundColor = CMColor.cmSecondaryBackground
         
@@ -216,19 +188,19 @@ final class SettingsPreferencesCell: ReusableCellBaseClass {
         iconContainer.clipsToBounds = true
 
         let icon = UIImageView()
-        icon.image = UIImage(systemName: "bell")
+        icon.image = UIImage(systemName: "star")
         icon.contentMode = .scaleAspectFit
         icon.tintColor = .white
         
         let label = UILabel()
-        label.text = "Notifications"
+        label.text = "Include Adult Content"
         label.font = CMFont.font(size: .body, fontName: .avenirDemiBold)
         label.numberOfLines = 1
         label.adjustsFontSizeToFitWidth = true
         
         let toggle = UISwitch()
-        toggle.isOn = true
-        toggle.addTarget(self, action: #selector(didChangeNotifications), for: .valueChanged)
+        toggle.isOn = vm.userService.adultEnabled
+        toggle.addTarget(self, action: #selector(didChangeAdultContent), for: .valueChanged)
 
         view.addSubview(iconContainer)
         view.addSubview(label)
@@ -257,32 +229,16 @@ final class SettingsPreferencesCell: ReusableCellBaseClass {
             $0.trailing.equalToSuperview().offset(-Constants.spacing)
         }
         
-        let divider = UIView()
-        divider.backgroundColor = .systemGray2
-        
-        view.addSubview(divider)
-        divider.snp.makeConstraints {
-            $0.leading.equalTo(iconContainer.snp.trailing)
-            $0.trailing.equalToSuperview()
-            $0.bottom.equalToSuperview()
-            $0.height.equalTo(0.5)
-        }
-        
         return view
     }
     
     // MARK: - OBJC FUNC
-    @objc private func didChangeNotifications(_ sender: UISwitch) {
-        viewModel?.userService.notificationEnabled = sender.isOn
+    @objc private func didChangeAdultContent(_ sender: UISwitch) {
+        viewModel?.userService.adultEnabled = sender.isOn
     }
     
-    @objc private func didTaplanguageButton(_ gesture: UIGestureRecognizer) {
+    @objc private func didTapStreamingButton(_ gesture: UIGestureRecognizer) {
         guard let view = gesture.view else { return }
-        view.animateTap(onCompletion: viewModel?.didTapLanguage)
-    }
-    
-    @objc private func didTapRegionButton(_ gesture: UIGestureRecognizer) {
-        guard let view = gesture.view else { return }
-        view.animateTap(onCompletion: viewModel?.didTapRegion)
+        view.animateTap(onCompletion: viewModel?.didTapStreaming)
     }
 }

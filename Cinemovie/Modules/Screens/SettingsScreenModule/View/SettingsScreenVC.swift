@@ -35,6 +35,9 @@ final class SettingsScreenVC: UIViewController {
         case header
         case logOut(SettingsLogOutCellViewModel)
         case preferences(SettingsPreferencesCellViewModel)
+        case content(SettingsContentCellViewModel)
+        case about(SettingsAboutCellViewModel)
+        case footer
     }
     
     // MARK: - VIPER
@@ -50,6 +53,9 @@ final class SettingsScreenVC: UIViewController {
         cv.register(cellClass: SettingsHeaderCell.self)
         cv.register(cellClass: SettingsAccountCell.self)
         cv.register(cellClass: SettingsLogOutCell.self)
+        cv.register(cellClass: SettingsContentCell.self)
+        cv.register(cellClass: SettingsAboutCell.self)
+        cv.register(cellClass: SettingsFooterCell.self)
         cv.register(cellClass: SettingsPreferencesCell.self)
         cv.backgroundColor = CMColor.cmBackground
         return cv
@@ -107,8 +113,22 @@ final class SettingsScreenVC: UIViewController {
                 (cell as? SettingsPreferencesCell)?.configure(withVM: vm)
                 return cell
                 
+            case .content(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath)
+                (cell as? SettingsContentCell)?.configure(withVM: vm)
+                return cell
+                
+            case .about(let vm):
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: vm.cellIdentifier, for: indexPath)
+                (cell as? SettingsAboutCell)?.configure(withVM: vm)
+                return cell
+                
             case .header:
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SettingsHeaderCell.identifier, for: indexPath)
+                return cell
+                
+            case .footer:
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SettingsFooterCell.identifier, for: indexPath)
                 return cell
             }
         }

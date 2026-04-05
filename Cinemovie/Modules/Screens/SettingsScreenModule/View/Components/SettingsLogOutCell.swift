@@ -62,7 +62,7 @@ final class SettingsLogOutCell: ReusableCellBaseClass {
             $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(50)
-            $0.bottom.lessThanOrEqualToSuperview()
+            $0.bottom.equalToSuperview().priority(.high)
         }
     }
 }

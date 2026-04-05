@@ -7,27 +7,61 @@
 
 import Foundation
 
-protocol UserServiceProtocol {
-    var userLanguage: String { get }
+protocol UserServiceProtocol: AnyObject {
+    var userLanguage: ConfigurationLanguage { get set }
+    var region: ConfigurationCountry { get set  }
+    var notificationEnabled: Bool { get set }
+    var adultEnabled: Bool { get set }
     
-    func changeLanguage(to language: String)
+    func reset()
 }
 
 final class CMUserService: UserServiceProtocol {
-    private(set) var userLanguage: String = "en-US"
-    private var recentlyViewedMedia: [MediaProtocol] = RecentMediaHelper.getRecentMedia()
     
+    // MARK: - KEYS
     private let userLanguageKey = "userLanguageKey"
-    private let recentlyViewedMediaKey = "recentlyViewedMediaKey"
+    private let regionKey = "regionKey"
+    private let notificationEnabledKey = "notificationEnabledKey"
+    private let adultEnabledKey = "adultEnabledKey"
     
-    func changeLanguage(to language: String) {
-        self.userLanguage = language
-        CMStorage.save(language, key: userLanguageKey)
+    // MARK: - PROTOCOL PROPERTIES
+    var userLanguage: ConfigurationLanguage {
+        didSet {
+            CMStorage.save(userLanguage, key: userLanguageKey)
+        }
     }
     
-    func addToRecentlyViewedMedia(_ media: MediaProtocol) {
-        guard !recentlyViewedMedia.contains(where: { $0.id == media.id }) else { return }
-        self.recentlyViewedMedia.append(media)
-        CMStorage.save(recentlyViewedMedia.map(AnyMedia.init), key: recentlyViewedMediaKey)
+    var region: ConfigurationCountry {
+        didSet {
+            CMStorage.save(region, key: regionKey)
+        }
+    }
+    
+    var notificationEnabled: Bool {
+        didSet {
+            CMStorage.save(notificationEnabled, key: notificationEnabledKey)
+        }
+    }
+    
+    var adultEnabled: Bool {
+        didSet {
+            CMStorage.save(adultEnabled, key: adultEnabledKey)
+        }
+    }
+    
+    // MARK: - INIT
+    init() {
+        self.userLanguage = CMStorage.load(ConfigurationLanguage.self, key: userLanguageKey) ?? ConfigurationLanguage.english
+        self.region = CMStorage.load(ConfigurationCountry.self, key: regionKey) ?? ConfigurationCountry.USA
+        self.notificationEnabled = CMStorage.load(Bool.self, key: notificationEnabledKey) ?? true
+        self.adultEnabled = CMStorage.load(Bool.self, key: adultEnabledKey) ?? false
+    }
+    
+    // MARK: - PUBLIC FUNC
+    func reset() {
+        self.userLanguage = .english
+        self.region = .USA
+        self.notificationEnabled = true
+        self.adultEnabled = false
     }
 }
