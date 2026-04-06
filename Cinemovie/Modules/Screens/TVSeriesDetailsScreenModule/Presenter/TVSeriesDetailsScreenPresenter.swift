@@ -24,10 +24,12 @@ protocol TVSeriesDetailsScreenPresenterProtocol: AnyObject {
     func didSelectSeason(_ season: TVSeason)
     func didTapAddToList()
     func didGetTVSeasonDetails(_ details: TVSeasonDetails)
-
     
     func didAddOrRemoveFromWatchlist(message: String?)
     func didAddOrRemoveFromFavorites(message: String?)
+    
+    // MARK: - RATING
+    func didRate(message: String?, value: Double)
     
     // MARK: - ERROR HANDLING
     func didRecieveError(_ error: Error)
@@ -83,12 +85,21 @@ final class TVSeriesDetailsScreenPresenter {
         self.view?.showLoading()
         guard let seriesDetails else { return }
         
-        let backdropVM = BackdropImageCellViewModel(
-            imagePath: seriesDetails.backdropPath,
-            size: .w1280, isFavorite: seriesAccountStates.favorite,
-            didTapBackButtonAction: { [weak self] in self?.didTapBackButton() } ,
-            didTapFavorite: { [weak self] in self?.didTapFavoriteButton(adding: $0) }
-        )
+        let backdropVM: BackdropImageCellViewModel
+        
+        if !authContext.isGuest {
+            backdropVM = BackdropImageCellViewModel(
+                imagePath: seriesDetails.backdropPath,
+                size: .w1280, isFavorite: seriesAccountStates.favorite,
+                didTapBackButtonAction: { [weak self] in self?.didTapBackButton() },
+                didTapFavorite: { [weak self] in self?.didTapFavoriteButton(adding: $0) }
+            )
+        } else {
+            backdropVM = BackdropImageCellViewModel(
+                imagePath: seriesDetails.backdropPath, size: .w1280,
+                didTapBackButtonAction: { [weak self] in self?.didTapBackButton() }
+            )
+        }
         
         let titleVM = TitleAndTaglineCellViewModel(mediaName: seriesDetails.name, mediaTagline: seriesDetails.tagline)
         
@@ -137,6 +148,7 @@ final class TVSeriesDetailsScreenPresenter {
         sectionsAndTheirItems.append((Sections.production, [.production(prodVM)]))
         
         let rateVM = RateAndShareCellViewModel(
+            rated: seriesAccountStates.rated,
             didTapShareButton: { [weak self] in self?.didTapShareButton() },
             didTapRateButton: { [weak self] in self?.didTapRateButton() }
         )
@@ -253,7 +265,16 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
     }
     
     func didTapRateButton() {
-        print("DID tap rate button")
+        let viewModel = RatePopUpViewModel(
+            posterPath: seriesDetails?.posterPath,
+            existingRating: seriesAccountStates.rated?.value,
+            didRate: { [weak self] in
+                guard let self = self else { return }
+                self.interactor.rate(seriesID: self.seriesID, value: $0)
+            },
+            onClose: { [weak self] in self?.view?.activePopUpView = nil }
+        )
+        self.router.showRatingPopUP(ratePopupVM: viewModel)
     }
     
     func didTapShareButton() {
@@ -289,6 +310,14 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
         interactor.addOrRemoveInWatchlist(seriesID: seriesID, adding: adding)
     }
     
+    func didTapAddToList() {
+        router.presentAddToListModal(seriesID: seriesID)
+    }
+    
+    func didGetTVSeasonDetails(_ details: TVSeasonDetails) {
+        router.showSeasonPopUp(seasonDetails: details)
+    }
+    
     func didAddOrRemoveFromFavorites(message: String?) {
         print("Successfully done operation: \(message ?? "")")
     }
@@ -297,12 +326,11 @@ extension TVSeriesDetailsScreenPresenter: TVSeriesDetailsScreenPresenterProtocol
         print("Successfully done operation: \(message ?? "")")
     }
     
-    func didTapAddToList() {
-        router.presentAddToListModal(seriesID: seriesID)
-    }
-    
-    func didGetTVSeasonDetails(_ details: TVSeasonDetails) {
-        router.showSeasonPopUp(seasonDetails: details)
+    // MARK: - RATING
+    func didRate(message: String?, value: Double) {
+        var newState = seriesAccountStates
+        newState.rated = .init(value: value)
+        self.seriesAccountStates = newState
     }
     
     // MARK: - ERROR HANDLING

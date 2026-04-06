@@ -21,6 +21,9 @@ protocol TVSeriesDetailsScreenInteractorProtocol: AnyObject {
     func getTVSeasonDetails(seriesID: Int, seasonNumber: Int)
     func addOrRemoveInWatchlist(seriesID: Int, adding: Bool)
     func addOrRemoveInFavorites(seriesID: Int, adding: Bool)
+    
+    // MARK: - RATING
+    func rate(seriesID: Int, value: Double)
 }
 
 final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProtocol {
@@ -107,6 +110,18 @@ final class TVSeriesDetailsScreenInteractor: TVSeriesDetailsScreenInteractorProt
                 await MainActor.run {
                     self.presenter?.didRecieveError(error)
                 }
+            }
+        }
+    }
+    
+    // MARK: - RATING
+    func rate(seriesID: Int, value: Double) {
+        Task {
+            do {
+                let response = try await networkService.series.rate(seriesID: seriesID, value: value)
+                self.presenter?.didRate(message: response.statusMessage, value: value)
+            } catch {
+                presenter?.didRecieveError(error)
             }
         }
     }

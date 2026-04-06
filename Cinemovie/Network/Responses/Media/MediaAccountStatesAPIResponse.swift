@@ -7,17 +7,15 @@
 
 import Foundation
 
-struct MediaAccountStatesAPIResponse: Decodable {
+struct MediaAccountStatesAPIResponse: Decodable, Hashable{
     let id: Int
     let favorite: Bool
-    let rated: Rated?
+    var rated: Rated?
     let watchlist: Bool
 
-    struct Rated: Decodable {
-        let value: Int
+    struct Rated: Hashable, Decodable {
+        var value: Double
     }
-
-    static let empty = MediaAccountStatesAPIResponse(id: 0, favorite: false, rated: nil, watchlist: false)
 
     enum CodingKeys: String, CodingKey {
         case id, favorite, rated, watchlist
@@ -37,4 +35,8 @@ struct MediaAccountStatesAPIResponse: Decodable {
         watchlist = try container.decode(Bool.self, forKey: .watchlist)
         rated = try? container.decode(Rated.self, forKey: .rated)
     }
+}
+
+extension MediaAccountStatesAPIResponse {
+    static let empty = MediaAccountStatesAPIResponse(id: 0, favorite: false, rated: nil, watchlist: false)
 }

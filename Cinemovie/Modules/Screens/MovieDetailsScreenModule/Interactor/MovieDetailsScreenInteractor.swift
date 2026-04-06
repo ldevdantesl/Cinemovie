@@ -7,18 +7,22 @@
 
 protocol MovieDetailsScreenInteractorProtocol: AnyObject {
     // MARK: - PROGRAMMATIC
-    func getMovieDetails(movieID: Int)
-    func getMovieCast(movieID: Int)
-    func getMovieRecommendations(movieID: Int)
-    func getMovieVideos(movieID: Int)
-    func getMovieReviews(movieID: Int)
-    func getBelongsToCollectionDetails(collectionID: Int)
-    func getMovieAccountStates(movieID: Int)
-    func getUserLists()
+    func getMovieDetails(movieID: Int) async throws -> MovieDetails
+    func getMovieCast(movieID: Int) async throws -> (cast: [Cast], crew: [Cast])
+    func getMovieRecommendations(movieID: Int) async throws -> [Movie]
+    func getMovieVideos(movieID: Int) async throws -> [Video]
+    func getMovieReviews(movieID: Int) async throws -> [Review]
+    func getBelongsToCollectionDetails(collectionID: Int) async throws -> BelongsToCollectionDetails
+    func getMovieAccountStates(movieID: Int) async throws -> MediaAccountStatesAPIResponse
+    func getUserLists() async throws -> [UserList]
     
     // MARK: - USER INITIATED
     func addOrRemoveInWatchlist(movieID: Int, adding: Bool)
     func addOrRemoveInFavorites(movieID: Int, adding: Bool)
+    
+    // MARK: - RATING
+    func rateMovie(movieID: Int, value: Double)
+    func removeRating(movieID: Int)
 }
 
 final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
@@ -30,92 +34,37 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
     }
     
     // MARK: - PROGRAMMATIC
-    func getMovieDetails(movieID: Int) {
-        Task {
-            do {
-                let result = try await networkService.movies.getMovieDetails(movieID: movieID)
-                self.presenter?.didGetMovieDetails(result)
-            } catch {
-                self.presenter?.didRecieveError(error.localizedDescription, goesBack: true)
-            }
-        }
+    func getMovieDetails(movieID: Int) async throws -> MovieDetails {
+        try await networkService.movies.getMovieDetails(movieID: movieID)
     }
     
-    func getMovieCast(movieID: Int) {
-        Task {
-            do {
-                let result = try await networkService.movies.getMovieCast(movieID: movieID)
-                self.presenter?.didGetMovieCast(cast: result.cast, crew: result.crew)
-            } catch {
-                self.presenter?.didRecieveError(error.localizedDescription, goesBack: false)
-            }
-        }
+    func getMovieCast(movieID: Int) async throws -> (cast: [Cast], crew: [Cast]) {
+        let result = try await networkService.movies.getMovieCast(movieID: movieID)
+        return (result.cast, result.crew)
     }
     
-    func getMovieRecommendations(movieID: Int) {
-        Task {
-            do {
-                let result = try await networkService.movies.getMovieRecommendations(movieID: movieID)
-                self.presenter?.didGetMovieRecommendations(queryMovies: result)
-            } catch {
-                self.presenter?.didRecieveError(error.localizedDescription, goesBack: false)
-            }
-        }
+    func getMovieRecommendations(movieID: Int) async throws -> [Movie] {
+        try await networkService.movies.getMovieRecommendations(movieID: movieID)
     }
     
-    func getMovieVideos(movieID: Int) {
-        Task {
-            do {
-                let result = try await networkService.movies.getMovieVideos(movieID: movieID)
-                self.presenter?.didGetMovieVideos(videos: result)
-            } catch {
-                self.presenter?.didGetMovieVideos(videos: [])
-            }
-        }
+    func getMovieVideos(movieID: Int) async throws -> [Video] {
+        try await networkService.movies.getMovieVideos(movieID: movieID)
     }
     
-    func getMovieReviews(movieID: Int) {
-        Task {
-            do {
-                let result = try await networkService.movies.getMovieReviews(movieID: movieID)
-                self.presenter?.didGetMovieReviews(result)
-            } catch {
-                self.presenter?.didGetMovieReviews([])
-            }
-        }
+    func getMovieReviews(movieID: Int) async throws -> [Review] {
+        try await networkService.movies.getMovieReviews(movieID: movieID)
     }
     
-    func getBelongsToCollectionDetails(collectionID: Int) {
-        Task {
-            do {
-                let result = try await networkService.other.collectionDetails(collectionID: collectionID)
-                self.presenter?.didGetMovieBelongsToCollectionDetails(result)
-            } catch {
-                presenter?.didRecieveError(error.localizedDescription, goesBack: false)
-            }
-        }
+    func getBelongsToCollectionDetails(collectionID: Int) async throws -> BelongsToCollectionDetails {
+        try await networkService.other.collectionDetails(collectionID: collectionID)
     }
     
-    func getMovieAccountStates(movieID: Int) {
-        Task {
-            do {
-                let result = try await networkService.movies.getMovieAccountState(movieID: movieID)
-                self.presenter?.didGetMovieAccountStates(result)
-            } catch {
-                presenter?.didRecieveError(error.localizedDescription, goesBack: false)
-            }
-        }
+    func getMovieAccountStates(movieID: Int) async throws -> MediaAccountStatesAPIResponse {
+        try await networkService.movies.getMovieAccountState(movieID: movieID)
     }
     
-    func getUserLists() {
-        Task {
-            do {
-                let result = try await networkService.userList.getUserLists(page: 1)
-                self.presenter?.didGetUserLists(result)
-            } catch {
-                self.presenter?.didGetUserLists([])
-            }
-        }
+    func getUserLists() async throws -> [UserList] {
+        try await networkService.userList.getUserLists(page: 1)
     }
     
     // MARK: - USER INITIATED
@@ -123,11 +72,15 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
         Task {
             do {
                 let result = try await adding ?
-                networkService.accountList.addMediaInAccountList(mediaID: movieID, listType: .watchlist, mediaType: .movie) :
-                networkService.accountList.removeMediaInAccountList(mediaID: movieID, listType: .watchlist, mediaType: .movie)
-                self.presenter?.didAddToWatchlist(result.statusMessage ?? "")
+                    networkService.accountList.addMediaInAccountList(mediaID: movieID, listType: .watchlist, mediaType: .movie) :
+                    networkService.accountList.removeMediaInAccountList(mediaID: movieID, listType: .watchlist, mediaType: .movie)
+                await MainActor.run {
+                    self.presenter?.didAddToWatchlist(result.statusMessage ?? "")
+                }
             } catch {
-                presenter?.didRecieveError(error.localizedDescription, goesBack: false)
+                await MainActor.run {
+                    self.presenter?.didRecieveError(error.localizedDescription, goesBack: false)
+                }
             }
         }
     }
@@ -136,11 +89,46 @@ final class MovieDetailsScreenInteractor: MovieDetailsScreenInteractorProtocol {
         Task {
             do {
                 let result = try await adding ?
-                networkService.accountList.addMediaInAccountList(mediaID: movieID, listType: .favorite, mediaType: .movie) :
-                networkService.accountList.removeMediaInAccountList(mediaID: movieID, listType: .favorite, mediaType: .movie)
-                self.presenter?.didAddToWatchlist(result.statusMessage ?? "")
+                    networkService.accountList.addMediaInAccountList(mediaID: movieID, listType: .favorite, mediaType: .movie) :
+                    networkService.accountList.removeMediaInAccountList(mediaID: movieID, listType: .favorite, mediaType: .movie)
+                await MainActor.run {
+                    self.presenter?.didAddToFavorite(result.statusMessage ?? "")
+                }
             } catch {
-                presenter?.didRecieveError(error.localizedDescription, goesBack: false)
+                await MainActor.run {
+                    self.presenter?.didRecieveError(error.localizedDescription, goesBack: false)
+                }
+            }
+        }
+    }
+    
+    // MARK: - RATING
+    func rateMovie(movieID: Int, value: Double) {
+        Task {
+            do {
+                let response = try await networkService.movies.rate(movieID: movieID, value: value)
+                await MainActor.run {
+                    self.presenter?.didRate(message: response.statusMessage, value: value)
+                }
+            } catch {
+                await MainActor.run {
+                    self.presenter?.didRecieveError(error.localizedDescription, goesBack: false)
+                }
+            }
+        }
+    }
+    
+    func removeRating(movieID: Int) {
+        Task {
+            do {
+                let response = try await networkService.movies.removeRating(movieID: movieID)
+                await MainActor.run {
+                    self.presenter?.didRemovedRating(message: response.statusMessage)
+                }
+            } catch {
+                await MainActor.run {
+                    self.presenter?.didRecieveError(error.localizedDescription, goesBack: false)
+                }
             }
         }
     }

@@ -18,6 +18,12 @@ protocol TVSeriesAPISubServiceProtocol {
     func getTrending(timeWindow: TrendingTimeWindow) async throws -> [TVSeries]
     func getSeasonDetails(seriesID: Int, seasonNumber: Int) async throws -> TVSeasonDetails
     func getList(listType: TVSeriesListType) async throws -> [TVSeries]
+    
+    @discardableResult
+    func rate(seriesID: Int, value: Double) async throws -> TMDBStatusResponse
+    
+    @discardableResult
+    func removeRating(seriesID: Int) async throws -> TMDBStatusResponse
 }
 
 final class TVSeriesAPISubService: TVSeriesAPISubServiceProtocol {
@@ -80,5 +86,15 @@ final class TVSeriesAPISubService: TVSeriesAPISubServiceProtocol {
     func getList(listType: TVSeriesListType) async throws -> [TVSeries] {
         let response: PaginatedAPIResponse<TVSeries> = try await httpClient.request(TVSeriesEndpoints.list(listType: listType, extraParams: queryParams))
         return response.results
+    }
+    
+    func rate(seriesID: Int, value: Double) async throws -> TMDBStatusResponse {
+        guard let sessionID = authContext.sessionID else { throw APIError.unauthorized }
+        return try await httpClient.request(TVSeriesEndpoints.rate(seriesID: seriesID, sessionID: sessionID, value: value))
+    }
+    
+    func removeRating(seriesID: Int) async throws -> TMDBStatusResponse {
+        guard let sessionID = authContext.sessionID else { throw APIError.unauthorized }
+        return try await httpClient.request(TVSeriesEndpoints.removeRating(seriesID: seriesID, sessionID: sessionID))
     }
 }

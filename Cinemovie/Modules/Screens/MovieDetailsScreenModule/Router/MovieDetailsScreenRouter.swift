@@ -18,6 +18,7 @@ protocol MovieDetailsScreenRouterProtocol {
     // MARK: - PRESENT
     func presentShareView(movie: MovieDetails)
     func showActorPopUp(actor: Cast)
+    func showRatingPopUP(ratePopupVM: RatePopUpViewModel)
     func showTooltipView(sendedBy view: UIView, message: String)
     func presentAddToListModal(movieID: Int)
 }
@@ -51,6 +52,13 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
         guard let vcView = viewController?.view else { return }
         let vm = ActorPopupViewModel(actor: actor, didTapActorDetails: self.navigateToPersonDetails, onClose: self.hideActorPopUp)
         let popupView = ActorPopupView(viewModel: vm)
+        popupView.show(in: vcView)
+        self.viewController?.activePopUpView = popupView
+    }
+    
+    func showRatingPopUP(ratePopupVM: RatePopUpViewModel) {
+        guard let vcView = viewController?.view else { return }
+        let popupView = RatePopUpView(viewModel: ratePopupVM)
         popupView.show(in: vcView)
         self.viewController?.activePopUpView = popupView
     }

@@ -62,6 +62,7 @@ extension AppCoordinator: SessionDelegate {
     func didRequestLogOut() {
         container.authContext.clearSession()
         tabCoordinator = nil
+        container.userService.reset()
         showLoginPage()
     }
 }

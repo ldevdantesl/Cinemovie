@@ -17,6 +17,12 @@ protocol MoviesAPISubServiceProtocol {
     func getMovieVideos(movieID: Int) async throws -> [Video]
     func getMovieTrending(timeWindow: TrendingTimeWindow) async throws -> [Movie]
     func getMovieList(listType: MovieListType) async throws -> [Movie]
+    
+    @discardableResult
+    func rate(movieID: Int, value: Double) async throws -> TMDBStatusResponse
+    
+    @discardableResult
+    func removeRating(movieID: Int) async throws -> TMDBStatusResponse
 }
 
 final class MoviesAPISubService: MoviesAPISubServiceProtocol {
@@ -78,5 +84,15 @@ final class MoviesAPISubService: MoviesAPISubServiceProtocol {
     func getMovieList(listType: MovieListType) async throws -> [Movie] {
         let response: PaginatedAPIResponse<Movie> =  try await httpClient.request(MovieEndpoints.list(listType: listType, extraParams: queryParams))
         return response.results
+    }
+    
+    func rate(movieID: Int, value: Double) async throws -> TMDBStatusResponse {
+        guard let sessionID = authContext.sessionID else { throw APIError.unauthorized }
+        return try await httpClient.request(MovieEndpoints.rate(movieID: movieID, sessionID: sessionID, value: value))
+    }
+    
+    func removeRating(movieID: Int) async throws -> TMDBStatusResponse {
+        guard let sessionID = authContext.sessionID else { throw APIError.unauthorized }
+        return try await httpClient.request(MovieEndpoints.removeRating(movieID: movieID, sessionID: sessionID))
     }
 }

@@ -18,7 +18,17 @@ enum TVSeriesEndpoints: Endpoint {
     case trending(timeWindow: TrendingTimeWindow, queryParams: [String: String]? = nil)
     case seasonDetails(seriesID: Int, seasonNumber: Int, queryParams: [String: String]? = nil)
     case list(listType: TVSeriesListType, extraParams: [String: String]? = nil)
+    case rate(seriesID: Int, sessionID: String, value: Double)
+    case removeRating(seriesID: Int, sessionID: String)
 
+    var method: HTTPMethod {
+        switch self {
+        case .rate: return .post
+        case .removeRating: return .delete
+        default: return .get
+        }
+    }
+    
     var path: String {
         switch self {
         case .details(let id, _):                   return "/tv/\(id)"
@@ -30,6 +40,8 @@ enum TVSeriesEndpoints: Endpoint {
         case .recommendations(let id, _):           return "/tv/\(id)/recommendations"
         case .trending(let tw, _):                  return "/trending/tv/\(tw.rawValue)"
         case .seasonDetails(let id, let season, _): return "/tv/\(id)/season/\(season)"
+        case .rate(let id, _, _):                   return "/tv/\(id)/rating"
+        case .removeRating(let id, _):              return "/tv/\(id)/rating"
         case .list(let listType, _):
             switch listType {
             case .topRated: return "/tv/top_rated"
@@ -59,7 +71,7 @@ enum TVSeriesEndpoints: Endpoint {
              .seasonDetails(_, _, let params):
             return params?.toQueryItems()
 
-        case .accountState(_, let sessionID):
+        case .accountState(_, let sessionID), .rate(_, let sessionID, _), .removeRating(_, let sessionID):
             return [URLQueryItem(name: "session_id", value: sessionID)]
 
         case .list(let listType, let extraParams):
@@ -97,6 +109,15 @@ enum TVSeriesEndpoints: Endpoint {
                 appendExtra(extraParams, to: &items)
                 return items
             }
+        }
+    }
+    
+    var body: Data? {
+        switch self {
+        case .rate(_, _, let value):
+            let json = ["value" : value]
+            return try? JSONEncoder().encode(json)
+        default: return nil
         }
     }
 

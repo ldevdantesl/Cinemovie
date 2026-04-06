@@ -65,14 +65,14 @@ enum AccountListEndpoints: Endpoint {
             let bodyParam: [String : Any] = [
                 "media_type" : mediaType.rawValue,
                 "media_id" : mediaID,
-                listType.titleForEndpointsV4 : true
+                listType.titleForEndpointsV3 : true
             ]
             return CMJSONSerializer.dataToJSON(json: bodyParam)
         case .removeMediaInAccountList(_, _, let mediaID, let listType, let mediaType):
             let bodyParam: [String : Any] = [
                 "media_type" : mediaType.rawValue,
                 "media_id" : mediaID,
-                listType.titleForEndpointsV4 : false
+                listType.titleForEndpointsV3 : false
             ]
             return CMJSONSerializer.dataToJSON(json: bodyParam)
         default: return .none

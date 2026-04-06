@@ -13,7 +13,7 @@ protocol MovieDetailsScreenViewProtocol: AnyObject {
     // MARK: - PROPERTIES
     var activeTooltipView: CMTooltipView? { get set }
     var activeTooltipWorkItem: DispatchWorkItem? { get set }
-    var activePopUpView: ActorPopupView? { get set }
+    var activePopUpView: PopUPView? { get set }
 
     // MARK: - OTHER
     func applySnapshot(sections: [MovieDetailsScreenVC.Sections], items: [MovieDetailsScreenVC.Sections : [MovieDetailsScreenVC.Items]])
@@ -59,7 +59,7 @@ final class MovieDetailsScreenVC: UIViewController {
     var presenter: MovieDetailsScreenPresenterProtocol?
     var activeTooltipView: CMTooltipView?
     var activeTooltipWorkItem: DispatchWorkItem?
-    var activePopUpView: ActorPopupView?
+    var activePopUpView: PopUPView?
     
     // MARK: - PROPERTIES
     private var viewModels: [CellViewModelBaseClass] = []

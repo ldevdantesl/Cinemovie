@@ -17,6 +17,7 @@ protocol TVSeriesDetailsScreenRouterProtocol {
     func showTooltipView(sendedBy view: UIView, message: String)
     func presentShareView(details: TVSeriesDetails)
     func showActorPopUp(actor: Cast)
+    func showRatingPopUP(ratePopupVM: RatePopUpViewModel)
     func showSeasonPopUp(seasonDetails: TVSeasonDetails)
     func presentAddToListModal(seriesID: Int)
     
@@ -59,6 +60,13 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
         let popupView = ActorPopupView(viewModel: vm)
         popupView.show(in: vcView)
         viewController?.activePopUpView = popupView
+    }
+    
+    func showRatingPopUP(ratePopupVM: RatePopUpViewModel) {
+        guard let vcView = viewController?.view else { return }
+        let popupView = RatePopUpView(viewModel: ratePopupVM)
+        popupView.show(in: vcView)
+        self.viewController?.activePopUpView = popupView
     }
     
     func showSeasonPopUp(seasonDetails: TVSeasonDetails) {

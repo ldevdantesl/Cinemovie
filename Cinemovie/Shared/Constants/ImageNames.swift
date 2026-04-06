@@ -31,6 +31,7 @@ enum ImageNames: String {
     case addMovie = "AddMovie"
     case completed = "Completed"
     case error = "Error"
+    case rated = "Rated"
     
     // MARK: - TV
     case tvSeriesID = "TVSeriesID"

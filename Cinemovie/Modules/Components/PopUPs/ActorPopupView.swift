@@ -39,9 +39,13 @@ final class ActorPopupView: PopUPView {
     private var viewModel: ActorPopupViewModel
     
     // MARK: - VIEW PROPERTIES
-    private let actorImageView: AsyncImageView = {
+    private lazy var actorImageView: AsyncImageView = {
         let view = AsyncImageView()
-        view.translatesAutoresizingMaskIntoConstraints = false
+        view.setAsyncImage(
+            path: viewModel.actor.profilePath, size: .w342,
+            notFoundImageSystemName: Constants.buttonImageName,
+            notFoundPointSize: Constants.avaSystemImageSize
+        )
         return view
     }()
     
@@ -124,13 +128,6 @@ final class ActorPopupView: PopUPView {
         self.viewModel = viewModel
         super.init(viewModel: viewModel)
         setupUI()
-        
-        let imagePath = viewModel.actor.profilePath
-        actorImageView.setAsyncImage(
-            path: imagePath, size: .w342,
-            notFoundImageSystemName: Constants.buttonImageName,
-            notFoundPointSize: Constants.avaSystemImageSize
-        )
     }
     
     @available(*, unavailable)
