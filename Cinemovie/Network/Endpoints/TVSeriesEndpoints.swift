@@ -68,14 +68,14 @@ enum TVSeriesEndpoints: Endpoint {
                 return extraParams?.toQueryItems()
 
             case .popular:
-                var items = baseWatchProviderQueryItems()
+                var items = baseWatchProviderQueryItems(extraParams)
                 items.append(URLQueryItem(name: "sort_by", value: "popularity.desc"))
                 items.append(URLQueryItem(name: "without_genres", value: excludedGenres()))
                 appendExtra(extraParams, to: &items)
                 return items
 
             case .onTheAir:
-                var items = baseWatchProviderQueryItems()
+                var items = baseWatchProviderQueryItems(extraParams)
                 items.append(URLQueryItem(name: "sort_by", value: "first_air_date.desc"))
                 items.append(URLQueryItem(name: "air_date.lte", value: CMDateFormatter.currentDateString()))
                 items.append(URLQueryItem(name: "without_genres", value: excludedGenres()))
@@ -83,7 +83,7 @@ enum TVSeriesEndpoints: Endpoint {
                 return items
 
             case .airingToday:
-                var items = baseWatchProviderQueryItems()
+                var items = baseWatchProviderQueryItems(extraParams)
                 items.append(URLQueryItem(name: "first_air_date.gte", value: CMDateFormatter.currentDateString()))
                 items.append(URLQueryItem(name: "first_air_date.lte", value: CMDateFormatter.currentDateString()))
                 items.append(URLQueryItem(name: "without_genres", value: excludedGenres()))
@@ -91,7 +91,7 @@ enum TVSeriesEndpoints: Endpoint {
                 return items
 
             case .actionAdventure, .sciFiFantasy, .drama, .animation, .crime, .kids, .comedy, .documentary:
-                var items = baseWatchProviderQueryItems()
+                var items = baseWatchProviderQueryItems(extraParams)
                 items.append(URLQueryItem(name: "sort_by", value: "popularity.desc"))
                 items.append(URLQueryItem(name: "with_genres", value: GenreHelper.shared.getTVSeriesGenreIDsSeperatedByComma(genres: [listType.genreName])))
                 appendExtra(extraParams, to: &items)
@@ -101,10 +101,10 @@ enum TVSeriesEndpoints: Endpoint {
     }
 
     // MARK: - Private Helpers
-    private func baseWatchProviderQueryItems() -> [URLQueryItem] {
+    private func baseWatchProviderQueryItems(_ extraParams: [String: String]?) -> [URLQueryItem] {
         [
             URLQueryItem(name: "with_watch_providers", value: "8|9|119|337|350|15"),
-            URLQueryItem(name: "watch_region", value: "US")
+            URLQueryItem(name: "watch_region", value: extraParams?["region"] ?? "US")
         ]
     }
 

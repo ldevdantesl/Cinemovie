@@ -10,6 +10,7 @@ import Foundation
 protocol APIConfigurationProtocol {
     var language: String { get }
     var region: String { get }
+    var isAdultIncluded: Bool { get }
 }
 
 final class APIConfiguration: APIConfigurationProtocol {
@@ -17,6 +18,7 @@ final class APIConfiguration: APIConfigurationProtocol {
     
     var language: String { userService.userLanguage.iso_639_1 }
     var region: String { userService.region.iso_3166_1 }
+    var isAdultIncluded: Bool { userService.adultEnabled }
     
     init(userService: UserServiceProtocol) {
         self.userService = userService

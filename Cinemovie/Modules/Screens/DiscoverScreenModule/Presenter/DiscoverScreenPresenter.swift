@@ -28,6 +28,7 @@ protocol DiscoverScreenPresenterProtocol: AnyObject {
     
     // MARK: - PROPERTIES
     var visibleSections: [DiscoverScreenVC.Sections] { get set }
+    var currentMediaType: MediaTypes { get }
     
     // MARK: - ERROR
     func didRecieveError(_ error: Error)
@@ -43,8 +44,16 @@ final class DiscoverScreenPresenter {
     var router: DiscoverScreenRouterProtocol
     var interactor: DiscoverScreenInteractorProtocol
     
+    // MARK: - INJECTED
+    private let userService: UserServiceProtocol
+    
     // MARK: - PUBLIC PROPERTIES
     public var visibleSections: [DiscoverScreenVC.Sections] = []
+    
+    // MARK: - COMPUTED PROPERTIES
+    var currentMediaType: MediaTypes {
+        userService.defaultMediaType
+    }
 
     // MARK: - PRIVATE PROPERTIES
     private let downloadGroup = DispatchGroup()
@@ -53,9 +62,10 @@ final class DiscoverScreenPresenter {
     private var seriesLists: [(listType: TVSeriesListType, series: [TVSeries])] = []
     private var trendingPeople: [Person] = []
     
-    init(interactor: DiscoverScreenInteractorProtocol, router: DiscoverScreenRouterProtocol) {
+    init(interactor: DiscoverScreenInteractorProtocol, router: DiscoverScreenRouterProtocol, userService: UserServiceProtocol) {
         self.interactor = interactor
         self.router = router
+        self.userService = userService
     }
 }
 
@@ -84,7 +94,7 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
         
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
-            self.didChangeMediaType(.movie)
+            self.didChangeMediaType(userService.defaultMediaType)
             self.view?.hideDownloadingView()
         }
     }

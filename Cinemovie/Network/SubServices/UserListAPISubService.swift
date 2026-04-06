@@ -33,7 +33,11 @@ final class UserListAPISubService: UserListAPISubServiceProtocol {
     private let config: APIConfigurationProtocol
     
     private var queryParams: [String : String] {
-        ["language" : config.language]
+        [
+            "language": config.language,
+            "region": config.region,
+            "include_adult": config.isAdultIncluded.description
+        ]
     }
     
     init(httpClient: HTTPClientProtocol, authContext: AuthContextProtocol, config: APIConfigurationProtocol) {

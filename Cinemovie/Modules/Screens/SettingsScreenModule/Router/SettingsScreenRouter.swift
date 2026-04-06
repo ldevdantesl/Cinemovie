@@ -5,9 +5,15 @@
 //  Created by Buzurg Rakhimzoda on 30.01.2025
 //
 
+import UIKit
+import SafariServices
+
 protocol SettingsScreenRouterProtocol {
     func navigateBackToLogin()
     func presentSelectionModal(pickerType: SettingsSelectionPickerViewModel.PickerType)
+    func openAccount(userName: String?)
+    func openPrivacyPolicy()
+    func openTerms()
 }
 
 final class SettingsScreenRouter: SettingsScreenRouterProtocol {
@@ -45,5 +51,23 @@ final class SettingsScreenRouter: SettingsScreenRouterProtocol {
         }
         
         self.viewController?.present(vc, animated: true)
+    }
+    
+    func openAccount(userName: String?) {
+        guard let userName,
+                let url = URL(string: "\(CONSTANTS.baseUniversalURLString)/u/\(userName)") else { return }
+        AppOpener.openURL(url)
+    }
+    
+    func openTerms() {
+        guard let url = URL(string: AppInfo.termsURLString), let vc = viewController else { return }
+        let safari = SFSafariViewController(url: url)
+        vc.present(safari, animated: true)
+    }
+    
+    func openPrivacyPolicy() {
+        guard let url = URL(string: AppInfo.privacyPolicyURLString), let vc = viewController else { return }
+        let safari = SFSafariViewController(url: url)
+        vc.present(safari, animated: true)
     }
 }

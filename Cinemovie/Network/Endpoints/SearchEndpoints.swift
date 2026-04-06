@@ -8,8 +8,8 @@
 import Foundation
 
 enum SearchEndpoints: Endpoint {
-    case getMovieSearchResults(query: String, page: Int)
-    case getTVSeriesSearchResults(query: String, page: Int)
+    case getMovieSearchResults(query: String, page: Int, extraParams: [String : String])
+    case getTVSeriesSearchResults(query: String, page: Int, extraParams: [String : String])
     
     var path: String {
         switch self {
@@ -20,9 +20,9 @@ enum SearchEndpoints: Endpoint {
     
     var queryItems: [URLQueryItem]? {
         switch self {
-        case .getMovieSearchResults(let query, let page), .getTVSeriesSearchResults(let query, let page):
+        case .getMovieSearchResults(let query, let page, let extraParams), .getTVSeriesSearchResults(let query, let page, let extraParams):
             let queryItems = ["query" : query, "page" : page.description]
-            return queryItems.toQueryItems()
+            return queryItems.toQueryItems() + extraParams.toQueryItems()
         }
     }
 }

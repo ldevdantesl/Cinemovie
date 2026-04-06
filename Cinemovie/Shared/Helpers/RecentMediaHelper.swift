@@ -19,7 +19,7 @@ public struct RecentMediaHelper {
         var allMedia = getRecentMedia().map { AnyMedia($0) }
         allMedia.removeAll { $0.asMedia.id == media.id }
         allMedia.insert(AnyMedia(media), at: 0)
-        if allMedia.count > 22 { allMedia.removeLast(allMedia.count - 50) }
+        allMedia = Array(allMedia.prefix(22))
         CMStorage.save(allMedia, key: recentMediaKey)
     }
 }

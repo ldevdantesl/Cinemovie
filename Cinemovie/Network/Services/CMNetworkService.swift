@@ -38,7 +38,7 @@ final class CMNetworkService: NetworkServiceProtocol {
         self.series = TVSeriesAPISubService(httpClient: httpClient, config: config, authContext: authContext)
         self.accountList = AccountListAPISubService(httpClient: httpClient, authContext: authContext)
         self.userList = UserListAPISubService(httpClient: httpClient, authContext: authContext, config: config)
-        self.search = SearchAPISubService(httpClient: httpClient)
+        self.search = SearchAPISubService(httpClient: httpClient, config: config)
         self.other = OtherAPISubService(httpClient: httpClient, config: config)
         self.auth = AuthenticationAPISubService(httpClient: httpClient)
         self.account = AccountAPISubService(httpClient: httpClient)

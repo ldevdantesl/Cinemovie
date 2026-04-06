@@ -10,14 +10,9 @@ import SnapKit
 
 final class SettingsContentCellViewModel: CellViewModelBaseClass {
     let userService: UserServiceProtocol
-    let didTapStreaming: (() -> Void)?
     
-    init(
-        userService: UserServiceProtocol,
-        didTapStreaming: (() -> Void)? = nil,
-    ) {
+    init(userService: UserServiceProtocol) {
         self.userService = userService
-        self.didTapStreaming = didTapStreaming
         super.init(cellIdentifier: SettingsContentCell.identifier)
     }
 }
@@ -73,7 +68,7 @@ final class SettingsContentCell: UICollectionViewCell {
     // MARK: - PUBLIC FUNC
     public func configure(withVM vm: SettingsContentCellViewModel) {
         self.viewModel = vm
-        [makeStreaming(), makeToggle(vm: vm)].forEach { vStack.addArrangedSubview($0) }
+        [makeMediaTypePicker(vm: vm), makeToggle(vm: vm)].forEach { vStack.addArrangedSubview($0) }
         layoutIfNeeded()
     }
     
@@ -93,42 +88,49 @@ final class SettingsContentCell: UICollectionViewCell {
         }
     }
     
-    private func makeStreaming() -> UIView {
+    private func makeMediaTypePicker(vm: SettingsContentCellViewModel) -> UIView {
         let view = UIView()
         view.backgroundColor = CMColor.cmSecondaryBackground
 
         let iconContainer = UIView()
-        iconContainer.backgroundColor = UIColor.systemGreen
+        iconContainer.backgroundColor = .systemBlue
         iconContainer.layer.cornerRadius = 10
         iconContainer.clipsToBounds = true
 
         let icon = UIImageView()
-        icon.image = UIImage(systemName: "square.stack.3d.up")
+        icon.image = UIImage(systemName: "film.stack")
         icon.contentMode = .scaleAspectFit
         icon.tintColor = .white
 
         let label = UILabel()
-        label.text = "Streaming Services"
+        label.text = "Default Media"
         label.font = CMFont.font(size: .body, fontName: .avenirDemiBold)
         label.numberOfLines = 1
-        label.adjustsFontSizeToFitWidth = true
 
-        let subtitle = UILabel()
-        subtitle.text = "Filter by your preferences"
-        subtitle.font = CMFont.font(size: .custom(12), fontName: .avenirRegular)
-        subtitle.textColor = .secondaryLabel
-        subtitle.numberOfLines = 1
-        subtitle.adjustsFontSizeToFitWidth = true
-        subtitle.setContentHuggingPriority(.required, for: .horizontal)
+        let menuButton = UIButton(type: .system)
+        menuButton.setTitle(vm.userService.defaultMediaType.title, for: .normal)
+        menuButton.titleLabel?.font = CMFont.font(size: .caption, fontName: .avenirRegular)
+        menuButton.setTitleColor(.secondaryLabel, for: .normal)
+        menuButton.showsMenuAsPrimaryAction = true
+        menuButton.menu = UIMenu(title: "Default Media Type", children: MediaTypes.allCases.map { type in
+            UIAction(
+                title: type.title,
+                image: UIImage(systemName: type == .movie ? "film" : "tv"),
+                state: vm.userService.defaultMediaType == type ? .on : .off
+            ) { [weak self] _ in
+                self?.viewModel?.userService.defaultMediaType = type
+                menuButton.setTitle(type.title, for: .normal)
+            }
+        })
 
         let arrowImage = UIImageView()
-        arrowImage.image = UIImage(systemName: "chevron.right")
+        arrowImage.image = UIImage(systemName: "chevron.up.chevron.down")
         arrowImage.contentMode = .scaleAspectFit
         arrowImage.tintColor = .tertiaryLabel
-    
+
         view.addSubview(iconContainer)
         view.addSubview(label)
-        view.addSubview(subtitle)
+        view.addSubview(menuButton)
         view.addSubview(arrowImage)
 
         iconContainer.snp.makeConstraints {
@@ -137,7 +139,7 @@ final class SettingsContentCell: UICollectionViewCell {
             $0.bottom.equalToSuperview().offset(-Constants.vSpacing)
             $0.size.equalTo(35)
         }
-        
+
         iconContainer.addSubview(icon)
         icon.snp.makeConstraints {
             $0.center.equalToSuperview()
@@ -145,15 +147,8 @@ final class SettingsContentCell: UICollectionViewCell {
         }
 
         label.snp.makeConstraints {
-            $0.top.equalTo(iconContainer)
+            $0.centerY.equalTo(iconContainer)
             $0.leading.equalTo(iconContainer.snp.trailing).offset(Constants.spacing)
-            $0.trailing.lessThanOrEqualTo(arrowImage.snp.leading).offset(-Constants.spacing)
-        }
-        
-        subtitle.snp.makeConstraints {
-            $0.top.equalTo(label.snp.bottom)
-            $0.leading.equalTo(label)
-            $0.bottom.lessThanOrEqualToSuperview().offset(-Constants.spacing)
         }
 
         arrowImage.snp.makeConstraints {
@@ -161,10 +156,14 @@ final class SettingsContentCell: UICollectionViewCell {
             $0.trailing.equalToSuperview().offset(-Constants.vSpacing)
             $0.size.equalTo(12)
         }
-        
+
+        menuButton.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.trailing.equalTo(arrowImage.snp.leading).offset(-5)
+        }
+
         let divider = UIView()
         divider.backgroundColor = .systemGray2
-        
         view.addSubview(divider)
         divider.snp.makeConstraints {
             $0.leading.equalTo(iconContainer.snp.trailing)
@@ -172,9 +171,7 @@ final class SettingsContentCell: UICollectionViewCell {
             $0.bottom.equalToSuperview()
             $0.height.equalTo(0.5)
         }
-        
-        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapStreamingButton)))
-        
+
         return view
     }
     
@@ -235,10 +232,5 @@ final class SettingsContentCell: UICollectionViewCell {
     // MARK: - OBJC FUNC
     @objc private func didChangeAdultContent(_ sender: UISwitch) {
         viewModel?.userService.adultEnabled = sender.isOn
-    }
-    
-    @objc private func didTapStreamingButton(_ gesture: UIGestureRecognizer) {
-        guard let view = gesture.view else { return }
-        view.animateTap(onCompletion: viewModel?.didTapStreaming)
     }
 }

@@ -66,8 +66,9 @@ final class DiscoverScreenVC: UIViewController {
     
     private lazy var headerView: DiscoverScreenHeaderView = {
         let vm = DiscoverScreenHeaderViewModel (
-            didTapSearchButton: presenter?.didTapSearch,
-            didTapMediaButton: presenter?.didChangeMediaType
+            currentMediaType: presenter?.currentMediaType ?? .movie,
+            didTapSearchButton: { [weak self] in self?.presenter?.didTapSearch() },
+            didTapMediaButton: { [weak self] in self?.presenter?.didChangeMediaType($0)}
         )
         let view = DiscoverScreenHeaderView(viewModel: vm)
         view.translatesAutoresizingMaskIntoConstraints = false

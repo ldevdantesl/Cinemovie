@@ -25,9 +25,12 @@ final class TVSeriesAPISubService: TVSeriesAPISubServiceProtocol {
     private let config: APIConfigurationProtocol
     private let authContext: AuthContextProtocol
     private var queryParams: [String : String] {
-        ["language" : config.language]
+        [
+            "language": config.language,
+            "region": config.region,
+            "include_adult": config.isAdultIncluded.description
+        ]
     }
-    
     init(httpClient: HTTPClientProtocol, config: APIConfigurationProtocol, authContext: AuthContextProtocol) {
         self.httpClient = httpClient
         self.config = config

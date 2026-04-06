@@ -36,7 +36,10 @@ final class SettingsScreenPresenter {
     }
     
     private func applySnapshot() {
-        let accountVM = SettingsAccountCellViewModel(accountDetails: accountDetails, didTap: nil)
+        let accountVM = SettingsAccountCellViewModel(
+            accountDetails: accountDetails,
+            didTap: { [weak self] in self?.router.openAccount(userName: self?.accountDetails?.username) }
+        )
         let logOutVM = SettingsLogOutCellViewModel(didTap: { [weak self] in self?.logOut() })
         let preferencesVM = SettingsPreferencesCellViewModel(
             userService: userService,
@@ -44,7 +47,12 @@ final class SettingsScreenPresenter {
             didTapRegion: { [weak self] in self?.router.presentSelectionModal(pickerType: .region) } 
         )
         let contentVM = SettingsContentCellViewModel(userService: userService)
-        let aboutVM = SettingsAboutCellViewModel(userService: userService)
+        let aboutVM = SettingsAboutCellViewModel(
+            userService: self.userService,
+            didTapRate: nil,
+            didTapPrivacy: { [weak self] in self?.router.openPrivacyPolicy() },
+            didTapTerms: { [weak self] in self?.router.openTerms() }
+        )
         
         view?.applySnapshot(
             sections: [.header, .account, .body, .footer],
