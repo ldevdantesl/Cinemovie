@@ -144,12 +144,11 @@ This product uses the TMDB API but is not endorsed or certified by [TMDB](https:
 
 ## About the Developer
 
-Built by **Buzurgmehr Rakhimzoda (Dantes)** — Native iOS Developer with 4+ years of experience.
+Built by **Buzurgmehr Rahimzoda (Dantes)** — Native iOS Developer with 4+ years of experience.
 
 - 🌐 [GitHub](https://github.com/ldevdantesl)
 - 💼 [LinkedIn](https://www.linkedin.com/in/buzurgmehr-rahimzoda-5789a1248/)
 - 📧 ldevdantesl@gmail.com
-- 📍 Alexandria, VA, USA
 
 ### Other Apps
 - **EduConnect** — Trilingual university guide for Kazakhstan students
@@ -157,7 +156,7 @@ Built by **Buzurgmehr Rakhimzoda (Dantes)** — Native iOS Developer with 4+ yea
 
 ## License
 
-**Copyright © 2026 Buzurgmehr Rakhimzoda. All Rights Reserved.**
+**Copyright © 2026 Buzurgmehr Rahimzoda. All Rights Reserved.**
 
 This project is proprietary software. The source code is made publicly available for **portfolio and viewing purposes only**. No part of this codebase may be copied, modified, distributed, or used in any form without the express written permission of the copyright holder.
 
