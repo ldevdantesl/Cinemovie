@@ -11,6 +11,7 @@ import UIKit
 protocol DiscoverScreenViewProtocol: AnyObject {
     func applySnapshot(sections: [DiscoverScreenVC.Sections], itemsBySection: [DiscoverScreenVC.Sections: [DiscoverScreenVC.Items]])
     func didRecieveError(_ errorStr: String)
+    func didRefresh()
     func showDownloadingView()
     func hideDownloadingView()
 }
@@ -55,6 +56,7 @@ final class DiscoverScreenVC: UIViewController {
         view.register(cellClass: OneFeaturedMediaCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
+        view.refreshControl = refreshControl
         return view
     }()
     
@@ -62,6 +64,13 @@ final class DiscoverScreenVC: UIViewController {
         let view = CMSplashView(frame: .zero)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
+    }()
+    
+    private lazy var refreshControl: UIRefreshControl = {
+        let refresh = UIRefreshControl()
+        refresh.tintColor = CMColor.cmLabel
+        refresh.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        return refresh
     }()
     
     private lazy var headerView: DiscoverScreenHeaderView = {
@@ -178,6 +187,10 @@ final class DiscoverScreenVC: UIViewController {
             return section
         }
     }
+    
+    @objc private func handleRefresh() {
+        presenter?.didRefresh()
+    }
 }
 
 extension DiscoverScreenVC: DiscoverScreenViewProtocol {
@@ -192,6 +205,12 @@ extension DiscoverScreenVC: DiscoverScreenViewProtocol {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.downloadingView.show()
+        }
+    }
+    
+    func didRefresh() {
+        DispatchQueue.main.async { [weak self] in
+            self?.refreshControl.endRefreshing()
         }
     }
     

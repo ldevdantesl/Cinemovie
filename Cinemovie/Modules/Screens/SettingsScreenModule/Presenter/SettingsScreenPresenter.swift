@@ -49,7 +49,7 @@ final class SettingsScreenPresenter {
         let contentVM = SettingsContentCellViewModel(userService: userService)
         let aboutVM = SettingsAboutCellViewModel(
             userService: self.userService,
-            didTapRate: nil,
+            didTapRate: { [weak self] in self?.openAppStore() },
             didTapPrivacy: { [weak self] in self?.router.openPrivacyPolicy() },
             didTapTerms: { [weak self] in self?.router.openTerms() }
         )
@@ -75,6 +75,10 @@ final class SettingsScreenPresenter {
     private func logOut() {
         view?.showLoading()
         interactor.logout()
+    }
+    
+    private func openAppStore() {
+        AppOpener.openAppStoreLink()
     }
 }
 

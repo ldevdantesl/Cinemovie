@@ -16,6 +16,7 @@ protocol DiscoverScreenPresenterProtocol: AnyObject {
     func didTapPerson(_ person: Person)
     func didChangeMediaType(_ mediaType: MediaTypes)
     func didTapSearch()
+    func didRefresh()
     
     // MARK: - MOVIES
     func didDownloadMovieList(listType: MovieListType, queryMovies: [Movie])
@@ -67,13 +68,12 @@ final class DiscoverScreenPresenter {
         self.router = router
         self.userService = userService
     }
-}
-
-extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
     
-    // MARK: - STARTING
-    func viewDidLoaded() {
-        self.view?.showDownloadingView()
+    private func fetchAllContent(completion: @escaping () -> Void) {
+        movieLists.removeAll()
+        seriesLists.removeAll()
+        trendingPeople.removeAll()
+        
         let movieListToDownload: [MovieListType] = [
             .popular, .upcoming, .topRated, .nowPlaying,
             .animation, .action, .comedy, .drama,
@@ -94,8 +94,19 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
         
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
-            self.didChangeMediaType(userService.defaultMediaType)
-            self.view?.hideDownloadingView()
+            self.didChangeMediaType(self.userService.defaultMediaType)
+            completion()
+        }
+    }
+}
+
+extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
+    
+    // MARK: - STARTING
+    func viewDidLoaded() {
+        self.view?.showDownloadingView()
+        fetchAllContent { [weak self] in
+            self?.view?.hideDownloadingView()
         }
     }
     
@@ -157,6 +168,12 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
     
     func didTapSearch() {
         router.navigateToSearch()
+    }
+    
+    func didRefresh() {
+        fetchAllContent { [weak self] in
+            self?.view?.didRefresh()
+        }
     }
 
     // MARK: - MOVIES
