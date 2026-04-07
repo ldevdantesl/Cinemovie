@@ -48,7 +48,7 @@ final class BackdropImageCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class BackdropImageCell: ReusableCellBaseClass {
+final class BackdropImageCell: UICollectionViewCell {
     // MARK: - TYPEALIAS
     typealias ViewModel = BackdropImageCellViewModel
     

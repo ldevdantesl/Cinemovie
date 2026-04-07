@@ -10,6 +10,15 @@ import UIKit
 struct AppOpener {
     static func openURL(_ url: URL) {
         if UIApplication.shared.canOpenURL(url) {
+            DispatchQueue.main.async {
+                UIApplication.shared.open(url)
+            }
+        }
+    }
+    
+    static func openAppStoreLink() {
+        guard let url = URL(string: "https://apps.apple.com/app/id6761709306"), UIApplication.shared.canOpenURL(url) else { return }
+        DispatchQueue.main.async {
             UIApplication.shared.open(url)
         }
     }

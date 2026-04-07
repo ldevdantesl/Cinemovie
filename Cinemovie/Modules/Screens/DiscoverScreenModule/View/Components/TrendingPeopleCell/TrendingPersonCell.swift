@@ -20,7 +20,7 @@ final class TrendingPersonCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class TrendingPersonCell: ReusableCellBaseClass {
+final class TrendingPersonCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let imageBorderWidth = 0.5

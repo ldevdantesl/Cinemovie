@@ -23,7 +23,7 @@ final class WatchlistButtonCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class WatchlistButtonCell: ReusableCellBaseClass {
+final class WatchlistButtonCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let imageName = "plus"

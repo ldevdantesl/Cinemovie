@@ -1,0 +1,48 @@
+//
+//  DomainVideo.swift
+//  Cinemovie
+//
+//  Created by Buzurg Rakhimzoda on 14.03.2025.
+//
+
+import Foundation
+
+struct Video: Decodable, Hashable {
+    let iso639_1: String
+    let iso3166_1: String
+    let name, key: String
+    let site: VideoWebsites
+    let size: Int
+    let type: VideoType
+    let official: Bool
+    let publishedAt, id: String
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, key, site, size, type, official
+        case iso639_1 = "iso_639_1"
+        case iso3166_1 = "iso_3166_1"
+        case publishedAt = "published_at"
+    }
+}
+
+enum VideoType: String, Codable {
+    case trailer = "Trailer"
+    case teaser = "Teaser"
+    case clip = "Clip"
+    case featurette = "Featurette"
+    case behindTheScenes = "Behind the Scenes"
+    case bloopers = "Bloopers"
+    case openingCredits = "Opening Credits"
+    case unknown
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let value = try container.decode(String.self)
+        self = VideoType(rawValue: value) ?? .unknown
+    }
+}
+
+enum VideoWebsites: String, Decodable {
+    case youtube = "YouTube"
+    case vimeo = "Vimeo"
+}

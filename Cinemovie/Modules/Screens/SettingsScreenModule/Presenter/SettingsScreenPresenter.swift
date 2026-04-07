@@ -9,31 +9,102 @@ import UIKit
 
 protocol SettingsScreenPresenterProtocol: AnyObject {
     // MARK: - START
-    func didPressLogoutButton()
     func viewDidLoaded()
+    func reapplySnapshot()
+    
+    func didLogOut()
+    func didReceiveAccountDetails(_ details: AccountDetails?)
+    func didReceiveError(error: Error)
 }
 
 final class SettingsScreenPresenter {
+    // MARK: - VIPER
     weak var view: SettingsScreenViewProtocol?
     var router: SettingsScreenRouterProtocol
     var interactor: SettingsScreenInteractorProtocol
+    
+    // MARK: - INJECTED
+    private let userService: UserServiceProtocol
+    
+    // MARK: - PROPERTIES
+    private var accountDetails: AccountDetails?
 
-    init(interactor: SettingsScreenInteractorProtocol, router: SettingsScreenRouterProtocol) {
+    init(interactor: SettingsScreenInteractorProtocol, router: SettingsScreenRouterProtocol, userService: UserServiceProtocol) {
         self.interactor = interactor
         self.router = router
+        self.userService = userService
+    }
+    
+    private func applySnapshot() {
+        let accountVM = SettingsAccountCellViewModel(
+            accountDetails: accountDetails,
+            didTap: { [weak self] in self?.router.openAccount(userName: self?.accountDetails?.username) }
+        )
+        let logOutVM = SettingsLogOutCellViewModel(didTap: { [weak self] in self?.logOut() })
+        let preferencesVM = SettingsPreferencesCellViewModel(
+            userService: userService,
+            didTapLanguage: { [weak self] in self?.router.presentSelectionModal(pickerType: .language) },
+            didTapRegion: { [weak self] in self?.router.presentSelectionModal(pickerType: .region) } 
+        )
+        let contentVM = SettingsContentCellViewModel(userService: userService)
+        let aboutVM = SettingsAboutCellViewModel(
+            userService: self.userService,
+            didTapRate: { [weak self] in self?.openAppStore() },
+            didTapPrivacy: { [weak self] in self?.router.openPrivacyPolicy() },
+            didTapTerms: { [weak self] in self?.router.openTerms() }
+        )
+        
+        view?.applySnapshot(
+            sections: [.header, .account, .body, .footer],
+            items: [
+                .header : [.header],
+                .account : [.account(accountVM)],
+                .body : [
+                    .preferences(preferencesVM),
+                    .content(contentVM),
+                    .about(aboutVM)
+                ],
+                .footer : [
+                    .logOut(logOutVM),
+                    .footer
+                ]
+            ]
+        )
+    }
+    
+    private func logOut() {
+        view?.showLoading()
+        interactor.logout()
+    }
+    
+    private func openAppStore() {
+        AppOpener.openAppStoreLink()
     }
 }
 
 extension SettingsScreenPresenter: SettingsScreenPresenterProtocol {
     // MARK: - STARTING
-    func didPressLogoutButton() {
-        interactor.logout()
-        DispatchQueue.main.async { [weak self] in
-            self?.router.navigateBackToLogin()
-        }
+    func viewDidLoaded() {
+        view?.showLoading()
+        interactor.loadAccount()
     }
     
-    func viewDidLoaded() {
-        interactor.showSessionID()
+    func reapplySnapshot() {
+        applySnapshot()
+    }
+    
+    func didReceiveAccountDetails(_ details: AccountDetails?) {
+        self.accountDetails = details
+        applySnapshot()
+        view?.hideLoading()
+    }
+    
+    func didLogOut() {
+        view?.hideLoading()
+        router.navigateBackToLogin()
+    }
+    
+    func didReceiveError(error: any Error) {
+        view?.didReceiveError(error.localizedDescription)
     }
 }

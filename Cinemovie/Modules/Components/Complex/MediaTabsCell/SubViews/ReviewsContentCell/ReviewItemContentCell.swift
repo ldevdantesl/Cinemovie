@@ -25,7 +25,7 @@ final class ReviewItemContentCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class ReviewItemContentCell: ReusableCellBaseClass {
+final class ReviewItemContentCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let authorImageBorderWidth = 0.5

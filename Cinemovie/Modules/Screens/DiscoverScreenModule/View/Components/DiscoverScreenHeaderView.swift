@@ -10,6 +10,7 @@ import UIKit
 import SDWebImage
 
 struct DiscoverScreenHeaderViewModel {
+    let currentMediaType: MediaTypes
     let didTapSearchButton: (() -> Void)?
     let didTapMediaButton: ((_ mediaType: MediaTypes) -> Void)?
 }
@@ -22,7 +23,7 @@ final class DiscoverScreenHeaderView: UIView {
         static let biggerSpacing = 10.0
         static let searchButtonSystemName = "magnifyingglass"
         static let movieButtonSystemName = "film.stack.fill"
-        static let seriesButtonSystemName = "tv.and.hifispeaker.fill"
+        static let seriesButtonSystemName = "tv.fill"
         static let xmarkButtonName = "xmark"
         static let buttonSize = 40.0
         static let buttonsCornerRadius = 15.0
@@ -33,7 +34,7 @@ final class DiscoverScreenHeaderView: UIView {
     
     // MARK: - PROPERTIES
     private var viewModel: DiscoverScreenHeaderViewModel
-    private var isShowingMovie: Bool = true
+    private lazy var isShowingMovie: Bool = viewModel.currentMediaType == .movie
     private var changeWorkItem: DispatchWorkItem?
     
     // MARK: - VIEW PROPERTIES
@@ -50,7 +51,7 @@ final class DiscoverScreenHeaderView: UIView {
     private lazy var mediaButton: CMButton = {
         let vm = CMButtonViewModel(
             font: CMFont.font(size: .body, fontName: .avenirBold),
-            image: UIImage(systemName: "film.stack.fill"),
+            image: UIImage(systemName: isShowingMovie ? Constants.movieButtonSystemName : Constants.seriesButtonSystemName),
             backColor: .black, didTapAction: self.didTapMediaButton
         )
         let button = CMButton(viewModel: vm)
@@ -94,9 +95,9 @@ final class DiscoverScreenHeaderView: UIView {
         isShowingMovie.toggle()
         let newType: MediaTypes = isShowingMovie ? .movie : .tvShow
         let vm = CMButtonViewModel(
-            text: newType == .movie ? "Movies" : "Series",
+            text: newType.title,
             font: CMFont.font(size: .body, fontName: .avenirBold),
-            image: UIImage(systemName: newType == .movie ? "film.stack.fill" : "tv.fill"),
+            image: UIImage(systemName: newType == .movie ? Constants.movieButtonSystemName : Constants.seriesButtonSystemName),
             backColor: .black, didTapAction: self.didTapMediaButton
         )
         self.mediaButton.reconfigure(viewModel: vm)
@@ -105,7 +106,7 @@ final class DiscoverScreenHeaderView: UIView {
             guard let self = self else { return }
             let newVm = CMButtonViewModel(
                 font: CMFont.font(size: .body, fontName: .avenirBold),
-                image: UIImage(systemName: newType == .movie ? "film.stack.fill" : "tv.fill"),
+                image: UIImage(systemName: newType == .movie ? Constants.movieButtonSystemName : Constants.seriesButtonSystemName),
                 backColor: .black, didTapAction: self.didTapMediaButton
             )
             self.mediaButton.reconfigure(viewModel: newVm)

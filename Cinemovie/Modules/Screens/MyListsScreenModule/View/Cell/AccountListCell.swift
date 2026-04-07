@@ -9,11 +9,11 @@ import UIKit
 import SnapKit
 
 final class AccountListCellViewModel: CellViewModelBaseClass {
-    let media: [Media]
+    let media: [MediaProtocol]
     let listType: AccountListTypes?
     let didTapList: ((AccountListTypes) -> Void)?
     
-    init(media: [Media], listType: AccountListTypes?, didTapList: ((AccountListTypes) -> Void)?) {
+    init(media: [MediaProtocol], listType: AccountListTypes?, didTapList: ((AccountListTypes) -> Void)?) {
         self.media = media
         self.didTapList = didTapList
         self.listType = listType
@@ -21,7 +21,7 @@ final class AccountListCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class AccountListCell: ReusableCellBaseClass {
+final class AccountListCell: UICollectionViewCell {
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -123,7 +123,6 @@ final class AccountListCell: ReusableCellBaseClass {
         self.plusPosterView.layer.cornerRadius = Constants.posterCornerRadius
         self.plusPosterView.layer.borderColor = CMColor.cmLabel.cgColor
         self.plusPosterView.layer.borderWidth = Constants.posterBorderWidth
-        
     }
     
     // MARK: - PUBLIC FUNC
@@ -159,7 +158,7 @@ final class AccountListCell: ReusableCellBaseClass {
         }
     }
     
-    private func stackPosters(items: [Media]) {
+    private func stackPosters(items: [MediaProtocol]) {
         posterStackView.subviews.forEach { $0.removeFromSuperview() }
         guard !items.isEmpty else {
             posterStackView.addSubview(plusPosterView)

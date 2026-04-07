@@ -77,7 +77,7 @@ final class SupplementaryHeaderViewModel: CellViewModelBaseClass {
     }
 }
 
-final class SupplementaryHeaderCell: ReusableCellBaseClass {
+final class SupplementaryHeaderCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let buttonSize = 30.0

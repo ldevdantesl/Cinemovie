@@ -18,68 +18,74 @@ protocol PersonDetailsScreenInteractorProtocol: AnyObject {
 
 final class PersonDetailsScreenInteractor: PersonDetailsScreenInteractorProtocol {
     weak var presenter: PersonDetailsScreenPresenterProtocol?
-    private let tmdbService: TMDBService
+    private let networkService: NetworkServiceProtocol
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(networkService: NetworkServiceProtocol) {
+        self.networkService = networkService
     }
     
     func getPersonID(creditID: String) {
-        tmdbService.getPersonID(creditID: creditID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let response): presenter?.didGetPersonID(response.person.id)
-            case .failure(let failure): presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.person.getPersonID(creditID: creditID)
+                self.presenter?.didGetPersonID(result.person.id)
+            } catch {
+                presenter?.didRecieveError(error)
             }
         }
     }
     
     func getPersonDetails(personID: Int) {
-        tmdbService.getPersonDetails(personID: personID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didGetPersonDetails(success)
-            case .failure(let failure): presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.person.details(personID: personID)
+                self.presenter?.didGetPersonDetails(result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getPersonExternalSources(personID: Int) {
-        tmdbService.getPersonExternalSources(personID: personID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): presenter?.didGetPersonExternalSources(success)
-            case .failure(let failure): presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.person.externalSources(personID: personID)
+                self.presenter?.didGetPersonExternalSources(result)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getPersonMovies(personID: Int) {
-        tmdbService.getPersonMovieCredits(personID: personID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didGetPersonMovies(success.cast)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.person.movieCredits(personID: personID)
+                self.presenter?.didGetPersonMovies(result.cast)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getPersonTVShows(personID: Int) {
-        tmdbService.getPersonTVShowCredits(personID: personID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didGetPersonTVShows(success.cast)
-            case .failure(let failure): self.presenter?.didRecieveError(failure)
+        Task {
+            do {
+                let result = try await networkService.person.tvCredits(personID: personID)
+                self.presenter?.didGetPersonTVShows(result.cast)
+            } catch {
+                self.presenter?.didRecieveError(error)
             }
         }
     }
     
     func getPersonImages(personID: Int) {
-        tmdbService.getPersonImages(personID: personID) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let success): self.presenter?.didGetPersonImages(success.profiles)
-            case .failure: self.presenter?.didGetPersonImages([])
+        Task {
+            do {
+                let result = try await networkService.person.images(personID: personID)
+                self.presenter?.didGetPersonImages(result)
+            } catch {
+                self.presenter?.didGetPersonImages([])
             }
         }
     }

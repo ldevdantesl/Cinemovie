@@ -12,9 +12,9 @@ final class MediaSearchCellViewModel: CellViewModelBaseClass {
     let movies: [Movie]
     let tvSeries: [TVSeries]
     let people: [Person]
-    let didTapAnyMedia: ((Media) -> Void)?
+    let didTapAnyMedia: ((MediaProtocol) -> Void)?
     
-    init(movies: [Movie], tvSeries: [TVSeries], people: [Person], didTapAnyMedia: ((Media) -> Void)?) {
+    init(movies: [Movie], tvSeries: [TVSeries], people: [Person], didTapAnyMedia: ((MediaProtocol) -> Void)?) {
         self.movies = movies
         self.tvSeries = tvSeries
         self.people = people
@@ -23,7 +23,7 @@ final class MediaSearchCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class MediaSearchCell: ReusableCellBaseClass {
+final class MediaSearchCell: UICollectionViewCell {
     // MARK: - TYPEALIAS
     typealias CellVMs = CellViewModelBaseClass & CellWithHeightProtocol
     

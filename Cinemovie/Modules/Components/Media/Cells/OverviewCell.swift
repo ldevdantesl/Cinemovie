@@ -17,7 +17,7 @@ final class OverviewCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class OverviewCell: ReusableCellBaseClass {
+final class OverviewCell: UICollectionViewCell {
     typealias ViewModel = OverviewCellViewModel
     
     // MARK: - CONSTANTS

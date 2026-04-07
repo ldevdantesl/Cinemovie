@@ -9,17 +9,24 @@ import UIKit
 import SnapKit
 
 final class RateAndShareCellViewModel: CellViewModelBaseClass {
+    let rated: MediaAccountStatesAPIResponse.Rated?
     let didTapShareButton: (() -> Void)?
     let didTapRateButton: (() -> Void)?
     
-    init(didTapShareButton: (() -> Void)?, didTapRateButton: (() -> Void)?) {
+    init(rated: MediaAccountStatesAPIResponse.Rated?, didTapShareButton: (() -> Void)?, didTapRateButton: (() -> Void)?) {
         self.didTapShareButton = didTapShareButton
         self.didTapRateButton = didTapRateButton
-        super.init(cellIdentifier: "RateAndShareCell")
+        self.rated = rated
+        super.init(cellIdentifier: RateAndShareCell.identifier)
+    }
+    
+    override func hash(into hasher: inout Hasher) {
+        hasher.combine(cellIdentifier)
+        hasher.combine(rated)
     }
 }
 
-final class RateAndShareCell: ReusableCellBaseClass {
+final class RateAndShareCell: UICollectionViewCell {
     typealias ViewModel = RateAndShareCellViewModel
     
     // MARK: - CONSTANTS
@@ -35,7 +42,6 @@ final class RateAndShareCell: ReusableCellBaseClass {
     // MARK: - VIEW PROPERTIES
     private lazy var rateImageView: UIImageView = {
         let view = UIImageView()
-        view.image = UIImage(named: ImageNames.like.rawValue)
         view.contentMode = .scaleAspectFit
         view.isUserInteractionEnabled = true
         view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapRate)))
@@ -73,6 +79,7 @@ final class RateAndShareCell: ReusableCellBaseClass {
     // MARK: - PUBLIC FUNC
     public func configure(with viewModel: ViewModel) {
         self.viewModel = viewModel
+        self.rateImageView.image = UIImage(named: viewModel.rated != nil ? ImageNames.rated.rawValue : ImageNames.like.rawValue)
     }
     
     // MARK: - PRIVATE FUNC
@@ -94,10 +101,10 @@ final class RateAndShareCell: ReusableCellBaseClass {
     
     // MARK: - OBJC FUNC
     @objc private func didTapShare() {
-        viewModel?.didTapShareButton?()
+        shareImageView.animateTap(onCompletion: { [weak self] in self?.viewModel?.didTapShareButton?() })
     }
     
     @objc private func didTapRate() {
-        viewModel?.didTapRateButton?()
+        rateImageView.animateTap(onCompletion: { [weak self] in self?.viewModel?.didTapRateButton?() })
     }
 }

@@ -45,6 +45,11 @@ final class SeasonsPopUpView: PopUPView {
         let image = AsyncImageView()
         image.setCornerRadius(Constants.posterCornerRadius)
         image.setBorder(width: Constants.posterBorderWidth, borderColor: CMColor.cmLabel)
+        image.setAsyncImage(
+            path: viewModel.seasonDetails.posterPath, size: .original,
+            notFoundImageSystemName: Constants.defaultImageName,
+            notFoundPointSize: Constants.defaultImageSize
+        )
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
@@ -73,13 +78,6 @@ final class SeasonsPopUpView: PopUPView {
         super.init(viewModel: viewModel)
         setupUI()
         episodesCollectionView.reloadData()
-        
-        let imagePath = viewModel.seasonDetails.posterPath
-        posterImageView.setAsyncImage(
-            path: imagePath, size: .original,
-            notFoundImageSystemName: Constants.defaultImageName,
-            notFoundPointSize: Constants.defaultImageSize
-        )
     }
     
     @available(*, unavailable)

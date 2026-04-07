@@ -8,28 +8,21 @@
 import Foundation
 import UIKit
 
-final class TabCoordinator: Coordinator {
-    var tabBarController: UITabBarController
+final class TabCoordinator {
+    lazy var tabBarController: UITabBarController = UITabBarController()
+    
+    private weak var sessionDelegate: SessionDelegate?
+    private let diContainer: DIContainer
 
-    private let authService: AuthService
-    private let tmdbService: TMDBService
-    weak var appCoordinator: AppCoordinator?
-
-    init(
-        authService: AuthService,
-        tmdbService: TMDBService,
-        appCoordinator: AppCoordinator?
-    ) {
-        self.tabBarController = UITabBarController()
-        self.authService = authService
-        self.tmdbService = tmdbService
-        self.appCoordinator = appCoordinator
+    init(diContainer: DIContainer, sessionDelegate: SessionDelegate?) {
+        self.diContainer = diContainer
+        self.sessionDelegate = sessionDelegate
     }
 
     func start() {
-        let homeCoordinator = DiscoverCoordinator(tmdbService: tmdbService)
-        let watchlistCoordinator = MyListsCoordinator(tmdbService: tmdbService)
-        let settingsCoordinator = SettingsCoordinator(authService: authService, appCoordinator: appCoordinator)
+        let homeCoordinator = DiscoverCoordinator(diContainer: diContainer)
+        let watchlistCoordinator = MyListsCoordinator(diContainer: diContainer, sessionDelegate: sessionDelegate)
+        let settingsCoordinator = SettingsCoordinator(diContainer: diContainer, sessionDelegate: sessionDelegate)
 
         homeCoordinator.start()
         watchlistCoordinator.start()

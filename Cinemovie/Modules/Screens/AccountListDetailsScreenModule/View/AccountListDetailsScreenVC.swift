@@ -14,7 +14,7 @@ protocol AccountListDetailsScreenViewProtocol: AnyObject {
     
     // MARK: - PROGRAMMATIC
     func didRecieveMedia(movies: [Movie], series: [TVSeries])
-    func didRecieveNewMedia(mediaType: MediaTypes, media: [Media], paginating: Bool)
+    func didRecieveNewMedia(mediaType: MediaTypes, media: [MediaProtocol], paginating: Bool)
     
     // MARK: - OTHER
     func didRecieveError(_ errorStr: String, goesBack: Bool)
@@ -127,7 +127,7 @@ extension AccountListDetailsScreenVC: AccountListDetailsScreenViewProtocol {
         }
     }
     
-    func didRecieveNewMedia(mediaType: MediaTypes, media: [any Media], paginating: Bool) {
+    func didRecieveNewMedia(mediaType: MediaTypes, media: [any MediaProtocol], paginating: Bool) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             guard let currentVC = viewControllers?.first as? AccountListDetailsMediaPageVC else { return }

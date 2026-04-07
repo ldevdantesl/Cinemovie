@@ -13,7 +13,7 @@ protocol UserListDetailsScreenPresenterProtocol: AnyObject {
     func didCallRefresh()
     func didCallPagination()
     func didTapBackButton()
-    func didTapMedia(media: Media)
+    func didTapMedia(media: MediaProtocol)
     
     // MARK: - PROGRAMMATIC
     func didReceiveListDetails(_ details: UserListDetails)
@@ -26,7 +26,7 @@ protocol UserListDetailsScreenPresenterProtocol: AnyObject {
     func didReceiveError(_ error: Error)
     
     // MARK: - PROPERTIES
-    var media: [Media] { get }
+    var media: [MediaProtocol] { get }
 }
 
 final class UserListDetailsScreenPresenter {
@@ -37,7 +37,7 @@ final class UserListDetailsScreenPresenter {
     weak var view: UserListDetailsScreenViewProtocol?
     var router: UserListDetailsScreenRouterProtocol
     var interactor: UserListDetailsScreenInteractorProtocol
-    var media: [Media] = []
+    var media: [MediaProtocol] = []
     
     private var listID: Int
     private var userList: UserList?
@@ -84,7 +84,7 @@ extension UserListDetailsScreenPresenter: UserListDetailsScreenPresenterProtocol
         router.goBack()
     }
     
-    func didTapMedia(media: any Media) {
+    func didTapMedia(media: any MediaProtocol) {
         if let movie = media as? Movie {
             router.navigateToMovie(movie: movie)
         } else if let series = media as? TVSeries {
@@ -114,7 +114,7 @@ extension UserListDetailsScreenPresenter: UserListDetailsScreenPresenterProtocol
             return
         }
         
-        self.media = AnyMedia.toMedia(from: details.results)
+        self.media = details.results
         let vms = self.media.map {
             Items.posterImageVM(MediaPosterImageCellViewModel(media: $0) { [weak self] in self?.didTapMedia(media: $0)})
         }
@@ -132,7 +132,7 @@ extension UserListDetailsScreenPresenter: UserListDetailsScreenPresenterProtocol
         self.userListDetails = details
         guard !details.results.isEmpty else { return }
         
-        let newMedia = AnyMedia.toMedia(from: details.results)
+        let newMedia = details.results
         self.media.append(contentsOf: newMedia)
         let vms = self.media.map {
             Items.posterImageVM(MediaPosterImageCellViewModel(media: $0) { [weak self] in self?.didTapMedia(media: $0)})

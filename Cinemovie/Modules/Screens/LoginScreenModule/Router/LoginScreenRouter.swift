@@ -15,10 +15,10 @@ protocol LoginScreenRouterProtocol {
 
 final class LoginScreenRouter: LoginScreenRouterProtocol {
     weak var viewController: LoginScreenVC?
-    weak var appCoordinator: AppCoordinator?
+    private weak var sessionDelegate: SessionDelegate?
     
-    init(appCoordinator: AppCoordinator?) {
-        self.appCoordinator = appCoordinator
+    init(sessionDelegate: SessionDelegate?) {
+        self.sessionDelegate = sessionDelegate
     }
     
     func openOAuthURLWithToken(token: String) {
@@ -34,6 +34,6 @@ final class LoginScreenRouter: LoginScreenRouterProtocol {
     }
     
     func routeToMainView() {
-        appCoordinator?.showMainApp()
+        sessionDelegate?.didRequestLogIn()
     }
 }

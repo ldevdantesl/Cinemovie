@@ -9,17 +9,17 @@ import SnapKit
 import UIKit
 
 final class MediaPosterImageCellViewModel: CellViewModelBaseClass {
-    let media: Media
-    let didTapMedia: ((Media) -> Void)?
+    let media: MediaProtocol
+    let didTapMedia: ((MediaProtocol) -> Void)?
     
-    init(media: Media, didTapMedia: ((Media) -> Void)? = nil) {
+    init(media: MediaProtocol, didTapMedia: ((MediaProtocol) -> Void)? = nil) {
         self.media = media
         self.didTapMedia = didTapMedia
         super.init(cellIdentifier: "MediaPosterImageCell")
     }
 }
 
-final class MediaPosterImageCell: ReusableCellBaseClass {
+final class MediaPosterImageCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let cornerRadius = 10.0
@@ -80,5 +80,6 @@ final class MediaPosterImageCell: ReusableCellBaseClass {
     @objc private func didTapMedia() {
         guard let media = viewModel?.media else { return }
         viewModel?.didTapMedia?(media)
+        RecentMediaHelper.addRecentMedia(media: media)
     }
 }

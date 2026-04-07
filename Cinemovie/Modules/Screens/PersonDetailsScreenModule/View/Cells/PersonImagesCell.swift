@@ -20,7 +20,7 @@ final class PersonImagesCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class PersonImagesCell: ReusableCellBaseClass {
+final class PersonImagesCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let itemWidth = UIConstants.screenWidth

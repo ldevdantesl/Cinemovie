@@ -18,31 +18,32 @@ protocol MovieDetailsScreenRouterProtocol {
     // MARK: - PRESENT
     func presentShareView(movie: MovieDetails)
     func showActorPopUp(actor: Cast)
+    func showRatingPopUP(ratePopupVM: RatePopUpViewModel)
     func showTooltipView(sendedBy view: UIView, message: String)
     func presentAddToListModal(movieID: Int)
 }
 
 final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
     weak var viewController: MovieDetailsScreenVC?
-    private let tmdbService: TMDBService
+    private let diContainer: DIContainer
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(diContainer: DIContainer) {
+        self.diContainer = diContainer
     }
     
     // MARK: - NAVIGATE
     func navigateToSeries(series: TVSeries) {
-        let seriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, tmdbService: tmdbService)
+        let seriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(seriesDetails, animated: true)
     }
     
     func navigateToAnotherMovie(movie: Movie) {
-        let newMovieDetails = MovieDetailsScreenAssembler.assemble(movieID: movie.id, tmdbService: tmdbService)
+        let newMovieDetails = MovieDetailsScreenAssembler.assemble(movieID: movie.id, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(newMovieDetails, animated: true)
     }
     
     func navigateToPersonDetails(creditID: String) {
-        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, tmdbService: tmdbService)
+        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -51,6 +52,13 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
         guard let vcView = viewController?.view else { return }
         let vm = ActorPopupViewModel(actor: actor, didTapActorDetails: self.navigateToPersonDetails, onClose: self.hideActorPopUp)
         let popupView = ActorPopupView(viewModel: vm)
+        popupView.show(in: vcView)
+        self.viewController?.activePopUpView = popupView
+    }
+    
+    func showRatingPopUP(ratePopupVM: RatePopUpViewModel) {
+        guard let vcView = viewController?.view else { return }
+        let popupView = RatePopUpView(viewModel: ratePopupVM)
         popupView.show(in: vcView)
         self.viewController?.activePopUpView = popupView
     }
@@ -99,7 +107,7 @@ final class MovieDetailsScreenRouter: MovieDetailsScreenRouterProtocol {
     }
     
     func presentAddToListModal(movieID: Int) {
-        let vc = AddToListModalAssembler.assemble(itemID: movieID, mediaType: .movie, tmdbService: tmdbService)
+        let vc = AddToListModalAssembler.assemble(itemID: movieID, mediaType: .movie, networkService: diContainer.networkService)
         vc.modalPresentationStyle = .pageSheet
     
         if let sheet = vc.sheetPresentationController {

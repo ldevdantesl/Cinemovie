@@ -11,16 +11,16 @@ import SnapKit
 final class MediaExtrasCellViewModel: CellViewModelBaseClass {
     let seasons: [TVSeason]
     let collectionDetails: BelongsToCollectionDetails?
-    let recommended: [Media]
+    let recommended: [MediaProtocol]
     let videos: [Video]
     let reviews: [Review]
-    let didTapMedia: ((Media) -> Void)?
+    let didTapMedia: ((MediaProtocol) -> Void)?
     let didTapSeason: ((TVSeason) -> Void)?
     
     init(
         collectionDetails: BelongsToCollectionDetails?,
-        recommended: [Media], videos: [Video], reviews: [Review],
-        didTapMedia: ((Media) -> Void)?
+        recommended: [MediaProtocol], videos: [Video], reviews: [Review],
+        didTapMedia: ((MediaProtocol) -> Void)?
     ) {
         self.seasons = []
         self.collectionDetails = collectionDetails
@@ -33,9 +33,9 @@ final class MediaExtrasCellViewModel: CellViewModelBaseClass {
     }
     
     init(
-        seasons: [TVSeason], recommended: [Media],
+        seasons: [TVSeason], recommended: [MediaProtocol],
         videos: [Video], reviews: [Review],
-        didTapMedia: ((Media) -> Void)?, didTapSeason: ((TVSeason) -> Void)?
+        didTapMedia: ((MediaProtocol) -> Void)?, didTapSeason: ((TVSeason) -> Void)?
     ) {
         self.seasons = seasons
         self.collectionDetails = nil
@@ -49,7 +49,7 @@ final class MediaExtrasCellViewModel: CellViewModelBaseClass {
 }
 
 
-final class MediaExtrasCell: ReusableCellBaseClass {
+final class MediaExtrasCell: UICollectionViewCell {
     // MARK: - TYPEALIAS
     typealias CellVMs = CellViewModelBaseClass & CellWithHeightProtocol
     

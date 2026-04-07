@@ -11,11 +11,11 @@ import SDWebImage
 
 final class BelongsToCollectionTabContentCellViewModel: CellViewModelBaseClass, CellWithHeightProtocol{
     let collectionDetails: BelongsToCollectionDetails
-    let onItemTapped: ((Media) -> Void)?
+    let onItemTapped: ((MediaProtocol) -> Void)?
     let onHeightChangedRequest: (() -> Void)?
     var cellHeight: CGFloat = 100.0
     
-    init(collectionDetails: BelongsToCollectionDetails, onItemTapped: ((Media) -> Void)?, onHeightChangedRequest: (() -> Void)?) {
+    init(collectionDetails: BelongsToCollectionDetails, onItemTapped: ((MediaProtocol) -> Void)?, onHeightChangedRequest: (() -> Void)?) {
         self.collectionDetails = collectionDetails
         self.onItemTapped = onItemTapped
         self.onHeightChangedRequest = onHeightChangedRequest
@@ -27,7 +27,7 @@ final class BelongsToCollectionTabContentCellViewModel: CellViewModelBaseClass, 
     }
 }
 
-final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
+final class BelongsToCollectionTabContentCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let imageHorizontalEdgePaddings = 10.0
@@ -43,7 +43,7 @@ final class BelongsToCollectionTabContentCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: BelongsToCollectionTabContentCellViewModel?
-    private var items: [Media] = []
+    private var items: [MediaProtocol] = []
     private var showingItems: Bool = false
     
     // MARK: - VIEW PROPERTIES

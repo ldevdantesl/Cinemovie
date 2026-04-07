@@ -52,7 +52,12 @@ final class AsyncImageView: UIImageView {
     }
     
     // MARK: - PUBLIC FUNC
-    public func setAsyncImage(path: String?, size: TMDBImageSizes, notFoundImageSystemName: String, notFoundPointSize: CGFloat, notFoundTintColor: UIColor = CMColor.cmAccent) {
+    public func setAsyncImage(
+        path: String?, size: TMDBImageSizes,
+        notFoundImageSystemName: String = "questionmark.circle",
+        notFoundPointSize: CGFloat = 20.0,
+        notFoundTintColor: UIColor = CMColor.cmAccent
+    ) {
         guard let url = URLHelper.getImageURL(with: path, size: size) else {
             self.image = UIImage(systemName: notFoundImageSystemName)
             self.preferredSymbolConfiguration = .init(pointSize: notFoundPointSize, weight: .bold)

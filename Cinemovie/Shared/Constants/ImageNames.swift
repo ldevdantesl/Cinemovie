@@ -18,6 +18,7 @@ enum ImageNames: String {
     case movieID = "MovieID"
 
     // MARK: - SHARED
+    case appIcon = "AppIconImage"
     case like = "Like"
     case share = "Share"
     case star = "Star"
@@ -30,6 +31,7 @@ enum ImageNames: String {
     case addMovie = "AddMovie"
     case completed = "Completed"
     case error = "Error"
+    case rated = "Rated"
     
     // MARK: - TV
     case tvSeriesID = "TVSeriesID"

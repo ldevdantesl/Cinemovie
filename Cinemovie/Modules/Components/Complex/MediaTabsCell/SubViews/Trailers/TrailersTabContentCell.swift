@@ -22,7 +22,7 @@ final class TrailersTabContentCellViewModel: CellViewModelBaseClass, CellWithHei
     }
 }
 
-final class TrailersTabContentCell: ReusableCellBaseClass {
+final class TrailersTabContentCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let itemHeight = 230.0

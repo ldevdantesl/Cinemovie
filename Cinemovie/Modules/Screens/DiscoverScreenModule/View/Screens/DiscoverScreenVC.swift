@@ -11,6 +11,7 @@ import UIKit
 protocol DiscoverScreenViewProtocol: AnyObject {
     func applySnapshot(sections: [DiscoverScreenVC.Sections], itemsBySection: [DiscoverScreenVC.Sections: [DiscoverScreenVC.Items]])
     func didRecieveError(_ errorStr: String)
+    func didRefresh()
     func showDownloadingView()
     func hideDownloadingView()
 }
@@ -55,6 +56,7 @@ final class DiscoverScreenVC: UIViewController {
         view.register(cellClass: OneFeaturedMediaCell.self)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = CMColor.cmBackground
+        view.refreshControl = refreshControl
         return view
     }()
     
@@ -64,10 +66,18 @@ final class DiscoverScreenVC: UIViewController {
         return view
     }()
     
+    private lazy var refreshControl: UIRefreshControl = {
+        let refresh = UIRefreshControl()
+        refresh.tintColor = CMColor.cmLabel
+        refresh.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        return refresh
+    }()
+    
     private lazy var headerView: DiscoverScreenHeaderView = {
         let vm = DiscoverScreenHeaderViewModel (
-            didTapSearchButton: presenter?.didTapSearch,
-            didTapMediaButton: presenter?.didChangeMediaType
+            currentMediaType: presenter?.currentMediaType ?? .movie,
+            didTapSearchButton: { [weak self] in self?.presenter?.didTapSearch() },
+            didTapMediaButton: { [weak self] in self?.presenter?.didChangeMediaType($0)}
         )
         let view = DiscoverScreenHeaderView(viewModel: vm)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -161,7 +171,8 @@ final class DiscoverScreenVC: UIViewController {
             switch homeSection {
             case .featured: edgeInsets = .zero
             case .notFound: edgeInsets = NSDirectionalEdgeInsets(top: UIConstants.screenHeight / 3, leading: 10, bottom: 10, trailing: 10)
-            default: edgeInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+            case .trendingPeople: edgeInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+            default: edgeInsets = NSDirectionalEdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0)
             }
             
             switch homeSection {
@@ -176,11 +187,16 @@ final class DiscoverScreenVC: UIViewController {
             return section
         }
     }
+    
+    @objc private func handleRefresh() {
+        presenter?.didRefresh()
+    }
 }
 
 extension DiscoverScreenVC: DiscoverScreenViewProtocol {
     func applySnapshot(sections: [Sections], itemsBySection: [Sections : [Items]]) {
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
             self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
         }
     }
@@ -192,6 +208,12 @@ extension DiscoverScreenVC: DiscoverScreenViewProtocol {
         }
     }
     
+    func didRefresh() {
+        DispatchQueue.main.async { [weak self] in
+            self?.refreshControl.endRefreshing()
+        }
+    }
+    
     func hideDownloadingView() {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
@@ -199,17 +221,11 @@ extension DiscoverScreenVC: DiscoverScreenViewProtocol {
         }
     }
     
-    func didRecieveError(_ errorStr: String) {
-        let alert = UIAlertController(
-            title: "Oops..",
-            message: errorStr,
-            preferredStyle: .alert
-        )
-
-        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
-
-        DispatchQueue.main.async {
-            self.present(alert, animated: true, completion: nil)
-        }
+    func didRecieveError(_ message: String) {
+        guard presentedViewController == nil else { return }
+        
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 }

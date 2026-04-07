@@ -17,7 +17,7 @@ final class MediaTrailerCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class MediaTrailerCell: ReusableCellBaseClass {
+final class MediaTrailerCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let youtubeViewHeight = 200.0

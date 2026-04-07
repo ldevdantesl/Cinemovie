@@ -40,7 +40,7 @@ fileprivate final class SourceImageView: UIImageView {
     var sourceID: String?
 }
 
-final class PersonInfoCell: ReusableCellBaseClass {
+final class PersonInfoCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let backButtonImageName = "chevron.left"

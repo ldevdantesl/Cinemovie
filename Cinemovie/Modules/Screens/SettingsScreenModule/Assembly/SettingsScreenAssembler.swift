@@ -8,10 +8,14 @@
 import UIKit
 
 final class SettingsScreenAssembler {
-    static func assemble(authService: AuthService?, appCoordinator: AppCoordinator?) -> SettingsScreenVC {
-        let interactor = SettingsScreenInteractor(authService: authService)
-        let router = SettingsScreenRouter(appCoordinator: appCoordinator)
-        let presenter = SettingsScreenPresenter(interactor: interactor, router: router)
+    static func assemble(diContainer: DIContainer, sessionDelegate: SessionDelegate?) -> SettingsScreenVC {
+        let interactor = SettingsScreenInteractor(
+            authService: diContainer.authService,
+            networkService: diContainer.networkService,
+            authContext: diContainer.authContext
+        )
+        let router = SettingsScreenRouter(sessionDelegate: sessionDelegate, diContainer: diContainer)
+        let presenter = SettingsScreenPresenter(interactor: interactor, router: router, userService: diContainer.userService)
         let viewController = SettingsScreenVC()
         presenter.view  = viewController
         viewController.presenter = presenter

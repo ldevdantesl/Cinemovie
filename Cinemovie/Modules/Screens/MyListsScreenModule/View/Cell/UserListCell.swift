@@ -21,7 +21,7 @@ final class UserListCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class UserListCell: ReusableCellBaseClass {
+final class UserListCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let plusImageName = "plus"
@@ -131,7 +131,7 @@ final class UserListCell: ReusableCellBaseClass {
         self.numberOfItemsLabel.text = "\(viewModel.userList.itemCount >= 20 ? "20+" : "\(viewModel.userList.itemCount)") items"
         self.listTitleLabel.text = viewModel.userList.name
         self.listSubtitleLabel.text = viewModel.userList.description
-        self.stackPosters(items: AnyMedia.toMedia(from: viewModel.userList.results))
+        self.stackPosters(items: viewModel.userList.results)
     }
     
     // MARK: - PRIVATE FUNC
@@ -163,7 +163,7 @@ final class UserListCell: ReusableCellBaseClass {
         contentView.addInteraction(interaction)
     }
     
-    private func stackPosters(items: [Media]) {
+    private func stackPosters(items: [MediaProtocol]) {
         posterStackView.subviews.forEach { $0.removeFromSuperview() }
         guard !items.isEmpty else {
             posterStackView.addSubview(plusPosterView)

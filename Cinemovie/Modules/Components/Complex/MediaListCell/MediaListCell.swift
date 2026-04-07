@@ -11,10 +11,10 @@ import SnapKit
 final class MediaListCellViewModel: CellViewModelBaseClass {
     let listName: String
     let listSubtitle: String?
-    let mediaItems: [Media]
-    let didTapMediaItem: ((Media) -> Void)?
+    let mediaItems: [MediaProtocol]
+    let didTapMediaItem: ((MediaProtocol) -> Void)?
     
-    init(mediaItems: [Media], listName: String, listSubtitle: String? = nil, didTapMediaItem: ((Media) -> Void)? = nil) {
+    init(mediaItems: [MediaProtocol], listName: String, listSubtitle: String? = nil, didTapMediaItem: ((MediaProtocol) -> Void)? = nil) {
         self.mediaItems = mediaItems
         self.listName = listName
         self.listSubtitle = listSubtitle
@@ -23,7 +23,7 @@ final class MediaListCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class MediaListCell: ReusableCellBaseClass {
+final class MediaListCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let spacing = 5.0
@@ -34,7 +34,7 @@ final class MediaListCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: MediaListCellViewModel?
-    private var items: [Media] = []
+    private var items: [MediaProtocol] = []
     
     // MARK: - VIEW PROPERTIES
     private let titleLabel: UILabel = {
@@ -57,6 +57,7 @@ final class MediaListCell: ReusableCellBaseClass {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumInteritemSpacing = 10
+        layout.sectionInset = .init(top: 0, left: 10, bottom: 0, right: 10)
         layout.itemSize = CGSize(width: Constants.itemWidth, height: Constants.itemHeight)
         
         let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -109,13 +110,13 @@ final class MediaListCell: ReusableCellBaseClass {
         contentView.addSubview(titleLabel)
         titleLabel.snp.makeConstraints {
             $0.top.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(10.0)
         }
         
         contentView.addSubview(subtitleLabel)
         subtitleLabel.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(Constants.spacing)
-            $0.horizontalEdges.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(10.0)
         }
         
         contentView.addSubview(collectionView)

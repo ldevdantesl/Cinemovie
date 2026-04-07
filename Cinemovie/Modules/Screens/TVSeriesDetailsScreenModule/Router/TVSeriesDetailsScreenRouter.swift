@@ -17,6 +17,7 @@ protocol TVSeriesDetailsScreenRouterProtocol {
     func showTooltipView(sendedBy view: UIView, message: String)
     func presentShareView(details: TVSeriesDetails)
     func showActorPopUp(actor: Cast)
+    func showRatingPopUP(ratePopupVM: RatePopUpViewModel)
     func showSeasonPopUp(seasonDetails: TVSeasonDetails)
     func presentAddToListModal(seriesID: Int)
     
@@ -26,10 +27,10 @@ protocol TVSeriesDetailsScreenRouterProtocol {
 
 final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     weak var viewController: TVSeriesDetailsScreenVC?
-    private let tmdbService: TMDBService
+    private let diContainer: DIContainer
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(diContainer: DIContainer) {
+        self.diContainer = diContainer
     }
     
     // MARK: - NAVIGATION
@@ -38,17 +39,17 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     }
     
     func navigateToAnotherTVSeries(series: TVSeries) {
-        let newSeriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, tmdbService: tmdbService)
+        let newSeriesDetails = TVSeriesDetailsScreenAssembler.assemble(seriesID: series.id, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(newSeriesDetails, animated: true)
     }
     
     func navigateToPersonDetails(creditID: String) {
-        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, tmdbService: tmdbService)
+        let vc = PersonDetailsScreenAssembler.assemble(creditID: creditID, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(vc, animated: true)
     }
     
     func navigateToMovie(movie: Movie) {
-        let movieDetailsVC = MovieDetailsScreenAssembler.assemble(movieID: movie.id, tmdbService: tmdbService)
+        let movieDetailsVC = MovieDetailsScreenAssembler.assemble(movieID: movie.id, diContainer: diContainer)
         viewController?.navigationController?.pushViewController(movieDetailsVC, animated: true)
     }
     
@@ -59,6 +60,13 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
         let popupView = ActorPopupView(viewModel: vm)
         popupView.show(in: vcView)
         viewController?.activePopUpView = popupView
+    }
+    
+    func showRatingPopUP(ratePopupVM: RatePopUpViewModel) {
+        guard let vcView = viewController?.view else { return }
+        let popupView = RatePopUpView(viewModel: ratePopupVM)
+        popupView.show(in: vcView)
+        self.viewController?.activePopUpView = popupView
     }
     
     func showSeasonPopUp(seasonDetails: TVSeasonDetails) {
@@ -116,7 +124,7 @@ final class TVSeriesDetailsScreenRouter: TVSeriesDetailsScreenRouterProtocol {
     }
     
     func presentAddToListModal(seriesID: Int) {
-        let vc = AddToListModalAssembler.assemble(itemID: seriesID, mediaType: .tvShow, tmdbService: tmdbService)
+        let vc = AddToListModalAssembler.assemble(itemID: seriesID, mediaType: .tvShow, networkService: diContainer.networkService)
         vc.modalPresentationStyle = .pageSheet
     
         if let sheet = vc.sheetPresentationController {

@@ -23,7 +23,7 @@ final class TabItemCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class TabItemCell: ReusableCellBaseClass {
+final class TabItemCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let topBarHeight = 5.0

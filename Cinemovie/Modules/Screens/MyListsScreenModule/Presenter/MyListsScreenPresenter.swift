@@ -9,67 +9,49 @@ import UIKit
 
 protocol MyListsScreenPresenterProtocol: AnyObject {
     func viewDidLoad(refreshing: Bool)
-    
-    // MARK: - USER INITIATED
     func didCallRefresh()
     func didTapAccountList(listType: AccountListTypes)
     func didTapUserList(userListDetails: UserListDetails)
     func didTapAddNewList()
     func didTapRemoveList(list: UserListDetails)
-    
-    // MARK: - WATCHLIST
-    func didGetWatchlistMovies(_ movies: [Movie])
-    func didGetWatchlistTVSeries(_ series: [TVSeries])
-    
-    // MARK: - FAVORITE
-    func didGetFavoriteMovies(_ movies: [Movie])
-    func didGetFavoriteTVSeries(_ series: [TVSeries])
-    
-    // MARK: - RATED
-    func didGetRatedMovies(_ movies: [Movie])
-    func didGetRatedTVSeries(_ series: [TVSeries])
-    
-    // MARK: - USER LISTS
-    func didReceieveUserLists(lists: [UserList])
-    func didReceiveUserListDetails(_ details: UserListDetails)
-    func didRemoveList()
-    
-    // MARK: - PROGRAMMATIC
-    func didCreateNewList()
-    
-    // MARK: - ERROR HANDLING
-    func didRecieveError(_ error: Error)
-    
-    // MARK: - PROPERTIES
     var visibleSections: [MyListsScreenVC.Sections] { get set }
 }
 
 final class MyListsScreenPresenter {
-    // MARK: - TYPEALIASES
+    
+    enum FetchResult {
+        case watchlistMovies([Movie])
+        case watchlistSeries([TVSeries])
+        case favoriteMovies([Movie])
+        case favoriteSeries([TVSeries])
+        case ratedMovies([Movie])
+        case ratedSeries([TVSeries])
+        case userLists([UserList])
+        case failure(Error)
+    }
+    
     typealias Sections = MyListsScreenVC.Sections
     typealias Items = MyListsScreenVC.Items
-    
-    // MARK: - VIPER
+
     weak var view: MyListsScreenViewProtocol?
     var router: MyListsScreenRouterProtocol
     var interactor: MyListsScreenInteractorProtocol
+
     var visibleSections: [MyListsScreenVC.Sections] = []
-    
-    // MARK: - PRIVATE PROPERTIES
-    private let downloadGroup = DispatchGroup()
-    
-    private var watchlistMedia: [Media] = []
-    private var favoriteMedia: [Media] = []
-    private var ratedMedia: [Media] = []
+    private let authContext: AuthContextProtocol
+
+    private var watchlistMedia: [MediaProtocol] = []
+    private var favoriteMedia: [MediaProtocol] = []
+    private var ratedMedia: [MediaProtocol] = []
     private var userListDetails: [UserListDetails] = []
-    
-    init(interactor: MyListsScreenInteractorProtocol, router: MyListsScreenRouterProtocol) {
+
+    init(authContext: AuthContextProtocol, interactor: MyListsScreenInteractorProtocol, router: MyListsScreenRouterProtocol) {
         self.interactor = interactor
         self.router = router
+        self.authContext = authContext
     }
-    
-    // MARK: - PRIVATE FUNC
-    private func sortedMedia(media: [Media]) -> [Media] {
+
+    private func sortedMedia(media: [MediaProtocol]) -> [MediaProtocol] {
         let movies = media.compactMap { $0 as? Movie }
         let series = media.compactMap { $0 as? TVSeries }
         return movies + series
@@ -79,176 +61,164 @@ final class MyListsScreenPresenter {
 extension MyListsScreenPresenter: MyListsScreenPresenterProtocol {
     func viewDidLoad(refreshing: Bool) {
         refreshing ? () : self.view?.showDownloadingView()
-        
-        self.watchlistMedia = []
-        self.favoriteMedia = []
-        self.ratedMedia = []
-        self.userListDetails = []
-        
-        downloadGroup.enter()
-        interactor.getFavoriteMovies()
-        
-        downloadGroup.enter()
-        interactor.getFavoriteTVSeries()
-        
-        downloadGroup.enter()
-        interactor.getWatchlistMovies()
-        
-        downloadGroup.enter()
-        interactor.getWatchlistTVSeries()
-        
-        downloadGroup.enter()
-        interactor.getRatedMovies()
-        
-        downloadGroup.enter()
-        interactor.getRatedTVSeries()
-        
-        downloadGroup.enter()
-        interactor.getUserLists()
-        
-        downloadGroup.notify(queue: .main) { [weak self] in
-            guard let self = self else { return }
-            self.didGetAllData(refreshing: refreshing)
+
+        guard !authContext.isGuest else {
+            let authenticateCell = MyListsAuthenticateCellViewModel { [weak self] in self?.router.navigateToLogin() }
+            view?.applySnapshot(sections: [.unauthorized], itemsBySection: [.unauthorized: [.authorizeVM(authenticateCell)]])
+            view?.hideDownloadingView()
+            view?.refreshCompleted()
+            return
         }
-    }
-    
-    // MARK: - USER INITIATED
-    func didCallRefresh() {
-        self.viewDidLoad(refreshing: true)
-    }
-    
-    func didTapAccountList(listType: AccountListTypes) {
-        router.navigateToAccountList(listType: listType)
-    }
-    
-    func didTapUserList(userListDetails: UserListDetails) {
-        router.navigateToUserList(userListDetails: userListDetails)
-    }
-    
-    func didTapAddNewList() {
-        router.presentAddNewListPopUp { [weak self] listName, listDescription, isPublic in
-            guard let self = self else { return }
-            self.router.showLoadingBox()
-            if self.userListDetails.count >= 5 {
-                self.router.hideLoadingBox(success: false, message: "Can't add more than 5 lists")
-            } else {
-                self.interactor.createNewList(listName: listName, listDescription: listDescription, isPublic: isPublic)
+
+        Task { [weak self] in
+            guard let self else { return }
+            
+            self.watchlistMedia = []
+            self.favoriteMedia = []
+            self.ratedMedia = []
+            self.userListDetails = []
+
+            let (lists, errors): ([UserList], [Error]) = await withTaskGroup(of: FetchResult.self) { group in
+                group.addTask {
+                    do { return .watchlistMovies(try await self.interactor.getWatchlistMovies()) }
+                    catch { return .failure(error) }
+                }
+                group.addTask {
+                    do { return .watchlistSeries(try await self.interactor.getWatchlistTVSeries()) }
+                    catch { return .failure(error) }
+                }
+                group.addTask {
+                    do { return .favoriteMovies(try await self.interactor.getFavoriteMovies()) }
+                    catch { return .failure(error) }
+                }
+                group.addTask {
+                    do { return .favoriteSeries(try await self.interactor.getFavoriteTVSeries()) }
+                    catch { return .failure(error) }
+                }
+                group.addTask {
+                    do { return .ratedMovies(try await self.interactor.getRatedMovies()) }
+                    catch { return .failure(error) }
+                }
+                group.addTask {
+                    do { return .ratedSeries(try await self.interactor.getRatedTVSeries()) }
+                    catch { return .failure(error) }
+                }
+                group.addTask {
+                    do { return .userLists(try await self.interactor.getUserLists()) }
+                    catch { return .failure(error) }
+                }
+                
+                var collectedLists: [UserList] = []
+                var collectedErrors: [Error] = []
+                
+                for await result in group {
+                    switch result {
+                    case .watchlistMovies(let m):  self.watchlistMedia.append(contentsOf: m)
+                    case .watchlistSeries(let s):  self.watchlistMedia.append(contentsOf: s)
+                    case .favoriteMovies(let m):   self.favoriteMedia.append(contentsOf: m)
+                    case .favoriteSeries(let s):   self.favoriteMedia.append(contentsOf: s)
+                    case .ratedMovies(let m):      self.ratedMedia.append(contentsOf: m)
+                    case .ratedSeries(let s):      self.ratedMedia.append(contentsOf: s)
+                    case .userLists(let l):        collectedLists = l
+                    case .failure(let e):          collectedErrors.append(e)
+                    }
+                }
+                return (collectedLists, collectedErrors)
+            }
+            
+            self.userListDetails = await withTaskGroup(of: UserListDetails?.self) { group in
+                for list in lists {
+                    group.addTask {
+                        do { return try await self.interactor.getUserListDetails(list: list) }
+                        catch { return nil }
+                    }
+                }
+                return await group.reduce(into: []) { result, details in
+                    if let details { result.append(details) }
+                }
+            }
+            
+            await MainActor.run {
+                if let firstError = errors.first {
+                    self.view?.showError(errorStr: firstError.localizedDescription)
+                }
+                self.didGetAllData(refreshing: refreshing)
             }
         }
     }
-    
-    func didTapRemoveList(list: UserListDetails) {
-        interactor.removeUserList(list: list)
+
+    func didCallRefresh() {
+        viewDidLoad(refreshing: true)
     }
-    
-    // MARK: - WATCHLIST
-    func didGetWatchlistMovies(_ movies: [Movie]) {
-        self.watchlistMedia.append(contentsOf: movies)
-        downloadGroup.leave()
+
+    func didTapAccountList(listType: AccountListTypes) {
+        router.navigateToAccountList(listType: listType)
     }
-    
-    func didGetWatchlistTVSeries(_ series: [TVSeries]) {
-        self.watchlistMedia.append(contentsOf: series)
-        downloadGroup.leave()
+
+    func didTapUserList(userListDetails: UserListDetails) {
+        router.navigateToUserList(userListDetails: userListDetails)
     }
-    
-    // MARK: - FAVORITE
-    func didGetFavoriteMovies(_ movies: [Movie]) {
-        self.favoriteMedia.append(contentsOf: movies)
-        downloadGroup.leave()
-    }
-    
-    func didGetFavoriteTVSeries(_ series: [TVSeries]) {
-        self.favoriteMedia.append(contentsOf: series)
-        downloadGroup.leave()
-    }
-    
-    // MARK: - RATED
-    func didGetRatedMovies(_ movies: [Movie]) {
-        self.ratedMedia.append(contentsOf: movies)
-        downloadGroup.leave()
-    }
-    
-    func didGetRatedTVSeries(_ series: [TVSeries]) {
-        self.ratedMedia.append(contentsOf: series)
-        downloadGroup.leave()
-    }
-    
-    // MARK: - USER LIST
-    func didReceieveUserLists(lists: [UserList]) {
-        lists.forEach {
-            downloadGroup.enter()
-            interactor.getUserListDetails(list: $0)
+
+    func didTapAddNewList() {
+        router.presentAddNewListPopUp { [weak self] listName, listDescription, isPublic in
+            guard let self else { return }
+            self.router.showLoadingBox()
+            guard self.userListDetails.count < 5 else {
+                self.router.hideLoadingBox(success: false, message: "Can't add more than 5 lists")
+                return
+            }
+            Task {
+                do {
+                    try await self.interactor.createNewList(listName: listName, listDescription: listDescription, isPublic: isPublic)
+                    await MainActor.run {
+                        self.router.hideLoadingBox(success: true, message: "Successfully added new list")
+                        self.didCallRefresh()
+                    }
+                } catch {
+                    await MainActor.run { self.view?.showError(errorStr: error.localizedDescription) }
+                }
+            }
         }
-        downloadGroup.leave()
     }
-    
-    func didReceiveUserListDetails(_ details: UserListDetails) {
-        self.userListDetails.append(details)
-        downloadGroup.leave()
+
+    func didTapRemoveList(list: UserListDetails) {
+        Task {
+            do {
+                try await interactor.removeUserList(list: list)
+                await MainActor.run { self.didCallRefresh() }
+            } catch {
+                await MainActor.run { self.view?.showError(errorStr: error.localizedDescription) }
+            }
+        }
     }
-    
-    // MARK: - PROGRAMMATIC
-    func didCreateNewList() {
-        self.router.hideLoadingBox(success: true, message: "Successfully added new list")
-        self.didCallRefresh()
-    }
-    
-    func didRemoveList() {
-        didCallRefresh()
-    }
-    
-    // MARK: - ERROR HANDLING
-    func didRecieveError(_ error: any Error) {
-        self.view?.showError(errorStr: error.localizedDescription)
-        downloadGroup.leave()
-    }
-    
-    // MARK: - PRIVATE FUNC
+
+    // MARK: - PRIVATE
     private func didGetAllData(refreshing: Bool) {
         refreshing ? self.view?.refreshCompleted() : self.view?.hideDownloadingView()
-        
-        let watchlistVM = AccountListCellViewModel(
-            media: sortedMedia(media: watchlistMedia),
-            listType: .watchlist
-        ) { [weak self] in
-            guard let self = self else { return }
-            self.didTapAccountList(listType: $0)
+
+        let watchlistVM = AccountListCellViewModel(media: sortedMedia(media: watchlistMedia), listType: .watchlist) { [weak self] in
+            self?.didTapAccountList(listType: $0)
         }
-        
-        let favoriteVM = AccountListCellViewModel(
-            media: sortedMedia(media: favoriteMedia),
-            listType: .favorite
-        ) { [weak self] in
-            guard let self = self else { return }
-            self.didTapAccountList(listType: $0)
+        let favoriteVM = AccountListCellViewModel(media: sortedMedia(media: favoriteMedia), listType: .favorite) { [weak self] in
+            self?.didTapAccountList(listType: $0)
         }
-        
-        let ratedVM = AccountListCellViewModel(
-            media: sortedMedia(media: ratedMedia),
-            listType: .rated
-        ) { [weak self] in
-            guard let self = self else { return }
-            self.didTapAccountList(listType: $0)
+        let ratedVM = AccountListCellViewModel(media: sortedMedia(media: ratedMedia), listType: .rated) { [weak self] in
+            self?.didTapAccountList(listType: $0)
         }
-        
+
         let userLists: [Items] = self.userListDetails.map {
             Items.userListVM(
                 UserListCellViewModel(userList: $0)
-                { [weak self] in self?.didTapUserList(userListDetails: $0) } didTapRemoveList:
-                { [weak self] in self?.didTapRemoveList(list: $0) }
+                { [weak self] in self?.didTapUserList(userListDetails: $0) }
+                didTapRemoveList: { [weak self] in self?.didTapRemoveList(list: $0) }
             )
         }
-        
+
         self.view?.applySnapshot(
             sections: [.accountLists, .userLists],
             itemsBySection: [
-                .accountLists : [
-                    .accountListVM(watchlistVM),
-                    .accountListVM(favoriteVM),
-                    .accountListVM(ratedVM)
-                ],
-                .userLists : userLists
+                .accountLists: [.accountListVM(watchlistVM), .accountListVM(favoriteVM), .accountListVM(ratedVM)],
+                .userLists: userLists
             ]
         )
     }

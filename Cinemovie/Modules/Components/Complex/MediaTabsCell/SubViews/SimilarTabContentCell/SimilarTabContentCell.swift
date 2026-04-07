@@ -9,11 +9,11 @@ import UIKit
 import SnapKit
 
 final class SimilarTabContentCellViewModel: CellViewModelBaseClass, CellWithHeightProtocol {
-    let media: [Media]
-    let didTapAnyMedia: ((Media) -> Void)?
+    let media: [MediaProtocol]
+    let didTapAnyMedia: ((MediaProtocol) -> Void)?
     var cellHeight: CGFloat = 1
     
-    init(media: [Media], didTapAnyMedia: ((Media) -> Void)?) {
+    init(media: [MediaProtocol], didTapAnyMedia: ((MediaProtocol) -> Void)?) {
         self.media = media
         self.didTapAnyMedia = didTapAnyMedia
         super.init(cellIdentifier: "SimilarTabContentCell")
@@ -24,7 +24,7 @@ final class SimilarTabContentCellViewModel: CellViewModelBaseClass, CellWithHeig
     }
 }
 
-final class SimilarTabContentCell: ReusableCellBaseClass {
+final class SimilarTabContentCell: UICollectionViewCell {
     
     // MARK: - CONSTANTS
     fileprivate enum Constants {
@@ -34,7 +34,7 @@ final class SimilarTabContentCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: SimilarTabContentCellViewModel?
-    private var items: [Media] = []
+    private var items: [MediaProtocol] = []
     
     // MARK: - VIEW PROPERTIES
     private lazy var gridCollectionView: UICollectionView = {

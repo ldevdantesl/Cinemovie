@@ -34,7 +34,7 @@ final class AccountListDetailsMediaPageVC: UIViewController {
     // MARK: - PROPERTIES
     lazy var subtitleForSupplementary = "Scroll \(mediaType == .movie ? "right" : "left") to see \(mediaType == .movie ? "TVSeries" : "Movies") if they exist"
     let mediaType: MediaTypes
-    private var media: [Media]
+    private var media: [MediaProtocol]
     private weak var presenter: AccountListDetailsScreenPresenterProtocol?
     
     // MARK: - VIEW PROPERTIES
@@ -67,7 +67,7 @@ final class AccountListDetailsMediaPageVC: UIViewController {
     }()
     
     // MARK: - LIFECYCLE
-    init(media: [Media], mediaType: MediaTypes, presenter: AccountListDetailsScreenPresenterProtocol?) {
+    init(media: [MediaProtocol], mediaType: MediaTypes, presenter: AccountListDetailsScreenPresenterProtocol?) {
         self.media = media
         self.mediaType = mediaType
         self.presenter = presenter
@@ -104,7 +104,7 @@ final class AccountListDetailsMediaPageVC: UIViewController {
     }
     
     // MARK: - PUBLIC FUNC
-    public func applySnapshotWithNewMedia(_ media: [Media], paginating: Bool) {
+    public func applySnapshotWithNewMedia(_ media: [MediaProtocol], paginating: Bool) {
         defer {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }

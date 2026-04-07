@@ -10,11 +10,11 @@ import SnapKit
 import SDWebImage
 
 final class FeaturedMediaCellViewModel: CellViewModelBaseClass {
-    let media: [Media]
+    let media: [MediaProtocol]
     let changeInSeconds: TimeInterval
-    let didTapMedia: ((Media) -> Void)?
+    let didTapMedia: ((MediaProtocol) -> Void)?
     
-    init(media: [Media], changeInSeconds: TimeInterval = 5.0, didTapMedia: ((Media) -> Void)? = nil) {
+    init(media: [MediaProtocol], changeInSeconds: TimeInterval = 5.0, didTapMedia: ((MediaProtocol) -> Void)? = nil) {
         self.media = media
         self.changeInSeconds = changeInSeconds
         self.didTapMedia = didTapMedia
@@ -22,7 +22,7 @@ final class FeaturedMediaCellViewModel: CellViewModelBaseClass {
     }
 }
 
-final class FeaturedMediaCell: ReusableCellBaseClass {
+final class FeaturedMediaCell: UICollectionViewCell {
     typealias ViewModel = FeaturedMediaCellViewModel
     
     // MARK: - CONSTANTS
@@ -40,7 +40,7 @@ final class FeaturedMediaCell: ReusableCellBaseClass {
     
     // MARK: - PROPERTIES
     private var viewModel: FeaturedMediaCellViewModel?
-    private var currentMedia: Media?
+    private var currentMedia: MediaProtocol?
     private var mediaWorkItem: DispatchWorkItem?
     private var gradientLayer: CAGradientLayer?
     
@@ -130,7 +130,7 @@ final class FeaturedMediaCell: ReusableCellBaseClass {
         }
     }
     
-    private func updateMedia(with media: Media) {
+    private func updateMedia(with media: MediaProtocol) {
         guard let url = URLHelper.getImageURL(with: media.posterPath, size: .original) else { return }
         self.currentMedia = media
         loadingIndicator.startAnimating()

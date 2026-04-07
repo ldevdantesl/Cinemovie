@@ -14,7 +14,7 @@ struct AddToListItemCellViewModel {
     let didTapAddToList: ((UserList) -> Void)?
 }
 
-final class AddToListItemCell: ReusableCellBaseClass {
+final class AddToListItemCell: UICollectionViewCell {
     // MARK: - CONSTANTS
     fileprivate enum Constants {
         static let plusIconName = "plus"

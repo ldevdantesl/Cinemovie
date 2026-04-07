@@ -7,17 +7,19 @@
 
 import UIKit
 
-final class MyListsCoordinator: Coordinator {
-    let navigationController: UINavigationController = UINavigationController()
+final class MyListsCoordinator {
+    lazy var navigationController: UINavigationController = UINavigationController()
     
-    private let tmdbService: TMDBService
+    private let diContainer: DIContainer
+    weak var sessionDelegate: SessionDelegate?
     
-    init(tmdbService: TMDBService) {
-        self.tmdbService = tmdbService
+    init(diContainer: DIContainer, sessionDelegate: SessionDelegate?) {
+        self.diContainer = diContainer
+        self.sessionDelegate = sessionDelegate
     }
     
     func start() {
-        let watchlistModule = MyListsScreenAssembler.assemble(tmdbService: tmdbService)
+        let watchlistModule = MyListsScreenAssembler.assemble(diContainer: diContainer, sessionDelegate: sessionDelegate)
         watchlistModule.tabBarItem = UITabBarItem(
             title: "My Lists",
             image: UIImage(systemName: "film.stack"),

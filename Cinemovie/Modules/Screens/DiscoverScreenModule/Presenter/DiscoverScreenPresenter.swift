@@ -12,10 +12,11 @@ protocol DiscoverScreenPresenterProtocol: AnyObject {
     func viewDidLoaded()
     
     // MARK: - USER INITIATED
-    func didTapMedia(_ media: Media)
+    func didTapMedia(_ media: MediaProtocol)
     func didTapPerson(_ person: Person)
     func didChangeMediaType(_ mediaType: MediaTypes)
     func didTapSearch()
+    func didRefresh()
     
     // MARK: - MOVIES
     func didDownloadMovieList(listType: MovieListType, queryMovies: [Movie])
@@ -28,6 +29,7 @@ protocol DiscoverScreenPresenterProtocol: AnyObject {
     
     // MARK: - PROPERTIES
     var visibleSections: [DiscoverScreenVC.Sections] { get set }
+    var currentMediaType: MediaTypes { get }
     
     // MARK: - ERROR
     func didRecieveError(_ error: Error)
@@ -43,8 +45,16 @@ final class DiscoverScreenPresenter {
     var router: DiscoverScreenRouterProtocol
     var interactor: DiscoverScreenInteractorProtocol
     
+    // MARK: - INJECTED
+    private let userService: UserServiceProtocol
+    
     // MARK: - PUBLIC PROPERTIES
     public var visibleSections: [DiscoverScreenVC.Sections] = []
+    
+    // MARK: - COMPUTED PROPERTIES
+    var currentMediaType: MediaTypes {
+        userService.defaultMediaType
+    }
 
     // MARK: - PRIVATE PROPERTIES
     private let downloadGroup = DispatchGroup()
@@ -53,17 +63,17 @@ final class DiscoverScreenPresenter {
     private var seriesLists: [(listType: TVSeriesListType, series: [TVSeries])] = []
     private var trendingPeople: [Person] = []
     
-    init(interactor: DiscoverScreenInteractorProtocol, router: DiscoverScreenRouterProtocol) {
+    init(interactor: DiscoverScreenInteractorProtocol, router: DiscoverScreenRouterProtocol, userService: UserServiceProtocol) {
         self.interactor = interactor
         self.router = router
+        self.userService = userService
     }
-}
-
-extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
     
-    // MARK: - STARTING
-    func viewDidLoaded() {
-        self.view?.showDownloadingView()
+    private func fetchAllContent(completion: @escaping () -> Void) {
+        movieLists.removeAll()
+        seriesLists.removeAll()
+        trendingPeople.removeAll()
+        
         let movieListToDownload: [MovieListType] = [
             .popular, .upcoming, .topRated, .nowPlaying,
             .animation, .action, .comedy, .drama,
@@ -84,16 +94,27 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
         
         downloadGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
-            self.didChangeMediaType(.movie)
-            self.view?.hideDownloadingView()
+            self.didChangeMediaType(self.userService.defaultMediaType)
+            completion()
+        }
+    }
+}
+
+extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
+    
+    // MARK: - STARTING
+    func viewDidLoaded() {
+        self.view?.showDownloadingView()
+        fetchAllContent { [weak self] in
+            self?.view?.hideDownloadingView()
         }
     }
     
     // MARK: - USER INITIATED
-    func didTapMedia(_ media: any Media) {
+    func didTapMedia(_ media: any MediaProtocol) {
         switch media {
-        case is Movie: router.navigateToMovieDetails(movieID: media.id)
-        case is TVSeries: router.navigateToTVSeriesDetails(seriesID: media.id)
+        case let movie as Movie: router.navigateToMovieDetails(movieID: movie.id)
+        case let series as TVSeries: router.navigateToTVSeriesDetails(seriesID: series.id)
         default: fatalError("Media not supported")
         }
     }
@@ -146,7 +167,13 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
     }
     
     func didTapSearch() {
-        
+        router.navigateToSearch()
+    }
+    
+    func didRefresh() {
+        fetchAllContent { [weak self] in
+            self?.view?.didRefresh()
+        }
     }
 
     // MARK: - MOVIES
@@ -170,11 +197,13 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
     
     // MARK: - ERROR
     func didRecieveError(_ error: Error) {
-        view?.didRecieveError(error.localizedDescription)
+        DispatchQueue.main.async {
+            self.view?.didRecieveError(error.localizedDescription)
+        }
     }
     
     // MARK: - PRIVATE FUNC
-    private func generateListSections<T: MediaListType, M: Media>(
+    private func generateListSections<T: MediaListType, M: MediaProtocol>(
         from lists: [(listType: T, media: [M])],
         sectionBuilder: (T) -> Sections
     ) -> [(section: Sections, items: [Items])] {

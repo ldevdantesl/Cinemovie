@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Array where Element: Media {
+extension Array where Element: MediaProtocol {
     func filteringHighRated(minimumRating: Double = 6.5) -> [Element] {
         self.filter { ($0.voteAverage ?? 0) > minimumRating }
     }
