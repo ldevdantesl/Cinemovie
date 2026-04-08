@@ -18,17 +18,6 @@ protocol DiscoverScreenPresenterProtocol: AnyObject {
     func didTapSearch()
     func didRefresh()
     
-    // MARK: - MOVIES
-    func didDownloadMovieList(listType: MovieListType, queryMovies: [Movie])
-    
-    // MARK: - TV SERIES
-    func didDownloadSeriesList(listType: TVSeriesListType, querySeries: [TVSeries])
-    
-    // MARK: - TRENDING
-    func didDownloadTrendingPeople(_ people: [Person])
-    
-    // MARK: - PROPERTIES
-    var visibleSections: [DiscoverScreenVC.Sections] { get set }
     var currentMediaType: MediaTypes { get }
     
     // MARK: - ERROR
@@ -36,6 +25,15 @@ protocol DiscoverScreenPresenterProtocol: AnyObject {
 }
 
 final class DiscoverScreenPresenter {
+    
+    // MARK: - FETCH RESULT
+    private enum FetchResult {
+        case movieList(MovieListType, [Movie])
+        case seriesList(TVSeriesListType, [TVSeries])
+        case trendingPeople([Person])
+        case failure(Error)
+    }
+    
     // MARK: - TYPEALIASES
     typealias Sections = DiscoverScreenVC.Sections
     typealias Items = DiscoverScreenVC.Items
@@ -48,20 +46,27 @@ final class DiscoverScreenPresenter {
     // MARK: - INJECTED
     private let userService: UserServiceProtocol
     
-    // MARK: - PUBLIC PROPERTIES
-    public var visibleSections: [DiscoverScreenVC.Sections] = []
-    
     // MARK: - COMPUTED PROPERTIES
     var currentMediaType: MediaTypes {
         userService.defaultMediaType
     }
 
     // MARK: - PRIVATE PROPERTIES
-    private let downloadGroup = DispatchGroup()
-    
     private var movieLists: [(listType: MovieListType, movies: [Movie])] = []
     private var seriesLists: [(listType: TVSeriesListType, series: [TVSeries])] = []
     private var trendingPeople: [Person] = []
+    
+    private let movieListsToDownload: [MovieListType] = [
+        .popular, .upcoming, .topRated, .nowPlaying,
+        .animation, .action, .comedy, .drama,
+        .fantasy, .horror, .history, .documentary,
+    ]
+    
+    private let seriesListsToDownload: [TVSeriesListType] = [
+        .popular, .airingToday, .topRated, .onTheAir,
+        .actionAdventure, .animation, .comedy, .drama,
+        .sciFiFantasy, .crime, .documentary, .kids
+    ]
     
     init(interactor: DiscoverScreenInteractorProtocol, router: DiscoverScreenRouterProtocol, userService: UserServiceProtocol) {
         self.interactor = interactor
@@ -69,34 +74,101 @@ final class DiscoverScreenPresenter {
         self.userService = userService
     }
     
-    private func fetchAllContent(completion: @escaping () -> Void) {
+    // MARK: - FETCH
+    private func fetchAllContent() async {
         movieLists.removeAll()
         seriesLists.removeAll()
         trendingPeople.removeAll()
         
-        let movieListToDownload: [MovieListType] = [
-            .popular, .upcoming, .topRated, .nowPlaying,
-            .animation, .action, .comedy, .drama,
-            .fantasy, .horror, .history, .documentary,
-        ]
+        var fetchedMovies: [MovieListType: [Movie]] = [:]
+        var fetchedSeries: [TVSeriesListType: [TVSeries]] = [:]
         
-        let seriesListToDownload: [TVSeriesListType] = [
-            .popular, .airingToday, .topRated, .onTheAir,
-            .actionAdventure, .animation, .comedy, .drama,
-            .sciFiFantasy, .crime, .documentary, .kids
-        ]
-        
-        movieListToDownload.forEach { downloadGroup.enter(); interactor.downloadMovieList(listType: $0) }
-        seriesListToDownload.forEach { downloadGroup.enter(); interactor.downloadTVSeriesList(listType: $0) }
-        
-        downloadGroup.enter()
-        interactor.downloadTrendingPeople(timeWindow: .week)
-        
-        downloadGroup.notify(queue: .main) { [weak self] in
-            guard let self = self else { return }
-            self.didChangeMediaType(self.userService.defaultMediaType)
-            completion()
+        let collectedErrors = await withTaskGroup(of: FetchResult.self) { group in
+            for listType in movieListsToDownload {
+                group.addTask { [interactor] in
+                    do {
+                        let movies = try await interactor.fetchMovieList(listType: listType)
+                        return .movieList(listType, movies)
+                    } catch {
+                        return .failure(error)
+                    }
+                }
+            }
+            
+            for listType in seriesListsToDownload {
+                group.addTask { [interactor] in
+                    do {
+                        let series = try await interactor.fetchTVSeriesList(listType: listType)
+                        return .seriesList(listType, series)
+                    } catch {
+                        return .failure(error)
+                    }
+                }
+            }
+            
+            group.addTask { [interactor] in
+                do {
+                    let people = try await interactor.fetchTrendingPeople(timeWindow: .week)
+                    return .trendingPeople(people)
+                } catch {
+                    return .failure(error)
+                }
+            }
+            
+            var errors: [Error] = []
+            
+            for await result in group {
+                switch result {
+                case .movieList(let listType, let movies):
+                    fetchedMovies[listType] = movies
+                case .seriesList(let listType, let series):
+                    fetchedSeries[listType] = series
+                case .trendingPeople(let people):
+                    let filtered = people
+                        .filter { $0.profilePath != nil }
+                        .sorted { $0.popularity > $1.popularity }
+                    self.trendingPeople = Array(filtered.prefix(10))
+                case .failure(let error):
+                    errors.append(error)
+                }
+            }
+            
+            return errors
         }
+        
+        self.movieLists = movieListsToDownload.compactMap { listType in
+            guard let movies = fetchedMovies[listType], !movies.isEmpty else { return nil }
+            return (listType, movies)
+        }
+        
+        self.seriesLists = seriesListsToDownload.compactMap { listType in
+            guard let series = fetchedSeries[listType], !series.isEmpty else { return nil }
+            return (listType, series)
+        }
+        
+        if !collectedErrors.isEmpty {
+            print("⚠️ Discover fetch completed with \(collectedErrors.count) errors")
+        }
+    }
+    
+    private func generateListSections<T: MediaListType, M: MediaProtocol>(
+        from lists: [(listType: T, media: [M])],
+        sectionBuilder: (T) -> Sections
+    ) -> [(section: Sections, items: [Items])] {
+        var result: [(section: Sections, items: [Items])] = []
+
+        for (listType, media) in lists {
+            if media.isEmpty { continue }
+
+            let vm = MediaListCellViewModel(mediaItems: media, listName: listType.title, listSubtitle: listType.subtitle) { [weak self] in
+                guard let self = self else { return }
+                self.didTapMedia($0)
+            }
+
+            result.append((sectionBuilder(listType), [.mediaListCell(vm)]))
+        }
+
+        return result
     }
 }
 
@@ -104,9 +176,14 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
     
     // MARK: - STARTING
     func viewDidLoaded() {
-        self.view?.showDownloadingView()
-        fetchAllContent { [weak self] in
-            self?.view?.hideDownloadingView()
+        view?.showDownloadingView()
+        Task { [weak self] in
+            guard let self = self else { return }
+            await self.fetchAllContent()
+            await MainActor.run {
+                self.didChangeMediaType(self.userService.defaultMediaType)
+                self.view?.hideDownloadingView()
+            }
         }
     }
     
@@ -115,7 +192,7 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
         switch media {
         case let movie as Movie: router.navigateToMovieDetails(movieID: movie.id)
         case let series as TVSeries: router.navigateToTVSeriesDetails(seriesID: series.id)
-        default: fatalError("Media not supported")
+        default: break
         }
     }
     
@@ -158,12 +235,17 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
             guard let self = self else { return }
             self.didTapPerson($0)
         }
-        sectionsAndItems.insert((Sections.trendingPeople, [.trendingPeopleCell(trendingPeopleVM)]), at: 5)
         
-        visibleSections = sectionsAndItems.map(\.section)
+        if sectionsAndItems.count >= 5 {
+            sectionsAndItems.insert((Sections.trendingPeople, [.trendingPeopleCell(trendingPeopleVM)]), at: 5)
+        } else {
+            sectionsAndItems.append((Sections.trendingPeople, [.trendingPeopleCell(trendingPeopleVM)]))
+        }
+        
+        let sections = sectionsAndItems.map(\.section)
         let itemsBySection = Dictionary(uniqueKeysWithValues: sectionsAndItems)
         
-        view?.applySnapshot(sections: visibleSections, itemsBySection: itemsBySection)
+        view?.applySnapshot(sections: sections, itemsBySection: itemsBySection)
     }
     
     func didTapSearch() {
@@ -171,55 +253,18 @@ extension DiscoverScreenPresenter: DiscoverScreenPresenterProtocol {
     }
     
     func didRefresh() {
-        fetchAllContent { [weak self] in
-            self?.view?.didRefresh()
+        Task { [weak self] in
+            guard let self = self else { return }
+            await self.fetchAllContent()
+            await MainActor.run {
+                self.didChangeMediaType(self.userService.defaultMediaType)
+                self.view?.didRefresh()
+            }
         }
-    }
-
-    // MARK: - MOVIES
-    func didDownloadMovieList(listType: MovieListType, queryMovies: [Movie]) {
-        movieLists.append((listType, queryMovies))
-        downloadGroup.leave()
-    }
-    
-    // MARK: - TV SERIES
-    func didDownloadSeriesList(listType: TVSeriesListType, querySeries: [TVSeries]) {
-        seriesLists.append((listType, querySeries))
-        downloadGroup.leave()
-    }
-    
-    // MARK: - TRENDING
-    func didDownloadTrendingPeople(_ people: [Person]) {
-        let trendingPeople = people.filter { $0.profilePath != nil }.sorted { $0.popularity > $1.popularity }
-        self.trendingPeople = Array(trendingPeople.prefix(upTo: 10))
-        downloadGroup.leave()
     }
     
     // MARK: - ERROR
     func didRecieveError(_ error: Error) {
-        DispatchQueue.main.async {
-            self.view?.didRecieveError(error.localizedDescription)
-        }
-    }
-    
-    // MARK: - PRIVATE FUNC
-    private func generateListSections<T: MediaListType, M: MediaProtocol>(
-        from lists: [(listType: T, media: [M])],
-        sectionBuilder: (T) -> Sections
-    ) -> [(section: Sections, items: [Items])] {
-        var result: [(section: Sections, items: [Items])] = []
-
-        for (listType, media) in lists {
-            if media.isEmpty { continue }
-
-            let vm = MediaListCellViewModel(mediaItems: media, listName: listType.title, listSubtitle: listType.subtitle) { [weak self] in
-                guard let self = self else { return }
-                self.didTapMedia($0)
-            }
-
-            result.append((sectionBuilder(listType), [.mediaListCell(vm)]))
-        }
-
-        return result
+        self.view?.didRecieveError(error.localizedDescription)
     }
 }

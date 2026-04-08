@@ -8,14 +8,9 @@
 import UIKit
 
 protocol DiscoverScreenInteractorProtocol: AnyObject {
-    // MARK: - MOVIES
-    func downloadMovieList(listType: MovieListType)
-    
-    // MARK: - TV SERIES
-    func downloadTVSeriesList(listType: TVSeriesListType)
-    
-    // MARK: - TRENDING
-    func downloadTrendingPeople(timeWindow: TrendingTimeWindow)
+    func fetchMovieList(listType: MovieListType) async throws -> [Movie]
+    func fetchTVSeriesList(listType: TVSeriesListType) async throws -> [TVSeries]
+    func fetchTrendingPeople(timeWindow: TrendingTimeWindow) async throws -> [Person]
 }
 
 final class DiscoverScreenInteractor: DiscoverScreenInteractorProtocol {
@@ -26,51 +21,15 @@ final class DiscoverScreenInteractor: DiscoverScreenInteractorProtocol {
         self.networkService = networkService
     }
     
-    // MARK: - MOVIES
-    func downloadMovieList(listType: MovieListType) {
-        Task {
-            do {
-                let result = try await networkService.movies.getMovieList(listType: listType)
-                await MainActor.run {
-                    self.presenter?.didDownloadMovieList(listType: listType, queryMovies: result)
-                }
-            } catch {
-                await MainActor.run {
-                    self.presenter?.didRecieveError(error)
-                }
-            }
-        }
+    func fetchMovieList(listType: MovieListType) async throws -> [Movie] {
+        try await networkService.movies.getMovieList(listType: listType)
     }
-    
-    // MARK: - TV SERIES
-    func downloadTVSeriesList(listType: TVSeriesListType) {
-        Task {
-            do {
-                let result = try await networkService.series.getList(listType: listType)
-                await MainActor.run {
-                    self.presenter?.didDownloadSeriesList(listType: listType, querySeries: result)
-                }
-            } catch {
-                await MainActor.run {
-                    self.presenter?.didRecieveError(error)
-                }
-            }
-        }
+
+    func fetchTVSeriesList(listType: TVSeriesListType) async throws -> [TVSeries] {
+        try await networkService.series.getList(listType: listType)
     }
-    
-    // MARK: - TRENDING
-    func downloadTrendingPeople(timeWindow: TrendingTimeWindow) {
-        Task {
-            do {
-                let result = try await networkService.person.trending(timeWindow: timeWindow)
-                await MainActor.run {
-                    self.presenter?.didDownloadTrendingPeople(result)
-                }
-            } catch {
-                await MainActor.run {
-                    self.presenter?.didRecieveError(error)
-                }
-            }
-        }
+
+    func fetchTrendingPeople(timeWindow: TrendingTimeWindow) async throws -> [Person] {
+        try await networkService.person.trending(timeWindow: timeWindow)
     }
 }

@@ -44,6 +44,9 @@ final class DiscoverScreenVC: UIViewController {
     // MARK: - VIPER
     var presenter: DiscoverScreenPresenterProtocol?
     
+    // MARK: - PROPERTIES
+    private let sectionStore = CMDiffableSectionStore<Sections>()
+    
     // MARK: - VIEW PROPERTIES
     private lazy var collectionView: DiffableCollectionView = {
         let view = DiffableCollectionView<DiscoverScreenVC.Sections, DiscoverScreenVC.Items>(layout: createLayout())
@@ -164,7 +167,7 @@ final class DiscoverScreenVC: UIViewController {
     private func createLayout() -> UICollectionViewCompositionalLayout {
         return UICollectionViewCompositionalLayout { [weak self] sectionIndex, env in
             guard let self = self else { return nil }
-            let homeSection = presenter?.visibleSections[sectionIndex] ?? Sections.featured
+            let homeSection = self.sectionStore.section(at: sectionIndex)
             let edgeInsets: NSDirectionalEdgeInsets
             let heightDimension: NSCollectionLayoutDimension
             
@@ -195,30 +198,20 @@ final class DiscoverScreenVC: UIViewController {
 
 extension DiscoverScreenVC: DiscoverScreenViewProtocol {
     func applySnapshot(sections: [Sections], itemsBySection: [Sections : [Items]]) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
-        }
+        sectionStore.update(sections)
+        self.collectionView.applySnapshot(sections: sections, itemsBySection: itemsBySection)
     }
     
     func showDownloadingView() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.downloadingView.show()
-        }
+        self.downloadingView.show()
     }
     
     func didRefresh() {
-        DispatchQueue.main.async { [weak self] in
-            self?.refreshControl.endRefreshing()
-        }
+        self.refreshControl.endRefreshing()
     }
     
     func hideDownloadingView() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.downloadingView.hide()
-        }
+        self.downloadingView.hide()
     }
     
     func didRecieveError(_ message: String) {

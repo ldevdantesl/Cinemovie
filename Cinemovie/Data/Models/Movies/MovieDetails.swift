@@ -51,5 +51,3 @@ struct MovieDetails: Decodable {
         case voteCount = "vote_count"
     }
 }
-
-
