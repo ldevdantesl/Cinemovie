@@ -11,6 +11,7 @@ import UIKit
 struct UIConstants {
     static let screenWidth = UIScreen.main.bounds.width
     static let screenHeight = UIScreen.main.bounds.height
+    static let buttonHeight = 50.0
     
     static var topInset: CGFloat {
         UIApplication.shared.connectedScenes
