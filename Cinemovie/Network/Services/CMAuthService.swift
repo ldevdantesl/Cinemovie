@@ -6,6 +6,7 @@
 //
 
 import Foundation
+@preconcurrency import AuthenticationServices
  
 protocol AuthServiceProtocol {
     var isLoggedIn: Bool { get }
@@ -13,6 +14,7 @@ protocol AuthServiceProtocol {
     
     // MARK: - GUEST
     func loginAsGuest() async throws
+    func loginWithOAuth(requestToken: String) async throws
     
     // MARK: - V3 FLOW
     func createRequestTokenV3() async throws -> String
@@ -27,7 +29,7 @@ protocol AuthServiceProtocol {
     func logout() async throws
 }
  
-final class CMAuthService: AuthServiceProtocol {
+final class CMAuthService: NSObject, AuthServiceProtocol {
     private let httpClient: HTTPClientProtocol
     private let authContext: AuthContextProtocol
     
@@ -43,6 +45,25 @@ final class CMAuthService: AuthServiceProtocol {
     func loginAsGuest() async throws {
         let result: GuestSessionResponse = try await httpClient.request(AuthEndpointsV3.loginAsGuest)
         authContext.sessionID = result.guestSessionId
+    }
+    
+    func loginWithOAuth(requestToken: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            let url = URL(string: "https://www.themoviedb.org/auth/access?request_token=\(requestToken)")!
+            let callbackScheme = "cinemovie"
+            
+            let session = ASWebAuthenticationSession(url: url, callbackURLScheme: callbackScheme) { callbackURL, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                continuation.resume(returning: ())
+            }
+            session.presentationContextProvider = self
+            session.prefersEphemeralWebBrowserSession = false
+            
+            DispatchQueue.main.async { session.start() }
+        }
     }
     
     // MARK: - V3 FLOW
@@ -95,3 +116,11 @@ final class CMAuthService: AuthServiceProtocol {
     }
 }
  
+extension CMAuthService: ASWebAuthenticationPresentationContextProviding {
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow } ?? ASPresentationAnchor()
+    }
+}

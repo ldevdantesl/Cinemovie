@@ -89,11 +89,6 @@ final class LoginScreenVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        
-        NotificationCenter.default.addObserver(
-            self, selector: #selector(handleOAuthCallback),
-            name: Notification.Name(ConstantKeys.OAUTH_CALLBACK.rawValue), object: nil
-        )
     }
     
     // MARK: - PRIVATE FUNC
@@ -123,19 +118,16 @@ final class LoginScreenVC: UIViewController {
         loginButton.snp.makeConstraints {
             $0.top.equalTo(subWelcomeText.snp.bottom).offset(Constants.hugeSpacing)
             $0.horizontalEdges.equalToSuperview().inset(Constants.hSpacing)
+            $0.height.equalTo(UIConstants.buttonHeight)
         }
         
         view.addSubview(asGuestButton)
         asGuestButton.snp.makeConstraints {
-            $0.top.equalTo(loginButton.snp.bottom).offset(Constants.spacing)
+            $0.top.equalTo(loginButton.snp.bottom).offset(Constants.vSpacing)
             $0.horizontalEdges.equalToSuperview().inset(Constants.hSpacing)
+            $0.height.equalTo(UIConstants.buttonHeight)
+            $0.bottom.lessThanOrEqualToSuperview().priority(.high)
         }
-    }
-    
-    // MARK: - OBJC FUNCTIONS
-    @objc private func handleOAuthCallback(_ notification: Notification) {
-        guard let url = notification.object as? URL else { return }
-        presenter?.handleOAuthCallback(url: url)
     }
 }
 
