@@ -204,9 +204,11 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
                     }
                 }
                 
-                group.addTask {
-                    do { return .userList(try await self.interactor.getUserLists()) }
-                    catch { return .failure(error) }
+                if !self.authContext.isGuest {
+                    group.addTask {
+                        do { return .userList(try await self.interactor.getUserLists()) }
+                        catch { return .failure(error) }
+                    }
                 }
                 
                 var collectedErrors: [Error] = []
