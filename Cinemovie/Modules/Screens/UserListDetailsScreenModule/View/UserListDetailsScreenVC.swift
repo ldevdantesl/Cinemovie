@@ -30,7 +30,7 @@ final class UserListDetailsScreenVC: UIViewController {
         static let aniDuration = 0.25
         static let itemWidth = (UIConstants.screenWidth / 3) - 40
         static let itemHeight = (itemWidth * 2)
-        static let rightArrowImageName = "chevron.right"
+        static let rightArrowImageName = "square.and.arrow.up"
         static let leftArrowImageName = "chevron.left"
         static let topDecorHeight = UIConstants.topInset
     }
@@ -189,6 +189,9 @@ final class UserListDetailsScreenVC: UIViewController {
                 title: presenter.getListName(),
                 subtitle: "Movies & TV Series of the list",
                 showsTopShadow: true,
+                rightButtonImageName: Constants.rightArrowImageName,
+                rightButtonTintColor: CMColor.cmAccent,
+                didTapRightButton: self.presenter?.didTapShareList,
                 leftButtonImageName: Constants.leftArrowImageName ,
                 leftButtonTintColor: CMColor.cmAccent,
                 didTapLeftButton: self.presenter?.didTapBackButton

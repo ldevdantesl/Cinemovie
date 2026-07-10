@@ -10,6 +10,8 @@ import UIKit
 protocol UserListDetailsScreenRouterProtocol {
     func goBack()
     
+    func presentShareSheet(items: [Any])
+    func presentPosterPicker(media: [MediaProtocol], onDone: @escaping ([MediaProtocol]) -> Void)
     func navigateToMovie(movie: Movie)
     func navigateToSeries(series: TVSeries)
 }
@@ -24,6 +26,19 @@ final class UserListDetailsScreenRouter: UserListDetailsScreenRouterProtocol {
     
     func goBack() {
         viewController?.navigationController?.popViewController(animated: true)
+    }
+    
+    func presentShareSheet(items: [Any]) {
+        guard let viewController else { return }
+        let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        viewController.present(activityVC, animated: true)
+    }
+    
+    func presentPosterPicker(media: [MediaProtocol], onDone: @escaping ([MediaProtocol]) -> Void) {
+        let picker = PosterPickerVC(media: media, onDone: onDone)
+        let nav = UINavigationController(rootViewController: picker)
+        nav.sheetPresentationController?.detents = [.large()]
+        viewController?.present(nav, animated: true)
     }
     
     func navigateToMovie(movie: Movie) {
