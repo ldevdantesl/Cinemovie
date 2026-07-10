@@ -93,7 +93,7 @@ final class MovieDetailsScreenPresenter {
             )
         }
         
-        let titleVM = TitleAndTaglineCellViewModel(mediaName: movieDetails.title, mediaTagline: movieDetails.tagline)
+        let titleVM = TitleAndTaglineCellViewModel(mediaName: movieDetails.title, mediaTagline: movieDetails.tagline, voteAverage: movieDetails.voteAverage, voteCount: movieDetails.voteCount)
         
         let subDetailsVM = MovieDetailsSubDetailsCellViewModel(
             year: movieDetails.releaseDate, released: CMDateFormatter.isDatePassed(movieDetails.releaseDate),

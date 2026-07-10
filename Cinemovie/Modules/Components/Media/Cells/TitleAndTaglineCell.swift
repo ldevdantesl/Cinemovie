@@ -11,11 +11,15 @@ import SnapKit
 final class TitleAndTaglineCellViewModel: CellViewModelBaseClass {
     let mediaName: String
     let mediaTagline: String?
+    let voteAverage: Double?
+    let voteCount: Int?
     
-    init(mediaName: String, mediaTagline: String?) {
+    init(mediaName: String, mediaTagline: String?, voteAverage: Double?, voteCount: Int?) {
         self.mediaName = mediaName
         self.mediaTagline = CMTextFormatter.formatToCleanString(mediaTagline)
-        super.init(cellIdentifier: "TitleAndTaglineCell")
+        self.voteAverage = voteAverage
+        self.voteCount = voteCount
+        super.init(cellIdentifier: TitleAndTaglineCell.identifier)
     }
 }
 
@@ -31,24 +35,19 @@ final class TitleAndTaglineCell: UICollectionViewCell {
     }
     
     // MARK: - PROPERTIES
-    private let cinemovieLogoImageView: UIImageView = {
-        let image = UIImageView(image: UIImage(named: ImageNames.logoAlt.rawValue))
-        image.contentMode = .scaleAspectFit
-        image.translatesAutoresizingMaskIntoConstraints = false
-        return image
-    }()
-
     private let cinemovieLabel: UILabel = {
         let label = UILabel()
-        label.text = "Cinemovie"
+        label.text = "CINEMOVIE"
         label.font = CMFont.font(size: .caption, fontName: .avenirBold)
         label.textColor = CMColor.cmSecondary
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
+    private let voteView = CMVoteAverageView()
+    
     private lazy var hStack: UIStackView = {
-        let hStack = UIStackView(arrangedSubviews: [cinemovieLogoImageView, cinemovieLabel, UIView()])
+        let hStack = UIStackView(arrangedSubviews: [cinemovieLabel, UIView(), voteView])
         hStack.axis = .horizontal
         hStack.spacing = Constants.spacer
         hStack.alignment = .bottom
@@ -98,14 +97,24 @@ final class TitleAndTaglineCell: UICollectionViewCell {
     }
     
     // MARK: - PUBLIC FUNC
+    // 3. In configure(with:)
     public func configure(with viewModel: ViewModel) {
         movieNameLabel.text = viewModel.mediaName
-        guard let tagline = viewModel.mediaTagline, !tagline.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+
+        if let vote = viewModel.voteAverage, vote > 0 {
+            voteView.isHidden = false
+            voteView.configure(voteAverage: vote, voteCount: viewModel.voteCount ?? 0)
+        } else {
+            voteView.isHidden = true
+        }
+
+        guard
+            let tagline = viewModel.mediaTagline,
+                !tagline.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         vStack.removeArrangedSubview(movieTaglineLabel)
         movieTaglineLabel.text = tagline
         vStack.addArrangedSubview(movieTaglineLabel)
     }
-    
     // MARK: - PRIVATE FUNC
     private func setupUI() {
         contentView.backgroundColor = CMColor.cmBackground
@@ -116,8 +125,8 @@ final class TitleAndTaglineCell: UICollectionViewCell {
             $0.bottom.equalToSuperview()
         }
         
-        cinemovieLogoImageView.snp.makeConstraints {
-            $0.size.equalTo(Constants.cinemovieLogoSize)
+        hStack.snp.makeConstraints {
+            $0.width.equalTo(vStack)
         }
     }
 }

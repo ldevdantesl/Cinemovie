@@ -101,7 +101,7 @@ final class TVSeriesDetailsScreenPresenter {
             )
         }
         
-        let titleVM = TitleAndTaglineCellViewModel(mediaName: seriesDetails.name, mediaTagline: seriesDetails.tagline)
+        let titleVM = TitleAndTaglineCellViewModel(mediaName: seriesDetails.name, mediaTagline: seriesDetails.tagline, voteAverage: seriesDetails.voteAverage, voteCount: seriesDetails.voteCount)
         
         let subDetailsVM = TVSeriesDetailsSubDetailsViewModel(
             firstAirDate: seriesDetails.firstAirDate, numberOfSeasons: seriesDetails.numberOfSeasons ?? 0,

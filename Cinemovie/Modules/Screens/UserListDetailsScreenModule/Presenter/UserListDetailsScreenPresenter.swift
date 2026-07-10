@@ -98,11 +98,13 @@ extension UserListDetailsScreenPresenter: UserListDetailsScreenPresenterProtocol
             guard let self else { return }
             Task {
                 await MainActor.run { self.view?.showDownloadingView() }
-                let image = await ShareCardGenerator.generate(
+            
+                let image = await ShareCardGenerator.generateShareFile(
                     listName: self.getListName(),
                     media: selected,
                     totalCount: self.media.count
                 )
+                
                 await MainActor.run {
                     self.view?.hideDownloadingView()
                     guard let image else { return }

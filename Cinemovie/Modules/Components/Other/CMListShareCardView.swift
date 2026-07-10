@@ -25,6 +25,9 @@ final class ListShareCardView: UIView {
         static let maxGridHeight: CGFloat = 1250
     }
     
+    // MARK: - STATIC PROPERTIES
+    static let maxPosters: Int = 6
+    
     // MARK: - INIT
     init(listName: String, itemCount: Int, posters allPosters: [UIImage]) {
         super.init(frame: CGRect(origin: .zero, size: Layout.canvasSize))
