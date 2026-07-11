@@ -16,7 +16,7 @@ final class CastListItemCellViewModel: CellViewModelBaseClass {
     init(cast: Cast?, didTapCast: ((Cast) -> Void)?) {
         self.cast = cast
         self.didTapCast = didTapCast
-        super.init(cellIdentifier: "CastListItemCell")
+        super.init(cellIdentifier: CastListItemCell.identifier)
     }
 }
 
@@ -93,7 +93,7 @@ final class CastListItemCell: UICollectionViewCell {
         self.nameLabel.text = cast.name
         self.characterName.text = cast.character ?? cast.job ?? Constants.unknownText
         avatarImageView.setAsyncImage(
-            path: cast.profilePath, size: .original,
+            path: cast.profilePath, size: .w500,
             notFoundImageSystemName: Constants.imageViewImageName,
             notFoundPointSize: Constants.imageViewImagePointSize
         )
