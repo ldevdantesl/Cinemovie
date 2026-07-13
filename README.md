@@ -28,12 +28,12 @@ Cinemovie is a native iOS application that provides a clean, fast, distraction-f
 
 <div align="center">
   
-<img width="200" height="2778" alt="Intro" src="https://github.com/user-attachments/assets/f17737db-f9ff-4a8b-bb8c-9db0a84c1d5c" />
-<img width="200" height="2778" alt="Discover" src="https://github.com/user-attachments/assets/bb8a6a8d-71ee-4793-b28f-6aa15a9836e9" />
-<img width="200" height="2778" alt="Lists" src="https://github.com/user-attachments/assets/a5a7a2e6-56df-4617-9506-d53e735b1f7b" />
-<img width="200" height="2778" alt="Favorites" src="https://github.com/user-attachments/assets/f2d36f7e-c32a-434c-890c-0a4d87ad312f" />
-<img width="200" height="2778" alt="Person" src="https://github.com/user-attachments/assets/83338549-b119-428c-8baa-dd5b652dc47f" />
-<img width="200" height="2778" alt="Settings" src="https://github.com/user-attachments/assets/886cc8a7-149b-4dd9-9f75-7ef9760b1c6d" />
+<img width="200" alt="Intro" src="https://github.com/user-attachments/assets/f17737db-f9ff-4a8b-bb8c-9db0a84c1d5c" />
+<img width="200" alt="Discover" src="https://github.com/user-attachments/assets/bb8a6a8d-71ee-4793-b28f-6aa15a9836e9" />
+<img width="200" alt="Lists" src="https://github.com/user-attachments/assets/a5a7a2e6-56df-4617-9506-d53e735b1f7b" />
+<img width="200" alt="Favorites" src="https://github.com/user-attachments/assets/f2d36f7e-c32a-434c-890c-0a4d87ad312f" />
+<img width="200" alt="Person" src="https://github.com/user-attachments/assets/83338549-b119-428c-8baa-dd5b652dc47f" />
+<img width="200" alt="Settings" src="https://github.com/user-attachments/assets/886cc8a7-149b-4dd9-9f75-7ef9760b1c6d" />
 
 </div>
 
