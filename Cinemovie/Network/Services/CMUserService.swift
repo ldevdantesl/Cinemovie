@@ -59,8 +59,8 @@ final class CMUserService: UserServiceProtocol {
     
     // MARK: - INIT
     init() {
-        self.userLanguage = CMStorage.load(ConfigurationLanguage.self, key: userLanguageKey) ?? ConfigurationLanguage.english
-        self.region = CMStorage.load(ConfigurationCountry.self, key: regionKey) ?? ConfigurationCountry.USA
+        self.userLanguage = CMStorage.load(ConfigurationLanguage.self, key: userLanguageKey) ?? .deviceSelected
+        self.region = CMStorage.load(ConfigurationCountry.self, key: regionKey) ?? .deviceSelected
         self.defaultMediaType = CMStorage.load(MediaTypes.self, key: defaultMediaTypeKey) ?? .movie
         self.notificationEnabled = CMStorage.load(Bool.self, key: notificationEnabledKey) ?? true
         self.adultEnabled = CMStorage.load(Bool.self, key: adultEnabledKey) ?? false
@@ -68,8 +68,8 @@ final class CMUserService: UserServiceProtocol {
     
     // MARK: - PUBLIC FUNC
     func reset() {
-        self.userLanguage = .english
-        self.region = .USA
+        self.userLanguage = .deviceSelected
+        self.region = .deviceSelected
         self.notificationEnabled = true
         self.adultEnabled = false
     }

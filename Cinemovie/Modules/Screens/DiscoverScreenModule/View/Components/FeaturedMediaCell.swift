@@ -173,6 +173,7 @@ final class FeaturedMediaCell: UICollectionViewCell {
     // MARK: - OBJC FUNCTIONS
     @objc private func didTapOnMediaImage() {
         guard let currentMedia = currentMedia else { return }
+        CMReviewRequester.shared.log(.openedFeatured)
         viewModel?.didTapMedia?(currentMedia)
     }
 }

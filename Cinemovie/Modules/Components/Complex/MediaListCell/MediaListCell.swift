@@ -141,6 +141,7 @@ extension MediaListCell: UICollectionViewDataSource, UICollectionViewDelegate {
         let item = items[indexPath.item]
         let vm = MediaPosterImageCellViewModel(media: item) { [weak self] in
             guard let self = self else { return }
+            CMReviewRequester.shared.log(.openedMovie)
             self.viewModel?.didTapMediaItem?($0)
         }
         cell.configure(with: vm)

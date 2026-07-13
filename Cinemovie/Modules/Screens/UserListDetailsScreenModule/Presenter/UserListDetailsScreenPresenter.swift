@@ -11,6 +11,7 @@ protocol UserListDetailsScreenPresenterProtocol: AnyObject {
     
     // MARK: - USER INITIATED
     func didCallRefresh()
+    func didTapShareList()
     func didCallPagination()
     func didTapBackButton()
     func didTapMedia(media: MediaProtocol)
@@ -92,12 +93,34 @@ extension UserListDetailsScreenPresenter: UserListDetailsScreenPresenterProtocol
         }
     }
     
+    func didTapShareList() {
+        router.presentPosterPicker(media: self.media) { [weak self] selected in
+            guard let self else { return }
+            Task {
+                await MainActor.run { self.view?.showDownloadingView() }
+            
+                let image = await ShareCardGenerator.generateShareFile(
+                    listName: self.getListName(),
+                    media: selected,
+                    totalCount: self.media.count
+                )
+                
+                await MainActor.run {
+                    self.view?.hideDownloadingView()
+                    guard let image else { return }
+                    self.router.presentShareSheet(items: [image])
+                }
+            }
+        }
+    }
+
     // MARK: - PROGRAMMATIC
     func didReceiveListDetails(_ details: UserListDetails) {
         self.userListDetails = details
         
         defer {
             self.view?.hideDownloadingView()
+            self.view?.stopRefreshing()
         }
         
         guard !details.results.isEmpty else {

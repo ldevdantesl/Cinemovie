@@ -93,7 +93,7 @@ final class MovieDetailsScreenPresenter {
             )
         }
         
-        let titleVM = TitleAndTaglineCellViewModel(mediaName: movieDetails.title, mediaTagline: movieDetails.tagline)
+        let titleVM = TitleAndTaglineCellViewModel(mediaName: movieDetails.title, mediaTagline: movieDetails.tagline, voteAverage: movieDetails.voteAverage, voteCount: movieDetails.voteCount)
         
         let subDetailsVM = MovieDetailsSubDetailsCellViewModel(
             year: movieDetails.releaseDate, released: CMDateFormatter.isDatePassed(movieDetails.releaseDate),
@@ -204,9 +204,11 @@ extension MovieDetailsScreenPresenter: MovieDetailsScreenPresenterProtocol {
                     }
                 }
                 
-                group.addTask {
-                    do { return .userList(try await self.interactor.getUserLists()) }
-                    catch { return .failure(error) }
+                if !self.authContext.isGuest {
+                    group.addTask {
+                        do { return .userList(try await self.interactor.getUserLists()) }
+                        catch { return .failure(error) }
+                    }
                 }
                 
                 var collectedErrors: [Error] = []
